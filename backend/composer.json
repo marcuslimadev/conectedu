@@ -1,0 +1,15 @@
+{
+  "name": "conectedu/conectedu",
+  "description": "ConectEdu backend",
+  "type": "project",
+  "require": {
+    "mpdf/mpdf": "^8.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "ConectEdu\\": "src/"
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}

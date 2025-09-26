@@ -1,4 +1,0 @@
-const VERSION='4.3'; const CACHE='conectedu-'+VERSION;
-self.addEventListener('install',e=>{ self.skipWaiting(); e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./index.html','./spa.js?v='+VERSION,'./config.js?v='+VERSION,'./manifest.json?v='+VERSION,'./icons/icon-192.png','./icons/icon-512.png'])))});
-self.addEventListener('activate',e=>{ self.clients.claim(); e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))))});
-self.addEventListener('fetch',e=>{ if(e.request.method!=='GET') return; e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{ const c=res.clone(); caches.open(CACHE).then(cc=>cc.put(e.request,c)); return res; }).catch(()=>caches.match('./index.html'))));});

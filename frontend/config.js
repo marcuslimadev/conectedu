@@ -1,1 +1,0 @@
-window.CONFIG={API_BASE:'/conectedu/backend/api.php',VERSION:'5.1'};

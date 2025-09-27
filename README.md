@@ -64,10 +64,10 @@ Planejamento detalhado do atendimento educacional:
    ```sql
    -- Criar banco de dados
    CREATE DATABASE conect_edu;
-   
+
    -- Importar schema principal
    mysql -u root -p conect_edu < backend/schema.sql
-   
+
    -- Importar schema dos formulários AEE
    mysql -u root -p conect_edu < backend/schema-aee.sql
    ```
@@ -87,6 +87,23 @@ Planejamento detalhado do atendimento educacional:
    # Iniciar Apache e MySQL no XAMPP
    # Acessar: http://localhost/conect-edu-melhorado/frontend/
    ```
+
+### Ambiente de Desenvolvimento Local
+
+Caso deseje testar o sistema sem depender do XAMPP, é possível executar os serviços diretamente via linha de comando:
+
+```bash
+# 1. Inicie a API REST (porta 8000) dentro da pasta backend
+php -S 127.0.0.1:8000 api.php
+
+# 2. Em um novo terminal, sirva o frontend SPA (porta 8001)
+php -S 127.0.0.1:8001 -t frontend
+
+# 3. Acesse pelo navegador
+open http://127.0.0.1:8001/index.html#/login
+```
+
+> 💡 O arquivo `frontend/config.js` aponta por padrão para `/conectedu/backend/api.php`. Ao executar localmente com o servidor embutido do PHP, ajuste `CONFIG.API_BASE` temporariamente para `http://127.0.0.1:8000/api.php` se necessário.
 
 ## 👤 Acesso ao Sistema
 

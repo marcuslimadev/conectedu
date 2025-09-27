@@ -1,0 +1,4 @@
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/mmbsites/public_html/conectedu
+    - /bin/cp -R * $DEPLOYPATH

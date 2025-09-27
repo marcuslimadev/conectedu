@@ -1,36 +1,332 @@
-
-(function(){
-  var lsKey='a11y:prefs';
-  function read(){try{return JSON.parse(localStorage.getItem(lsKey)||'{}')}catch(e){return{}}}
-  function save(p){localStorage.setItem(lsKey,JSON.stringify(p))}
-  function setRootFont(px){document.documentElement.style.fontSize=px+'px'}
-  function currentFont(){var s=getComputedStyle(document.documentElement).fontSize;return parseFloat(s)||16}
-  function apply(p){
-    var html=document.documentElement;
-    html.classList.toggle('dark',!!p.dark);
-    html.classList.toggle('hc',!!p.hc);
-    html.classList.toggle('dys',!!p.dys);
-    if(p.fontSize){setRootFont(p.fontSize)}
+// Sistema de Acessibilidade - ConectEdu
+class AccessibilityManager {
+  constructor() {
+    this.settings = {
+      theme: 'light',
+      fontSize: 'normal',
+      fontFamily: 'normal',
+      contrast: 'normal',
+      highlightLinks: false,
+      largeCursor: false,
+      focusVisible: false,
+      vlibras: true
+    };
+    this.init();
   }
-  function init(){
-    var p=read();
-    if(p.dark==null){p.dark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches}
-    if(!p.fontSize){p.fontSize=16}
-    apply(p);
-    var el=document.querySelector('[data-a11y-root]');
-    if(!el) return;
-    el.addEventListener('click',function(ev){
-      var t=ev.target.closest('[data-a]'); if(!t) return;
-      ev.preventDefault();
-      var a=t.getAttribute('data-a');
-      if(a==='dark'){p.dark=!p.dark}
-      if(a==='hc'){p.hc=!p.hc}
-      if(a==='dys'){p.dys=!p.dys}
-      if(a==='inc'){p.fontSize=Math.min((p.fontSize||16)+2,26)}
-      if(a==='dec'){p.fontSize=Math.max((p.fontSize||16)-2,12)}
-      if(a==='reset'){p.fontSize=16; p.hc=false; p.dys=false; p.dark=false}
-      save(p); apply(p);
+
+  init() {
+    this.loadSettings();
+    this.createFloatingButton();
+    this.createAccessibilityPanel();
+    this.loadVlibras();
+    this.applySettings();
+    this.setupKeyboardShortcuts();
+  }
+
+  loadSettings() {
+    const saved = localStorage.getItem('conectedu-a11y-settings');
+    if (saved) {
+      this.settings = { ...this.settings, ...JSON.parse(saved) };
+    }
+  }
+
+  saveSettings() {
+    localStorage.setItem('conectedu-a11y-settings', JSON.stringify(this.settings));
+  }
+
+  createFloatingButton() {
+    const button = document.createElement('button');
+    button.className = 'a11y-floating-btn';
+    button.innerHTML = '♿';
+    button.setAttribute('aria-label', 'Abrir opções de acessibilidade');
+    button.title = 'Acessibilidade';
+    button.addEventListener('click', () => this.togglePanel());
+    document.body.appendChild(button);
+  }
+
+  createAccessibilityPanel() {
+    const panel = document.createElement('div');
+    panel.className = 'a11y-panel';
+    panel.innerHTML = this.getPanelHTML();
+    document.body.appendChild(panel);
+    this.setupPanelEvents(panel);
+    this.panel = panel;
+  }
+
+  getPanelHTML() {
+    return `
+      <div class="a11y-panel-header">
+        <h3 class="a11y-panel-title">Acessibilidade</h3>
+        <button class="a11y-panel-close" aria-label="Fechar painel">&times;</button>
+      </div>
+      <div class="a11y-panel-content">
+        <div class="a11y-section">
+          <h4 class="a11y-section-title">Aparência</h4>
+          <div class="a11y-option">
+            <span class="a11y-option-label">Modo Escuro</span>
+            <div class="a11y-toggle" data-setting="theme" data-value="dark">
+              <div class="a11y-toggle-slider"></div>
+            </div>
+          </div>
+        </div>
+        <div class="a11y-section">
+          <h4 class="a11y-section-title">Fonte</h4>
+          <div class="a11y-option">
+            <span class="a11y-option-label">Tamanho</span>
+            <select class="a11y-select" data-setting="fontSize">
+              <option value="small">Pequena</option>
+              <option value="normal">Normal</option>
+              <option value="large">Grande</option>
+              <option value="xlarge">Muito Grande</option>
+              <option value="xxlarge">Extra Grande</option>
+            </select>
+          </div>
+          <div class="a11y-option">
+            <span class="a11y-option-label">Fonte para Disléxicos</span>
+            <div class="a11y-toggle" data-setting="fontFamily" data-value="dyslexic">
+              <div class="a11y-toggle-slider"></div>
+            </div>
+          </div>
+        </div>
+        <div class="a11y-section">
+          <h4 class="a11y-section-title">Contraste</h4>
+          <div class="a11y-option">
+            <span class="a11y-option-label">Alto Contraste</span>
+            <div class="a11y-toggle" data-setting="contrast" data-value="high">
+              <div class="a11y-toggle-slider"></div>
+            </div>
+          </div>
+        </div>
+        <div class="a11y-section">
+          <h4 class="a11y-section-title">Navegação</h4>
+          <div class="a11y-option">
+            <span class="a11y-option-label">Destacar Links</span>
+            <div class="a11y-toggle" data-setting="highlightLinks" data-value="true">
+              <div class="a11y-toggle-slider"></div>
+            </div>
+          </div>
+          <div class="a11y-option">
+            <span class="a11y-option-label">Cursor Grande</span>
+            <div class="a11y-toggle" data-setting="largeCursor" data-value="true">
+              <div class="a11y-toggle-slider"></div>
+            </div>
+          </div>
+          <div class="a11y-option">
+            <span class="a11y-option-label">Foco Visível</span>
+            <div class="a11y-toggle" data-setting="focusVisible" data-value="true">
+              <div class="a11y-toggle-slider"></div>
+            </div>
+          </div>
+        </div>
+        <div class="a11y-section">
+          <h4 class="a11y-section-title">Ferramentas</h4>
+          <div class="a11y-option">
+            <span class="a11y-option-label">Vlibras (Libras)</span>
+            <div class="a11y-toggle" data-setting="vlibras" data-value="true">
+              <div class="a11y-toggle-slider"></div>
+            </div>
+          </div>
+        </div>
+        <div class="a11y-section">
+          <h4 class="a11y-section-title">Ações</h4>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="a11y-button" onclick="a11yManager.resetSettings()">Resetar</button>
+            <button class="a11y-button secondary" onclick="a11yManager.togglePanel()">Fechar</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  setupPanelEvents(panel) {
+    panel.querySelector('.a11y-panel-close').addEventListener('click', () => this.togglePanel());
+    
+    panel.querySelectorAll('.a11y-toggle').forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        const setting = toggle.dataset.setting;
+        const value = toggle.dataset.value;
+        this.toggleSetting(setting, value);
+      });
+    });
+
+    panel.querySelectorAll('.a11y-select').forEach(select => {
+      select.addEventListener('change', (e) => {
+        const setting = e.target.dataset.setting;
+        const value = e.target.value;
+        this.updateSetting(setting, value);
+      });
     });
   }
-  document.addEventListener('DOMContentLoaded',init);
+
+  loadVlibras() {
+    if (this.settings.vlibras) {
+      const script = document.createElement('script');
+      script.src = 'https://vlibras.gov.br/app/vlibras-plugin.js';
+      script.onload = () => {
+        if (window.VLibras) {
+          new window.VLibras.Widget('https://vlibras.gov.br/app');
+        }
+      };
+      document.head.appendChild(script);
+    }
+  }
+
+  togglePanel() {
+    const isOpen = this.panel.classList.toggle('open');
+    document.body.classList.toggle('a11y-panel-is-open', isOpen);
+  }
+
+  toggleSetting(setting, value) {
+    const currentValue = this.settings[setting];
+    const newValue = currentValue === value ? (setting === 'theme' ? 'light' : false) : value;
+    this.updateSetting(setting, newValue);
+  }
+
+  updateSetting(setting, value) {
+    this.settings[setting] = value;
+    this.saveSettings();
+    this.applySettings();
+    this.updatePanelUI();
+    this.showStatus(`${setting} alterado`);
+  }
+
+  updatePanelUI() {
+    this.panel.querySelectorAll('.a11y-toggle').forEach(toggle => {
+      const setting = toggle.dataset.setting;
+      const value = toggle.dataset.value;
+      const isActive = this.settings[setting] === value;
+      toggle.classList.toggle('active', isActive);
+    });
+
+    this.panel.querySelectorAll('.a11y-select').forEach(select => {
+      const setting = select.dataset.setting;
+      select.value = this.settings[setting];
+    });
+  }
+
+  applySettings() {
+    const body = document.body;
+    body.setAttribute('data-theme', this.settings.theme);
+    body.setAttribute('data-font-size', this.settings.fontSize);
+    body.setAttribute('data-font-family', this.settings.fontFamily);
+    body.setAttribute('data-contrast', this.settings.contrast);
+    body.setAttribute('data-highlight', this.settings.highlightLinks ? 'links' : 'none');
+    body.setAttribute('data-cursor', this.settings.largeCursor ? 'large' : 'default');
+    body.setAttribute('data-focus', this.settings.focusVisible ? 'visible' : 'auto');
+    
+    // Aplicar fonte disléxica globalmente
+    if (this.settings.fontFamily === 'dyslexic') {
+      body.style.fontFamily = "'OpenDyslexic', 'Comic Sans MS', cursive";
+      body.style.letterSpacing = "0.05em";
+      body.style.lineHeight = "1.6";
+    } else {
+      body.style.fontFamily = "";
+      body.style.letterSpacing = "";
+      body.style.lineHeight = "";
+    }
+    
+    const vlibrasWidget = document.querySelector('.vlibras-widget');
+    if (vlibrasWidget) {
+      vlibrasWidget.style.display = this.settings.vlibras ? 'block' : 'none';
+    }
+  }
+
+  resetSettings() {
+    this.settings = {
+      theme: 'light',
+      fontSize: 'normal',
+      fontFamily: 'normal',
+      contrast: 'normal',
+      highlightLinks: false,
+      largeCursor: false,
+      focusVisible: false,
+      vlibras: true
+    };
+    this.saveSettings();
+    this.applySettings();
+    this.updatePanelUI();
+    this.showStatus('Configurações resetadas');
+  }
+
+  showStatus(message) {
+    const status = document.createElement('div');
+    status.className = 'a11y-status';
+    status.textContent = message;
+    document.body.appendChild(status);
+    
+    setTimeout(() => status.classList.add('show'), 100);
+    setTimeout(() => {
+      status.classList.remove('show');
+      setTimeout(() => document.body.removeChild(status), 300);
+    }, 2000);
+  }
+
+  setupKeyboardShortcuts() {
+    document.addEventListener('keydown', (e) => {
+      if (e.altKey && e.key === 'a') {
+        e.preventDefault();
+        this.togglePanel();
+      }
+      if (e.altKey && e.key === 'd') {
+        e.preventDefault();
+        this.toggleSetting('theme', 'dark');
+      }
+      if (e.altKey && e.key === 'f') {
+        e.preventDefault();
+        this.toggleSetting('fontFamily', 'dyslexic');
+      }
+      if (e.altKey && e.key === 'c') {
+        e.preventDefault();
+        this.toggleSetting('contrast', 'high');
+      }
+      if (e.altKey && e.key === 'l') {
+        e.preventDefault();
+        this.toggleSetting('highlightLinks', true);
+      }
+    });
+  }
+}
+
+// Inicializar
+document.addEventListener('DOMContentLoaded', () => {
+  window.a11yManager = new AccessibilityManager();
+});
+
+// Ancillary accessibility features
+(function() {
+  // Skip links and ARIA roles
+  document.addEventListener('DOMContentLoaded', () => {
+    const skipLink = document.createElement('a');
+    skipLink.href = '#main-content';
+    skipLink.className = 'skip-link';
+    skipLink.textContent = 'Pular para o conteúdo principal';
+    document.body.insertBefore(skipLink, document.body.firstChild);
+
+    const mainContent = document.querySelector('#app');
+    if (mainContent) {
+      mainContent.setAttribute('role', 'main');
+      mainContent.id = 'main-content';
+    }
+  });
+
+  // Keyboard navigation detection
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+      document.body.classList.add('keyboard-navigation');
+    }
+  });
+
+  document.addEventListener('mousedown', () => {
+    document.body.classList.remove('keyboard-navigation');
+  });
+
+  // Focus styles
+  const style = document.createElement('style');
+  style.textContent = `
+    .keyboard-navigation *:focus {
+      outline: 2px solid #3b82f6 !important;
+      outline-offset: 2px !important;
+    }
+  `;
+  document.head.appendChild(style);
 })();

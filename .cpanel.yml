@@ -1,7 +1,7 @@
 deployment:
   tasks:
     # Define caminho base
-    - export DEPLOYPATH=/home/mmbsites/public_html/conectedu
+    - export DEPLOYPATH=/home/mmbsites/conectedu.mmbsites.com.br
 
     # Copia o frontend para a pasta /frontend do site
     - /bin/mkdir -p $DEPLOYPATH/frontend

@@ -1368,9 +1368,17 @@ const EntrevistaResponsavel = {
           <h3 class="text-lg font-medium text-gray-900 mb-4">Dados do Aluno</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Nome completo do aluno</label>
-              <input v-model="form.nome_aluno" type="text" required 
+              <label class="block text-sm font-medium text-gray-700 mb-2">Selecionar Aluno</label>
+              <select v-model="form.student_id" @change="preencherDadosAlunoEntrevista" required 
                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
+                <option value="">Selecione um aluno</option>
+                <option v-for="aluno in alunos" :key="aluno.id" :value="aluno.id">{{ aluno.name }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Nome completo do aluno</label>
+              <input v-model="form.nome_aluno" type="text" readonly 
+                class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none">
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Data de nascimento</label>
@@ -1522,7 +1530,9 @@ const EntrevistaResponsavel = {
   data() {
     return {
       loading: false,
+      alunos: [],
       form: {
+        student_id: '',
         nome_aluno: '',
         data_nascimento: '',
         idade: '',
@@ -1544,7 +1554,43 @@ const EntrevistaResponsavel = {
       }
     }
   },
+  async mounted() {
+    await this.carregarAlunos();
+  },
   methods: {
+    async carregarAlunos() {
+      try {
+        const response = await api.get('/students');
+        this.alunos = response.data?.data?.rows || [];
+      } catch (error) {
+        console.error('Erro ao carregar alunos:', error);
+      }
+    },
+    preencherDadosAlunoEntrevista() {
+      const alunoSelecionado = this.alunos.find(aluno => aluno.id == this.form.student_id);
+      if (alunoSelecionado) {
+        this.form.nome_aluno = alunoSelecionado.name;
+        // Preenche outros campos se disponíveis
+        if (alunoSelecionado.birth_date) {
+          this.form.data_nascimento = alunoSelecionado.birth_date;
+          // Calcula idade automaticamente
+          const nascimento = new Date(alunoSelecionado.birth_date);
+          const hoje = new Date();
+          let idade = hoje.getFullYear() - nascimento.getFullYear();
+          const mes = hoje.getMonth() - nascimento.getMonth();
+          if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
+            idade--;
+          }
+          this.form.idade = idade;
+        }
+        if (alunoSelecionado.school) {
+          this.form.escola = alunoSelecionado.school;
+        }
+        if (alunoSelecionado.grade) {
+          this.form.serie = alunoSelecionado.grade;
+        }
+      }
+    },
     async salvarEntrevista() {
       this.loading = true;
       try {
@@ -1575,9 +1621,17 @@ const PDI = {
           <h3 class="text-lg font-medium text-gray-900 mb-4">Identificação</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Nome do Aluno</label>
-              <input v-model="form.nome_aluno" type="text" required 
+              <label class="block text-sm font-medium text-gray-700 mb-2">Selecionar Aluno</label>
+              <select v-model="form.student_id" @change="preencherDadosAluno" required 
                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
+                <option value="">Selecione um aluno</option>
+                <option v-for="aluno in alunos" :key="aluno.id" :value="aluno.id">{{ aluno.name }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Nome do Aluno Selecionado</label>
+              <input v-model="form.nome_aluno" type="text" readonly 
+                class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none">
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Data de Nascimento</label>
@@ -1724,7 +1778,9 @@ const PDI = {
   data() {
     return {
       loading: false,
+      alunos: [],
       form: {
+        student_id: '',
         nome_aluno: '',
         data_nascimento: '',
         escola: '',
@@ -1745,7 +1801,34 @@ const PDI = {
       }
     }
   },
+  async mounted() {
+    await this.carregarAlunos();
+  },
   methods: {
+    async carregarAlunos() {
+      try {
+        const response = await api.get('/students');
+        this.alunos = response.data?.data?.rows || [];
+      } catch (error) {
+        console.error('Erro ao carregar alunos:', error);
+      }
+    },
+    preencherDadosAluno() {
+      const alunoSelecionado = this.alunos.find(aluno => aluno.id == this.form.student_id);
+      if (alunoSelecionado) {
+        this.form.nome_aluno = alunoSelecionado.name;
+        // Preenche outros campos se disponíveis
+        if (alunoSelecionado.birth_date) {
+          this.form.data_nascimento = alunoSelecionado.birth_date;
+        }
+        if (alunoSelecionado.school) {
+          this.form.escola = alunoSelecionado.school;
+        }
+        if (alunoSelecionado.grade) {
+          this.form.ano_serie = alunoSelecionado.grade;
+        }
+      }
+    },
     async salvarPDI() {
       this.loading = true;
       try {
@@ -1776,9 +1859,17 @@ const PlanoAtendimento = {
           <h3 class="text-lg font-medium text-gray-900 mb-4">Identificação do Aluno</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Nome Completo</label>
-              <input v-model="form.nome_aluno" type="text" required 
+              <label class="block text-sm font-medium text-gray-700 mb-2">Selecionar Aluno</label>
+              <select v-model="form.student_id" @change="preencherDadosAlunoPlano" required 
                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
+                <option value="">Selecione um aluno</option>
+                <option v-for="aluno in alunos" :key="aluno.id" :value="aluno.id">{{ aluno.name }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Nome Completo</label>
+              <input v-model="form.nome_aluno" type="text" readonly 
+                class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none">
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Data de Nascimento</label>
@@ -1969,7 +2060,9 @@ const PlanoAtendimento = {
   data() {
     return {
       loading: false,
+      alunos: [],
       form: {
+        student_id: '',
         nome_aluno: '',
         data_nascimento: '',
         matricula: '',
@@ -1992,7 +2085,34 @@ const PlanoAtendimento = {
       }
     }
   },
+  async mounted() {
+    await this.carregarAlunos();
+  },
   methods: {
+    async carregarAlunos() {
+      try {
+        const response = await api.get('/students');
+        this.alunos = response.data?.data?.rows || [];
+      } catch (error) {
+        console.error('Erro ao carregar alunos:', error);
+      }
+    },
+    preencherDadosAlunoPlano() {
+      const alunoSelecionado = this.alunos.find(aluno => aluno.id == this.form.student_id);
+      if (alunoSelecionado) {
+        this.form.nome_aluno = alunoSelecionado.name;
+        // Preenche outros campos se disponíveis
+        if (alunoSelecionado.birth_date) {
+          this.form.data_nascimento = alunoSelecionado.birth_date;
+        }
+        if (alunoSelecionado.registration_number) {
+          this.form.matricula = alunoSelecionado.registration_number;
+        }
+        if (alunoSelecionado.school) {
+          this.form.escola_origem = alunoSelecionado.school;
+        }
+      }
+    },
     async salvarPlano() {
       this.loading = true;
       try {

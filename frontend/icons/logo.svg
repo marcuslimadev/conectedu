@@ -1,0 +1,43 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <!-- Gradientes para criar o efeito de cores do logo -->
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7ED321;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#50E3C2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4A90E2;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4A90E2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#50E3C2;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#50E3C2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7ED321;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Forma triangular conectada do logo -->
+  <g transform="translate(400,200)">
+    <!-- Primeira forma (superior) -->
+    <path d="M0,-80 Q-60,-40 -30,20 Q0,40 30,20 Q60,-40 0,-80 Z" fill="url(#grad1)"/>
+    <circle cx="0" cy="-40" r="12" fill="white"/>
+    
+    <!-- Segunda forma (inferior esquerda) -->
+    <path d="M-80,60 Q-40,0 20,30 Q40,60 20,90 Q-40,120 -80,60 Z" fill="url(#grad2)"/>
+    <circle cx="-40" cy="75" r="12" fill="white"/>
+    
+    <!-- Terceira forma (inferior direita) -->
+    <path d="M80,60 Q120,100 90,130 Q60,140 30,120 Q0,80 20,30 Q40,0 80,60 Z" fill="url(#grad3)"/>
+    <circle cx="55" cy="85" r="12" fill="white"/>
+    
+    <!-- Triângulo central -->
+    <path d="M0,20 L-20,60 L20,60 Z" fill="#2D5A27" opacity="0.8"/>
+  </g>
+  
+  <!-- Texto CONECT'AEE -->
+  <text x="400" y="380" font-family="Arial, sans-serif" font-size="72" font-weight="bold" text-anchor="middle" fill="#1B365D">
+    CONECT'AEE
+  </text>
+</svg>

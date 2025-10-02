@@ -1,4 +1,4 @@
-// ConectEdu v5.0 - Sistema de Gestão Educacional com Tailwind CSS
+// ConectAEE v5.0 - Sistema de Gestão Educacional com Tailwind CSS
 // Configuração da API
 const api = axios.create({
   baseURL: CONFIG.API_BASE, 
@@ -188,8 +188,11 @@ const RegisterTW = {
   <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
       <div class="text-center">
+        <div class="mx-auto h-40 w-40 flex items-center justify-center mb-4">
+          <img src="./icons/logo-icon.png" alt="ConectAEE" class="h-36 w-36">
+        </div>
         <h2 class="text-3xl font-bold text-gray-900">Criar Conta</h2>
-        <p class="mt-2 text-sm text-gray-600">Registre-se para acessar o ConectEdu</p>
+        <p class="mt-2 text-sm text-gray-600">Registre-se para acessar o ConectAEE</p>
       </div>
     </div>
 
@@ -760,9 +763,15 @@ const Layout = {
       <aside 
         :class="['fixed lg:static inset-y-0 left-0 z-50 w-72 bg-white bg-opacity-95 backdrop-blur-sm border-r border-gray-200 transform transition-transform duration-300 ease-in-out', sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0']">
         
-        <div class="p-4 border-b border-gray-200">
+        <div class="p-6 border-b border-gray-200">
           <div class="flex items-center justify-between">
-            <h5 class="text-lg font-semibold text-gray-900">Menu Principal</h5>
+            <div class="flex items-center gap-4">
+              <img src="./icons/logo-icon.png" alt="ConectAEE" class="h-20 w-20">
+              <div>
+                <h5 class="text-2xl font-bold text-gray-900">ConectAEE</h5>
+                <p class="text-base text-gray-600">Sistema AEE</p>
+              </div>
+            </div>
             <button 
               class="lg:hidden p-2 rounded-md border border-gray-300 text-gray-500 hover:bg-gray-100" 
               @click="sidebarOpen = false">
@@ -939,14 +948,11 @@ const Login = {
     <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div class="max-w-md w-full space-y-8">
         <div>
-          <div class="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-gradient-to-r from-brand-primary to-brand-secondary">
-            <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10"/>
-              <circle cx="12" cy="12" r="6"/>
-            </svg>
+          <div class="mx-auto h-40 w-40 flex items-center justify-center">
+            <img src="./icons/logo-icon.png" alt="ConectAEE" class="h-36 w-36">
           </div>
           <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            ConectEdu v5.0
+            ConectAEE v5.0
           </h2>
           <p class="mt-2 text-center text-sm text-gray-600">
             Sistema de Gestão Educacional

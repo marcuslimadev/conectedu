@@ -1,0 +1,9 @@
+# Negar acesso direto aos arquivos
+# Apenas permitir download através da API
+Order Deny,Allow
+Deny from all
+
+# Permitir apenas através de scripts PHP
+<Files "*.php">
+    Allow from all
+</Files>

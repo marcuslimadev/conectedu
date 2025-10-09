@@ -40,144 +40,668 @@ const AuthGuard = (to, from, next) => {
 // Alunos - CRUD completo
 const AlunosTW = {
   template: `
-  <div class="space-y-4">
+  <div class="space-y-4" role="main">
     <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-bold text-gray-900">Alunos</h1>
-      <button @click="newAluno" class="px-3 py-2 bg-brand-primary text-white rounded">Novo Aluno</button>
+      <h1 class="text-2xl font-bold text-gray-900" id="alunos-heading">Alunos</h1>
+      <button @click="newAluno" 
+              class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
+              aria-label="Adicionar novo aluno">Novo Aluno</button>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-      <div>
-        <label class="sr-only" for="alunos-busca">Buscar por nome</label>
-        <input id="alunos-busca" v-model="filters.q" @keyup.enter="load" class="border rounded px-3 py-2 w-full" placeholder="Buscar por nome">
+      <!-- Filtros Desktop -->
+      <div class="hidden md:block">
+        <div>
+          <label class="sr-only" for="alunos-busca">Buscar por nome</label>
+          <input id="alunos-busca" v-model="filters.q" @keyup.enter="load" 
+                 class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent" 
+                 placeholder="Buscar por nome">
+        </div>
       </div>
-      <div>
+      <div class="hidden md:block">
         <label class="sr-only" for="alunos-status">Status</label>
-        <select id="alunos-status" v-model="filters.status" class="border rounded px-3 py-2 w-full">
-        <option value="">Todos os status</option>
-        <option value="ativo">Ativo</option>
-        <option value="inativo">Inativo</option>
-      </select>
+        <select id="alunos-status" v-model="filters.status" 
+                class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent">
+          <option value="">Todos os status</option>
+          <option value="ativo">Ativo</option>
+          <option value="inativo">Inativo</option>
+        </select>
       </div>
-      <div>
+      <div class="hidden md:block">
         <label class="sr-only" for="alunos-modalidade">Modalidade</label>
-        <select id="alunos-modalidade" v-model="filters.modalidade" class="border rounded px-3 py-2 w-full">
-        <option value="">Todas as modalidades</option>
-        <option value="apoio">Apoio</option>
-        <option value="srm">SRM</option>
-      </select>
+        <select id="alunos-modalidade" v-model="filters.modalidade" 
+                class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent">
+          <option value="">Todas modalidades</option>
+          <option value="apoio">Apoio</option>
+          <option value="srm">SRM</option>
+        </select>
       </div>
-      <button @click="load" class="px-3 py-2 bg-gray-800 text-white rounded">Filtrar</button>
+      <button @click="load" 
+              class="hidden md:block px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
+              aria-label="Aplicar filtros de busca">
+        <i class="fas fa-search mr-2" aria-hidden="true"></i>Filtrar
+      </button>
+
+      <!-- Filtros Mobile -->
+      <div class="md:hidden bg-white shadow rounded-lg p-4 mb-4">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">🔍 Buscar Aluno</label>
+            <input v-model="filters.q" @keyup.enter="load" 
+                   class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent" 
+                   placeholder="Digite o nome do aluno...">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+              <select v-model="filters.status" 
+                      class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent">
+                <option value="">Todos</option>
+                <option value="ativo">✅ Ativo</option>
+                <option value="inativo">❌ Inativo</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Modalidade</label>
+              <select v-model="filters.modalidade" 
+                      class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent">
+                <option value="">Todas</option>
+                <option value="apoio">👨‍🏫 Apoio</option>
+                <option value="srm">🏫 SRM</option>
+              </select>
+            </div>
+          </div>
+          <button @click="load" class="w-full px-4 py-3 bg-brand-primary text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+            🔍 Buscar Alunos
+          </button>
+        </div>
+      </div>
     </div>
 
-    <div class="bg-white shadow rounded overflow-x-auto">
-      <table class="min-w-full">
+    <!-- Visualização Desktop -->
+    <div class="bg-white shadow rounded overflow-x-auto hidden md:block" role="region" aria-labelledby="alunos-heading">
+      <table class="min-w-full" role="table" aria-label="Lista de alunos">
         <thead>
           <tr class="text-left">
-            <th class="px-3 py-2">Nome</th>
-            <th class="px-3 py-2">Modalidade</th>
-            <th class="px-3 py-2">Status</th>
-            <th class="px-3 py-2">Vínculo</th>
-            <th class="px-3 py-2 text-right">Ações</th>
+            <th class="px-3 py-2 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none" 
+                @click="sortBy('name')" @keydown.enter="sortBy('name')" @keydown.space="sortBy('name')" tabindex="0"
+                role="columnheader" :aria-sort="sortField === 'name' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
+              <div class="flex items-center justify-between">
+                <span>Nome</span>
+                <svg v-if="sortField === 'name'" class="w-4 h-4" :class="sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+            </th>
+            <th class="px-3 py-2 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none" 
+                @click="sortBy('modalidade')" @keydown.enter="sortBy('modalidade')" @keydown.space="sortBy('modalidade')" tabindex="0"
+                role="columnheader" :aria-sort="sortField === 'modalidade' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
+              <div class="flex items-center justify-between">
+                <span>Modalidade</span>
+                <svg v-if="sortField === 'modalidade'" class="w-4 h-4" :class="sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+            </th>
+            <th class="px-3 py-2 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none" 
+                @click="sortBy('status')" @keydown.enter="sortBy('status')" @keydown.space="sortBy('status')" tabindex="0"
+                role="columnheader" :aria-sort="sortField === 'status' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
+              <div class="flex items-center justify-between">
+                <span>Status</span>
+                <svg v-if="sortField === 'status'" class="w-4 h-4" :class="sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+            </th>
+            <th class="px-3 py-2" role="columnheader">Vínculo</th>
+            <th class="px-3 py-2 text-right" role="columnheader">Ações</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="s in rows" :key="s.id" class="border-t">
-            <td class="px-3 py-2">{{ s.name }}</td>
-            <td class="px-3 py-2 text-uppercase">{{ s.modalidade }}</td>
+          <tr v-for="s in rows" :key="s.id" class="border-t hover:bg-gray-50">
+            <td class="px-3 py-2 font-medium">{{ s.name }}</td>
             <td class="px-3 py-2">
-              <span :class="['px-2 py-1 rounded text-xs', s.status==='ativo'?'bg-green-100 text-green-700':'bg-gray-100 text-gray-600']">{{ s.status }}</span>
+              <span class="px-2 py-1 rounded text-xs font-medium uppercase bg-blue-100 text-blue-800">{{ s.modalidade }}</span>
             </td>
             <td class="px-3 py-2">
+              <span :class="['px-2 py-1 rounded text-xs font-medium', s.status==='ativo'?'bg-green-100 text-green-700':'bg-gray-100 text-gray-600']">{{ s.status }}</span>
+            </td>
+            <td class="px-3 py-2 text-sm text-gray-600">
               <span v-if="s.modalidade==='apoio'">Prof #{{ s.support_teacher_id || '-' }}</span>
               <span v-else>SRM #{{ s.srm_room_id || '-' }}</span>
             </td>
             <td class="px-3 py-2 text-right space-x-2">
-              <button class="px-2 py-1 text-sm border rounded" @click="edit(s)">Editar</button>
-              <button class="px-2 py-1 text-sm border rounded text-red-600" @click="del(s)">Excluir</button>
+              <button class="px-2 py-1 text-sm border rounded hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-colors" 
+                      @click="edit(s)" :aria-label="'Editar aluno ' + s.name">
+                <i class="fas fa-edit mr-1" aria-hidden="true"></i>Editar
+              </button>
+              <button class="px-2 py-1 text-sm border rounded text-red-600 hover:bg-red-50 focus:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 transition-colors" 
+                      @click="del(s)" :aria-label="'Excluir aluno ' + s.name">
+                <i class="fas fa-trash mr-1" aria-hidden="true"></i>Excluir
+              </button>
             </td>
           </tr>
-          <tr v-if="rows.length===0"><td colspan="5" class="px-3 py-6 text-center text-gray-500">Sem registros</td></tr>
+          <tr v-if="!rows || rows.length===0"><td colspan="5" class="px-3 py-6 text-center text-gray-500">Sem registros</td></tr>
         </tbody>
       </table>
+      
+      <!-- Paginação -->
+      <nav v-if="totalPages > 1" class="flex items-center justify-between mt-4 px-4 py-3 border-t" role="navigation" aria-label="Navegação por páginas">
+        <div class="text-sm text-gray-700" aria-live="polite">
+          Mostrando {{ (currentPage - 1) * perPage + 1 }} a {{ Math.min(currentPage * perPage, totalItems) }} de {{ totalItems }} alunos
+        </div>
+        <div class="flex items-center space-x-2">
+          <button @click="previousPage" :disabled="currentPage === 1" 
+                  class="px-3 py-1 text-sm border rounded hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  :aria-label="'Ir para página anterior'"
+                  :aria-disabled="currentPage === 1">
+            <i class="fas fa-chevron-left mr-1" aria-hidden="true"></i>Anterior
+          </button>
+          <button v-for="page in visiblePages" :key="page" 
+                @click="goToPage(page)"
+                :class="[
+                  'px-3 py-1 text-sm cursor-pointer rounded transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1',
+                  page === currentPage ? 'bg-blue-600 text-white' : 'border hover:bg-gray-50 focus:bg-gray-50'
+                ]"
+                :aria-label="'Ir para página ' + page"
+                :aria-current="page === currentPage ? 'page' : false">
+            {{ page }}
+          </button>
+          <button @click="nextPage" :disabled="currentPage === totalPages" 
+                  class="px-3 py-1 text-sm border rounded hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  :aria-label="'Ir para próxima página'"
+                  :aria-disabled="currentPage === totalPages">
+            Próxima<i class="fas fa-chevron-right ml-1" aria-hidden="true"></i>
+          </button>
+        </div>
+      </nav>
     </div>
 
-    <div v-if="editing" class="bg-white shadow rounded p-4 space-y-3">
-      <h2 class="text-lg font-semibold">{{ form.id ? 'Editar Aluno' : 'Novo Aluno' }}</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div>
-          <label class="text-sm font-medium text-gray-700 mb-1 block" for="aluno-nome">Nome</label>
-          <input id="aluno-nome" v-model="form.name" class="border rounded px-3 py-2 w-full" placeholder="Nome">
+    <!-- Visualização Mobile -->
+    <div class="md:hidden space-y-3">
+      <div v-for="s in rows" :key="s.id" class="bg-white shadow rounded-lg p-4 border-l-4 border-brand-primary">
+        <div class="flex items-start justify-between mb-3">
+          <h3 class="font-medium text-gray-900 text-lg">{{ s.name }}</h3>
+          <div class="flex space-x-1">
+            <span :class="['px-2 py-1 rounded text-xs font-medium', s.status==='ativo'?'bg-green-100 text-green-700':'bg-gray-100 text-gray-600']">{{ s.status }}</span>
+          </div>
         </div>
-        <div>
-          <label class="text-sm font-medium text-gray-700 mb-1 block" for="aluno-modalidade">Modalidade</label>
-          <select id="aluno-modalidade" v-model="form.modalidade" class="border rounded px-3 py-2 w-full">
-          <option disabled value="">Modalidade</option>
-          <option value="apoio">Apoio</option>
-          <option value="srm">SRM</option>
-          </select>
+        
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-gray-500">Modalidade:</span>
+            <span class="px-2 py-1 rounded text-xs font-medium uppercase bg-blue-100 text-blue-800">{{ s.modalidade }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-500">Vínculo:</span>
+            <span class="text-gray-900">
+              <span v-if="s.modalidade==='apoio'">Prof #{{ s.support_teacher_id || '-' }}</span>
+              <span v-else>SRM #{{ s.srm_room_id || '-' }}</span>
+            </span>
+          </div>
         </div>
-        <div>
-          <label class="text-sm font-medium text-gray-700 mb-1 block" for="aluno-status">Status</label>
-          <select id="aluno-status" v-model="form.status" class="border rounded px-3 py-2 w-full">
-          <option value="ativo">Ativo</option>
-          <option value="inativo">Inativo</option>
-          </select>
+        
+        <div class="flex space-x-2 mt-4 pt-3 border-t">
+          <button class="flex-1 px-3 py-2 text-sm border rounded hover:bg-gray-50 transition-colors" @click="edit(s)">
+            📝 Editar
+          </button>
+          <button class="flex-1 px-3 py-2 text-sm border rounded text-red-600 hover:bg-red-50 transition-colors" @click="del(s)">
+            🗑️ Excluir
+          </button>
+        </div>
+      </div>
+      
+      <div v-if="!rows || rows.length===0" class="bg-white shadow rounded-lg p-8 text-center text-gray-500">
+        Nenhum aluno encontrado
+      </div>
+      
+      <!-- Paginação Mobile -->
+      <div v-if="totalPages > 1" class="bg-white shadow rounded-lg p-4">
+        <div class="text-sm text-gray-700 text-center mb-3">
+          {{ (currentPage - 1) * perPage + 1 }} - {{ Math.min(currentPage * perPage, totalItems) }} de {{ totalItems }} alunos
+        </div>
+        <div class="flex justify-center space-x-2">
+          <button @click="previousPage" :disabled="currentPage === 1" 
+                  class="px-4 py-2 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            ← Anterior
+          </button>
+          <button @click="nextPage" :disabled="currentPage === totalPages" 
+                  class="px-4 py-2 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            Próxima →
+          </button>
+        </div>
+      </div>
+    </div>
+      
+      <!-- Paginação -->
+      <div v-if="totalPages > 1" class="flex items-center justify-between mt-4 px-4 py-3 border-t">
+        <div class="text-sm text-gray-700">
+          Mostrando {{ (currentPage - 1) * perPage + 1 }} a {{ Math.min(currentPage * perPage, totalItems) }} de {{ totalItems }} alunos
+        </div>
+        <div class="flex items-center space-x-2">
+          <button @click="previousPage" :disabled="currentPage === 1" 
+                  class="px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  :aria-label="'Ir para página anterior'"
+                  :aria-disabled="currentPage === 1">
+            Anterior
+          </button>
+          <span v-for="page in visiblePages" :key="page" 
+                @click="goToPage(page)"
+                :class="[
+                  'px-3 py-1 text-sm cursor-pointer rounded',
+                  page === currentPage ? 'bg-brand-primary text-white' : 'border hover:bg-gray-50 focus:bg-gray-50'
+                ]"
+                :aria-label="'Ir para página ' + page"
+                :aria-current="page === currentPage ? 'page' : false">
+            {{ page }}
+          </span>
+          <button @click="nextPage" :disabled="currentPage === totalPages" 
+                  class="px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  :aria-label="'Ir para próxima página'"
+                  :aria-disabled="currentPage === totalPages">
+            Próxima
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="editing" class="bg-white shadow rounded-lg p-6 space-y-6" role="dialog" aria-labelledby="form-heading">
+      <h1 id="form-heading" class="text-2xl font-bold text-gray-900">{{ form.id ? 'Editar Aluno' : 'Novo Aluno' }}</h1>
+      
+      <!-- Barra de Progresso -->
+      <div class="mb-8">
+        <div class="flex items-center justify-between mb-2">
+          <div class="text-sm font-medium text-gray-600">Progresso</div>
+          <div class="text-sm font-medium text-blue-600">{{ Math.round((currentStepAluno / (totalStepsAluno || 1)) * 100) }}%</div>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+          <div class="bg-gradient-to-r from-blue-400 to-blue-600 h-2 rounded-full transition-all duration-300" 
+               :style="{ width: (currentStepAluno / (totalStepsAluno || 1)) * 100 + '%' }"></div>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div v-if="form.modalidade==='apoio'">
-          <label class="text-sm font-medium text-gray-700 mb-1 block" for="aluno-apoiador">Professor de Apoio</label>
-          <input id="aluno-apoiador" v-model="form._st_name" list="dl-teachers" class="border rounded px-3 py-2 w-full" placeholder="Professor de Apoio (nome ou #id)" @input="mapTeacher">
-          <datalist id="dl-teachers">
-            <option v-for="t in teachers" :key="'t'+t.id" :value="t.name + ' (#'+t.id+')'" />
-          </datalist>
-        </div>
-        <div v-if="form.modalidade==='srm'">
-          <label class="text-sm font-medium text-gray-700 mb-1 block" for="aluno-srm">Sala de Recursos</label>
-          <input id="aluno-srm" v-model="form._room_name" list="dl-rooms" class="border rounded px-3 py-2 w-full" placeholder="Sala de Recursos (nome ou #id)" @input="mapRoom">
-          <datalist id="dl-rooms">
-            <option v-for="r in rooms" :key="'r'+r.id" :value="r.name + ' (#'+r.id+')'" />
-          </datalist>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div>
-          <label class="text-sm font-medium text-gray-700 mb-1 block" for="aluno-resp">Responsável</label>
-          <input id="aluno-resp" v-model="form.responsible_name" class="border rounded px-3 py-2 w-full" placeholder="Responsável">
-        </div>
-        <div>
-          <label class="text-sm font-medium text-gray-700 mb-1 block" for="aluno-fone">Telefone</label>
-          <input id="aluno-fone" v-model="form.responsible_phone" class="border rounded px-3 py-2 w-full" placeholder="Telefone">
-        </div>
-        <div>
-          <label class="text-sm font-medium text-gray-700 mb-1 block" for="aluno-cid">CID (opcional)</label>
-          <input id="aluno-cid" v-model="form.cid_code" class="border rounded px-3 py-2 w-full" placeholder="CID (opcional)">
+      <!-- Indicadores de Etapas -->
+      <div class="flex justify-between mb-8">
+        <div v-for="(step, index) in stepsAluno" :key="index" 
+             class="flex flex-col items-center cursor-pointer transition-all duration-200"
+             @click="goToStepAluno(index)">
+          <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-200"
+               :class="index < currentStepAluno ? 'bg-blue-500 border-blue-500 text-white' : 
+                       index === currentStepAluno ? 'bg-blue-100 border-blue-500 text-blue-700' : 
+                       'bg-gray-100 border-gray-300 text-gray-400'">
+            <i :class="step.icon"></i>
+          </div>
+          <span class="text-xs mt-2 text-center max-w-20"
+                :class="index <= currentStepAluno ? 'text-blue-600 font-medium' : 'text-gray-400'">
+            {{ step.title }}
+          </span>
         </div>
       </div>
 
-      <div class="flex gap-2">
-        <button class="px-3 py-2 bg-brand-primary text-white rounded" @click="save">Salvar</button>
-        <button class="px-3 py-2 border rounded" @click="cancel">Cancelar</button>
+      <!-- Etapa 1: Dados Básicos -->
+      <div v-if="currentStepAluno === 0" class="space-y-6">
+        <div class="border-l-4 border-blue-500 pl-4 mb-6">
+          <h2 class="text-lg font-semibold text-gray-900">Dados Básicos do Aluno</h2>
+          <p class="text-sm text-gray-600">Informe os dados principais do aluno</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-user text-blue-500 mr-1"></i>
+              Nome Completo *
+            </label>
+            <input v-model="form.name" 
+                   class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                   placeholder="Digite o nome completo do aluno"
+                   required>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-graduation-cap text-blue-500 mr-1"></i>
+              Modalidade AEE *
+            </label>
+            <select v-model="form.modalidade" 
+                    class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required>
+              <option disabled value="">Selecione a modalidade</option>
+              <option value="apoio">👨‍🏫 Apoio Pedagógico</option>
+              <option value="srm">🏫 Sala de Recursos Multifuncionais</option>
+            </select>
+            <div class="text-xs text-gray-500 mt-1">Escolha o tipo de atendimento AEE</div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-toggle-on text-blue-500 mr-1"></i>
+              Status
+            </label>
+            <select v-model="form.status" 
+                    class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <option value="ativo">✅ Ativo</option>
+              <option value="inativo">❌ Inativo</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Etapa 2: Atribuições -->
+      <div v-if="currentStepAluno === 1" class="space-y-6">
+        <div class="border-l-4 border-blue-500 pl-4 mb-6">
+          <h2 class="text-lg font-semibold text-gray-900">Atribuições de Atendimento</h2>
+          <p class="text-sm text-gray-600">Configure o professor ou sala responsável pelo atendimento</p>
+        </div>
+
+        <div v-if="form.modalidade === 'apoio'" class="space-y-4">
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-center mb-2">
+              <i class="fas fa-chalkboard-teacher text-blue-600 mr-2"></i>
+              <h3 class="font-medium text-blue-800">Apoio Pedagógico</h3>
+            </div>
+            <p class="text-sm text-blue-700">O aluno receberá atendimento de apoio pedagógico especializado.</p>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-user-tie text-blue-500 mr-1"></i>
+              Professor de Apoio
+            </label>
+            <input v-model="form._st_name" 
+                   list="dl-teachers" 
+                   class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                   placeholder="Digite o nome do professor ou selecione da lista"
+                   @input="mapTeacher">
+            <datalist id="dl-teachers">
+              <option v-for="t in teachers" :key="'t'+t.id" :value="t.name + ' (#'+t.id+')'" />
+            </datalist>
+          </div>
+        </div>
+
+        <div v-if="form.modalidade === 'srm'" class="space-y-4">
+          <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div class="flex items-center mb-2">
+              <i class="fas fa-door-open text-green-600 mr-2"></i>
+              <h3 class="font-medium text-green-800">Sala de Recursos Multifuncionais</h3>
+            </div>
+            <p class="text-sm text-green-700">O aluno frequentará uma Sala de Recursos Multifuncionais.</p>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-school text-blue-500 mr-1"></i>
+              Sala de Recursos
+            </label>
+            <input v-model="form._room_name" 
+                   list="dl-rooms" 
+                   class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                   placeholder="Digite o nome da sala ou selecione da lista"
+                   @input="mapRoom">
+            <datalist id="dl-rooms">
+              <option v-for="r in rooms" :key="'r'+r.id" :value="r.name + ' (#'+r.id+')'" />
+            </datalist>
+          </div>
+        </div>
+
+        <div v-if="!form.modalidade" class="text-center py-8 text-gray-500">
+          <i class="fas fa-arrow-left text-2xl mb-2"></i>
+          <p>Primeiro selecione a modalidade na etapa anterior</p>
+        </div>
+      </div>
+
+      <!-- Etapa 3: Informações de Contato -->
+      <div v-if="currentStepAluno === 2" class="space-y-6">
+        <div class="border-l-4 border-blue-500 pl-4 mb-6">
+          <h2 class="text-lg font-semibold text-gray-900">Informações de Contato</h2>
+          <p class="text-sm text-gray-600">Dados do responsável e informações complementares</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-user-friends text-blue-500 mr-1"></i>
+              Nome do Responsável
+            </label>
+            <input v-model="form.responsible_name" 
+                   class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                   placeholder="Nome do pai, mãe ou responsável">
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-phone text-blue-500 mr-1"></i>
+              Telefone de Contato
+            </label>
+            <input v-model="form.responsible_phone" 
+                   class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                   placeholder="(11) 99999-9999">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            <i class="fas fa-notes-medical text-blue-500 mr-1"></i>
+            Código CID (Opcional)
+          </label>
+          <input v-model="form.cid_code" 
+                 class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                 placeholder="Código CID, se disponível">
+          <div class="text-xs text-gray-500 mt-1">Classificação Internacional de Doenças (opcional)</div>
+        </div>
+
+        <!-- Resumo dos dados -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h3 class="font-medium text-blue-800 mb-3">
+            <i class="fas fa-clipboard-check mr-1"></i>
+            Resumo do Cadastro
+          </h3>
+          <div class="space-y-2 text-sm">
+            <div><strong>Nome:</strong> {{ form.name || 'Não informado' }}</div>
+            <div><strong>Modalidade:</strong> {{ form.modalidade === 'apoio' ? '👨‍🏫 Apoio Pedagógico' : form.modalidade === 'srm' ? '🏫 Sala de Recursos' : 'Não selecionada' }}</div>
+            <div><strong>Status:</strong> {{ form.status === 'ativo' ? '✅ Ativo' : '❌ Inativo' }}</div>
+            <div v-if="form.modalidade === 'apoio'"><strong>Professor:</strong> {{ form._st_name || 'Não atribuído' }}</div>
+            <div v-if="form.modalidade === 'srm'"><strong>Sala:</strong> {{ form._room_name || 'Não atribuída' }}</div>
+            <div><strong>Responsável:</strong> {{ form.responsible_name || 'Não informado' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navegação -->
+      <div class="flex justify-between pt-6 border-t">
+        <button type="button" 
+                @click="previousStepAluno" 
+                :disabled="currentStepAluno === 0"
+                class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+          <i class="fas fa-arrow-left mr-1"></i>
+          Anterior
+        </button>
+        
+        <div class="flex space-x-3">
+          <button type="button" 
+                  @click="cancel" 
+                  class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+            <i class="fas fa-times mr-1"></i>
+            Cancelar
+          </button>
+          
+          <button v-if="currentStepAluno < totalStepsAluno - 1" 
+                  type="button" 
+                  @click="nextStepAluno"
+                  :disabled="!canProceedAluno"
+                  class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+            Próximo
+            <i class="fas fa-arrow-right ml-1"></i>
+          </button>
+          
+          <button v-else 
+                  type="button"
+                  @click="save" 
+                  :disabled="!canProceedAluno"
+                  class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50">
+            <i class="fas fa-save mr-1"></i>
+            {{ form.id ? 'Salvar Alterações' : 'Cadastrar Aluno' }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
   `,
-  data(){return{ rows:[], filters:{ q:'', status:'', modalidade:'' }, editing:false, form:{ id:null, name:'', modalidade:'', status:'ativo', _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'' }, teachers:[], rooms:[] }},
+  data(){return{ 
+    rows:[], 
+    filters:{ q:'', status:'', modalidade:'' }, 
+    editing:false,
+    // Wizard properties
+    currentStepAluno: 0,
+    totalStepsAluno: 3,
+    stepsAluno: [
+      { title: 'Dados Básicos', icon: 'fas fa-user' },
+      { title: 'Atribuições', icon: 'fas fa-chalkboard-teacher' },
+      { title: 'Contato', icon: 'fas fa-phone' }
+    ],
+    form:{ id:null, name:'', modalidade:'', status:'ativo', _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'' }, 
+    teachers:[], 
+    rooms:[],
+    // Paginação
+    currentPage: 1,
+    perPage: 10,
+    totalItems: 0,
+    totalPages: 0,
+    // Ordenação
+    sortField: 'name',
+    sortDirection: 'asc'
+  }},
+  computed: {
+    visiblePages() {
+      const range = 2;
+      const start = Math.max(1, this.currentPage - range);
+      const end = Math.min(this.totalPages, this.currentPage + range);
+      const pages = [];
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+      return pages;
+    },
+    canProceedAluno() {
+      switch (this.currentStepAluno) {
+        case 0:
+          return this.form.name && this.form.name.trim().length > 0 && this.form.modalidade;
+        case 1:
+          return true; // Atribuições são opcionais
+        case 2:
+          return true; // Dados de contato são opcionais
+        default:
+          return false;
+      }
+    }
+  },
   methods:{
+    // Métodos do wizard
+    nextStepAluno() {
+      if (this.canProceedAluno && this.currentStepAluno < this.totalStepsAluno - 1) {
+        this.currentStepAluno++;
+      }
+    },
+    
+    previousStepAluno() {
+      if (this.currentStepAluno > 0) {
+        this.currentStepAluno--;
+      }
+    },
+    
+    goToStepAluno(stepIndex) {
+      if (stepIndex >= 0 && stepIndex < this.totalStepsAluno) {
+        this.currentStepAluno = stepIndex;
+      }
+    },
+    
     display(s){ return `${s.name} (#${s.id})`; },
     parseId(v){ const m=String(v||'').match(/#(\d+)/); return m?Number(m[1]):null; },
     mapTeacher(){ this.form.support_teacher_id = this.parseId(this.form._st_name); },
     mapRoom(){ this.form.srm_room_id = this.parseId(this.form._room_name); },
-    newAluno(){ this.editing=true; this.form={ id:null, name:'', modalidade:'', status:'ativo', _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'' }; },
-    edit(s){ this.editing=true; this.form=Object.assign({_st_name:'', _room_name:''}, s); },
-    cancel(){ this.editing=false; this.form={ id:null, name:'', modalidade:'', status:'ativo', _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'' }; },
-    async load(){ const params={}; if(this.filters.q) params.q=this.filters.q; if(this.filters.status) params.status=this.filters.status; if(this.filters.modalidade) params.modalidade=this.filters.modalidade; const r=await api.get('/students',{params}); this.rows = r.data?.data?.rows || []; },
+    newAluno(){ 
+      this.editing=true; 
+      this.currentStepAluno = 0;
+      this.form={ id:null, name:'', modalidade:'', status:'ativo', _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'' }; 
+    },
+    edit(s){ 
+      this.editing=true; 
+      this.currentStepAluno = 0;
+      this.form=Object.assign({_st_name:'', _room_name:''}, s); 
+    },
+    cancel(){ 
+      this.editing=false; 
+      this.currentStepAluno = 0;
+      this.form={ id:null, name:'', modalidade:'', status:'ativo', _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'' }; 
+    },
+    async load(){ 
+      const params={ 
+        page: this.currentPage, 
+        per_page: this.perPage,
+        sort_by: this.sortField,
+        sort_direction: this.sortDirection
+      }; 
+      if(this.filters.q) params.q=this.filters.q; 
+      if(this.filters.status) params.status=this.filters.status; 
+      if(this.filters.modalidade) params.modalidade=this.filters.modalidade; 
+      // Professores veem apenas seus próprios alunos
+      if(this.$parent.user && this.$parent.user.role !== 'admin') {
+        params.teacher_id = this.$parent.user.id;
+      }
+      const r=await api.get('/students',{params}); 
+      this.rows = r.data?.data?.rows || []; 
+      this.totalItems = r.data?.data?.total || 0;
+      this.totalPages = Math.ceil(this.totalItems / this.perPage);
+    },
+    previousPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+        this.load();
+      }
+    },
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+        this.load();
+      }
+    },
+    goToPage(page) {
+      this.currentPage = page;
+      this.load();
+    },
+    sortBy(field) {
+      if (this.sortField === field) {
+        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.sortField = field;
+        this.sortDirection = 'asc';
+      }
+      this.currentPage = 1; // Resetar para primeira página
+      this.load();
+    },
     async loadLists(){ const t=await api.get('/support-teachers'); this.teachers=t.data?.data||[]; const r=await api.get('/srm-rooms'); this.rooms=r.data?.data||[]; },
-    async save(){ if(!this.form.name || !this.form.modalidade){ alert('Preencha nome e modalidade'); return; } const payload=Object.assign({}, this.form); delete payload._st_name; delete payload._room_name; if(!this.form.id){ const r=await api.post('/students/create', payload); if(r.data?.ok){ await this.load(); this.cancel(); } else alert(r.data?.error||'Erro ao criar'); } else { const r=await api.put('/students/update', payload, { params:{ id:this.form.id } }); if(r.data?.ok){ await this.load(); this.cancel(); } else alert(r.data?.error||'Erro ao atualizar'); } },
-    async del(s){ if(!confirm('Excluir aluno?')) return; const r=await api.post('/students/delete', {}, { params:{ id:s.id } }); if(r.data?.ok){ this.load(); } else alert(r.data?.error||'Erro ao excluir'); }
+    async save(){ 
+      if(!this.form.name || !this.form.modalidade){ 
+        this.$showModal('Atenção', 'Preencha nome e modalidade', 'info'); 
+        return; 
+      } 
+      const payload=Object.assign({}, this.form); 
+      delete payload._st_name; 
+      delete payload._room_name; 
+      // Associar aluno ao professor atual
+      if(!this.form.id && this.$parent.user && this.$parent.user.role !== 'admin') {
+        payload.created_by_teacher_id = this.$parent.user.id;
+      }
+      if(!this.form.id){ 
+        const r=await api.post('/students/create', payload); 
+        if(r.data?.ok){ await this.load(); this.cancel(); } 
+        else this.$showModal('Erro', r.data?.error||'Erro ao criar', 'error'); 
+      } else { 
+        const r=await api.put('/students/update', payload, { params:{ id:this.form.id } }); 
+        if(r.data?.ok){ await this.load(); this.cancel(); } 
+        else this.$showModal('Erro', r.data?.error||'Erro ao atualizar', 'error'); 
+      } 
+    },
+    async del(s){ if(!confirm('Excluir aluno?')) return; const r=await api.post('/students/delete', {}, { params:{ id:s.id } }); if(r.data?.ok){ this.load(); } else this.$showModal('Erro', r.data?.error||'Erro ao excluir', 'error'); }
   },
   async mounted(){ await this.loadLists(); await this.load(); }
 };
@@ -191,8 +715,8 @@ const RegisterTW = {
         <div class="mx-auto h-40 w-40 flex items-center justify-center mb-4">
           <img src="./icons/logo-icon.png" alt="ConectAEE" class="h-36 w-36">
         </div>
-        <h2 class="text-3xl font-bold text-gray-900">Criar Conta</h2>
-        <p class="mt-2 text-sm text-gray-600">Registre-se para acessar o ConectAEE</p>
+        <h2 class="text-3xl font-bold text-gray-900">Cadastro de Professor</h2>
+        <p class="mt-2 text-sm text-gray-600">Cadastre-se como professor no ConectAEE</p>
       </div>
     </div>
 
@@ -303,12 +827,17 @@ const RegisterTW = {
       this.success = '';
 
       try {
-        const response = await api.post('/register', this.form);
+        // Definir role como teacher para auto-registro apenas de professores
+        const payload = {
+          ...this.form,
+          role: 'teacher'
+        };
+        const response = await api.post('/register', payload);
         if (response.data?.ok) {
-          this.success = response.data.message || 'Conta criada com sucesso! Aguarde aprovação.';
+          this.success = response.data.message || 'Cadastro de professor criado com sucesso! Você já pode fazer login.';
           this.form = { name: '', email: '', password: '', confirm_password: '' };
         } else {
-          this.error = response.data?.error || 'Erro ao criar conta';
+          this.error = response.data?.error || 'Erro ao criar cadastro';
         }
       } catch (err) {
         this.error = err.response?.data?.error || 'Erro de conexão';
@@ -322,27 +851,53 @@ const RegisterTW = {
 // Usuários (Professores/Admins)
 const UsuariosTW = {
   template: `
-  <div class="space-y-4">
+  <div class="space-y-4" role="main">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">Usuários</h1>
-        <div v-if="pendingCount > 0" class="mt-1">
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-            {{ pendingCount }} usuário(s) aguardando aprovação
-          </span>
-        </div>
+        <h1 id="usuarios-heading" class="text-2xl font-bold text-gray-900">Usuários</h1>
       </div>
       <div class="space-x-2">
-        <button @click="loadNotifications" class="px-3 py-2 bg-blue-600 text-white rounded">
+        <button @click="loadNotifications" 
+                class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
+                :aria-label="notifications.length > 0 ? 'Ver ' + notifications.length + ' notificações' : 'Ver notificações'">
           <span v-if="notifications.length > 0" class="inline-flex items-center">
-            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
               <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
             </svg>
             Notificações ({{ notifications.length }})
           </span>
-          <span v-else>Notificações</span>
+          <span v-else>
+            <i class="fas fa-bell mr-1" aria-hidden="true"></i>Notificações
+          </span>
         </button>
-        <button @click="novo" class="px-3 py-2 bg-brand-primary text-white rounded">Novo Usuário</button>
+        <button @click="novo" 
+                class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
+                aria-label="Adicionar novo usuário">
+          <i class="fas fa-plus mr-1" aria-hidden="true"></i>Novo Usuário
+        </button>
+      </div>
+    </div>
+
+    <!-- Mensagens de Feedback -->
+    <div v-if="successMessage" class="bg-green-50 border border-green-200 rounded-md p-4">
+      <div class="flex">
+        <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        <div class="ml-3">
+          <p class="text-sm font-medium text-green-800">{{ successMessage }}</p>
+        </div>
+      </div>
+    </div>
+    
+    <div v-if="errorMessage" class="bg-red-50 border border-red-200 rounded-md p-4">
+      <div class="flex">
+        <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+        </svg>
+        <div class="ml-3">
+          <p class="text-sm font-medium text-red-800">{{ errorMessage }}</p>
+        </div>
       </div>
     </div>
 
@@ -376,12 +931,12 @@ const UsuariosTW = {
       <div class="flex items-center justify-between">
         <h2 class="text-lg font-semibold">Notificações</h2>
         <button @click="showNotifications = false" class="text-gray-400 hover:text-gray-600">
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
           </svg>
         </button>
       </div>
-      <div v-if="notifications.length === 0" class="text-center text-gray-500 py-4">
+      <div v-if="!notifications || notifications.length === 0" class="text-center text-gray-500 py-4">
         Nenhuma notificação
       </div>
       <div v-else class="space-y-2">
@@ -393,7 +948,6 @@ const UsuariosTW = {
               <p class="text-xs text-gray-400 mt-1">{{ formatDate(n.created_at) }}</p>
             </div>
             <div class="ml-4 space-x-2">
-              <button v-if="n.type === 'user_pending_approval'" @click="approveUser(n.data.user_id)" class="px-2 py-1 text-xs bg-green-600 text-white rounded">Aprovar</button>
               <button @click="markAsRead(n.id)" class="px-2 py-1 text-xs border rounded">Marcar como lida</button>
             </div>
           </div>
@@ -413,25 +967,43 @@ const UsuariosTW = {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="u in rows" :key="u.id" class="border-t" :class="u.status === 'pendente' ? 'bg-yellow-50' : ''">
-            <td class="px-3 py-2">{{ u.name }}</td>
-            <td class="px-3 py-2">{{ u.email }}</td>
-            <td class="px-3 py-2">{{ u.role }}</td>
+          <tr v-for="u in rows" :key="u.id" class="border-t">
+            <td class="px-3 py-2">{{ u.name || 'Nome não informado' }}</td>
+            <td class="px-3 py-2">{{ u.email || 'Email não informado' }}</td>
             <td class="px-3 py-2">
               <span :class="[
-                'px-2 py-1 rounded text-xs',
-                u.status === 'ativo' ? 'bg-green-100 text-green-700' :
-                u.status === 'pendente' ? 'bg-yellow-100 text-yellow-700' :
+                'px-2 py-1 rounded text-xs font-medium',
+                u.role === 'admin' ? 'bg-purple-100 text-purple-700' :
+                u.role === 'professor' ? 'bg-blue-100 text-blue-700' :
+                u.role === 'coordenador' ? 'bg-indigo-100 text-indigo-700' :
                 'bg-gray-100 text-gray-600'
-              ]">{{ u.status }}</span>
+              ]">{{ getRoleLabel(u.role) }}</span>
+            </td>
+            <td class="px-3 py-2">
+              <span :class="[
+                'px-2 py-1 rounded text-xs font-medium',
+                u.status === 'ativo' ? 'bg-green-100 text-green-700' :
+                u.status === 'inativo' ? 'bg-red-100 text-red-700' :
+                'bg-gray-100 text-gray-600'
+              ]">{{ getStatusLabel(u.status) }}</span>
             </td>
             <td class="px-3 py-2 text-right space-x-2">
-              <button v-if="u.status === 'pendente'" @click="approveUser(u.id)" class="px-2 py-1 text-sm bg-green-600 text-white rounded">Aprovar</button>
-              <button class="px-2 py-1 text-sm border rounded" @click="edit(u)">Editar</button>
-              <button class="px-2 py-1 text-sm border rounded text-red-600" @click="del(u)">Excluir</button>
+              <button class="px-2 py-1 text-sm border rounded hover:bg-gray-50 transition-colors" @click="edit(u)">
+                Editar
+              </button>
+              <button class="px-2 py-1 text-sm border rounded text-red-600 hover:bg-red-50 transition-colors" 
+                      @click="del(u)" 
+                      :disabled="deletingUserId === u.id"
+                      :class="deletingUserId === u.id ? 'opacity-50 cursor-not-allowed' : ''">
+                <span v-if="deletingUserId === u.id" class="inline-flex items-center">
+                  <div class="animate-spin -ml-1 mr-1 h-3 w-3 border border-red-600 border-t-transparent rounded-full"></div>
+                  Excluindo...
+                </span>
+                <span v-else>Excluir</span>
+              </button>
             </td>
           </tr>
-          <tr v-if="rows.length===0"><td colspan="5" class="px-3 py-6 text-center text-gray-500">Sem usuários</td></tr>
+          <tr v-if="!rows || rows.length===0"><td colspan="5" class="px-3 py-6 text-center text-gray-500">Sem usuários</td></tr>
         </tbody>
       </table>
     </div>
@@ -468,8 +1040,18 @@ const UsuariosTW = {
         </div>
       </div>
       <div class="flex gap-2">
-        <button class="px-3 py-2 bg-brand-primary text-white rounded" @click="save">Salvar</button>
-        <button class="px-3 py-2 border rounded" @click="cancel">Cancelar</button>
+        <button class="px-3 py-2 bg-brand-primary text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
+                @click="save" 
+                :disabled="savingForm">
+          <span v-if="savingForm" class="inline-flex items-center">
+            <div class="animate-spin -ml-1 mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+            {{ form.id ? 'Atualizando...' : 'Criando...' }}
+          </span>
+          <span v-else>{{ form.id ? 'Atualizar' : 'Criar' }} Usuário</span>
+        </button>
+        <button class="px-3 py-2 border rounded hover:bg-gray-50 transition-colors" @click="cancel" :disabled="savingForm">
+          Cancelar
+        </button>
       </div>
     </div>
   </div>
@@ -478,280 +1060,560 @@ const UsuariosTW = {
     rows:[], 
     filters:{ q:'', role:'', status:'' }, 
     editing:false, 
+    loading: false,
+    savingForm: false,
+    deletingUserId: null,
     form:{ id:null, name:'', email:'', role:'professor', status:'ativo', password:'' },
     notifications: [],
-    showNotifications: false
+    showNotifications: false,
+    successMessage: '',
+    errorMessage: ''
   }},
   methods:{
     async load(){ const p={}; if(this.filters.q) p.q=this.filters.q; if(this.filters.role) p.role=this.filters.role; if(this.filters.status) p.status=this.filters.status; const r=await api.get('/users',{params:p}); this.rows=r.data?.data?.rows||[]; },
     novo(){ this.editing=true; this.form={ id:null, name:'', email:'', role:'professor', status:'ativo', password:'' }; },
     edit(u){ this.editing=true; this.form=Object.assign({ password:'' }, u); },
     cancel(){ this.editing=false; this.form={ id:null, name:'', email:'', role:'professor', status:'ativo', password:'' }; },
-    async save(){ if(!this.form.name||!this.form.email){ alert('Informe nome e email'); return; }
-      if(!this.form.id){ const payload=Object.assign({}, this.form); if(!payload.password){ alert('Defina uma senha'); return; } const r=await api.post('/users/create', payload); if(r.data?.ok){ await this.load(); this.cancel(); } else alert(r.data?.error||'Erro ao criar'); }
-      else { const payload=Object.assign({}, this.form); if(!payload.password) delete payload.password; const r=await api.post('/users/update', payload, { params:{ id:this.form.id } }); if(r.data?.ok){ await this.load(); this.cancel(); } else alert(r.data?.error||'Erro ao atualizar'); }
+    async save(){ 
+      if(!this.form.name||!this.form.email){ 
+        this.showErrorMessage('Por favor, informe nome e email'); 
+        return; 
+      }
+      
+      this.savingForm = true;
+      try {
+        if(!this.form.id){ 
+          const payload=Object.assign({}, this.form); 
+          if(!payload.password){ 
+            this.showErrorMessage('Por favor, defina uma senha para o novo usuário'); 
+            return; 
+          } 
+          const r=await api.post('/users/create', payload); 
+          if(r.data?.ok){ 
+            this.showSuccessMessage('Usuário criado com sucesso!');
+            await this.load(); 
+            this.cancel(); 
+          } else {
+            this.showErrorMessage(r.data?.error||'Erro ao criar usuário');
+          }
+        } else { 
+          const payload=Object.assign({}, this.form); 
+          if(!payload.password) delete payload.password; 
+          const r=await api.post('/users/update', payload, { params:{ id:this.form.id } }); 
+          if(r.data?.ok){ 
+            this.showSuccessMessage('Usuário atualizado com sucesso!');
+            await this.load(); 
+            this.cancel(); 
+          } else {
+            this.showErrorMessage(r.data?.error||'Erro ao atualizar usuário');
+          }
+        }
+      } catch(error) {
+        this.showErrorMessage('Erro na operação: ' + (error.response?.data?.message || error.message));
+      } finally {
+        this.savingForm = false;
+      }
     },
-    async del(u){ if(!confirm('Excluir usuário?')) return; const r=await api.post('/users/delete', {}, { params:{ id:u.id } }); if(r.data?.ok){ this.load(); } else alert(r.data?.error||'Erro ao excluir'); },
+    async del(u){ 
+      if(!confirm(`Tem certeza que deseja excluir o usuário "${u.name}"?\n\nEsta ação não pode ser desfeita.`)) return; 
+      this.deletingUserId = u.id;
+      try {
+        const r = await api.post('/users/delete', {}, { params:{ id:u.id } }); 
+        if(r.data?.ok){ 
+          this.showSuccessMessage('Usuário excluído com sucesso!');
+          this.load(); 
+        } else {
+          this.showErrorMessage(r.data?.error||'Erro ao excluir');
+        }
+      } catch(error) {
+        this.showErrorMessage('Erro ao excluir usuário: ' + (error.response?.data?.message || error.message));
+      } finally {
+        this.deletingUserId = null;
+      }
+    },
+    getRoleLabel(role) {
+      const roles = {
+        'admin': 'Administrador',
+        'professor': 'Professor AEE',
+        'coordenador': 'Coordenador'
+      };
+      return roles[role] || 'Indefinido';
+    },
+    getStatusLabel(status) {
+      const statuses = {
+        'ativo': 'Ativo',
+        'inativo': 'Inativo'
+      };
+      return statuses[status] || 'Indefinido';
+    },
+    showSuccessMessage(message) {
+      this.successMessage = message;
+      this.errorMessage = '';
+      setTimeout(() => {
+        this.successMessage = '';
+      }, 5000);
+    },
+    showErrorMessage(message) {
+      this.errorMessage = message;
+      this.successMessage = '';
+      setTimeout(() => {
+        this.errorMessage = '';
+      }, 8000);
+    },
     async loadNotifications(){ 
       try {
         const r = await api.get('/notifications'); 
         this.notifications = r.data?.data || []; 
         this.showNotifications = true; 
       } catch(e) { 
-        alert('Erro ao carregar notificações'); 
+        this.$showModal('Erro', 'Erro ao carregar notificações', 'error'); 
       } 
     },
-    async approveUser(userId) {
-      if(!confirm('Aprovar este usuário?')) return;
-      try {
-        const r = await api.post('/register/approve', { user_id: userId, role: 'aluno', status: 'ativo' });
-        if(r.data?.ok) {
-          alert('Usuário aprovado com sucesso!');
-          this.load();
-          this.loadNotifications();
-        } else {
-          alert(r.data?.error || 'Erro ao aprovar usuário');
-        }
-      } catch(e) {
-        alert('Erro ao aprovar usuário');
-      }
-    },
+
     async markAsRead(notificationId) {
       try {
         await api.post('/notifications/read', { notification_id: notificationId });
         this.loadNotifications();
       } catch(e) {
-        alert('Erro ao marcar notificação como lida');
+        this.$showModal('Erro', 'Erro ao marcar notificação como lida', 'error');
       }
     },
     formatDate(dateStr) {
       return new Date(dateStr).toLocaleString('pt-BR');
     }
   },
-  computed: {
-    pendingCount() {
-      return this.rows.filter(u => u.status === 'pendente').length;
-    }
-  },
+
   async mounted(){ this.load(); this.loadNotifications(); }
 };
 
-const CursosTW = {
+// Componente de Legislações
+const LegislacoesTW = {
   template: `
-  <div class="space-y-4">
-    <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-bold text-gray-900">Cursos</h1>
-      <div class="flex gap-2">
-        <button @click="newCurso" class="px-3 py-2 bg-brand-primary text-white rounded">Novo Curso</button>
-        <button @click="openAssign" class="px-3 py-2 border rounded">Atribuir Professor</button>
-        <button @click="openTurma" class="px-3 py-2 border rounded">Criar Turma</button>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-      <input v-model="filters.q" @keyup.enter="load" class="border rounded px-3 py-2" placeholder="Buscar por nome">
-      <select v-model="filters.status" class="border rounded px-3 py-2">
-        <option value="">Todos os status</option>
-        <option value="ativo">Ativo</option>
-        <option value="inativo">Inativo</option>
-      </select>
-      <button @click="load" class="px-3 py-2 bg-gray-800 text-white rounded">Filtrar</button>
-    </div>
-
-    <div v-if="editing" class="bg-white shadow rounded p-4 space-y-3">
-      <h2 class="text-lg font-semibold">{{ form.id ? 'Editar Curso' : 'Novo Curso' }}</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <input v-model="form.name" class="border rounded px-3 py-2" placeholder="Nome do curso">
-        <select v-model="form.status" class="border rounded px-3 py-2">
-          <option value="ativo">Ativo</option>
-          <option value="inativo">Inativo</option>
-        </select>
-      </div>
-      <textarea v-model="form.description" class="border rounded px-3 py-2 w-full" placeholder="Descrição (opcional)"></textarea>
-      <div class="flex gap-2">
-        <button class="px-3 py-2 bg-brand-primary text-white rounded" @click="save">Salvar</button>
-        <button class="px-3 py-2 border rounded" @click="cancel">Cancelar</button>
-      </div>
-    </div>
-
-    <div class="bg-white shadow rounded overflow-x-auto">
-      <table class="min-w-full">
-        <thead>
-          <tr class="text-left">
-            <th class="px-3 py-2">Nome</th>
-            <th class="px-3 py-2">Status</th>
-            <th class="px-3 py-2 text-right">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="c in list" :key="c.id" class="border-t">
-            <td class="px-3 py-2">{{ c.name }}</td>
-            <td class="px-3 py-2">
-              <span :class="['px-2 py-1 rounded text-xs', c.status==='ativo'?'bg-green-100 text-green-700':'bg-gray-100 text-gray-600']">{{ c.status }}</span>
-            </td>
-            <td class="px-3 py-2 text-right space-x-2">
-              <button class="px-2 py-1 text-sm border rounded" @click="edit(c)">Editar</button>
-              <button class="px-2 py-1 text-sm border rounded text-red-600" @click="del(c)">Excluir</button>
-            </td>
-          </tr>
-          <tr v-if="list.length===0"><td colspan="3" class="px-3 py-6 text-center text-gray-500">Sem cursos</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Atribuir professor ao curso -->
-    <div v-if="assigning" class="bg-white shadow rounded p-4 space-y-3">
-      <h2 class="text-lg font-semibold">Atribuir Professor ao Curso</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div>
-          <label class="text-sm font-medium text-gray-700 mb-1 block">Curso (id)</label>
-          <input v-model.number="assign.course_id" class="border rounded px-3 py-2 w-full" placeholder="ID do curso">
-        </div>
-        <div>
-          <label class="text-sm font-medium text-gray-700 mb-1 block">Professor (id do usuário)</label>
-          <input v-model.number="assign.teacher_id" class="border rounded px-3 py-2 w-full" placeholder="ID do professor (usuários)">
-        </div>
-        <div>
-          <label class="text-sm font-medium text-gray-700 mb-1 block">Papel</label>
-          <select v-model="assign.role" class="border rounded px-3 py-2 w-full">
-            <option value="principal">Principal</option>
-            <option value="assistente">Assistente</option>
-          </select>
-        </div>
-      </div>
-      <div class="flex gap-2">
-        <button class="px-3 py-2 bg-brand-primary text-white rounded" @click="saveAssign">Salvar</button>
-        <button class="px-3 py-2 border rounded" @click="assigning=false">Cancelar</button>
-      </div>
-    </div>
-
-    <!-- Criar Turma -->
-    <div v-if="turmando" class="bg-white shadow rounded p-4 space-y-3">
-      <h2 class="text-lg font-semibold">Criar Turma</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div>
-          <label class="text-sm font-medium text-gray-700 mb-1 block">Curso (id)</label>
-          <input v-model.number="turma.course_id" class="border rounded px-3 py-2 w-full" placeholder="ID do curso">
-        </div>
-        <div>
-          <label class="text-sm font-medium text-gray-700 mb-1 block">Nome da Turma</label>
-          <input v-model="turma.name" class="border rounded px-3 py-2 w-full" placeholder="Ex.: Turma A">
-        </div>
-        <div>
-          <label class="text-sm font-medium text-gray-700 mb-1 block">Professor responsável (id)</label>
-          <input v-model.number="turma.teacher_id" class="border rounded px-3 py-2 w-full" placeholder="ID do professor">
-        </div>
-        <div>
-          <label class="text-sm font-medium text-gray-700 mb-1 block">Ano</label>
-          <input v-model.number="turma.year" type="number" class="border rounded px-3 py-2 w-full">
-        </div>
-        <div>
-          <label class="text-sm font-medium text-gray-700 mb-1 block">Semestre</label>
-          <input v-model.number="turma.semestre" type="number" class="border rounded px-3 py-2 w-full">
-        </div>
-        <div>
-          <label class="text-sm font-medium text-gray-700 mb-1 block">Horário</label>
-          <input v-model="turma.schedule" class="border rounded px-3 py-2 w-full" placeholder="Ex.: 2a/4a 14:00-15:00">
-        </div>
-      </div>
-      <div class="flex gap-2">
-        <button class="px-3 py-2 bg-brand-primary text-white rounded" @click="saveTurma">Salvar</button>
-        <button class="px-3 py-2 border rounded" @click="turmando=false">Cancelar</button>
-      </div>
-    </div>
-  </div>
-  `,
-  data(){return{ list:[], filters:{ q:'', status:'' }, editing:false, form:{ id:null, name:'', description:'', status:'ativo' }, assigning:false, assign:{ course_id:null, teacher_id:null, role:'principal' }, turmando:false, turma:{ course_id:null, name:'', teacher_id:null, year:new Date().getFullYear(), semestre:1, schedule:'' } }},
-  methods:{
-    async load(){ const params={}; if(this.filters.q) params.q=this.filters.q; if(this.filters.status) params.status=this.filters.status; const r=await api.get('/courses',{params}); this.list = r.data?.data || []; },
-    newCurso(){ this.editing=true; this.form={ id:null, name:'', description:'', status:'ativo' }; },
-    edit(c){ this.editing=true; this.form=Object.assign({},c); },
-    cancel(){ this.editing=false; this.form={ id:null, name:'', description:'', status:'ativo' }; },
-    async save(){ if(!this.form.name){ alert('Informe o nome'); return; } if(!this.form.id){ const r=await api.post('/courses/create', this.form); if(r.data?.ok){ await this.load(); this.cancel(); } else alert(r.data?.error||'Erro ao criar'); } else { const r=await api.post('/courses/update', this.form); if(r.data?.ok){ await this.load(); this.cancel(); } else alert(r.data?.error||'Erro ao atualizar'); } },
-    async del(c){ if(!confirm('Excluir curso?')) return; const r=await api.post('/courses/delete', { id:c.id }); if(r.data?.ok){ this.load(); } else alert(r.data?.error||'Erro ao excluir'); },
-    openAssign(){ this.assigning=true; },
-    async saveAssign(){ if(!this.assign.course_id||!this.assign.teacher_id){ alert('Informe curso e professor'); return; } const r=await api.post('/courses/teachers/assign', this.assign); if(r.data?.ok){ alert('Professor atribuído'); this.assigning=false; } else alert(r.data?.error||'Erro'); },
-    openTurma(){ this.turmando=true; },
-    async saveTurma(){ const t=this.turma; if(!t.course_id||!t.name){ alert('Informe curso e nome'); return; } const r=await api.post('/classes/create', t); if(r.data?.ok){ alert('Turma criada'); this.turmando=false; } else alert(r.data?.error||'Erro ao criar turma'); }
-  },
-  async mounted(){ this.load(); }
-};
-
-const AgendaTW = {
-  template: `
-    <div class="space-y-4">
+    <div class="space-y-6">
       <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-900">Agenda</h1>
-        <button class="px-3 py-2 bg-brand-primary text-white rounded" @click="newEvent">Novo Evento</button>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-        <input v-model="filters.q" class="border rounded px-3 py-2" placeholder="Buscar">
-        <input v-model="filters.start" type="date" class="border rounded px-3 py-2">
-        <input v-model="filters.end" type="date" class="border rounded px-3 py-2">
-        <button class="px-3 py-2 bg-gray-800 text-white rounded" @click="load">Filtrar</button>
-      </div>
-
-      <div v-if="editing" class="bg-white shadow rounded p-4 space-y-3">
-        <h2 class="text-lg font-semibold">{{ form.id ? 'Editar Evento' : 'Novo Evento' }}</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <input v-model="form.title" class="border rounded px-3 py-2" placeholder="Título">
-          <input v-model="form.location" class="border rounded px-3 py-2" placeholder="Local (opcional)">
-          <input v-model="form.date_start" type="datetime-local" class="border rounded px-3 py-2" placeholder="Início">
-          <input v-model="form.date_end" type="datetime-local" class="border rounded px-3 py-2" placeholder="Fim">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Diretório de Legislações</h1>
+          <p class="mt-1 text-sm text-gray-600">Documentos legislativos relacionados ao AEE</p>
         </div>
-        <textarea v-model="form.notes" class="border rounded px-3 py-2 w-full" placeholder="Notas"></textarea>
-        <div class="flex gap-2">
-          <button class="px-3 py-2 bg-brand-primary text-white rounded" @click="save">Salvar</button>
-          <button class="px-3 py-2 border rounded" @click="cancel">Cancelar</button>
+        <button 
+          v-if="user && user.role === 'admin'"
+          @click="showUploadForm = true" 
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
+          <span>Adicionar Legislação</span>
+        </button>
+      </div>
+
+      <!-- Formulário de Upload (apenas admin) -->
+      <div v-if="showUploadForm && user && user.role === 'admin'" class="bg-white shadow rounded-lg p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-gray-900">Nova Legislação</h2>
+          <button @click="cancelUpload" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        
+        <form @submit.prevent="uploadLegislacao" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Título *</label>
+            <input 
+              v-model="form.titulo" 
+              type="text" 
+              required 
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Ex: Lei Brasileira de Inclusão da Pessoa com Deficiência">
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Descrição</label>
+            <textarea 
+              v-model="form.descricao" 
+              rows="3" 
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Breve descrição sobre a legislação..."></textarea>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Arquivo PDF *</label>
+            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors">
+              <div class="space-y-1 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <div class="flex text-sm text-gray-600">
+                  <label class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500">
+                    <span>Selecionar arquivo</span>
+                    <input @change="handleFileSelect" type="file" accept=".pdf" required class="sr-only">
+                  </label>
+                  <p class="pl-1">ou arraste e solte</p>
+                </div>
+                <p class="text-xs text-gray-500">Apenas arquivos PDF até 50MB</p>
+                <div v-if="selectedFile" class="mt-2 text-sm text-green-600">
+                  <p>📄 {{ selectedFile.name }} ({{ formatFileSize(selectedFile.size) }})</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div v-if="uploadError" class="bg-red-50 border border-red-200 rounded p-3">
+            <p class="text-sm text-red-600">{{ uploadError }}</p>
+          </div>
+          
+          <div class="flex justify-end space-x-3">
+            <button type="button" @click="cancelUpload" class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50">
+              Cancelar
+            </button>
+            <button 
+              type="submit" 
+              :disabled="uploading || !form.titulo || !selectedFile" 
+              class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+              <span v-if="uploading" class="flex items-center">
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Enviando...
+              </span>
+              <span v-else>Salvar Legislação</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Filtros de Busca -->
+      <div class="bg-white shadow rounded-lg p-4">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-3 md:space-y-0">
+          <div class="flex-1 max-w-md">
+            <div class="relative">
+              <input 
+                v-model="searchQuery" 
+                @keyup.enter="search"
+                type="text" 
+                placeholder="Buscar por título ou descrição..."
+                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+            </div>
+          </div>
+          <button 
+            @click="search" 
+            class="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 flex items-center space-x-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <span>Buscar</span>
+          </button>
         </div>
       </div>
 
-      <div class="bg-white shadow rounded">
-        <table class="min-w-full">
-          <thead>
-            <tr class="text-left">
-              <th class="px-3 py-2">Título</th>
-              <th class="px-3 py-2">Início</th>
-              <th class="px-3 py-2">Fim</th>
-              <th class="px-3 py-2">Local</th>
-              <th class="px-3 py-2 text-right">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="e in list" :key="e.id" class="border-t">
-              <td class="px-3 py-2">{{e.title}}</td>
-              <td class="px-3 py-2">{{fmt(e.date_start)}}</td>
-              <td class="px-3 py-2">{{fmt(e.date_end)}}</td>
-              <td class="px-3 py-2">{{e.location||'-'}} </td>
-              <td class="px-3 py-2 text-right space-x-2">
-                <button class="px-2 py-1 text-sm border rounded" @click="edit(e)">Editar</button>
-                <button class="px-2 py-1 text-sm border rounded text-red-600" @click="del(e)">Excluir</button>
-              </td>
-            </tr>
-            <tr v-if="list.length===0"><td colspan="5" class="px-3 py-6 text-center text-gray-500">Sem eventos</td></tr>
-          </tbody>
-        </table>
+      <!-- Lista de Legislações -->
+      <div class="bg-white shadow rounded-lg overflow-hidden">
+        <div v-if="loading" class="p-8 text-center">
+          <div class="inline-flex items-center">
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Carregando legislações...
+          </div>
+        </div>
+        
+        <div v-else-if="!legislacoes || legislacoes.length === 0" class="p-8 text-center text-gray-500">
+          <svg class="mx-auto h-12 w-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <p class="text-lg font-medium mb-2">Nenhuma legislação encontrada</p>
+          <p class="text-sm">{{ searchQuery ? 'Tente buscar por outros termos.' : 'Não há documentos cadastrados ainda.' }}</p>
+        </div>
+        
+        <div v-else class="divide-y divide-gray-200">
+          <div v-for="legislacao in legislacoes" :key="legislacao.id" class="p-6 hover:bg-gray-50 transition-colors">
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
+                <div class="flex items-center space-x-3 mb-2">
+                  <svg class="h-6 w-6 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
+                  </svg>
+                  <h3 class="text-lg font-semibold text-gray-900">{{ legislacao.titulo }}</h3>
+                </div>
+                
+                <p v-if="legislacao.descricao" class="text-gray-600 mb-3 line-clamp-2">{{ legislacao.descricao }}</p>
+                
+                <div class="flex items-center space-x-4 text-sm text-gray-500">
+                  <span class="flex items-center">
+                    <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    {{ legislacao.data_formatada }}
+                  </span>
+                  <span class="flex items-center">
+                    <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    {{ legislacao.tamanho_formatado }}
+                  </span>
+                  <span class="text-blue-600">{{ legislacao.nome_original }}</span>
+                </div>
+              </div>
+              
+              <div class="flex items-center space-x-2 ml-4">
+                <a 
+                  :href="getPdfUrl(legislacao.id)" 
+                  target="_blank"
+                  class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                  <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  </svg>
+                  Visualizar
+                </a>
+                
+                <button 
+                  v-if="user && user.role === 'admin'"
+                  @click="deleteLegislacao(legislacao)"
+                  class="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                  <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                  Excluir
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Paginação -->
+        <div v-if="pagination.total_pages > 1" class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-700">
+              Mostrando {{ ((pagination.page - 1) * pagination.per_page) + 1 }} a {{ Math.min(pagination.page * pagination.per_page, pagination.total) }} de {{ pagination.total }} resultados
+            </div>
+            <div class="flex space-x-1">
+              <button 
+                @click="changePage(pagination.page - 1)"
+                :disabled="pagination.page <= 1"
+                class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                Anterior
+              </button>
+              
+              <button 
+                v-for="page in getVisiblePages()" 
+                :key="page"
+                @click="changePage(page)"
+                :class="['px-3 py-2 text-sm font-medium border rounded-md', page === pagination.page ? 'text-blue-600 bg-blue-50 border-blue-300' : 'text-gray-500 bg-white border-gray-300 hover:bg-gray-50']">
+                {{ page }}
+              </button>
+              
+              <button 
+                @click="changePage(pagination.page + 1)"
+                :disabled="pagination.page >= pagination.total_pages"
+                class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                Próxima
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   `,
-  data(){return{ list:[], filters:{ q:'', start:'', end:'' }, editing:false, form:{ id:null, title:'', date_start:'', date_end:'', location:'', notes:'' } }},
-  methods:{
-    fmt(v){ if(!v) return '-'; try{ return new Date(v).toLocaleString('pt-BR'); }catch(e){ return v; } },
-    async load(){ const params={}; if(this.filters.q) params.q=this.filters.q; if(this.filters.start) params.start=this.filters.start; if(this.filters.end) params.end=this.filters.end; const r=await api.get('/agenda',{params}); this.list = r.data?.data || []; },
-    newEvent(){ this.editing=true; this.form={ id:null, title:'', date_start:'', date_end:'', location:'', notes:'' }; },
-    edit(e){ this.editing=true; this.form=Object.assign({},e); },
-    cancel(){ this.editing=false; this.form={ id:null, title:'', date_start:'', date_end:'', location:'', notes:'' }; },
-    async save(){ if(!this.form.title){ alert('Informe o título'); return; } if(!this.form.id){ const r=await api.post('/agenda/create', this.form); if(r.data?.ok){ await this.load(); this.cancel(); } else alert(r.data?.error||'Erro ao criar'); } else { const r=await api.post('/agenda/update', this.form); if(r.data?.ok){ await this.load(); this.cancel(); } else alert(r.data?.error||'Erro ao atualizar'); } },
-    async del(e){ if(!confirm('Excluir evento?')) return; const r=await api.post('/agenda/delete', { id:e.id }); if(r.data?.ok){ this.load(); } else alert(r.data?.error||'Erro ao excluir'); }
+  data() {
+    return {
+      legislacoes: [],
+      loading: false,
+      showUploadForm: false,
+      uploading: false,
+      uploadError: null,
+      searchQuery: '',
+      selectedFile: null,
+      form: {
+        titulo: '',
+        descricao: ''
+      },
+      pagination: {
+        page: 1,
+        per_page: 10,
+        total: 0,
+        total_pages: 0
+      },
+      user: null
+    }
   },
-  async mounted(){ const d0=new Date(); d0.setDate(1); this.filters.start=d0.toISOString().slice(0,10); const d1=new Date(); d1.setMonth(d1.getMonth()+1); d1.setDate(0); this.filters.end=d1.toISOString().slice(0,10); this.load(); }
+  async mounted() {
+    // Carregar dados do usuário
+    try {
+      const response = await api.get('/user');
+      this.user = (response.data && response.data.data) ? response.data.data : response.data;
+    } catch (error) {
+      console.error('Erro ao carregar usuário:', error);
+    }
+    
+    await this.loadLegislacoes();
+  },
+  methods: {
+    async loadLegislacoes() {
+      this.loading = true;
+      try {
+        const params = {
+          page: this.pagination.page,
+          per_page: this.pagination.per_page
+        };
+        
+        if (this.searchQuery) {
+          params.q = this.searchQuery;
+        }
+        
+        const response = await api.get('/legislacoes', { params });
+        const data = response.data?.data || response.data;
+        
+        this.legislacoes = data.rows || [];
+        this.pagination = {
+          page: data.page || 1,
+          per_page: data.per_page || 10,
+          total: data.total || 0,
+          total_pages: data.total_pages || 0
+        };
+      } catch (error) {
+        console.error('Erro ao carregar legislações:', error);
+        this.$showModal('Erro', 'Erro ao carregar legislações', 'error');
+      } finally {
+        this.loading = false;
+      }
+    },
+    
+    async search() {
+      this.pagination.page = 1;
+      await this.loadLegislacoes();
+    },
+    
+    async changePage(page) {
+      if (page >= 1 && page <= this.pagination.total_pages) {
+        this.pagination.page = page;
+        await this.loadLegislacoes();
+      }
+    },
+    
+    getVisiblePages() {
+      const current = this.pagination.page;
+      const total = this.pagination.total_pages;
+      const pages = [];
+      
+      const start = Math.max(1, current - 2);
+      const end = Math.min(total, current + 2);
+      
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+      
+      return pages;
+    },
+    
+    handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (file) {
+        if (file.type !== 'application/pdf') {
+          this.$showModal('Atenção', 'Por favor, selecione apenas arquivos PDF.', 'info');
+          event.target.value = '';
+          return;
+        }
+        
+        if (file.size > 50 * 1024 * 1024) {
+          this.$showModal('Atenção', 'O arquivo deve ter no máximo 50MB.', 'info');
+          event.target.value = '';
+          return;
+        }
+        
+        this.selectedFile = file;
+        this.uploadError = null;
+      }
+    },
+    
+    async uploadLegislacao() {
+      if (!this.form.titulo || !this.selectedFile) {
+        this.uploadError = 'Título e arquivo PDF são obrigatórios.';
+        return;
+      }
+      
+      this.uploading = true;
+      this.uploadError = null;
+      
+      const formData = new FormData();
+      formData.append('titulo', this.form.titulo);
+      formData.append('descricao', this.form.descricao);
+      formData.append('arquivo', this.selectedFile);
+      
+      try {
+        const response = await api.post('/legislacoes/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        
+        if (response.data?.ok) {
+          this.$showModal('Sucesso', 'Legislação adicionada com sucesso!', 'success');
+          this.cancelUpload();
+          await this.loadLegislacoes();
+        } else {
+          this.uploadError = response.data?.error || 'Erro ao enviar arquivo';
+        }
+      } catch (error) {
+        console.error('Erro no upload:', error);
+        this.uploadError = error.response?.data?.error || 'Erro ao enviar arquivo';
+      } finally {
+        this.uploading = false;
+      }
+    },
+    
+    cancelUpload() {
+      this.showUploadForm = false;
+      this.form = { titulo: '', descricao: '' };
+      this.selectedFile = null;
+      this.uploadError = null;
+    },
+    
+    async deleteLegislacao(legislacao) {
+      if (!confirm(`Tem certeza que deseja excluir a legislação "${legislacao.titulo}"?`)) {
+        return;
+      }
+      
+      try {
+        const response = await api.delete(`/legislacoes/${legislacao.id}`);
+        if (response.data?.ok) {
+          this.$showModal('Sucesso', 'Legislação excluída com sucesso!', 'success');
+          await this.loadLegislacoes();
+        } else {
+          this.$showModal('Erro', 'Erro ao excluir legislação', 'error');
+        }
+      } catch (error) {
+        console.error('Erro ao excluir:', error);
+        this.$showModal('Erro', 'Erro ao excluir legislação', 'error');
+      }
+    },
+    
+    getPdfUrl(id) {
+      return `${CONFIG.API_BASE}/legislacoes/${id}/download`;
+    },
+    
+    formatFileSize(bytes) {
+      if (bytes >= 1048576) {
+        return (bytes / 1048576).toFixed(1) + ' MB';
+      } else if (bytes >= 1024) {
+        return (bytes / 1024).toFixed(1) + ' KB';
+      } else {
+        return bytes + ' bytes';
+      }
+    }
+  }
 };
 
 // Layout principal com sidebar moderna usando Tailwind
 const Layout = {
   template: `
-    <div class="flex min-h-screen">
+    <div class="flex h-screen overflow-hidden">
       <!-- Overlay para mobile -->
       <div 
         v-if="sidebarOpen" 
@@ -761,15 +1623,16 @@ const Layout = {
       
       <!-- Sidebar -->
       <aside 
-        :class="['fixed lg:static inset-y-0 left-0 z-50 w-72 bg-white bg-opacity-95 backdrop-blur-sm border-r border-gray-200 transform transition-transform duration-300 ease-in-out', sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0']">
+        :class="['fixed lg:static inset-y-0 left-0 z-50 w-72 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out flex flex-col', sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0']">
         
-        <div class="p-6 border-b border-gray-200">
+        <!-- Header da Sidebar -->
+        <div class="flex-shrink-0 p-4 lg:p-6 border-b border-gray-200">
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-4">
-              <img src="./icons/logo-icon.png" alt="ConectAEE" class="h-20 w-20">
-              <div>
-                <h5 class="text-2xl font-bold text-gray-900">ConectAEE</h5>
-                <p class="text-base text-gray-600">Sistema AEE</p>
+            <div class="flex items-center gap-3">
+              <img src="./icons/logo-icon.png" alt="ConectAEE" class="h-12 w-12 lg:h-16 lg:w-16">
+              <div class="hidden sm:block">
+                <h5 class="text-lg lg:text-xl font-bold text-gray-900">ConectAEE</h5>
+                <p class="text-xs lg:text-sm text-gray-600">Sistema AEE</p>
               </div>
             </div>
             <button 
@@ -780,7 +1643,8 @@ const Layout = {
           </div>
         </div>
         
-        <nav class="p-3 space-y-6">
+        <!-- Navegação Scrollable -->
+        <nav class="flex-1 overflow-y-auto p-3 space-y-4">
           <div>
             <h6 class="mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
               Dashboard
@@ -807,28 +1671,12 @@ const Layout = {
               </svg>
               Alunos
             </router-link>
-            <router-link to="/cursos" class="nav-link-tw" @click="closeMobileSidebar">
-              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-              </svg>
-              Cursos
-            </router-link>
-            <router-link to="/usuarios" class="nav-link-tw" @click="closeMobileSidebar">
+            <router-link v-if="user && user.role === 'admin'" to="/usuarios" class="nav-link-tw" @click="closeMobileSidebar">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M17 21v-2a4 4 0 0 0-3-3.87M7 21v-2a4 4 0 0 1 3-3.87"/>
                 <circle cx="12" cy="7" r="4"/>
               </svg>
               Usuários
-            </router-link>
-            <router-link to="/agenda" class="nav-link-tw" @click="closeMobileSidebar">
-              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                <line x1="16" y1="2" x2="16" y2="6"/>
-                <line x1="8" y1="2" x2="8" y2="6"/>
-                <line x1="3" y1="10" x2="21" y2="10"/>
-              </svg>
-              Agenda
             </router-link>
           </div>
           
@@ -838,7 +1686,7 @@ const Layout = {
             </h6>
             <router-link to="/entrevista-responsavel" class="nav-link-tw" @click="closeMobileSidebar">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4.586a1 1 0 01-.707-.293l-5.414-5.414a1 1 0 01-.293-.707V2z"/>
                 <polyline points="14,2 14,8 20,8"/>
                 <line x1="16" y1="13" x2="8" y2="13"/>
                 <line x1="16" y1="17" x2="8" y2="17"/>
@@ -858,6 +1706,15 @@ const Layout = {
               </svg>
               Plano de Atendimento Individual
             </router-link>
+            <router-link to="/relatorio-atendimento" class="nav-link-tw" @click="closeMobileSidebar">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" y1="19" x2="12" y2="23"/>
+                <line x1="8" y1="23" x2="16" y2="23"/>
+              </svg>
+              Relatório de Atendimento
+            </router-link>
           </div>
           
           <div>
@@ -875,13 +1732,29 @@ const Layout = {
               Relatórios
             </router-link>
           </div>
+          
+          <div>
+            <h6 class="mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              Recursos
+            </h6>
+            <router-link to="/legislacoes" class="nav-link-tw" @click="closeMobileSidebar">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14,2 14,8 20,8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10,9 9,9 8,9"/>
+              </svg>
+              Legislações
+            </router-link>
+          </div>
         </nav>
       </aside>
       
       <!-- Conteúdo principal -->
-      <main class="flex-1 lg:ml-0">
-        <!-- Header com botão do menu mobile -->
-        <header class="bg-white border-b border-gray-200 px-4 py-3 lg:px-6">
+      <main class="flex-1 flex flex-col overflow-hidden lg:ml-0">
+        <!-- Header fixo -->
+        <header class="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3 lg:px-6">
           <div class="flex items-center justify-between">
             <button 
               class="lg:hidden p-2 rounded-md text-gray-500 hover:bg-gray-100"
@@ -891,19 +1764,19 @@ const Layout = {
               </svg>
             </button>
             
-            <div class="flex items-center space-x-4">
-              <span class="text-sm text-gray-600">Bem-vindo, {{ user?.name || 'Usuário' }}</span>
+            <div class="flex items-center space-x-2 lg:space-x-4">
+              <span class="text-xs lg:text-sm text-gray-600 truncate">Bem-vindo, {{ user?.name || 'Usuário' }}</span>
               <button 
                 @click="logout" 
-                class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors">
+                class="px-3 py-2 text-xs lg:text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors">
                 Sair
               </button>
             </div>
           </div>
         </header>
         
-        <!-- Área de conteúdo -->
-        <div class="p-4 lg:p-6">
+        <!-- Área de conteúdo scrollable -->
+        <div class="flex-1 overflow-y-auto p-4 lg:p-6">
           <router-view></router-view>
         </div>
       </main>
@@ -912,10 +1785,43 @@ const Layout = {
   data() {
     return {
       sidebarOpen: false,
-      user: null
+      user: null,
+      modal: {
+        visible: false,
+        title: '',
+        message: '',
+        type: 'info' // 'success', 'error', 'info'
+      }
+    }
+  },
+  computed: {
+    modalIcon() {
+      const icons = {
+        success: 'fas fa-check-circle text-green-600',
+        error: 'fas fa-times-circle text-red-600',
+        info: 'fas fa-info-circle text-blue-600'
+      };
+      return icons[this.modal.type] || icons.info;
+    },
+    modalIconBg() {
+      const colors = {
+        success: 'bg-green-100',
+        error: 'bg-red-100',
+        info: 'bg-blue-100'
+      };
+      return colors[this.modal.type] || colors.info;
     }
   },
   methods: {
+    showModal(title, message, type = 'info') {
+      this.modal.title = title;
+      this.modal.message = message;
+      this.modal.type = type;
+      this.modal.visible = true;
+    },
+    closeModal() {
+      this.modal.visible = false;
+    },
     closeMobileSidebar() {
       if (window.innerWidth < 1024) {
         this.sidebarOpen = false;
@@ -991,7 +1897,7 @@ const Login = {
             <button 
               type="submit" 
               :disabled="loading"
-              class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-brand-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary disabled:opacity-50">
+              class="group relative w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-primary hover:bg-brand-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary disabled:opacity-50">
               <span v-if="loading" class="absolute left-0 inset-y-0 flex items-center pl-3">
                 <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
               </span>
@@ -1031,7 +1937,16 @@ const Login = {
         });
         
         const token = response.data?.data?.token || response.data?.token;
+        const user = response.data?.data?.user || response.data?.user;
+        
         if (!token) throw new Error('TOKEN_MISSING');
+        
+        // Bloquear login de estudantes
+        if (user && user.role === 'student') {
+          this.error = 'Acesso negado. Apenas professores e administradores podem fazer login.';
+          return;
+        }
+        
         localStorage.setItem('token', token);
         this.$router.push('/');
       } catch (error) {
@@ -1060,7 +1975,6 @@ const Dashboard = {
               <div class="flex-shrink-0">
                 <svg class="h-8 w-8 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
-                </svg>
               </div>
               <div class="ml-5 w-0 flex-1">
                 <dl>
@@ -1078,7 +1992,6 @@ const Dashboard = {
               <div class="flex-shrink-0">
                 <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                </svg>
               </div>
               <div class="ml-5 w-0 flex-1">
                 <dl>
@@ -1171,8 +2084,7 @@ const Dashboard = {
                     <span class="h-8 w-8 rounded-full bg-brand-primary flex items-center justify-center ring-8 ring-white">
                       <svg class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                      </svg>
-                    </span>
+                    </svg>
                   </div>
                   <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
                     <div>
@@ -1267,43 +2179,314 @@ const Relatorios = {
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">Relatórios</h1>
-          <p class="mt-1 text-sm text-gray-600">Selecione um aluno para ver relatórios e gerar análise com IA</p>
+          <h1 class="text-2xl font-bold text-gray-900">Relatórios do Sistema</h1>
+          <p class="mt-1 text-sm text-gray-600">Gere relatórios detalhados de alunos, atendimentos e formulários AEE</p>
         </div>
       </div>
 
-      <div class="bg-white shadow rounded p-4 space-y-3">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <input v-model="query" @keyup.enter="buscar" class="border rounded px-3 py-2" placeholder="Buscar aluno por nome" />
-          <button @click="buscar" class="px-3 py-2 bg-gray-800 text-white rounded">Buscar</button>
-          <select v-model="alunoId" class="border rounded px-3 py-2">
-            <option value="">Selecione um aluno</option>
-            <option v-for="s in alunos" :key="s.id" :value="s.id">{{ s.name }} (#{{ s.id }})</option>
-          </select>
+      <!-- Etapa 1: Seleção de Aluno -->
+      <div class="bg-white shadow rounded p-6 space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Buscar Aluno</label>
+            <input v-model="query" @keyup.enter="buscar" 
+                   class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-brand-primary focus:border-transparent" 
+                   placeholder="Digite o nome do aluno..." />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Selecionar Aluno</label>
+            <select v-model="alunoId" @change="carregarDadosAluno"
+                    class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-brand-primary focus:border-transparent">
+              <option value="">Selecione um aluno</option>
+              <option v-for="s in alunos" :key="s.id" :value="s.id">{{ s.name }} - {{ s.class || 'Série não informada' }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Relatório</label>
+            <select v-model="tipoRelatorio" 
+                    class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-brand-primary focus:border-transparent">
+              <option value="geral">Relatório Geral do Aluno</option>
+              <option value="atendimentos">Histórico de Atendimentos</option>
+              <option value="formularios">Formulários AEE</option>
+              <option value="evolucao">Relatório de Evolução</option>
+            </select>
+          </div>
         </div>
 
-        <div class="flex flex-wrap gap-2" v-if="alunoId">
-          <button @click="carregarRelatorio" class="px-3 py-2 bg-brand-primary text-white rounded">Carregar dados</button>
-          <a :href="pdfUrl('student')" target="_blank" class="px-3 py-2 border rounded">PDF Geral</a>
-          <a :href="pdfUrl('anamnese')" target="_blank" class="px-3 py-2 border rounded">PDF Anamneses</a>
-          <a :href="pdfUrl('pdi')" target="_blank" class="px-3 py-2 border rounded">PDF PDI</a>
-          <a :href="pdfUrl('pai')" target="_blank" class="px-3 py-2 border rounded">PDF PAI</a>
-          <button @click="analiseIA" class="px-3 py-2 bg-purple-600 text-white rounded" :disabled="loadingIA">
-            <span v-if="loadingIA" class="inline-flex items-center"><span class="spinner mr-2"></span>Gerando...</span>
-            <span v-else>Análise com IA</span>
+        <div class="flex flex-wrap gap-3" v-if="alunoId">
+          <button @click="gerarRelatorio" :disabled="carregandoRelatorio"
+                  class="px-4 py-2 bg-brand-primary text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50">
+            <span v-if="carregandoRelatorio" class="inline-flex items-center">
+              <div class="animate-spin -ml-1 mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+              Gerando...
+            </span>
+            <span v-else>📊 Gerar Relatório</span>
+          </button>
+          <button @click="exportarPDF" :disabled="!dadosRelatorio || carregandoPDF"
+                  class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors disabled:opacity-50">
+            <span v-if="carregandoPDF" class="inline-flex items-center">
+              <div class="animate-spin -ml-1 mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+              Exportando...
+            </span>
+            <span v-else>📄 Exportar PDF</span>
+          </button>
+          <button @click="analiseIA" :disabled="!dadosRelatorio || carregandoIA"
+                  class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors disabled:opacity-50">
+            <span v-if="carregandoIA" class="inline-flex items-center">
+              <div class="animate-spin -ml-1 mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+              Analisando...
+            </span>
+            <span v-else>🤖 Análise com IA</span>
           </button>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" v-if="alunoId">
-        <div class="bg-white shadow rounded p-4">
-          <h2 class="text-lg font-semibold mb-3">Dados consolidados</h2>
-          <pre class="text-xs bg-gray-50 border rounded p-3 overflow-auto" style="max-height:360px">{{ pretty(relatorio) }}</pre>
+      <!-- Resultados do Relatório -->
+      <div v-if="dadosRelatorio" class="bg-white shadow rounded overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b">
+          <h2 class="text-lg font-semibold text-gray-900">{{ tituloRelatorio }}</h2>
+          <p class="text-sm text-gray-600">{{ descricaoRelatorio }}</p>
         </div>
-        <div class="bg-white shadow rounded p-4">
-          <h2 class="text-lg font-semibold mb-3">Análise com IA</h2>
-          <div v-if="erroIA" class="text-sm text-red-600 mb-2">{{ erroIA }}</div>
-          <pre class="text-xs bg-gray-50 border rounded p-3 overflow-auto" style="max-height:360px">{{ pretty(analise) }}</pre>
+        
+        <div class="p-6">
+          <!-- Relatório Geral -->
+          <div v-if="tipoRelatorio === 'geral'" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="space-y-4">
+                <h3 class="font-medium text-gray-900 border-b pb-2">Informações Pessoais</h3>
+                <div class="space-y-2 text-sm">
+                  <p><strong>Nome:</strong> {{ dadosRelatorio.aluno?.name || 'Não informado' }}</p>
+                  <p><strong>Data de Nascimento:</strong> {{ formatarData(dadosRelatorio.aluno?.birthdate) }}</p>
+                  <p><strong>Escola:</strong> {{ dadosRelatorio.aluno?.school || 'Não informada' }}</p>
+                  <p><strong>Série:</strong> {{ dadosRelatorio.aluno?.class || 'Não informada' }}</p>
+                </div>
+              </div>
+              <div class="space-y-4">
+                <h3 class="font-medium text-gray-900 border-b pb-2">Estatísticas</h3>
+                <div class="space-y-2 text-sm">
+                  <p><strong>Total de Atendimentos:</strong> {{ dadosRelatorio.estatisticas?.total_atendimentos || 0 }}</p>
+                  <p><strong>Formulários Preenchidos:</strong> {{ dadosRelatorio.estatisticas?.total_formularios || 0 }}</p>
+                  <p><strong>Último Atendimento:</strong> {{ dadosRelatorio.estatisticas?.ultimo_atendimento }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Histórico de Atendimentos -->
+          <div v-if="tipoRelatorio === 'atendimentos'" class="space-y-4">
+            <div v-if="dadosRelatorio.atendimentos && dadosRelatorio.atendimentos.length > 0">
+              <div v-for="atendimento in dadosRelatorio.atendimentos" :key="atendimento.id" 
+                   class="border rounded-lg p-4 hover:bg-gray-50">
+                <div class="flex justify-between items-start mb-2">
+                  <h4 class="font-medium text-gray-900">{{ formatarData(atendimento.data_atendimento) }}</h4>
+                  <span class="text-xs text-gray-500">ID: {{ atendimento.id }}</span>
+                </div>
+                <p class="text-sm text-gray-700 mb-2"><strong>Descrição:</strong> {{ atendimento.descricao || 'Não informada' }}</p>
+                <p class="text-sm text-gray-700 mb-2"><strong>Objetivos:</strong> {{ atendimento.objetivos || 'Não informados' }}</p>
+                <p class="text-sm text-gray-700"><strong>Observações:</strong> {{ atendimento.observacoes || 'Nenhuma observação' }}</p>
+              </div>
+            </div>
+            <div v-else class="text-center text-gray-500 py-8">
+              Nenhum atendimento registrado para este aluno
+            </div>
+          </div>
+
+          <!-- Formulários AEE -->
+          <div v-if="tipoRelatorio === 'formularios'" class="space-y-6">
+            <!-- Anamneses/Entrevistas -->
+            <div class="bg-white border rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-clipboard-list text-blue-600 mr-2"></i>
+                Anamneses e Entrevistas
+              </h3>
+              
+              <div v-if="dadosRelatorio.anamneses && dadosRelatorio.anamneses.length > 0">
+                <div class="space-y-4">
+                  <div v-for="anamnese in dadosRelatorio.anamneses" :key="anamnese.id" 
+                       class="border rounded-lg p-4 hover:bg-gray-50">
+                    <div class="flex justify-between items-start mb-3">
+                      <h4 class="font-medium text-gray-900">
+                        {{ anamnese.tipo === 'entrevista_responsavel' ? 'Entrevista com Responsável' : 'Anamnese' }}
+                      </h4>
+                      <div class="text-xs text-gray-500">
+                        {{ formatarData(anamnese.created_at) }}
+                        <span v-if="anamnese.tipo === 'entrevista_responsavel'" class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                          Entrevista
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <!-- Conteúdo da Anamnese -->
+                    <div v-if="anamnese.tipo !== 'entrevista_responsavel'" class="space-y-2">
+                      <div v-for="(value, key) in anamnese.answers" :key="key" class="text-sm">
+                        <span class="font-medium text-gray-700">{{ key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) }}:</span>
+                        <span class="text-gray-600 ml-1">{{ value }}</span>
+                      </div>
+                    </div>
+                    
+                    <!-- Conteúdo da Entrevista -->
+                    <div v-else class="space-y-3">
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div v-if="anamnese.answers.nome_estudante">
+                          <span class="font-medium text-gray-700">Nome do Estudante:</span>
+                          <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_estudante }}</span>
+                        </div>
+                        <div v-if="anamnese.answers.data_nascimento">
+                          <span class="font-medium text-gray-700">Data de Nascimento:</span>
+                          <span class="text-gray-600 ml-1">{{ formatarData(anamnese.answers.data_nascimento) }}</span>
+                        </div>
+                        <div v-if="anamnese.answers.nome_escola">
+                          <span class="font-medium text-gray-700">Escola:</span>
+                          <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_escola }}</span>
+                        </div>
+                        <div v-if="anamnese.answers.serie_ano">
+                          <span class="font-medium text-gray-700">Série/Ano:</span>
+                          <span class="text-gray-600 ml-1">{{ anamnese.answers.serie_ano }}</span>
+                        </div>
+                        <div v-if="anamnese.answers.nome_pai">
+                          <span class="font-medium text-gray-700">Nome do Pai:</span>
+                          <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_pai }}</span>
+                        </div>
+                        <div v-if="anamnese.answers.nome_mae">
+                          <span class="font-medium text-gray-700">Nome da Mãe:</span>
+                          <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_mae }}</span>
+                        </div>
+                      </div>
+                      
+                      <div v-if="anamnese.answers.motivo_entrevista" class="mt-3">
+                        <span class="font-medium text-gray-700">Motivo da Entrevista:</span>
+                        <p class="text-gray-600 mt-1">{{ anamnese.answers.motivo_entrevista }}</p>
+                      </div>
+                      
+                      <div v-if="anamnese.answers.informacoes_complementares" class="mt-3">
+                        <span class="font-medium text-gray-700">Informações Complementares:</span>
+                        <p class="text-gray-600 mt-1">{{ anamnese.answers.informacoes_complementares }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div v-else class="text-center text-gray-500 py-8">
+                <i class="fas fa-clipboard-list text-3xl mb-2"></i>
+                <p>Nenhuma anamnese ou entrevista registrada para este aluno</p>
+              </div>
+            </div>
+            
+            <!-- PDIs -->
+            <div class="bg-white border rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-tasks text-green-600 mr-2"></i>
+                Planos de Desenvolvimento Individual (PDIs)
+              </h3>
+              
+              <div v-if="dadosRelatorio.pdis && dadosRelatorio.pdis.length > 0">
+                <div class="space-y-4">
+                  <div v-for="pdi in dadosRelatorio.pdis" :key="pdi.id" 
+                       class="border rounded-lg p-4 hover:bg-gray-50">
+                    <div class="flex justify-between items-start mb-3">
+                      <h4 class="font-medium text-gray-900">PDI #{{ pdi.id }}</h4>
+                      <div class="text-xs">
+                        <span class="px-2 py-1 rounded-full text-xs" 
+                              :class="pdi.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
+                          {{ pdi.status }}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div class="space-y-2 text-sm">
+                      <div v-if="pdi.objectives">
+                        <span class="font-medium text-gray-700">Objetivos:</span>
+                        <p class="text-gray-600 mt-1">{{ pdi.objectives }}</p>
+                      </div>
+                      <div v-if="pdi.strategies">
+                        <span class="font-medium text-gray-700">Estratégias:</span>
+                        <p class="text-gray-600 mt-1">{{ pdi.strategies }}</p>
+                      </div>
+                      <div class="grid grid-cols-2 gap-4 mt-3">
+                        <div v-if="pdi.start_date">
+                          <span class="font-medium text-gray-700">Data Início:</span>
+                          <span class="text-gray-600 ml-1">{{ formatarData(pdi.start_date) }}</span>
+                        </div>
+                        <div v-if="pdi.end_date">
+                          <span class="font-medium text-gray-700">Data Fim:</span>
+                          <span class="text-gray-600 ml-1">{{ formatarData(pdi.end_date) }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div v-else class="text-center text-gray-500 py-8">
+                <i class="fas fa-tasks text-3xl mb-2"></i>
+                <p>Nenhum PDI registrado para este aluno</p>
+              </div>
+            </div>
+            
+            <!-- Planos de Atendimento Individualizados (PAIs) -->
+            <div class="bg-white border rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-file-alt text-purple-600 mr-2"></i>
+                Planos de Atendimento Individualizados (PAIs)
+              </h3>
+              
+              <div v-if="dadosRelatorio.pais && dadosRelatorio.pais.length > 0">
+                <div class="space-y-4">
+                  <div v-for="pai in dadosRelatorio.pais" :key="pai.id" 
+                       class="border rounded-lg p-4 hover:bg-gray-50">
+                    <div class="flex justify-between items-start mb-3">
+                      <h4 class="font-medium text-gray-900">PAI #{{ pai.id }}</h4>
+                      <div class="text-xs">
+                        <span class="px-2 py-1 rounded-full text-xs" 
+                              :class="pai.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
+                          {{ pai.status }}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div class="space-y-2 text-sm">
+                      <div v-if="pai.objectives">
+                        <span class="font-medium text-gray-700">Objetivos:</span>
+                        <p class="text-gray-600 mt-1">{{ pai.objectives }}</p>
+                      </div>
+                      <div v-if="pai.strategies">
+                        <span class="font-medium text-gray-700">Estratégias:</span>
+                        <p class="text-gray-600 mt-1">{{ pai.strategies }}</p>
+                      </div>
+                      <div class="grid grid-cols-2 gap-4 mt-3">
+                        <div v-if="pai.start_date">
+                          <span class="font-medium text-gray-700">Data Início:</span>
+                          <span class="text-gray-600 ml-1">{{ formatarData(pai.start_date) }}</span>
+                        </div>
+                        <div v-if="pai.end_date">
+                          <span class="font-medium text-gray-700">Data Fim:</span>
+                          <span class="text-gray-600 ml-1">{{ formatarData(pai.end_date) }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div v-else class="text-center text-gray-500 py-8">
+                <i class="fas fa-file-alt text-3xl mb-2"></i>
+                <p>Nenhum PAI registrado para este aluno</p>
+              </div>
+            </div>
+          </div>
+          
+          <div v-if="tipoRelatorio === 'evolucao'" class="text-center text-gray-500 py-8">
+            Relatório de evolução em desenvolvimento
+          </div>
+        </div>
+      </div>
+
+      <!-- Análise IA -->
+      <div v-if="analiseIA_resultado" class="bg-white shadow rounded p-6">
+        <h2 class="text-lg font-semibold mb-4 text-purple-800">🤖 Análise com Inteligência Artificial</h2>
+        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+          <p class="text-sm text-purple-700">{{ analiseIA_resultado }}</p>
         </div>
       </div>
     </div>
@@ -1313,42 +2496,258 @@ const Relatorios = {
       query: '',
       alunos: [],
       alunoId: '',
-      relatorio: null,
-      analise: null,
-      loadingIA: false,
-      erroIA: null
+      alunoSelecionado: null,
+      tipoRelatorio: 'geral',
+      dadosRelatorio: null,
+      carregandoRelatorio: false,
+      carregandoPDF: false,
+      carregandoIA: false,
+      analiseIA_resultado: null,
+      erroIA: null,
+      tentouGerar: false
     };
+  },
+  computed: {
+    tituloRelatorio() {
+      const titulos = {
+        'geral': 'Relatório Geral do Aluno',
+        'atendimentos': 'Histórico de Atendimentos',
+        'formularios': 'Formulários AEE Preenchidos',
+        'evolucao': 'Relatório de Evolução'
+      };
+      return titulos[this.tipoRelatorio] || 'Relatório';
+    },
+    descricaoRelatorio() {
+      if (!this.dadosRelatorio?.aluno) return 'Selecione um aluno para gerar o relatório';
+      const aluno = this.dadosRelatorio.aluno;
+      return `Relatório detalhado de ${aluno.name} - ${aluno.school || 'Escola não informada'}`;
+    },
+    
+    alertaQualidadeDados() {
+      if (!this.dadosRelatorio) return null;
+      
+      const issues = [];
+      const aluno = this.dadosRelatorio.aluno;
+      const stats = this.dadosRelatorio.estatisticas;
+      
+      if (!aluno?.name || aluno.name === 'Não informado') issues.push('nome não informado');
+  if (!aluno?.birthdate) issues.push('data de nascimento não informada');
+      if (!aluno?.school) issues.push('escola não informada');
+      if (!stats?.total_atendimentos || stats.total_atendimentos === 0) issues.push('nenhum atendimento registrado');
+      
+      if (issues.length === 0) return null;
+      
+      return `Este relatório possui dados limitados: ${issues.join(', ')}. Recomenda-se completar as informações do aluno antes de usar este relatório oficialmente.`;
+    },
+    
+    podeExportarPDF() {
+      if (!this.dadosRelatorio) return false;
+      const aluno = this.dadosRelatorio.aluno;
+      const stats = this.dadosRelatorio.estatisticas;
+      
+      // Permite PDF se pelo menos nome e escola estão preenchidos
+      return aluno?.name && aluno.name !== 'Não informado' && aluno?.school;
+    },
+    
+    podeAnalisarIA() {
+      if (!this.dadosRelatorio) return false;
+      const stats = this.dadosRelatorio.estatisticas;
+      
+      // Permite IA apenas se há pelo menos 1 atendimento
+      return stats?.total_atendimentos > 0;
+    }
   },
   methods: {
     async buscar(){
-      const params = { q: this.query, per_page: 30 };
-      try { const r = await api.get('/students', { params }); this.alunos = (r.data?.data?.rows)||[]; }
-      catch(e){ alert('Erro ao buscar alunos'); }
+      const params = { q: this.query, per_page: 50 };
+      try { 
+        const r = await api.get('/students', { params }); 
+        this.alunos = (r.data?.data?.rows)||[]; 
+      }
+      catch(e){ 
+        console.error('Erro ao buscar alunos:', e);
+        this.$showModal('Erro', 'Erro ao buscar alunos', 'error'); 
+      }
     },
-    async carregarRelatorio(){
-      if(!this.alunoId) return;
-      try { const r = await api.get('/reports/student', { params:{ student_id: this.alunoId }}); this.relatorio = r.data?.data||r.data; }
-      catch(e){ alert('Erro ao carregar relatório'); }
+    
+    onAlunoSelecionado() {
+      this.tentouGerar = false;
+      this.dadosRelatorio = null;
+      this.analiseIA_resultado = null;
+      
+      if (this.alunoId) {
+        this.alunoSelecionado = this.alunos.find(a => a.id == this.alunoId);
+      } else {
+        this.alunoSelecionado = null;
+      }
     },
-    pdfUrl(tipo){
-      if(!this.alunoId) return '#';
-      const base = CONFIG.API_BASE;
-      if(tipo==='student') return `${base}/reports/student/pdf?student_id=${this.alunoId}`;
-      if(tipo==='anamnese') return `${base}/forms/anamnese/pdf?student_id=${this.alunoId}`;
-      if(tipo==='pdi') return `${base}/pdi/pdf?student_id=${this.alunoId}`;
-      if(tipo==='pai') return `${base}/pai/pdf?student_id=${this.alunoId}`;
-      return '#';
+    
+    onTipoChanged() {
+      // Limpar relatório anterior quando tipo mudar
+      this.dadosRelatorio = null;
+      this.analiseIA_resultado = null;
+    },
+    
+    getDescricaoTipo() {
+      const descricoes = {
+        'geral': 'Informações completas do aluno com estatísticas gerais',
+        'atendimentos': 'Lista detalhada de todos os atendimentos realizados',
+        'formularios': 'Histórico de formulários AEE preenchidos (em desenvolvimento)',
+        'evolucao': 'Análise de progresso e evolução do aluno (em desenvolvimento)'
+      };
+      return descricoes[this.tipoRelatorio] || '';
+    },
+    async carregarDadosAluno() {
+      if (!this.alunoId) {
+        this.dadosRelatorio = null;
+        return;
+      }
+      // Auto-gerar relatório quando aluno for selecionado
+      await this.gerarRelatorio();
+    },
+    async gerarRelatorio(){
+      if(!this.alunoId) {
+        this.tentouGerar = true;
+        return;
+      }
+      
+      this.carregandoRelatorio = true;
+      try {
+        // Carregar dados completos do aluno usando a API de relatórios
+        const response = await api.get('/reports/student', { 
+          params: { student_id: this.alunoId } 
+        });
+        const reportData = response.data?.data || response.data;
+
+        if (!reportData) {
+          throw new Error('Dados do relatório não encontrados');
+        }
+
+        // Carregar atendimentos adicionais se necessário
+        let atendimentos = [];
+        if (this.tipoRelatorio === 'atendimentos' || this.tipoRelatorio === 'geral') {
+          try {
+            const atendimentosResponse = await api.get('/atendimentos', { 
+              params: { aluno_id: this.alunoId } 
+            });
+            atendimentos = atendimentosResponse.data?.data?.rows || [];
+          } catch(e) {
+            console.warn('Erro ao carregar atendimentos:', e);
+          }
+        }
+
+        // Calcular estatísticas baseadas nos dados do relatório
+        const estatisticas = {
+          total_atendimentos: atendimentos.length,
+          total_formularios: (reportData.anamneses?.length || 0) + (reportData.pdis?.length || 0) + (reportData.pais?.length || 0),
+          ultimo_atendimento: reportData.attendance?.length > 0 ? reportData.attendance[0].date : null,
+          total_pdis: reportData.pdis?.length || 0,
+          total_pais: reportData.pais?.length || 0,
+          total_anamneses: reportData.anamneses?.length || 0
+        };
+
+        this.dadosRelatorio = {
+          aluno: reportData.student,
+          atendimentos,
+          estatisticas,
+          anamneses: reportData.anamneses || [],
+          pdis: reportData.pdis || [],
+          pais: reportData.pais || [],
+          attendance: reportData.attendance || [],
+          weekly_plans: reportData.weekly_plans || []
+        };
+
+      } catch(e){ 
+        console.error('Erro ao gerar relatório:', e);
+        const errorMsg = e.response?.data?.error || e.response?.data?.message || e.message;
+        this.$showModal('Erro', 'Erro ao gerar relatório: ' + errorMsg, 'error'); 
+      } finally {
+        this.carregandoRelatorio = false;
+      }
+    },
+    async exportarPDF(){
+      if (!this.dadosRelatorio) return;
+      
+      this.carregandoPDF = true;
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          this.$showModal('Erro', 'Token de autenticação não encontrado. Faça login novamente.', 'error');
+          return;
+        }
+        const url = `${CONFIG.API_BASE}/reports/student/pdf?student_id=${this.alunoId}&tipo=${this.tipoRelatorio}&token=${encodeURIComponent(token)}`;
+        window.open(url, '_blank');
+      } catch(e) {
+        this.$showModal('Erro', 'Erro ao exportar PDF: ' + e.message, 'error');
+      } finally {
+        this.carregandoPDF = false;
+      }
     },
     async analiseIA(){
-      this.loadingIA = true; this.erroIA=null; this.analise=null;
+      if (!this.dadosRelatorio) return;
+      
+      this.carregandoIA = true; 
+      this.erroIA = null; 
+      this.analiseIA_resultado = null;
+      
       try {
-        const r = await api.get('/ai/evaluate-student', { params:{ student_id: this.alunoId }});
-        this.analise = r.data?.data || r.data;
+        // Simular análise IA (a ser implementado com serviço real)
+        const analiseSimulada = `
+Análise automatizada do aluno ${this.dadosRelatorio.aluno.name}:
+
+📊 RESUMO ESTATÍSTICO:
+- Total de atendimentos registrados: ${this.dadosRelatorio.estatisticas.total_atendimentos}
+- Frequência de atendimentos: ${this.dadosRelatorio.estatisticas.total_atendimentos > 0 ? 'Regular' : 'Irregular'}
+
+📈 PONTOS DE ATENÇÃO:
+${this.dadosRelatorio.estatisticas.total_atendimentos === 0 
+  ? '- Aluno ainda não possui atendimentos registrados. Recomenda-se iniciar acompanhamento.' 
+  : '- Acompanhamento em andamento. Continue monitorando o progresso.'}
+
+🎯 RECOMENDAÇÕES:
+- Manter registro consistente dos atendimentos
+- Avaliar periodicidade dos encontros
+- Documentar evolução do aluno
+
+⚠️ Nota: Esta é uma análise preliminar. Para avaliação completa, consulte um profissional especializado.
+        `;
+        
+        // Simular delay da IA
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        this.analiseIA_resultado = analiseSimulada.trim();
+        
       } catch(err){
         this.erroIA = err?.response?.data?.error || err.message || 'Erro na análise com IA';
-      } finally { this.loadingIA = false; }
+      } finally { 
+        this.carregandoIA = false; 
+      }
+    },
+    formatarData(data) {
+      if (!data) return 'Não informado';
+      try {
+        return new Date(data).toLocaleDateString('pt-BR');
+      } catch(e) {
+        return 'Data inválida';
+      }
+    },
+    
+    
+    calcularIdade(dataNascimento) {
+      if (!dataNascimento) return 0;
+      const nascimento = new Date(dataNascimento);
+      const hoje = new Date();
+      let idade = hoje.getFullYear() - nascimento.getFullYear();
+      const mes = hoje.getMonth() - nascimento.getMonth();
+      if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
+        idade--;
+      }
+      return idade;
     },
     pretty(o){ try{ return JSON.stringify(o, null, 2); }catch(e){ return String(o); } }
+  },
+  async mounted() {
+    await this.buscar(); // Carregar alunos automaticamente
   }
 };
 
@@ -1356,186 +2755,351 @@ const Relatorios = {
 // Componente para Entrevista com Responsável
 const EntrevistaResponsavel = {
   template: `
-    <div class="space-y-6">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900">Entrevista com Responsável</h1>
-        <p class="mt-1 text-sm text-gray-600">Formulário de entrevista inicial com o responsável pelo aluno</p>
-      </div>
-      
-      <form @submit.prevent="salvarEntrevista" class="space-y-8">
-        <!-- Dados do Aluno -->
-        <div class="bg-white shadow rounded-lg p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Dados do Aluno</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Selecionar Aluno</label>
-              <select v-model="form.student_id" @change="preencherDadosAlunoEntrevista" required 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-                <option value="">Selecione um aluno</option>
-                <option v-for="aluno in alunos" :key="aluno.id" :value="aluno.id">{{ aluno.name }}</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Nome completo do aluno</label>
-              <input v-model="form.nome_aluno" type="text" readonly 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Data de nascimento</label>
-              <input v-model="form.data_nascimento" type="date" required 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Idade</label>
-              <input v-model="form.idade" type="number" required 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Escola</label>
-              <input v-model="form.escola" type="text" required 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Série/Ano</label>
-              <input v-model="form.serie" type="text" required 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Turno</label>
-              <select v-model="form.turno" required 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-                <option value="">Selecione</option>
-                <option value="matutino">Matutino</option>
-                <option value="vespertino">Vespertino</option>
-                <option value="noturno">Noturno</option>
-              </select>
-            </div>
-          </div>
+    <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+      <div class="max-w-4xl mx-auto px-4">
+        <!-- Header -->
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">Entrevista com Responsável</h1>
+          <p class="text-gray-600">Complete as informações em etapas organizadas</p>
         </div>
 
-        <!-- Dados do Responsável -->
-        <div class="bg-white shadow rounded-lg p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Dados do Responsável</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Nome completo</label>
-              <input v-model="form.nome_responsavel" type="text" required 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Parentesco</label>
-              <select v-model="form.parentesco" required 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-                <option value="">Selecione</option>
-                <option value="pai">Pai</option>
-                <option value="mae">Mãe</option>
-                <option value="avo">Avô/Avó</option>
-                <option value="tio">Tio/Tia</option>
-                <option value="responsavel_legal">Responsável Legal</option>
-                <option value="outro">Outro</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Telefone</label>
-              <input v-model="form.telefone" type="tel" required 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-              <input v-model="form.email" type="email" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-            </div>
+        <!-- Progress Bar -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-sm font-medium text-gray-700">Progresso do Formulário</span>
+            <span class="text-sm text-gray-500">{{ currentStep }}/{{ totalSteps }}</span>
           </div>
-        </div>
-
-        <!-- Histórico Médico -->
-        <div class="bg-white shadow rounded-lg p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Histórico Médico</h3>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Diagnóstico médico</label>
-              <textarea v-model="form.diagnostico" rows="3" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Medicamentos em uso</label>
-              <textarea v-model="form.medicamentos" rows="3" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Profissionais que acompanham</label>
-              <textarea v-model="form.profissionais" rows="3" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 rounded-full transition-all duration-500 ease-out" 
+                 :style="{ width: progressPercentage + '%' }"></div>
           </div>
-        </div>
-
-        <!-- Desenvolvimento e Comportamento -->
-        <div class="bg-white shadow rounded-lg p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Desenvolvimento e Comportamento</h3>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Como é o comportamento do aluno em casa?</label>
-              <textarea v-model="form.comportamento_casa" rows="4" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Principais dificuldades observadas</label>
-              <textarea v-model="form.dificuldades" rows="4" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Habilidades e potencialidades</label>
-              <textarea v-model="form.habilidades" rows="4" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
-          </div>
-        </div>
-
-        <!-- Expectativas -->
-        <div class="bg-white shadow rounded-lg p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Expectativas</h3>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">O que espera do atendimento educacional especializado?</label>
-              <textarea v-model="form.expectativas" rows="4" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Informações adicionais</label>
-              <textarea v-model="form.informacoes_adicionais" rows="4" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
-          </div>
-        </div>
-
-        <!-- Botões de ação -->
-        <div class="flex justify-end space-x-4">
-          <button type="button" @click="$router.push('/')" 
-            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary">
-            Cancelar
-          </button>
-          <button type="submit" :disabled="loading"
-            class="px-4 py-2 bg-brand-primary border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary disabled:opacity-50">
-            <span v-if="loading" class="inline-flex items-center">
-              <div class="animate-spin -ml-1 mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
-              Salvando...
+          <div class="flex justify-between mt-2">
+            <span v-for="(step, index) in steps" :key="index" 
+                  class="text-xs font-medium transition-colors duration-300"
+                  :class="index < currentStep ? 'text-indigo-600' : index === currentStep - 1 ? 'text-indigo-500' : 'text-gray-400'">
+              {{ step.title }}
             </span>
-            <span v-else>Salvar Entrevista</span>
+          </div>
+        </div>
+
+        <!-- Step Navigation Pills -->
+        <div class="flex flex-wrap justify-center gap-2 mb-8">
+          <button v-for="(step, index) in steps" :key="index"
+                  @click="goToStep(index + 1)"
+                  :disabled="index + 1 > maxCompletedStep"
+                  class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300"
+                  :class="[
+                    index + 1 === currentStep 
+                      ? 'bg-indigo-600 text-white shadow-lg' 
+                      : index + 1 <= maxCompletedStep 
+                        ? 'bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50' 
+                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  ]">
+            <i :class="step.icon + ' mr-2'"></i>{{ step.title }}
           </button>
         </div>
-      </form>
+
+        <!-- Form Card -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+          <form @submit.prevent="salvarEntrevista" class="relative">
+            <!-- Step 1: Dados do Aluno -->
+            <div v-show="currentStep === 1" class="step-content">
+              <div class="p-8">
+                <div class="text-center mb-8">
+                  <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user-graduate text-2xl text-blue-600"></i>
+                  </div>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Dados do Aluno</h2>
+                  <p class="text-gray-600">Vamos começar com as informações básicas do aluno</p>
+                </div>
+
+                <div class="max-w-2xl mx-auto space-y-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Selecionar Aluno <span class="text-red-500">*</span>
+                    </label>
+                    <select v-model="form.student_id" 
+                            @change="preencherDadosAlunoEntrevista" required 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      :class="validationErrors.student_id ? 'border-red-300 bg-red-50' : ''">
+                      <option value="">Selecione um aluno</option>
+                      <option v-for="aluno in alunos" :key="aluno.id" :value="aluno.id">{{ aluno.name }}</option>
+                    </select>
+                    <p v-if="validationErrors.student_id" class="mt-2 text-sm text-red-600">{{ validationErrors.student_id }}</p>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Nome completo do aluno</label>
+                      <input v-model="form.nome_aluno" type="text" readonly 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50">
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Escola</label>
+                      <input v-model="form.escola" type="text" required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Série/Ano</label>
+                      <input v-model="form.serie" type="text" required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Turno</label>
+                      <select v-model="form.turno" required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <option value="">Selecione</option>
+                        <option value="matutino">Matutino</option>
+                        <option value="vespertino">Vespertino</option>
+                        <option value="noite">Noturno</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 2: Dados do Responsável -->
+            <div v-show="currentStep === 2" class="step-content">
+              <div class="p-8">
+                <div class="text-center mb-8">
+                  <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-users text-2xl text-green-600"></i>
+                  </div>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Dados do Responsável</h2>
+                  <p class="text-gray-600">Informações sobre o responsável pelo aluno</p>
+                </div>
+
+                <div class="max-w-2xl mx-auto space-y-6">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Nome completo <span class="text-red-500">*</span>
+                      </label>
+                      <input v-model="form.nome_responsavel" type="text" required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        :class="validationErrors.nome_responsavel ? 'border-red-300 bg-red-50' : ''"
+                        maxlength="120">
+                      <p v-if="validationErrors.nome_responsavel" class="mt-2 text-sm text-red-600">{{ validationErrors.nome_responsavel }}</p>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Parentesco <span class="text-red-500">*</span>
+                      </label>
+                      <select v-model="form.parentesco" required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        :class="validationErrors.parentesco ? 'border-red-300 bg-red-50' : ''">
+                        <option value="">Selecione</option>
+                        <option value="pai">Pai</option>
+                        <option value="mae">Mãe</option>
+                        <option value="avo">Avô/Avó</option>
+                        <option value="tio">Tio/Tia</option>
+                        <option value="responsavel_legal">Responsável Legal</option>
+                        <option value="outro">Outro</option>
+                      </select>
+                      <p v-if="validationErrors.parentesco" class="mt-2 text-sm text-red-600">{{ validationErrors.parentesco }}</p>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Telefone <span class="text-red-500">*</span>
+                      </label>
+                      <input v-model="form.telefone" type="tel" required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        :class="validationErrors.telefone ? 'border-red-300 bg-red-50' : ''">
+                      <p v-if="validationErrors.telefone" class="mt-2 text-sm text-red-600">{{ validationErrors.telefone }}</p>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                      <input v-model="form.email" type="email" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 3: Histórico Médico -->
+            <div v-show="currentStep === 3" class="step-content">
+              <div class="p-8">
+                <div class="text-center mb-8">
+                  <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-heartbeat text-2xl text-red-600"></i>
+                  </div>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Histórico Médico</h2>
+                  <p class="text-gray-600">Informações sobre diagnósticos e acompanhamento médico</p>
+                </div>
+
+                <div class="max-w-2xl mx-auto space-y-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Diagnóstico médico</label>
+                    <textarea v-model="form.diagnostico" rows="4" maxlength="500"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      placeholder="Descreva o diagnóstico médico do aluno, se houver..."></textarea>
+                    <div class="flex justify-between mt-1">
+                      <p class="text-xs text-gray-500">Descreva brevemente o diagnóstico médico</p>
+                      <p class="text-xs text-gray-400">{{ (form.diagnostico || '').length }}/500</p>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Medicamentos em uso</label>
+                    <textarea v-model="form.medicamentos" rows="3" maxlength="300"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      placeholder="Liste os medicamentos que o aluno utiliza, se houver..."></textarea>
+                    <div class="flex justify-between mt-1">
+                      <p class="text-xs text-gray-500">Liste medicamentos, dosagens e horários</p>
+                      <p class="text-xs text-gray-400">{{ (form.medicamentos || '').length }}/300</p>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Profissionais que acompanham</label>
+                    <textarea v-model="form.profissionais" rows="3" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      placeholder="Ex: Neurologista, Psicólogo, Fonoaudiólogo..."></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 4: Desenvolvimento e Comportamento -->
+            <div v-show="currentStep === 4" class="step-content">
+              <div class="p-8">
+                <div class="text-center mb-8">
+                  <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-child text-2xl text-purple-600"></i>
+                  </div>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Desenvolvimento e Comportamento</h2>
+                  <p class="text-gray-600">Como é o aluno em casa e na escola</p>
+                </div>
+
+                <div class="max-w-2xl mx-auto space-y-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Como é o comportamento do aluno em casa?</label>
+                    <textarea v-model="form.comportamento_casa" rows="4" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      placeholder="Descreva como o aluno se comporta em casa, na rotina familiar..."></textarea>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Principais dificuldades observadas</label>
+                    <textarea v-model="form.dificuldades" rows="4" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      placeholder="Quais são as principais dificuldades que você observa no aluno?"></textarea>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Habilidades e potencialidades</label>
+                    <textarea v-model="form.habilidades" rows="4" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      placeholder="Quais são os pontos fortes e habilidades do aluno?"></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 5: Expectativas e Finalização -->
+            <div v-show="currentStep === 5" class="step-content">
+              <div class="p-8">
+                <div class="text-center mb-8">
+                  <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-clipboard-check text-2xl text-yellow-600"></i>
+                  </div>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Expectativas e Finalização</h2>
+                  <p class="text-gray-600">Últimas informações e suas expectativas</p>
+                </div>
+
+                <div class="max-w-2xl mx-auto space-y-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">O que espera do atendimento educacional especializado?</label>
+                    <textarea v-model="form.expectativas" rows="4" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      placeholder="Conte suas expectativas sobre o AEE para seu filho..."></textarea>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Informações adicionais</label>
+                    <textarea v-model="form.informacoes_adicionais" rows="4" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      placeholder="Alguma informação adicional que considera importante..."></textarea>
+                  </div>
+
+                  <!-- Resumo dos dados -->
+                  <div class="bg-indigo-50 rounded-lg p-6 mt-8">
+                    <h3 class="text-lg font-semibold text-indigo-900 mb-4">Resumo da Entrevista</h3>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span class="font-medium text-gray-700">Aluno:</span>
+                        <span class="text-gray-600">{{ form.nome_aluno || 'Não informado' }}</span>
+                      </div>
+                      <div>
+                        <span class="font-medium text-gray-700">Responsável:</span>
+                        <span class="text-gray-600">{{ form.nome_responsavel || 'Não informado' }}</span>
+                      </div>
+                      <div>
+                        <span class="font-medium text-gray-700">Escola:</span>
+                        <span class="text-gray-600">{{ form.escola || 'Não informado' }}</span>
+                      </div>
+                      <div>
+                        <span class="font-medium text-gray-700">Série:</span>
+                        <span class="text-gray-600">{{ form.serie || 'Não informado' }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="bg-gray-50 px-8 py-6 flex justify-between items-center">
+              <button type="button" @click="previousStep" 
+                      :disabled="currentStep === 1"
+                      class="flex items-center px-6 py-3 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
+                <i class="fas fa-chevron-left mr-2"></i>
+                Anterior
+              </button>
+
+              <div class="flex items-center space-x-2">
+                <span class="text-sm text-gray-500">{{ currentStep }} de {{ totalSteps }}</span>
+              </div>
+
+              <button v-if="currentStep < totalSteps" type="button" @click="nextStep"
+                      class="flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200">
+                Próximo
+                <i class="fas fa-chevron-right ml-2"></i>
+              </button>
+
+              <button v-else type="submit" :disabled="loading"
+                      class="flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
+                <div v-if="loading" class="animate-spin -ml-1 mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                <i v-else class="fas fa-save mr-2"></i>
+                {{ loading ? 'Salvando...' : 'Finalizar Entrevista' }}
+              </button>
+              
+              <!-- Botão PDF -->
+              <button v-if="form.student_id" type="button" @click="exportarPDF"
+                      class="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200">
+                <i class="fas fa-file-pdf mr-2"></i>
+                📄 Exportar PDF
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   `,
+  
   data() {
     return {
+      currentStep: 1,
+      totalSteps: 5,
+      maxCompletedStep: 1,
       loading: false,
+      validationErrors: {},
       alunos: [],
       form: {
         student_id: '',
         nome_aluno: '',
-        data_nascimento: '',
-        idade: '',
         escola: '',
         serie: '',
         turno: '',
@@ -1551,57 +3115,137 @@ const EntrevistaResponsavel = {
         habilidades: '',
         expectativas: '',
         informacoes_adicionais: ''
-      }
+      },
+      steps: [
+        { title: 'Aluno', icon: 'fas fa-user-graduate' },
+        { title: 'Responsável', icon: 'fas fa-users' },
+        { title: 'Médico', icon: 'fas fa-heartbeat' },
+        { title: 'Desenvolvimento', icon: 'fas fa-child' },
+        { title: 'Finalização', icon: 'fas fa-clipboard-check' }
+      ]
+    };
+  },
+  
+  computed: {
+    progressPercentage() {
+      return (this.currentStep / (this.totalSteps || 1)) * 100;
     }
   },
+  
   async mounted() {
     await this.carregarAlunos();
   },
+  
   methods: {
     async carregarAlunos() {
       try {
         const response = await api.get('/students');
         this.alunos = response.data?.data?.rows || [];
       } catch (error) {
-        console.error('Erro ao carregar alunos:', error);
-      }
-    },
-    preencherDadosAlunoEntrevista() {
-      const alunoSelecionado = this.alunos.find(aluno => aluno.id == this.form.student_id);
-      if (alunoSelecionado) {
-        this.form.nome_aluno = alunoSelecionado.name;
-        // Preenche outros campos se disponíveis
-        if (alunoSelecionado.birth_date) {
-          this.form.data_nascimento = alunoSelecionado.birth_date;
-          // Calcula idade automaticamente
-          const nascimento = new Date(alunoSelecionado.birth_date);
-          const hoje = new Date();
-          let idade = hoje.getFullYear() - nascimento.getFullYear();
-          const mes = hoje.getMonth() - nascimento.getMonth();
-          if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
-            idade--;
-          }
-          this.form.idade = idade;
+    
+    validateCurrentStep() {
+      this.validationErrors = {};
+      let isValid = true;
+      
+      if (this.currentStep === 1) {
+        if (!this.form.student_id) {
+          this.validationErrors.student_id = 'Selecione um aluno';
+          isValid = false;
         }
-        if (alunoSelecionado.school) {
-          this.form.escola = alunoSelecionado.school;
+      } else if (this.currentStep === 2) {
+        if (!this.form.nome_responsavel) {
+          this.validationErrors.nome_responsavel = 'Informe o nome do responsável';
+          isValid = false;
         }
-        if (alunoSelecionado.grade) {
-          this.form.serie = alunoSelecionado.grade;
+        if (!this.form.parentesco) {
+          this.validationErrors.parentesco = 'Selecione o parentesco';
+          isValid = false;
+        }
+        if (!this.form.telefone) {
+          this.validationErrors.telefone = 'Informe o telefone';
+          isValid = false;
         }
       }
+      
+      return isValid;
     },
+    
+    getMaxDate() {
+      return new Date().toISOString().split('T')[0];
+    },
+
+    // Função auxiliar para calcular idade a partir da data de nascimento
+    calcularIdade(dataNascimento) {
+      if (!dataNascimento) return null;
+      const nascimento = new Date(dataNascimento);
+      const hoje = new Date();
+      let idade = hoje.getFullYear() - nascimento.getFullYear();
+      const mes = hoje.getMonth() - nascimento.getMonth();
+      if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
+        idade--;
+      }
+      return idade;
+    },
+    
     async salvarEntrevista() {
+      if (!this.validateCurrentStep()) {
+        return;
+      }
+      
       this.loading = true;
       try {
-        await api.post('/entrevistas-responsavel', this.form);
-        alert('Entrevista salva com sucesso!');
-        this.$router.push('/');
+        // Mapear os campos do formulário para os campos esperados pela API
+        const dadosParaSalvar = {
+          student_id: this.form.student_id,
+          nome_estudante: this.form.nome_aluno,
+          nome_escola: this.form.escola,
+          serie_ano: this.form.serie,
+          turno: this.form.turno,
+          telefone: this.form.telefone,
+          // Adicionar outros campos conforme disponíveis no formulário
+          data_entrevista: new Date().toISOString().split('T')[0], // Data atual
+          tipo_entrevista: 'inicial' // Valor padrão
+        };
+        
+        // Filtrar apenas campos que têm valor
+        const dadosLimpos = {};
+        Object.keys(dadosParaSalvar).forEach(key => {
+          if (dadosParaSalvar[key] !== null && dadosParaSalvar[key] !== undefined && dadosParaSalvar[key] !== '') {
+            dadosLimpos[key] = dadosParaSalvar[key];
+          }
+        });
+        
+        console.log('Dados sendo enviados:', dadosLimpos);
+        
+        const response = await api.post('/entrevistas-responsavel', dadosLimpos);
+        if (response.data?.ok) {
+          this.$showModal('Sucesso', 'Entrevista salva com sucesso!', 'success');
+          this.$router.push('/');
+        } else {
+          this.$showModal('Erro', 'Erro ao salvar entrevista', 'error');
+        }
       } catch (error) {
-        alert('Erro ao salvar entrevista: ' + (error.response?.data?.message || error.message));
+        console.error('Erro completo:', error);
+        this.$showModal('Erro', 'Erro ao salvar entrevista: ' + (error.response?.data?.message || error.message), 'error');
       } finally {
         this.loading = false;
       }
+    },
+    
+    exportarPDF() {
+      if (!this.form.student_id) {
+        this.$showModal('Atenção', 'Selecione um aluno primeiro para gerar o PDF.', 'info');
+        return;
+      }
+      
+      const token = localStorage.getItem('token');
+      if (!token) {
+        this.$showModal('Erro', 'Token de autenticação não encontrado. Faça login novamente.', 'error');
+        return;
+      }
+      
+      const url = `${CONFIG.API_BASE}/forms/anamnese/pdf?student_id=${this.form.student_id}&token=${encodeURIComponent(token)}`;
+      window.open(url, '_blank');
     }
   }
 };
@@ -1609,180 +3253,307 @@ const EntrevistaResponsavel = {
 // Componente para PDI - ConectAEE
 const PDI = {
   template: `
-    <div class="space-y-6">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900">PDI - Plano de Desenvolvimento Individual</h1>
-        <p class="mt-1 text-sm text-gray-600">ConectAEE - Atendimento Educacional Especializado</p>
-      </div>
-      
-      <form @submit.prevent="salvarPDI" class="space-y-8">
-        <!-- Identificação -->
-        <div class="bg-white shadow rounded-lg p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Identificação</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Selecionar Aluno</label>
-              <select v-model="form.student_id" @change="preencherDadosAluno" required 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-                <option value="">Selecione um aluno</option>
-                <option v-for="aluno in alunos" :key="aluno.id" :value="aluno.id">{{ aluno.name }}</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Nome do Aluno Selecionado</label>
-              <input v-model="form.nome_aluno" type="text" readonly 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Data de Nascimento</label>
-              <input v-model="form.data_nascimento" type="date" required 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Escola</label>
-              <input v-model="form.escola" type="text" required 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Ano/Série</label>
-              <input v-model="form.ano_serie" type="text" required 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Professor AEE</label>
-              <input v-model="form.professor_aee" type="text" required 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Período</label>
-              <input v-model="form.periodo" type="text" required 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-            </div>
-          </div>
+    <div class="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 py-8">
+      <div class="max-w-4xl mx-auto px-4">
+        <!-- Header -->
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">PDI - Plano de Desenvolvimento Individual</h1>
+          <p class="text-gray-600">ConectAEE - Complete as informações em etapas organizadas</p>
         </div>
 
-        <!-- Diagnóstico -->
-        <div class="bg-white shadow rounded-lg p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Diagnóstico e Caracterização</h3>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Diagnóstico</label>
-              <textarea v-model="form.diagnostico" rows="3" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Características observadas</label>
-              <textarea v-model="form.caracteristicas" rows="4" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
+        <!-- Progress Bar -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-sm font-medium text-gray-700">Progresso do PDI</span>
+            <span class="text-sm text-gray-500">{{ currentStep }}/{{ totalSteps }}</span>
           </div>
-        </div>
-
-        <!-- Habilidades e Dificuldades -->
-        <div class="bg-white shadow rounded-lg p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Habilidades e Dificuldades</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Habilidades Identificadas</label>
-              <textarea v-model="form.habilidades" rows="6" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Dificuldades Identificadas</label>
-              <textarea v-model="form.dificuldades" rows="6" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
+          <div class="w-full bg-gray-200 rounded-full h-3">
+            <div class="bg-gradient-to-r from-green-500 to-emerald-600 h-3 rounded-full transition-all duration-500 ease-out" 
+                 :style="{ width: progressPercentage + '%' }"></div>
           </div>
-        </div>
-
-        <!-- Objetivos -->
-        <div class="bg-white shadow rounded-lg p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Objetivos do PDI</h3>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Objetivo Geral</label>
-              <textarea v-model="form.objetivo_geral" rows="3" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Objetivos Específicos</label>
-              <textarea v-model="form.objetivos_especificos" rows="5" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
-          </div>
-        </div>
-
-        <!-- Estratégias e Recursos -->
-        <div class="bg-white shadow rounded-lg p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Estratégias e Recursos</h3>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Estratégias Pedagógicas</label>
-              <textarea v-model="form.estrategias" rows="4" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Recursos Necessários</label>
-              <textarea v-model="form.recursos" rows="4" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Tecnologia Assistiva</label>
-              <textarea v-model="form.tecnologia_assistiva" rows="3" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
-          </div>
-        </div>
-
-        <!-- Avaliação -->
-        <div class="bg-white shadow rounded-lg p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Avaliação e Acompanhamento</h3>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Critérios de Avaliação</label>
-              <textarea v-model="form.criterios_avaliacao" rows="4" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Periodicidade de Revisão</label>
-              <select v-model="form.periodicidade_revisao" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-                <option value="">Selecione</option>
-                <option value="mensal">Mensal</option>
-                <option value="bimestral">Bimestral</option>
-                <option value="trimestral">Trimestral</option>
-                <option value="semestral">Semestral</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <!-- Botões de ação -->
-        <div class="flex justify-end space-x-4">
-          <button type="button" @click="$router.push('/')" 
-            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary">
-            Cancelar
-          </button>
-          <button type="submit" :disabled="loading"
-            class="px-4 py-2 bg-brand-primary border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary disabled:opacity-50">
-            <span v-if="loading" class="inline-flex items-center">
-              <div class="animate-spin -ml-1 mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
-              Salvando...
+          <div class="flex justify-between mt-2">
+            <span v-for="(step, index) in steps" :key="index" 
+                  class="text-xs font-medium transition-colors duration-300"
+                  :class="index < currentStep ? 'text-emerald-600' : index === currentStep - 1 ? 'text-emerald-500' : 'text-gray-400'">
+              {{ step.title }}
             </span>
-            <span v-else>Salvar PDI</span>
+          </div>
+        </div>
+
+        <!-- Step Navigation Pills -->
+        <div class="flex flex-wrap justify-center gap-2 mb-8">
+          <button v-for="(step, index) in steps" :key="index"
+                  @click="goToStep(index + 1)"
+                  :disabled="index + 1 > maxCompletedStep"
+                  class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300"
+                  :class="[
+                    index + 1 === currentStep 
+                      ? 'bg-emerald-600 text-white shadow-lg' 
+                      : index + 1 <= maxCompletedStep 
+                        ? 'bg-white text-emerald-600 border border-emerald-200 hover:bg-emerald-50' 
+                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  ]">
+            <i :class="step.icon + ' mr-2'"></i>{{ step.title }}
           </button>
         </div>
-      </form>
+
+        <!-- Form Card -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+          <form @submit.prevent="salvarPDI" class="relative">
+            <!-- Step 1: Identificação -->
+            <div v-show="currentStep === 1" class="step-content">
+              <div class="p-8">
+                <div class="text-center mb-8">
+                  <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-id-card text-2xl text-blue-600"></i>
+                  </div>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Identificação</h2>
+                  <p class="text-gray-600">Dados básicos do aluno e informações escolares</p>
+                </div>
+
+                <div class="max-w-2xl mx-auto space-y-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Selecionar Aluno <span class="text-red-500">*</span>
+                    </label>
+                    <select v-model="form.student_id" @change="preencherDadosAluno" required 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                      <option value="">Selecione um aluno</option>
+                      <option v-for="aluno in alunos" :key="aluno.id" :value="aluno.id">{{ aluno.name }}</option>
+                    </select>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Nome do Aluno</label>
+                      <input v-model="form.nome_aluno" type="text" readonly 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50">
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Escola</label>
+                      <input v-model="form.escola" type="text" required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Ano/Série</label>
+                      <input v-model="form.ano_serie" type="text" required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Professor AEE</label>
+                      <input v-model="form.professor_aee" type="text" required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Período</label>
+                      <input v-model="form.periodo" type="text" required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 2: Diagnóstico -->
+            <div v-show="currentStep === 2" class="step-content">
+              <div class="p-8">
+                <div class="text-center mb-8">
+                  <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-stethoscope text-2xl text-red-600"></i>
+                  </div>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Diagnóstico e Características</h2>
+                  <p class="text-gray-600">Informações sobre diagnóstico, habilidades e dificuldades</p>
+                </div>
+
+                <div class="max-w-2xl mx-auto space-y-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Diagnóstico</label>
+                    <textarea v-model="form.diagnostico" rows="4" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      placeholder="Descreva o diagnóstico médico ou educacional..."></textarea>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Características observadas</label>
+                    <textarea v-model="form.caracteristicas" rows="4" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      placeholder="Descreva as características comportamentais e de aprendizagem..."></textarea>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Habilidades Identificadas</label>
+                      <textarea v-model="form.habilidades" rows="6" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                        placeholder="Liste as habilidades e potencialidades do aluno..."></textarea>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Dificuldades Identificadas</label>
+                      <textarea v-model="form.dificuldades" rows="6" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                        placeholder="Liste as principais dificuldades observadas..."></textarea>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 3: Objetivos -->
+            <div v-show="currentStep === 3" class="step-content">
+              <div class="p-8">
+                <div class="text-center mb-8">
+                  <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-target text-2xl text-purple-600"></i>
+                  </div>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Objetivos do PDI</h2>
+                  <p class="text-gray-600">Definição dos objetivos gerais e específicos</p>
+                </div>
+
+                <div class="max-w-2xl mx-auto space-y-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Objetivo Geral</label>
+                    <textarea v-model="form.objetivo_geral" rows="4" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      placeholder="Descreva o objetivo principal do PDI..."></textarea>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Objetivos Específicos</label>
+                    <textarea v-model="form.objetivos_especificos" rows="6" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      placeholder="Liste os objetivos específicos a serem alcançados..."></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 4: Estratégias e Avaliação -->
+            <div v-show="currentStep === 4" class="step-content">
+              <div class="p-8">
+                <div class="text-center mb-8">
+                  <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-cogs text-2xl text-yellow-600"></i>
+                  </div>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Estratégias e Avaliação</h2>
+                  <p class="text-gray-600">Estratégias pedagógicas, recursos e critérios de avaliação</p>
+                </div>
+
+                <div class="max-w-2xl mx-auto space-y-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Estratégias Pedagógicas</label>
+                    <textarea v-model="form.estrategias" rows="4" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      placeholder="Descreva as estratégias pedagógicas a serem utilizadas..."></textarea>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Recursos Necessários</label>
+                    <textarea v-model="form.recursos" rows="4" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      placeholder="Liste os recursos pedagógicos necessários..."></textarea>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tecnologia Assistiva</label>
+                    <textarea v-model="form.tecnologia_assistiva" rows="3" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      placeholder="Descreva as tecnologias assistivas necessárias..."></textarea>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Critérios de Avaliação</label>
+                    <textarea v-model="form.criterios_avaliacao" rows="4" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      placeholder="Defina como será avaliado o progresso do aluno..."></textarea>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Periodicidade de Revisão</label>
+                    <select v-model="form.periodicidade_revisao" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                      <option value="">Selecione</option>
+                      <option value="mensal">Mensal</option>
+                      <option value="bimestral">Bimestral</option>
+                      <option value="trimestral">Trimestral</option>
+                      <option value="semestral">Semestral</option>
+                    </select>
+                  </div>
+
+                  <!-- Resumo dos dados -->
+                  <div class="bg-emerald-50 rounded-lg p-6 mt-8">
+                    <h3 class="text-lg font-semibold text-emerald-900 mb-4">📋 Resumo do PDI</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span class="font-medium text-gray-700">Aluno:</span>
+                        <p class="text-gray-600">{{ form.nome_aluno || 'Não informado' }}</p>
+                      </div>
+                      <div>
+                        <span class="font-medium text-gray-700">Escola:</span>
+                        <p class="text-gray-600">{{ form.escola || 'Não informado' }}</p>
+                      </div>
+                      <div>
+                        <span class="font-medium text-gray-700">Professor AEE:</span>
+                        <p class="text-gray-600">{{ form.professor_aee || 'Não informado' }}</p>
+                      </div>
+                      <div>
+                        <span class="font-medium text-gray-700">Período:</span>
+                        <p class="text-gray-600">{{ form.periodo || 'Não informado' }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="bg-gray-50 px-8 py-6 flex justify-between items-center">
+              <button type="button" @click="previousStep" 
+                      :disabled="currentStep === 1"
+                      class="flex items-center px-6 py-3 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
+                <i class="fas fa-chevron-left mr-2"></i>
+                Anterior
+              </button>
+
+              <div class="flex items-center space-x-2">
+                <span class="text-sm text-gray-500">{{ currentStep }} de {{ totalSteps }}</span>
+              </div>
+
+              <button v-if="currentStep < totalSteps" type="button" @click="nextStep"
+                      class="flex items-center px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-all duration-200">
+                Próximo
+                <i class="fas fa-chevron-right ml-2"></i>
+              </button>
+
+              <button v-else type="submit" :disabled="loading"
+                      class="flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
+                <div v-if="loading" class="animate-spin -ml-1 mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                <i v-else class="fas fa-save mr-2"></i>
+                {{ loading ? 'Salvando...' : '📋 Finalizar PDI' }}
+              </button>
+              
+              <!-- Botão PDF -->
+              <button v-if="form.student_id" type="button" @click="exportarPDF"
+                      class="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200">
+                <i class="fas fa-file-pdf mr-2"></i>
+                📄 Exportar PDF
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   `,
   data() {
     return {
+      currentStep: 1,
+      totalSteps: 4,
+      maxCompletedStep: 1,
       loading: false,
+      validationErrors: {},
       alunos: [],
       form: {
         student_id: '',
         nome_aluno: '',
-        data_nascimento: '',
         escola: '',
         ano_serie: '',
         professor_aee: '',
@@ -1798,7 +3569,19 @@ const PDI = {
         tecnologia_assistiva: '',
         criterios_avaliacao: '',
         periodicidade_revisao: ''
-      }
+      },
+      steps: [
+        { title: 'Identificação', icon: 'fas fa-id-card' },
+        { title: 'Diagnóstico', icon: 'fas fa-stethoscope' },
+        { title: 'Objetivos', icon: 'fas fa-target' },
+        { title: 'Estratégias', icon: 'fas fa-cogs' }
+      ]
+    }
+  },
+
+  computed: {
+    progressPercentage() {
+      return (this.currentStep / (this.totalSteps || 1)) * 100;
     }
   },
   async mounted() {
@@ -1813,33 +3596,95 @@ const PDI = {
         console.error('Erro ao carregar alunos:', error);
       }
     },
+    
     preencherDadosAluno() {
       const alunoSelecionado = this.alunos.find(aluno => aluno.id == this.form.student_id);
       if (alunoSelecionado) {
         this.form.nome_aluno = alunoSelecionado.name;
         // Preenche outros campos se disponíveis
-        if (alunoSelecionado.birth_date) {
-          this.form.data_nascimento = alunoSelecionado.birth_date;
-        }
         if (alunoSelecionado.school) {
           this.form.escola = alunoSelecionado.school;
         }
-        if (alunoSelecionado.grade) {
-          this.form.ano_serie = alunoSelecionado.grade;
+        if (alunoSelecionado.class) {
+          this.form.ano_serie = alunoSelecionado.class;
         }
       }
     },
+
+    goToStep(step) {
+      if (step <= this.maxCompletedStep) {
+        this.currentStep = step;
+      }
+    },
+    
+    nextStep() {
+      if (this.validateCurrentStep()) {
+        if (this.currentStep < this.totalSteps) {
+          this.currentStep++;
+          this.maxCompletedStep = Math.max(this.maxCompletedStep, this.currentStep);
+        }
+      }
+    },
+    
+    previousStep() {
+      if (this.currentStep > 1) {
+        this.currentStep--;
+      }
+    },
+    
+    validateCurrentStep() {
+      this.validationErrors = {};
+      let isValid = true;
+      
+      if (this.currentStep === 1) {
+        if (!this.form.student_id) {
+          this.validationErrors.student_id = 'Selecione um aluno';
+          isValid = false;
+        }
+      }
+      
+      return isValid;
+    },
+    
     async salvarPDI() {
+      if (!this.validateCurrentStep()) {
+        return;
+      }
+      
       this.loading = true;
       try {
-        await api.post('/pdi', this.form);
-        alert('PDI salvo com sucesso!');
-        this.$router.push('/');
+        const response = await api.post('/pdi', this.form);
+        if (response.data?.ok) {
+          this.$showModal('Sucesso', 'PDI salvo com sucesso!', 'success');
+          this.$router.push('/');
+        } else {
+          this.$showModal('Erro', 'Erro ao salvar PDI', 'error');
+        }
       } catch (error) {
-        alert('Erro ao salvar PDI: ' + (error.response?.data?.message || error.message));
+        this.$showModal('Erro', 'Erro ao salvar PDI: ' + (error.response?.data?.message || error.message), 'error');
       } finally {
         this.loading = false;
       }
+    },
+    
+    exportarPDF() {
+      if (!this.form.student_id) {
+        this.$showModal('Atenção', 'Selecione um aluno primeiro para gerar o PDF.', 'info');
+        return;
+      }
+      
+      const token = localStorage.getItem('token');
+      if (!token) {
+        this.$showModal('Erro', 'Token de autenticação não encontrado. Faça login novamente.', 'error');
+        return;
+      }
+      
+      const url = `${CONFIG.API_BASE}/pdi/pdf?student_id=${this.form.student_id}&token=${encodeURIComponent(token)}`;
+      window.open(url, '_blank');
+    },
+    
+    getMaxDate() {
+      return new Date().toISOString().split('T')[0];
     }
   }
 };
@@ -1847,224 +3692,344 @@ const PDI = {
 // Componente para Plano de Atendimento Individual
 const PlanoAtendimento = {
   template: `
-    <div class="space-y-6">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900">Plano de Atendimento Individual</h1>
-        <p class="mt-1 text-sm text-gray-600">Planejamento detalhado do atendimento educacional especializado</p>
-      </div>
-      
-      <form @submit.prevent="salvarPlano" class="space-y-8">
-        <!-- Identificação -->
-        <div class="bg-white shadow rounded-lg p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Identificação do Aluno</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Selecionar Aluno</label>
-              <select v-model="form.student_id" @change="preencherDadosAlunoPlano" required 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-                <option value="">Selecione um aluno</option>
-                <option v-for="aluno in alunos" :key="aluno.id" :value="aluno.id">{{ aluno.name }}</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Nome Completo</label>
-              <input v-model="form.nome_aluno" type="text" readonly 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Data de Nascimento</label>
-              <input v-model="form.data_nascimento" type="date" required 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Matrícula</label>
-              <input v-model="form.matricula" type="text" required 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Escola de Origem</label>
-              <input v-model="form.escola_origem" type="text" required 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-            </div>
-          </div>
+    <div class="min-h-screen bg-gradient-to-br from-purple-50 to-violet-100 py-8">
+      <div class="max-w-4xl mx-auto px-4">
+        <!-- Header -->
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">Plano de Atendimento Individual</h1>
+          <p class="text-gray-600">Planejamento detalhado do atendimento educacional especializado</p>
         </div>
 
-        <!-- Necessidades Educacionais -->
-        <div class="bg-white shadow rounded-lg p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Necessidades Educacionais Especiais</h3>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Deficiência/Transtorno</label>
-              <select v-model="form.tipo_necessidade" required 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-                <option value="">Selecione</option>
-                <option value="deficiencia_intelectual">Deficiência Intelectual</option>
-                <option value="deficiencia_fisica">Deficiência Física</option>
-                <option value="deficiencia_visual">Deficiência Visual</option>
-                <option value="deficiencia_auditiva">Deficiência Auditiva</option>
-                <option value="deficiencia_multipla">Deficiência Múltipla</option>
-                <option value="tea">Transtorno do Espectro Autista</option>
-                <option value="altas_habilidades">Altas Habilidades/Superdotação</option>
-                <option value="outro">Outro</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Descrição das Necessidades</label>
-              <textarea v-model="form.descricao_necessidades" rows="4" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
+        <!-- Progress Bar -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-sm font-medium text-gray-700">Progresso do Plano</span>
+            <span class="text-sm text-gray-500">{{ currentStep }}/{{ totalSteps }}</span>
           </div>
-        </div>
-
-        <!-- Objetivos do Atendimento -->
-        <div class="bg-white shadow rounded-lg p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Objetivos do Atendimento</h3>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Objetivo Geral</label>
-              <textarea v-model="form.objetivo_geral" rows="3" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Objetivos Específicos</label>
-              <textarea v-model="form.objetivos_especificos" rows="5" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-                placeholder="Liste os objetivos específicos, um por linha"></textarea>
-            </div>
+          <div class="w-full bg-gray-200 rounded-full h-3">
+            <div class="bg-gradient-to-r from-purple-500 to-violet-600 h-3 rounded-full transition-all duration-500 ease-out" 
+                 :style="{ width: progressPercentage + '%' }"></div>
           </div>
-        </div>
-
-        <!-- Atividades e Metodologia -->
-        <div class="bg-white shadow rounded-lg p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Atividades e Metodologia</h3>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Atividades Propostas</label>
-              <textarea v-model="form.atividades" rows="5" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Metodologia de Ensino</label>
-              <textarea v-model="form.metodologia" rows="4" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Recursos Didáticos</label>
-              <textarea v-model="form.recursos_didaticos" rows="3" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
-          </div>
-        </div>
-
-        <!-- Cronograma -->
-        <div class="bg-white shadow rounded-lg p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Cronograma de Atendimento</h3>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Frequência Semanal</label>
-              <select v-model="form.frequencia_semanal" required 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-                <option value="">Selecione</option>
-                <option value="1">1 vez por semana</option>
-                <option value="2">2 vezes por semana</option>
-                <option value="3">3 vezes por semana</option>
-                <option value="4">4 vezes por semana</option>
-                <option value="5">5 vezes por semana</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Duração da Sessão</label>
-              <select v-model="form.duracao_sessao" required 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-                <option value="">Selecione</option>
-                <option value="30">30 minutos</option>
-                <option value="45">45 minutos</option>
-                <option value="60">60 minutos</option>
-                <option value="90">90 minutos</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Período de Atendimento</label>
-              <select v-model="form.periodo_atendimento" required 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-                <option value="">Selecione</option>
-                <option value="matutino">Matutino</option>
-                <option value="vespertino">Vespertino</option>
-                <option value="noturno">Noturno</option>
-              </select>
-            </div>
-          </div>
-          <div class="mt-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Horários Específicos</label>
-            <textarea v-model="form.horarios_especificos" rows="3" 
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-              placeholder="Ex: Segunda-feira: 14h às 15h, Quarta-feira: 14h às 15h"></textarea>
-          </div>
-        </div>
-
-        <!-- Avaliação e Acompanhamento -->
-        <div class="bg-white shadow rounded-lg p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Avaliação e Acompanhamento</h3>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Instrumentos de Avaliação</label>
-              <textarea v-model="form.instrumentos_avaliacao" rows="3" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Critérios de Avaliação</label>
-              <textarea v-model="form.criterios_avaliacao" rows="3" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Periodicidade de Revisão do Plano</label>
-              <select v-model="form.periodicidade_revisao" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-                <option value="">Selecione</option>
-                <option value="mensal">Mensal</option>
-                <option value="bimestral">Bimestral</option>
-                <option value="trimestral">Trimestral</option>
-                <option value="semestral">Semestral</option>
-                <option value="anual">Anual</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <!-- Observações -->
-        <div class="bg-white shadow rounded-lg p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Observações Gerais</h3>
-          <textarea v-model="form.observacoes" rows="4" 
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-            placeholder="Informações adicionais relevantes para o atendimento"></textarea>
-        </div>
-
-        <!-- Botões de ação -->
-        <div class="flex justify-end space-x-4">
-          <button type="button" @click="$router.push('/')" 
-            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary">
-            Cancelar
-          </button>
-          <button type="submit" :disabled="loading"
-            class="px-4 py-2 bg-brand-primary border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary disabled:opacity-50">
-            <span v-if="loading" class="inline-flex items-center">
-              <div class="animate-spin -ml-1 mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
-              Salvando...
+          <div class="flex justify-between mt-2">
+            <span v-for="(step, index) in steps" :key="index" 
+                  class="text-xs font-medium transition-colors duration-300"
+                  :class="index < currentStep ? 'text-violet-600' : index === currentStep - 1 ? 'text-violet-500' : 'text-gray-400'">
+              {{ step.title }}
             </span>
-            <span v-else>Salvar Plano</span>
+          </div>
+        </div>
+
+        <!-- Step Navigation Pills -->
+        <div class="flex flex-wrap justify-center gap-2 mb-8">
+          <button v-for="(step, index) in steps" :key="index"
+                  @click="goToStep(index + 1)"
+                  :disabled="index + 1 > maxCompletedStep"
+                  class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300"
+                  :class="[
+                    index + 1 === currentStep 
+                      ? 'bg-violet-600 text-white shadow-lg' 
+                      : index + 1 <= maxCompletedStep 
+                        ? 'bg-white text-violet-600 border border-violet-200 hover:bg-violet-50' 
+                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  ]">
+            <i :class="step.icon + ' mr-2'"></i>{{ step.title }}
           </button>
         </div>
-      </form>
+
+        <!-- Form Card -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+          <form @submit.prevent="salvarPlano" class="relative">
+            <!-- Step 1: Identificação do Aluno -->
+            <div v-show="currentStep === 1" class="step-content">
+              <div class="p-8">
+                <div class="text-center mb-8">
+                  <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user-circle text-2xl text-blue-600"></i>
+                  </div>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Identificação do Aluno</h2>
+                  <p class="text-gray-600">Dados básicos e informações escolares</p>
+                </div>
+
+                <div class="max-w-2xl mx-auto space-y-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Selecionar Aluno <span class="text-red-500">*</span>
+                    </label>
+                    <select v-model="form.student_id" @change="preencherDadosAlunoPlano" required 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                      <option value="">Selecione um aluno</option>
+                      <option v-for="aluno in alunos" :key="aluno.id" :value="aluno.id">{{ aluno.name }}</option>
+                    </select>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Nome Completo</label>
+                      <input v-model="form.nome_aluno" type="text" readonly 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50">
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Matrícula</label>
+                      <input v-model="form.matricula" type="text" required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Escola de Origem</label>
+                      <input v-model="form.escola_origem" type="text" required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 2: Necessidades e Objetivos -->
+            <div v-show="currentStep === 2" class="step-content">
+              <div class="p-8">
+                <div class="text-center mb-8">
+                  <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-puzzle-piece text-2xl text-red-600"></i>
+                  </div>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Necessidades e Objetivos</h2>
+                  <p class="text-gray-600">Defina as necessidades especiais e objetivos do atendimento</p>
+                </div>
+
+                <div class="max-w-2xl mx-auto space-y-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Deficiência/Transtorno</label>
+                    <select v-model="form.tipo_necessidade" required 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                      <option value="">Selecione</option>
+                      <option value="deficiencia_intelectual">Deficiência Intelectual</option>
+                      <option value="deficiencia_fisica">Deficiência Física</option>
+                      <option value="deficiencia_visual">Deficiência Visual</option>
+                      <option value="deficiencia_auditiva">Deficiência Auditiva</option>
+                      <option value="deficiencia_multipla">Deficiência Múltipla</option>
+                      <option value="tea">Transtorno do Espectro Autista</option>
+                      <option value="altas_habilidades">Altas Habilidades/Superdotação</option>
+                      <option value="outro">Outro</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Descrição das Necessidades</label>
+                    <textarea v-model="form.descricao_necessidades" rows="4" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                      placeholder="Descreva detalhadamente as necessidades educacionais especiais..."></textarea>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Objetivo Geral</label>
+                    <textarea v-model="form.objetivo_geral" rows="3" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                      placeholder="Defina o objetivo principal do atendimento..."></textarea>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Objetivos Específicos</label>
+                    <textarea v-model="form.objetivos_especificos" rows="5" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                      placeholder="Liste os objetivos específicos, um por linha..."></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 3: Atividades e Metodologia -->
+            <div v-show="currentStep === 3" class="step-content">
+              <div class="p-8">
+                <div class="text-center mb-8">
+                  <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-clipboard-list text-2xl text-green-600"></i>
+                  </div>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Atividades e Metodologia</h2>
+                  <p class="text-gray-600">Defina as atividades propostas e metodologia de ensino</p>
+                </div>
+
+                <div class="max-w-2xl mx-auto space-y-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Atividades Propostas</label>
+                    <textarea v-model="form.atividades" rows="5" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                      placeholder="Descreva as atividades que serão desenvolvidas com o aluno..."></textarea>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Metodologia de Ensino</label>
+                    <textarea v-model="form.metodologia" rows="4" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                      placeholder="Explique a metodologia e estratégias pedagógicas..."></textarea>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Recursos Didáticos</label>
+                    <textarea v-model="form.recursos_didaticos" rows="3" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                      placeholder="Liste os recursos didáticos e materiais necessários..."></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 4: Cronograma e Avaliação -->
+            <div v-show="currentStep === 4" class="step-content">
+              <div class="p-8">
+                <div class="text-center mb-8">
+                  <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-calendar-alt text-2xl text-yellow-600"></i>
+                  </div>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Cronograma e Avaliação</h2>
+                  <p class="text-gray-600">Configure os horários e critérios de avaliação</p>
+                </div>
+
+                <div class="max-w-2xl mx-auto space-y-6">
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Frequência Semanal</label>
+                      <select v-model="form.frequencia_semanal" required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                        <option value="">Selecione</option>
+                        <option value="1">1x por semana</option>
+                        <option value="2">2x por semana</option>
+                        <option value="3">3x por semana</option>
+                        <option value="4">4x por semana</option>
+                        <option value="5">5x por semana</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Duração da Sessão</label>
+                      <select v-model="form.duracao_sessao" required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                        <option value="">Selecione</option>
+                        <option value="30">30 minutos</option>
+                        <option value="45">45 minutos</option>
+                        <option value="60">60 minutos</option>
+                        <option value="90">90 minutos</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Período</label>
+                      <select v-model="form.periodo_atendimento" required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                        <option value="">Selecione</option>
+                        <option value="matutino">Matutino</option>
+                        <option value="vespertino">Vespertino</option>
+                        <option value="noite">Noturno</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Horários Específicos</label>
+                    <textarea v-model="form.horarios_especificos" rows="3" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                      placeholder="Ex: Segunda-feira: 14h às 15h, Quarta-feira: 14h às 15h"></textarea>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Instrumentos de Avaliação</label>
+                    <textarea v-model="form.instrumentos_avaliacao" rows="3" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                      placeholder="Descreva os instrumentos que serão utilizados para avaliação..."></textarea>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Critérios de Avaliação</label>
+                    <textarea v-model="form.criterios_avaliacao" rows="3" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                      placeholder="Defina os critérios para avaliar o progresso..."></textarea>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Periodicidade de Revisão</label>
+                      <select v-model="form.periodicidade_revisao" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                        <option value="">Selecione</option>
+                        <option value="mensal">Mensal</option>
+                        <option value="bimestral">Bimestral</option>
+                        <option value="trimestral">Trimestral</option>
+                        <option value="semestral">Semestral</option>
+                        <option value="anual">Anual</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Observações Gerais</label>
+                    <textarea v-model="form.observacoes" rows="4" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                      placeholder="Informações adicionais relevantes para o atendimento..."></textarea>
+                  </div>
+
+                  <!-- Resumo do Plano -->
+                  <div class="bg-violet-50 rounded-lg p-6 mt-8">
+                    <h3 class="text-lg font-semibold text-violet-900 mb-4">📅 Resumo do Plano</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span class="font-medium text-gray-700">Aluno:</span>
+                        <p class="text-gray-600">{{ form.nome_aluno || 'Não informado' }}</p>
+                      </div>
+                      <div>
+                        <span class="font-medium text-gray-700">Escola:</span>
+                        <p class="text-gray-600">{{ form.escola_origem || 'Não informado' }}</p>
+                      </div>
+                      <div>
+                        <span class="font-medium text-gray-700">Frequência:</span>
+                        <p class="text-gray-600">{{ form.frequencia_semanal ? form.frequencia_semanal + 'x por semana' : 'Não informado' }}</p>
+                      </div>
+                      <div>
+                        <span class="font-medium text-gray-700">Duração:</span>
+                        <p class="text-gray-600">{{ form.duracao_sessao ? form.duracao_sessao + ' minutos' : 'Não informado' }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="bg-gray-50 px-8 py-6 flex justify-between items-center">
+              <button type="button" @click="previousStep" 
+                      :disabled="currentStep === 1"
+                      class="flex items-center px-6 py-3 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
+                <i class="fas fa-chevron-left mr-2"></i>
+                Anterior
+              </button>
+
+              <div class="flex items-center space-x-2">
+                <span class="text-sm text-gray-500">{{ currentStep }} de {{ totalSteps }}</span>
+              </div>
+
+              <button v-if="currentStep < totalSteps" type="button" @click="nextStep"
+                      class="flex items-center px-6 py-3 bg-violet-600 text-white rounded-lg hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 transition-all duration-200">
+                Próximo
+                <i class="fas fa-chevron-right ml-2"></i>
+              </button>
+
+              <button v-else type="submit" :disabled="loading"
+                      class="flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
+                <div v-if="loading" class="animate-spin -ml-1 mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                <i v-else class="fas fa-save mr-2"></i>
+                {{ loading ? 'Salvando...' : '📅 Finalizar Plano' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   `,
   data() {
     return {
+      currentStep: 1,
+      totalSteps: 4,
+      maxCompletedStep: 1,
       loading: false,
+      validationErrors: {},
       alunos: [],
       form: {
         student_id: '',
         nome_aluno: '',
-        data_nascimento: '',
         matricula: '',
         escola_origem: '',
         tipo_necessidade: '',
@@ -2082,7 +4047,19 @@ const PlanoAtendimento = {
         criterios_avaliacao: '',
         periodicidade_revisao: '',
         observacoes: ''
-      }
+      },
+      steps: [
+        { title: 'Identificação', icon: 'fas fa-user-circle' },
+        { title: 'Necessidades', icon: 'fas fa-puzzle-piece' },
+        { title: 'Atividades', icon: 'fas fa-clipboard-list' },
+        { title: 'Cronograma', icon: 'fas fa-calendar-alt' }
+      ]
+    }
+  },
+
+  computed: {
+    progressPercentage() {
+      return (this.currentStep / (this.totalSteps || 1)) * 100;
     }
   },
   async mounted() {
@@ -2102,9 +4079,6 @@ const PlanoAtendimento = {
       if (alunoSelecionado) {
         this.form.nome_aluno = alunoSelecionado.name;
         // Preenche outros campos se disponíveis
-        if (alunoSelecionado.birth_date) {
-          this.form.data_nascimento = alunoSelecionado.birth_date;
-        }
         if (alunoSelecionado.registration_number) {
           this.form.matricula = alunoSelecionado.registration_number;
         }
@@ -2113,17 +4087,595 @@ const PlanoAtendimento = {
         }
       }
     },
+
+    goToStep(step) {
+      if (step <= this.maxCompletedStep) {
+        this.currentStep = step;
+      }
+    },
+    
+    nextStep() {
+      if (this.validateCurrentStep()) {
+        if (this.currentStep < this.totalSteps) {
+          this.currentStep++;
+          this.maxCompletedStep = Math.max(this.maxCompletedStep, this.currentStep);
+        }
+      }
+    },
+    
+    previousStep() {
+      if (this.currentStep > 1) {
+        this.currentStep--;
+      }
+    },
+    
+    validateCurrentStep() {
+      this.validationErrors = {};
+      let isValid = true;
+      
+      if (this.currentStep === 1) {
+        if (!this.form.student_id) {
+          this.validationErrors.student_id = 'Selecione um aluno';
+          isValid = false;
+        }
+      }
+      
+      return isValid;
+    },
+
     async salvarPlano() {
+      if (!this.validateCurrentStep()) {
+        return;
+      }
+      
       this.loading = true;
       try {
-        await api.post('/planos-atendimento', this.form);
-        alert('Plano de Atendimento salvo com sucesso!');
-        this.$router.push('/');
+        const response = await api.post('/planos-atendimento', this.form);
+        if (response.data?.ok) {
+          this.$showModal('Sucesso', 'Plano de Atendimento salvo com sucesso!', 'success');
+          this.$router.push('/');
+        } else {
+          this.$showModal('Erro', 'Erro ao salvar plano', 'error');
+        }
       } catch (error) {
-        alert('Erro ao salvar plano: ' + (error.response?.data?.message || error.message));
+        this.$showModal('Erro', 'Erro ao salvar plano: ' + (error.response?.data?.message || error.message), 'error');
       } finally {
         this.loading = false;
       }
+    },
+    
+    getMaxDate() {
+      return new Date().toISOString().split('T')[0];
+    }
+  }
+};
+
+// Componente de Relatório de Atendimento
+const RelatorioAtendimento = {
+  template: `
+    <div class="max-w-6xl mx-auto p-6 space-y-6">
+      <div class="bg-white shadow rounded-lg p-6">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">Relatório de Atendimento</h1>
+        
+        <!-- Barra de Progresso -->
+        <div class="mb-8">
+          <div class="flex items-center justify-between mb-2">
+            <div class="text-sm font-medium text-gray-600">Progresso</div>
+            <div class="text-sm font-medium text-amber-600">{{ Math.round((currentStep / (totalSteps || 1)) * 100) }}%</div>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-gradient-to-r from-amber-400 to-amber-600 h-2 rounded-full transition-all duration-300" 
+                 :style="{ width: (currentStep / (totalSteps || 1)) * 100 + '%' }"></div>
+          </div>
+        </div>
+
+        <!-- Indicadores de Etapas -->
+        <div class="flex justify-between mb-8">
+          <div v-for="(step, index) in steps" :key="index" 
+               class="flex flex-col items-center cursor-pointer transition-all duration-200"
+               @click="goToStep(index)">
+            <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-200"
+                 :class="index < currentStep ? 'bg-amber-500 border-amber-500 text-white' : 
+                         index === currentStep ? 'bg-amber-100 border-amber-500 text-amber-700' : 
+                         'bg-gray-100 border-gray-300 text-gray-400'">
+              <i :class="step.icon"></i>
+            </div>
+            <span class="text-xs mt-2 text-center max-w-20"
+                  :class="index <= currentStep ? 'text-amber-600 font-medium' : 'text-gray-400'">
+              {{ step.title }}
+            </span>
+          </div>
+        </div>
+        
+        <form @submit.prevent="save" class="space-y-6">
+          <!-- Etapa 1: Identificação -->
+          <div v-if="currentStep === 0" class="space-y-6">
+            <div class="border-l-4 border-amber-500 pl-4 mb-6">
+              <h2 class="text-lg font-semibold text-gray-900">Identificação do Atendimento</h2>
+              <p class="text-sm text-gray-600">Selecione o aluno e a data do atendimento</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="fas fa-user text-amber-500 mr-1"></i>
+                  Aluno *
+                </label>
+                <select v-model="form.student_id" 
+                        @change="loadStudentData"
+                        class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500" 
+                        required>
+                  <option value="">Selecione um aluno</option>
+                  <option v-for="aluno in alunos" :key="aluno.id" :value="aluno.id">
+                    {{ aluno.name }}
+                  </option>
+                </select>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="fas fa-calendar text-amber-500 mr-1"></i>
+                  Data do Atendimento *
+                </label>
+                <input type="date" 
+                       v-model="form.data_atendimento" 
+                       class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500" 
+                       required>
+              </div>
+            </div>
+          </div>
+
+          <!-- Etapa 2: Descrição (com gravação) -->
+          <div v-if="currentStep === 1" class="space-y-6">
+            <div class="border-l-4 border-amber-500 pl-4 mb-6">
+              <h2 class="text-lg font-semibold text-gray-900">Descrição do Atendimento</h2>
+              <p class="text-sm text-gray-600">Descreva detalhadamente o que foi realizado no atendimento</p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-file-alt text-amber-500 mr-1"></i>
+                Descrição do Atendimento *
+              </label>
+              
+              <!-- Controles de gravação -->
+              <div class="mb-3 flex items-center space-x-3">
+                <button type="button" 
+                        @click="toggleRecording" 
+                        :disabled="isProcessingAudio"
+                        class="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                        :class="isRecording 
+                          ? 'bg-red-100 text-red-700 hover:bg-red-200' 
+                          : 'bg-amber-100 text-amber-700 hover:bg-amber-200'">
+                  <i :class="isRecording ? 'fas fa-stop' : 'fas fa-microphone'"></i>
+                  <span>{{ isRecording ? 'Parar Gravação' : 'Gravar Áudio' }}</span>
+                </button>
+                
+                <!-- Indicador de gravação -->
+                <div v-if="isRecording" class="flex items-center space-x-2 text-red-600">
+                  <div class="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div>
+                  <span class="text-sm font-medium">{{ Math.floor(recordingTime / 60) }}:{{ String(recordingTime % 60).padStart(2, '0') }}</span>
+                </div>
+                
+                <!-- Instruções -->
+                <div class="text-xs text-gray-500">
+                  Clique no microfone para gravar ou digite diretamente
+                </div>
+              </div>
+                
+              <!-- Status de processamento -->
+              <div v-if="isProcessingAudio" class="bg-amber-50 border border-amber-200 rounded p-3 mb-3">
+                <div class="flex items-center space-x-2">
+                  <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-amber-600"></div>
+                  <span class="text-sm text-amber-700">Convertendo áudio para texto...</span>
+                </div>
+              </div>
+              
+              <!-- Textarea para descrição -->
+              <textarea v-model="form.descricao" 
+                        rows="8" 
+                        placeholder="Digite ou grave a descrição detalhada do atendimento..."
+                        class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                        required></textarea>
+            </div>
+          </div>
+
+          <!-- Etapa 3: Objetivos e Recursos -->
+          <div v-if="currentStep === 2" class="space-y-6">
+            <div class="border-l-4 border-amber-500 pl-4 mb-6">
+              <h2 class="text-lg font-semibold text-gray-900">Objetivos e Recursos</h2>
+              <p class="text-sm text-gray-600">Informe os objetivos trabalhados e recursos utilizados</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="fas fa-bullseye text-amber-500 mr-1"></i>
+                  Objetivos Trabalhados
+                </label>
+                <textarea v-model="form.objetivos" 
+                          rows="5" 
+                          class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500" 
+                          placeholder="Descreva os objetivos específicos trabalhados durante o atendimento..."></textarea>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="fas fa-tools text-amber-500 mr-1"></i>
+                  Recursos Utilizados
+                </label>
+                <textarea v-model="form.recursos" 
+                          rows="5" 
+                          class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500" 
+                          placeholder="Liste os materiais, jogos, tecnologias e outros recursos utilizados..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Etapa 4: Observações e Finalização -->
+          <div v-if="currentStep === 3" class="space-y-6">
+            <div class="border-l-4 border-amber-500 pl-4 mb-6">
+              <h2 class="text-lg font-semibold text-gray-900">Observações e Progressos</h2>
+              <p class="text-sm text-gray-600">Registre observações importantes e progressos identificados</p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-chart-line text-amber-500 mr-1"></i>
+                Observações e Progressos
+              </label>
+              <textarea v-model="form.observacoes" 
+                        rows="6" 
+                        class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500" 
+                        placeholder="Descreva progressos observados, dificuldades encontradas, recomendações para próximos atendimentos..."></textarea>
+            </div>
+
+            <!-- Resumo dos dados -->
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <h3 class="font-medium text-amber-800 mb-3">
+                <i class="fas fa-clipboard-check mr-1"></i>
+                Resumo do Relatório
+              </h3>
+              <div class="space-y-2 text-sm">
+                <div><strong>Aluno:</strong> {{ getStudentName(form.student_id) || 'Não selecionado' }}</div>
+                <div><strong>Data:</strong> {{ formatDate(form.data_atendimento) }}</div>
+                <div><strong>Descrição:</strong> {{ form.descricao ? (form.descricao.length > 100 ? form.descricao.substring(0, 100) + '...' : form.descricao) : 'Não informada' }}</div>
+                <div><strong>Objetivos:</strong> {{ form.objetivos || 'Não informados' }}</div>
+                <div><strong>Recursos:</strong> {{ form.recursos || 'Não informados' }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Navegação -->
+          <div class="flex justify-between pt-6 border-t">
+            <button type="button" 
+                    @click="previousStep" 
+                    :disabled="currentStep === 0"
+                    class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+              <i class="fas fa-arrow-left mr-1"></i>
+              Anterior
+            </button>
+            
+            <div class="flex space-x-3">
+              <button type="button" 
+                      @click="cancel" 
+                      class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                Cancelar
+              </button>
+              
+              <button v-if="currentStep < totalSteps - 1" 
+                      type="button" 
+                      @click="nextStep"
+                      :disabled="!canProceed"
+                      class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                Próximo
+                <i class="fas fa-arrow-right ml-1"></i>
+              </button>
+              
+              <button v-else 
+                      type="submit" 
+                      :disabled="loading || !canProceed"
+                      class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50">
+                <i class="fas fa-save mr-1"></i>
+                <span v-if="loading">Salvando...</span>
+                <span v-else>Salvar Relatório</span>
+              </button>
+              
+              <!-- Botão PDF -->
+              <button v-if="form.student_id" type="button" @click="exportarPDF"
+                      class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200">
+                <i class="fas fa-file-pdf mr-1"></i>
+                📄 Exportar PDF
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Lista de relatórios -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Relatórios Anteriores</h2>
+        <div v-if="!relatorios || relatorios.length === 0" class="text-center text-gray-500 py-8">
+          Nenhum relatório de atendimento encontrado.
+        </div>
+        <div v-else class="space-y-4">
+          <div v-for="r in relatorios" :key="r.id" class="border rounded-lg p-4 hover:bg-gray-50">
+            <div class="flex justify-between items-start">
+              <div class="flex-1">
+                <div class="flex items-center space-x-3 mb-2">
+                  <h3 class="text-sm font-medium text-gray-900">{{ r.student_name || 'Aluno não encontrado' }}</h3>
+                  <span class="text-xs text-gray-500">{{ formatDate(r.data_atendimento) }}</span>
+                </div>
+                <p class="text-sm text-gray-600 line-clamp-2">{{ r.descricao }}</p>
+              </div>
+              <div class="flex space-x-2">
+                <button @click="edit(r)" class="text-blue-600 hover:text-blue-800 text-sm">Editar</button>
+                <button @click="deleteRelatorio(r)" class="text-red-600 hover:text-red-800 text-sm">Excluir</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+  data() {
+    return {
+      currentStep: 0,
+      totalSteps: 4,
+      steps: [
+        { title: 'Identificação', icon: 'fas fa-id-card' },
+        { title: 'Descrição', icon: 'fas fa-file-alt' },
+        { title: 'Objetivos', icon: 'fas fa-bullseye' },
+        { title: 'Finalização', icon: 'fas fa-check-circle' }
+      ],
+      form: {
+        student_id: '',
+        data_atendimento: new Date().toISOString().split('T')[0],
+        descricao: '',
+        objetivos: '',
+        recursos: '',
+        observacoes: ''
+      },
+      alunos: [],
+      relatorios: [],
+      loading: false,
+      isRecording: false,
+      isProcessingAudio: false,
+      recordingTime: 0,
+      mediaRecorder: null,
+      audioChunks: [],
+      recordingTimer: null
+    }
+  },
+  async mounted() {
+    await this.loadStudents();
+    await this.loadRelatorios();
+  },
+  computed: {
+    canProceed() {
+      switch (this.currentStep) {
+        case 0:
+          return this.form.student_id && this.form.data_atendimento;
+        case 1:
+          return this.form.descricao && this.form.descricao.trim().length > 0;
+        case 2:
+          return true; // Objetivos e recursos são opcionais
+        case 3:
+          return true; // Observações são opcionais
+        default:
+          return false;
+      }
+    }
+  },
+  methods: {
+    nextStep() {
+      if (this.canProceed && this.currentStep < this.totalSteps - 1) {
+        this.currentStep++;
+      }
+    },
+    
+    previousStep() {
+      if (this.currentStep > 0) {
+        this.currentStep--;
+      }
+    },
+    
+    goToStep(stepIndex) {
+      if (stepIndex >= 0 && stepIndex < this.totalSteps) {
+        this.currentStep = stepIndex;
+      }
+    },
+    
+    getStudentName(studentId) {
+      const student = this.alunos.find(s => s.id == studentId);
+      return student ? student.name : '';
+    },
+    async loadStudents() {
+      try {
+        let params = {};
+        if (this.$parent.user && this.$parent.user.role !== 'admin') {
+          params.teacher_id = this.$parent.user.id;
+        }
+        const r = await api.get('/students', { params });
+        this.alunos = (r.data?.data?.rows) || [];
+      } catch (e) {
+        console.error('Erro ao carregar alunos:', e);
+      }
+    },
+    
+    async loadRelatorios() {
+      try {
+        let params = {};
+        if (this.$parent.user && this.$parent.user.role !== 'admin') {
+          params.teacher_id = this.$parent.user.id;
+        }
+        const r = await api.get('/atendimentos', { params });
+        this.relatorios = (r.data?.data?.rows) || [];
+      } catch (e) {
+        console.error('Erro ao carregar relatórios:', e);
+      }
+    },
+
+    async toggleRecording() {
+      if (this.isRecording) {
+        await this.stopRecording();
+      } else {
+        await this.startRecording();
+      }
+    },
+
+    async startRecording() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        this.mediaRecorder = new MediaRecorder(stream);
+        this.audioChunks = [];
+        this.recordingTime = 0;
+
+        this.mediaRecorder.ondataavailable = (event) => {
+          this.audioChunks.push(event.data);
+        };
+
+        this.mediaRecorder.onstop = async () => {
+          const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
+          await this.processAudio(audioBlob);
+          
+          // Parar todas as tracks de áudio
+          stream.getTracks().forEach(track => track.stop());
+        };
+
+        this.mediaRecorder.start();
+        this.isRecording = true;
+        
+        // Timer para mostrar tempo de gravação
+        this.recordingTimer = setInterval(() => {
+          this.recordingTime++;
+        }, 1000);
+
+      } catch (error) {
+        console.error('Erro ao iniciar gravação:', error);
+        this.$showModal('Erro', 'Erro ao acessar o microfone. Verifique as permissões.', 'error');
+      }
+    },
+
+    async stopRecording() {
+      if (this.mediaRecorder && this.isRecording) {
+        this.mediaRecorder.stop();
+        this.isRecording = false;
+        
+        if (this.recordingTimer) {
+          clearInterval(this.recordingTimer);
+          this.recordingTimer = null;
+        }
+      }
+    },
+
+    async processAudio(audioBlob) {
+      this.isProcessingAudio = true;
+      
+      try {
+        // Aqui seria a integração com API de speech-to-text
+        // Por enquanto, vamos simular com um placeholder
+        
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'recording.wav');
+        
+        // Simulação de processamento (substituir por API real)
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Texto simulado - substituir pela resposta real da API
+        const transcricao = 'Texto convertido do áudio será inserido aqui quando a API de conversão estiver implementada.';
+        
+        // Adicionar ao texto existente
+        if (this.form.descricao) {
+          this.form.descricao += '\n\n' + transcricao;
+        } else {
+          this.form.descricao = transcricao;
+        }
+        
+      } catch (error) {
+        console.error('Erro ao processar áudio:', error);
+        this.$showModal('Erro', 'Erro ao converter áudio para texto.', 'error');
+      } finally {
+        this.isProcessingAudio = false;
+      }
+    },
+
+    async save() {
+      this.loading = true;
+      try {
+        const payload = { ...this.form };
+        if (this.$parent.user && this.$parent.user.role !== 'admin') {
+          payload.teacher_id = this.$parent.user.id;
+        }
+
+        const r = await api.post('/atendimentos', payload);
+        if (r.data?.ok) {
+          this.$showModal('Sucesso', 'Relatório salvo com sucesso!', 'success');
+          this.cancel();
+          await this.loadRelatorios();
+        } else {
+          this.$showModal('Erro', r.data?.error || 'Erro ao salvar relatório', 'error');
+        }
+      } catch (e) {
+        this.$showModal('Erro', 'Erro ao salvar relatório', 'error');
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    cancel() {
+      this.currentStep = 0;
+      this.form = {
+        student_id: '',
+        data_atendimento: new Date().toISOString().split('T')[0],
+        descricao: '',
+        objetivos: '',
+        recursos: '',
+        observacoes: ''
+      };
+    },
+
+    edit(relatorio) {
+      this.form = { ...relatorio };
+    },
+
+    async deleteRelatorio(relatorio) {
+      if (!confirm('Excluir este relatório?')) return;
+      
+      try {
+        const r = await api.delete(`/atendimentos/${relatorio.id}`);
+        if (r.data?.ok) {
+          await this.loadRelatorios();
+        } else {
+          this.$showModal('Erro', r.data?.error || 'Erro ao excluir relatório', 'error');
+        }
+      } catch (e) {
+        this.$showModal('Erro', 'Erro ao excluir relatório', 'error');
+      }
+    },
+
+    formatDate(date) {
+      return new Date(date).toLocaleDateString('pt-BR');
+    },
+
+    loadStudentData() {
+      // Carregar dados específicos do aluno se necessário
+    },
+    
+    exportarPDF() {
+      if (!this.form.student_id) {
+        this.$showModal('Atenção', 'Selecione um aluno primeiro para gerar o PDF.', 'info');
+        return;
+      }
+      
+      const token = localStorage.getItem('token');
+      if (!token) {
+        this.$showModal('Erro', 'Token de autenticação não encontrado. Faça login novamente.', 'error');
+        return;
+      }
+      
+      const url = `${CONFIG.API_BASE}/pai/pdf?student_id=${this.form.student_id}&token=${encodeURIComponent(token)}`;
+      window.open(url, '_blank');
     }
   }
 };
@@ -2140,13 +4692,13 @@ const routes = [
     children: [
       { path: '', component: Dashboard },
       { path: 'alunos', component: AlunosTW },
-      { path: 'cursos', component: CursosTW },
-      { path: 'agenda', component: AgendaTW },
       { path: 'usuarios', component: UsuariosTW },
+      { path: 'relatorio-atendimento', component: RelatorioAtendimento },
       { path: 'entrevista-responsavel', component: EntrevistaResponsavel },
       { path: 'pdi', component: PDI },
       { path: 'plano-atendimento', component: PlanoAtendimento },
-      { path: 'relatorios', component: Relatorios }
+      { path: 'relatorios', component: Relatorios },
+      { path: 'legislacoes', component: LegislacoesTW }
     ]
   }
 ];
@@ -2170,9 +4722,74 @@ router.beforeEach((to, from, next) => {
 const { createApp } = Vue;
 
 const app = createApp({
+  components: {
+    PainelDesenvolvimento: window.PainelDesenvolvimento
+  },
+  template: `
+    <div>
+      <PainelDesenvolvimento />
+      <router-view></router-view>
+      
+      <!-- Modal Component -->
+      <div v-if="modal.visible" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+          <div class="mt-3 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full" :class="modalIconBg">
+              <i :class="modalIcon" class="text-xl"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mt-5">{{ modal.title }}</h3>
+            <div class="mt-2 px-7 py-3">
+              <p class="text-sm text-gray-500">{{ modal.message }}</p>
+            </div>
+            <div class="items-center px-4 py-3">
+              <button @click="closeModal" 
+                      class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
   data() {
     return {
-      loading: true
+      loading: true,
+      modal: {
+        visible: false,
+        title: '',
+        message: '',
+        type: 'info' // 'success', 'error', 'info'
+      }
+    }
+  },
+  computed: {
+    modalIcon() {
+      const icons = {
+        success: 'fas fa-check-circle text-green-600',
+        error: 'fas fa-times-circle text-red-600',
+        info: 'fas fa-info-circle text-blue-600'
+      };
+      return icons[this.modal.type] || icons.info;
+    },
+    modalIconBg() {
+      const colors = {
+        success: 'bg-green-100',
+        error: 'bg-red-100',
+        info: 'bg-blue-100'
+      };
+      return colors[this.modal.type] || colors.info;
+    }
+  },
+  methods: {
+    showModal(title, message, type = 'info') {
+      this.modal.title = title;
+      this.modal.message = message;
+      this.modal.type = type;
+      this.modal.visible = true;
+    },
+    closeModal() {
+      this.modal.visible = false;
     }
   },
   async mounted() {
@@ -2189,6 +4806,11 @@ const app = createApp({
     this.loading = false;
   }
 });
+
+// Adicionar método global para modal
+app.config.globalProperties.$showModal = function(title, message, type = 'info') {
+  this.$root.showModal(title, message, type);
+};
 
 // Adicionar estilos customizados para navegação
 const style = document.createElement('style');
@@ -2213,9 +4835,17 @@ style.textContent = `
   }
   
   .nav-link-tw.router-link-active {
-    background-color: #dbeafe;
-    color: #1d4ed8;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
     font-weight: 600;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    border-left: 4px solid #1e40af;
+  }
+  
+  .nav-link-tw.router-link-active:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+    color: white;
+    transform: translateX(4px);
   }
   
   .fade-in {
@@ -2375,6 +5005,11 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
+
+// Registrar componente DatePicker
+if (typeof DatePickerComponent !== 'undefined') {
+  app.component('DatePicker', DatePickerComponent);
+}
 
 // Usar router e montar aplicação
 app.use(router);

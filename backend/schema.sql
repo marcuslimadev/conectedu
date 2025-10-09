@@ -224,6 +224,7 @@ CREATE TABLE IF NOT EXISTS `students` (
   `modalidade` enum('apoio','srm') NOT NULL,
   `support_teacher_id` int(11) DEFAULT NULL,
   `srm_room_id` int(11) DEFAULT NULL,
+  `created_by_teacher_id` int(11) DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
@@ -235,9 +236,11 @@ CREATE TABLE IF NOT EXISTS `students` (
   KEY `idx_students_name` (`name`),
   KEY `idx_students_modalidade` (`modalidade`),
   KEY `idx_students_support_teacher_id` (`support_teacher_id`),
+  KEY `idx_students_created_by_teacher_id` (`created_by_teacher_id`),
   CONSTRAINT `fk_students_srm_room_id` FOREIGN KEY (`srm_room_id`) REFERENCES `srm_rooms` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_students_support_teacher_id` FOREIGN KEY (`support_teacher_id`) REFERENCES `support_teachers` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `fk_students_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+  CONSTRAINT `fk_students_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_students_created_by_teacher_id` FOREIGN KEY (`created_by_teacher_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Copiando dados para a tabela conectedu.students: ~0 rows (aproximadamente)
@@ -317,6 +320,45 @@ CREATE TABLE IF NOT EXISTS `weekly_plan_items` (
 -- Copiando dados para a tabela conectedu.weekly_plan_items: ~0 rows (aproximadamente)
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
+-- Copiando estrutura para tabela conectedu.atendimentos
+CREATE TABLE IF NOT EXISTS `atendimentos` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` int(11) NOT NULL,
+  `teacher_id` int(11) NOT NULL,
+  `data_atendimento` date NOT NULL,
+  `descricao` longtext NOT NULL,
+  `objetivos` text DEFAULT NULL,
+  `recursos` text DEFAULT NULL,
+  `observacoes` text DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `student_id` (`student_id`),
+  KEY `teacher_id` (`teacher_id`),
+  KEY `data_atendimento` (`data_atendimento`),
+  CONSTRAINT `fk_atendimentos_student_id` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_atendimentos_teacher_id` FOREIGN KEY (`teacher_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Copiando dados para a tabela conectedu.atendimentos: ~0 rows (aproximadamente)
+
+-- Copiando estrutura para tabela conectedu.legislacoes
+CREATE TABLE IF NOT EXISTS `legislacoes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `titulo` varchar(255) NOT NULL,
+  `descricao` text DEFAULT NULL,
+  `arquivo_pdf` varchar(255) NOT NULL,
+  `nome_original` varchar(255) NOT NULL,
+  `tamanho_arquivo` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_legislacoes_titulo` (`titulo`),
+  KEY `idx_legislacoes_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Copiando dados para a tabela conectedu.legislacoes: ~0 rows (aproximadamente)
+
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

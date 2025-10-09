@@ -1,5 +1,5 @@
 
-html.dys { font-family: 'OpenDyslexic', system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+html.dys { font-family: 'Comic Neue', system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
 html.hc, html.hc body { background-color:#000 !important; color:#fff !important; }
 html.hc *:not(.a11y-menu):not(.a11y-menu *):not(svg):not(svg *):not(img) { color:#fff !important; border-color:#fff !important; }
 html.hc a { color:#0ff !important; text-decoration: underline !important; }

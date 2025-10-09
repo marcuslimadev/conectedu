@@ -10,23 +10,42 @@
 <meta name="description" content="Sistema completo para gestão de alunos, cursos e agenda educacional">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=OpenDyslexic:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+</noscript>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=5.0'))}</script>
-<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="./tailwind-local.css?v=5.0">
 <script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          'brand-primary': '#1d4ed8',
-          'brand-secondary': '#06b6d4',
-        }
-      }
-    }
-  }
+  // Tailwind config moved to local CSS file for production
+  console.log('✅ Tailwind CSS carregado localmente para produção');
 </script>
 <link rel="stylesheet" href="./accessibility.css?v=5.0">
+<script src="./accessibility.js?v=5.0" defer></script>
+<style>
+  /* Fallback fonts e estilos críticos */
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  }
+  
+  /* Esconder VLibras se houver erro */
+  [vw].vlibras-error {
+    display: none !important;
+  }
+  
+  /* Loader para fontes */
+  .font-loading {
+    visibility: hidden;
+  }
+  
+  /* Garantir que o logo seja sempre visível */
+  img[alt*="ConectAEE"] {
+    max-width: 100%;
+    height: auto;
+  }
+</style>
 </head>
 <body class="bg-gray-50 font-sans">
 <div class="bg-gradient-to-r from-brand-primary to-brand-secondary text-white shadow-lg">
@@ -56,6 +75,9 @@
 <script src="https://cdn.jsdelivr.net/npm/axios@1.7.4/dist/axios.min.js"></script>
 <script src="https://code.highcharts.com/highcharts.js"></script>
 <script src="./config.js?v=5.0"></script>
+<script src="./date-picker-component.js?v=5.0"></script>
+<script src="./dados-teste-automatizado.js?v=5.0"></script>
+<script src="./painel-desenvolvimento.js?v=5.0"></script>
 <script src="./spa-tailwind.js?v=5.0"></script>
 
 <!-- Modal functionality -->
@@ -102,19 +124,125 @@ document.addEventListener('keydown', function(e) {
 });
 </script>
 
-<!-- Vlibras -->
+<!-- Vlibras com tratamento de erro -->
 <div vw class="enabled">
   <div vw-access-button class="active"></div>
   <div vw-plugin-wrapper>
     <div class="vw-plugin-top-wrapper"></div>
   </div>
 </div>
-<script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
 <script>
-  new window.VLibras.Widget('https://vlibras.gov.br/app');
+// Carregamento seguro do VLibras
+(function() {
+  // Timeout para carregamento do VLibras
+  let vlibrasTimeout;
+  
+  function hideVLibras() {
+    const vlibrasElements = document.querySelectorAll('[vw]');
+    vlibrasElements.forEach(el => {
+      el.style.display = 'none';
+      el.classList.add('vlibras-error');
+    });
+  }
+  
+  function loadVLibras() {
+    try {
+      // Timeout de 10 segundos para carregamento
+      vlibrasTimeout = setTimeout(() => {
+        console.warn('VLibras: Timeout de carregamento excedido');
+        hideVLibras();
+      }, 10000);
+      
+      // Criar elemento script
+      const script = document.createElement('script');
+      script.src = 'https://vlibras.gov.br/app/vlibras-plugin.js';
+      script.async = true;
+      
+      // Tratar carregamento bem-sucedido
+      script.onload = function() {
+        clearTimeout(vlibrasTimeout);
+        
+        try {
+          if (window.VLibras && typeof window.VLibras.Widget === 'function') {
+            // Adicionar proteção adicional contra erros do VLibras
+            const originalEmit = EventTarget.prototype.emit;
+            if (!originalEmit) {
+              EventTarget.prototype.emit = function() {
+                try {
+                  if (this.dispatchEvent) {
+                    return this.dispatchEvent.apply(this, arguments);
+                  }
+                } catch (e) {
+                  console.warn('VLibras emit error:', e);
+                }
+              };
+            }
+            
+            new window.VLibras.Widget('https://vlibras.gov.br/app');
+          } else {
+            console.warn('VLibras não foi carregado corretamente');
+            hideVLibras();
+          }
+        } catch (e) {
+          console.warn('Erro ao inicializar VLibras:', e);
+          hideVLibras();
+        }
+      };
+      
+      // Tratar erro de carregamento
+      script.onerror = function() {
+        clearTimeout(vlibrasTimeout);
+        console.warn('Falha ao carregar script do VLibras');
+        hideVLibras();
+      };
+      
+      // Adicionar ao head
+      document.head.appendChild(script);
+      
+    } catch (e) {
+      clearTimeout(vlibrasTimeout);
+      console.warn('Erro ao configurar VLibras:', e);
+      hideVLibras();
+    }
+  }
+  
+  // Aguardar DOM estar pronto
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadVLibras);
+  } else {
+    loadVLibras();
+  }
+})();
 </script>
 
-<!-- Acessibilidade -->
-<script src="./a11y.js?v=5.0"></script>
+<!-- Acessibilidade com tratamento de erro -->
+<script>
+// Carregamento seguro do sistema de acessibilidade
+(function() {
+  try {
+    const script = document.createElement('script');
+    script.src = './a11y.js?v=5.0';
+    script.async = true;
+    
+    script.onerror = function() {
+      console.warn('Erro ao carregar sistema de acessibilidade');
+    };
+    
+    document.head.appendChild(script);
+  } catch (e) {
+    console.warn('Erro ao configurar sistema de acessibilidade:', e);
+  }
+})();
+
+// Proteção adicional contra erros globais
+window.addEventListener('error', function(e) {
+  // Suprimir erros do VLibras que não afetam o funcionamento
+  if (e.message && e.message.includes('vlibras') || 
+      e.filename && e.filename.includes('vlibras')) {
+    e.preventDefault();
+    return false;
+  }
+});
+</script>
 </body>
 </html>

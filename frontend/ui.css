@@ -24,3 +24,48 @@
 html.dark .card,html.dark .list-group-item{background:#0b1220;color:#e5e7eb;border-color:#334155}
 html.dark .btn{background:#111827;color:#e5e7eb;border-color:#334155}
 html.dark .input, html.dark .form-control, html.dark .form-select{background:#0b1220;color:#e5e7eb;border-color:#334155}
+
+/* Layout fixo otimizado para mobile */
+.fixed-layout { 
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Scrollbar customizada para melhor UX */
+.overflow-y-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Otimizações para mobile */
+@media (max-width: 1023px) {
+  .sidebar-mobile {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+  
+  .header-mobile {
+    min-height: 56px;
+  }
+  
+  /* Evita que o conteúdo seja muito apertado no mobile */
+  .content-mobile {
+    padding: 1rem;
+  }
+}

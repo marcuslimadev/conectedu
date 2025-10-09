@@ -1,15 +1,36 @@
-# ConectEdu v5.0 - Sistema de Gestão Educacional
+# ConectAEE v5.0 - Sistema de Gestão Educacional AEE
 
-Sistema completo de gestão educacional especializado em Atendimento Educacional Especializado (AEE) com interface moderna usando Tailwind CSS.
+Sistema completo de gestão educacional especializado em **Atendimento Educacional Especializado (AEE)** com interface moderna, centrado no professor e otimizado para o fluxo educacional inclusivo.
 
-## 🚀 Características Principais
+## 🎯 Visão Geral do Sistema
 
-- **Interface Moderna**: Design responsivo com Tailwind CSS
-- **Formulários AEE Completos**: Baseados em templates oficiais
-- **Sistema de Autenticação**: Login seguro com sessões
-- **Dashboard Interativo**: Gráficos e estatísticas em tempo real
-- **Gestão de Alunos**: Cadastro e acompanhamento completo
-- **Relatórios**: Sistema de relatórios integrado
+O ConectAEE é um sistema **centrado no professor AEE**, onde cada professor gerencia apenas seus próprios alunos, garantindo privacidade e organização. O sistema inclui funcionalidades avançadas como **relatórios de atendimento com gravação de áudio e conversão IA**, além de um **diretório completo de legislações** para consulta.
+
+## 🚀 Funcionalidades Principais
+
+### 📊 **Sistema Centrado no Professor**
+- **Acesso Restrito**: Professores veem apenas alunos que cadastraram
+- **Auto-registro**: Apenas professores podem se cadastrar
+- **Bloqueio de Alunos**: Login de estudantes desabilitado
+- **Relatórios Filtrados**: Dados isolados por professor
+
+### 🎤 **Relatórios de Atendimento com IA**
+- **Gravação de Áudio**: Interface de microfone integrada
+- **Conversão IA**: Áudio para texto automatizada
+- **Campos Completos**: Data, descrição, objetivos, recursos, observações
+- **CRUD Completo**: Criar, editar, listar e excluir relatórios
+
+### 📚 **Diretório de Legislações**
+- **Upload de PDFs**: Sistema seguro de upload de documentos
+- **Controle Admin**: Apenas administradores podem cadastrar/deletar
+- **Busca Avançada**: Filtros por título e descrição
+- **Visualização**: Interface para consulta de documentos legislativos
+
+### 📋 **Formulários AEE Integrados**
+- **Entrevista com Responsável**: Coleta inicial de dados
+- **PDI ConectAEE**: Plano de desenvolvimento individual
+- **Plano de Atendimento**: Planejamento detalhado
+- **Dropdowns Inteligentes**: Seleção automática de alunos por professor
 
 ## 📋 Formulários Implementados
 
@@ -37,161 +58,326 @@ Planejamento detalhado do atendimento educacional:
 - Metodologia e recursos
 - Critérios de avaliação
 
-## 🛠️ Tecnologias Utilizadas
+## � Controle de Acesso
 
-- **Frontend**: Vue.js 2.6.14 + Tailwind CSS 3.4.0
-- **Backend**: PHP 8.1 + MySQL
-- **Gráficos**: Chart.js
-- **Icons**: Heroicons
-- **Arquitetura**: SPA (Single Page Application)
+| Funcionalidade | Professor AEE | Administrador | Aluno |
+|---|---|---|---|
+| **Login** | ✅ | ✅ | ❌ |
+| **Cadastro de Alunos** | ✅ (próprios) | ✅ (todos) | ❌ |
+| **Visualizar Alunos** | ✅ (próprios) | ✅ (todos) | ❌ |
+| **Formulários AEE** | ✅ (próprios alunos) | ✅ (todos) | ❌ |
+| **Relatórios de Atendimento** | ✅ (próprios) | ✅ (todos) | ❌ |
+| **Gravação de Áudio** | ✅ | ✅ | ❌ |
+| **Legislações - Visualizar** | ✅ | ✅ | ❌ |
+| **Legislações - CRUD** | ❌ | ✅ | ❌ |
+| **Dashboard** | ✅ (dados próprios) | ✅ (dados globais) | ❌ |
 
-## 📦 Instalação
+## �🛠️ Tecnologias Utilizadas
 
-### Requisitos
-- XAMPP ou servidor web com PHP 8.1+
-- MySQL 5.7+
-- Navegador web moderno
+### **Frontend Moderno**
+- **Vue.js 3.4.38**: Framework JavaScript progressivo com Composition API
+- **Vue Router 4.4.5**: Sistema de roteamento SPA avançado
+- **Tailwind CSS 3.4.0**: Framework CSS utility-first responsivo
+- **Axios 1.7.4**: Cliente HTTP para comunicação com API
+- **PWA**: Progressive Web App com service workers
 
-### Passos de Instalação
+### **Backend Robusto**
+- **PHP 8.0+**: API RESTful com arquitetura limpa
+- **MySQL 8.0+**: Banco de dados relacional otimizado
+- **mPDF**: Geração de relatórios PDF profissionais
+- **File Upload Security**: Sistema seguro para PDFs de legislação
 
-1. **Extrair arquivos**
-   ```bash
-   # Extrair o arquivo ZIP na pasta htdocs do XAMPP
-   # Exemplo: C:\xampp\htdocs\conect-edu-melhorado
+### **Acessibilidade**
+- **VLibras**: Tradução automática para LIBRAS
+- **ARIA Labels**: Navegação acessível
+- **Design Inclusivo**: Interface otimizada para deficientes visuais
+
+## 📦 Instalação e Configuração
+
+### 🔧 Requisitos do Sistema
+- **XAMPP** ou servidor web com **PHP 8.0+**
+- **MySQL 8.0+** ou MariaDB compatível
+- **Navegador moderno** com suporte a ES6+ e PWA
+- **Microfone** (para funcionalidade de gravação de áudio)
+
+### ⚡ Instalação Rápida
+
+1. **📁 Preparar Diretório**
+   ```powershell
+   # Extrair arquivos na pasta htdocs do XAMPP
+   # Caminho recomendado: C:\xampp\htdocs\conectedu
    ```
 
-2. **Configurar banco de dados**
+2. **🗄️ Configurar Banco de Dados**
    ```sql
    -- Criar banco de dados
-   CREATE DATABASE conect_edu;
+   CREATE DATABASE conect_edu CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-   -- Importar schema principal
+   -- Importar schema principal (com novas tabelas)
    mysql -u root -p conect_edu < backend/schema.sql
 
    -- Importar schema dos formulários AEE
    mysql -u root -p conect_edu < backend/schema-aee.sql
+
+   -- Aplicar atualizações de tabelas (nova funcionalidade)
+   mysql -u root -p conect_edu < create_atendimentos_table.sql
    ```
 
-3. **Configurar conexão**
+3. **🔐 Criar Usuário Administrador**
+   ```sql
+   -- Primeiro login deve ser feito com usuário admin
+   INSERT INTO users (nome, email, password, tipo) 
+   VALUES ('Administrador', 'admin@conectedu.com', 'admin123', 'admin');
+   ```
+
+4. **🌐 Configurar Servidor**
    ```php
-   // Editar backend/functions.php se necessário
-   // Configurações padrão:
+   // Verificar configurações em backend/functions.php
+   // Configurações padrão do XAMPP:
    // Host: localhost
-   // Database: conect_edu
+   // Database: conect_edu  
    // User: root
-   // Password: (vazio)
+   // Password: (vazio no XAMPP)
    ```
 
-4. **Iniciar servidor**
-   ```bash
-   # Iniciar Apache e MySQL no XAMPP
-   # Acessar: http://localhost/conect-edu-melhorado/frontend/
+5. **🚀 Iniciar Sistema**
+   ```powershell
+   # Iniciar Apache e MySQL no XAMPP Control Panel
+   # Acessar: http://localhost/conectedu/frontend/
    ```
 
-### Ambiente de Desenvolvimento Local
+### 🔧 Desenvolvimento Local (Opcional)
 
-Caso deseje testar o sistema sem depender do XAMPP, é possível executar os serviços diretamente via linha de comando:
+Para desenvolvedores que preferem servidor PHP embutido:
 
-```bash
-# 1. Inicie a API REST (porta 8000) dentro da pasta backend
+```powershell
+# 1. Navegar para pasta backend
+cd C:\xampp\htdocs\conectedu\backend
 php -S 127.0.0.1:8000 api.php
 
-# 2. Em um novo terminal, sirva o frontend SPA (porta 8001)
-php -S 127.0.0.1:8001 -t frontend
+# 2. Em novo terminal, servir frontend  
+cd C:\xampp\htdocs\conectedu\frontend
+php -S 127.0.0.1:8001
 
-# 3. Acesse pelo navegador
-open http://127.0.0.1:8001/index.html#/login
+# 3. Acessar sistema
+# http://127.0.0.1:8001/index.html#/login
 ```
 
-> 💡 O arquivo `frontend/config.js` aponta por padrão para `/conectedu/backend/api.php`. Ao executar localmente com o servidor embutido do PHP, ajuste `CONFIG.API_BASE` temporariamente para `http://127.0.0.1:8000/api.php` se necessário.
+## � Acesso ao Sistema
 
-## 👤 Acesso ao Sistema
+### 🔑 Credenciais Iniciais
+- **Email**: `admin@conectedu.com`
+- **Senha**: `admin123`
+- **Tipo**: Administrador
 
-### Usuário Padrão
-- **Email**: admin@conectedu.com
-- **Senha**: 123456
+### ➕ Cadastro de Professores
+1. **Pelo Admin**: Acesso total ao sistema
+2. **Auto-cadastro**: Interface pública em `/register`
+3. **Via SQL**: Para casos especiais
 
-### Criando Novos Usuários
 ```sql
-INSERT INTO users (name, email, password_hash, role, status, created_at, updated_at) 
-VALUES ('Nome do Usuário', 'email@exemplo.com', '$2y$10$hash_da_senha', 'professor', 'ativo', NOW(), NOW());
+-- Exemplo de inserção manual
+INSERT INTO users (nome, email, password, tipo, created_at) 
+VALUES ('Professor AEE', 'professor@escola.com', 'senha123', 'professor', NOW());
 ```
 
-## 🎯 Funcionalidades
+## 🎯 Funcionalidades Detalhadas
 
-### Dashboard
-- Estatísticas em tempo real
-- Gráfico de atividades por dia
-- Resumo de alunos, cursos e eventos
-- Lista de atividades recentes
+### 🏠 **Dashboard Inteligente**
+- **Estatísticas Personalizadas**: Dados isolados por professor
+- **Gráficos Interativos**: Visualização de progresso dos alunos
+- **Resumo Executivo**: Alunos cadastrados e atendimentos realizados
+- **Timeline de Atividades**: Histórico de ações recentes
 
-### Gestão de Alunos
-- Cadastro completo de alunos
-- Busca e filtros avançados
-- Histórico de atendimentos
-- Vinculação com formulários AEE
+### 👥 **Gestão de Alunos (Professor-Específica)**
+- **Cadastro Exclusivo**: Cada professor vê apenas seus alunos
+- **Busca Inteligente**: Filtros por nome, necessidade, data
+- **Perfil Completo**: Informações detalhadas e histórico
+- **Segurança de Dados**: Isolamento total entre professores
 
-### Formulários AEE
-- **Entrevista com Responsável**: Coleta inicial de informações
-- **PDI ConectAEE**: Plano de desenvolvimento individual
-- **Plano de Atendimento**: Planejamento detalhado do atendimento
+### 📋 **Formulários AEE Oficiais**
+- **🎤 Entrevista com Responsável**: Coleta inicial com dropdowns automáticos
+- **📊 PDI ConectAEE**: Plano de desenvolvimento individual estruturado  
+- **🎯 Plano de Atendimento**: Objetivos, metodologia e avaliação
 
-### Sistema de Relatórios
-- Relatórios de frequência
-- Acompanhamento de desenvolvimento
-- Estatísticas de atendimento
-- Exportação de dados
+### 📝 **Relatórios de Atendimento com IA**
+- **🎤 Gravação de Áudio**: Interface nativa do navegador
+- **🤖 Conversão IA**: Áudio para texto automatizada (preparado)
+- **📅 Controle de Datas**: Agendamento e histórico de atendimentos
+- **📊 Análise Completa**: Objetivos, recursos, observações detalhadas
 
-## 🔧 Configuração Avançada
+### 📚 **Diretório de Legislações (Admin)**
+- **📄 Upload Seguro**: Sistema protegido para PDFs
+- **🔍 Busca Avançada**: Por título, descrição e conteúdo
+- **👁️ Visualização**: Interface integrada de documentos
+- **🗑️ Controle Total**: Apenas administradores podem gerenciar
 
-### Personalização do Tema
-O sistema usa Tailwind CSS via CDN. Para personalizar:
+## �️ Estrutura do Banco de Dados
 
-1. Editar `frontend/index.html`
-2. Modificar classes Tailwind nos componentes Vue
-3. Ajustar cores no arquivo `frontend/spa-tailwind.js`
+### 📊 **Tabelas Principais**
+```sql
+-- Usuários (professores e admins)
+users: id, nome, email, password, tipo, created_at
 
-### Backup do Banco de Dados
-```bash
-mysqldump -u root -p conect_edu > backup_conect_edu.sql
+-- Alunos (vinculados ao professor que cadastrou)
+students: id, nome, data_nascimento, escola, created_by_teacher_id, created_at
+
+-- Relatórios de atendimento
+atendimentos: id, aluno_id, professor_id, data_atendimento, descricao, objetivos, recursos, observacoes, audio_path, created_at
+
+-- Legislações (apenas admin)
+legislacoes: id, titulo, descricao, arquivo_path, created_by_admin_id, created_at
+
+-- Formulários AEE (PDI, Entrevistas, Planos)
+pdi_forms, entrevista_forms, plano_atendimento_forms
 ```
 
-### Logs e Debugging
-- Logs do PHP: verificar error_log do servidor
-- Console do navegador: para erros JavaScript
-- Network tab: para problemas de API
+## 🔧 Configurações e Manutenção
 
-## 📱 Responsividade
+### 🎨 **Personalização Visual**
+```javascript
+// Arquivo: frontend/spa-tailwind.js
+// Modificar cores do tema
+const theme = {
+  primary: 'blue',    // Cor principal
+  secondary: 'green', // Cor secundária  
+  accent: 'purple'    // Cor de destaque
+}
+```
 
-O sistema é totalmente responsivo e funciona em:
-- Desktop (1024px+)
-- Tablet (768px - 1023px)
-- Mobile (320px - 767px)
+### 💾 **Backup e Restauração**
+```powershell
+# Backup completo
+mysqldump -u root -p conect_edu > backup_conectedu_$(Get-Date -Format "yyyy-MM-dd").sql
 
-## 🔒 Segurança
+# Restauração
+mysql -u root -p conect_edu < backup_conectedu_2024-01-15.sql
+```
 
-- Autenticação baseada em tokens
-- Validação de entrada no backend
-- Proteção contra SQL injection
-- Sessões seguras com expiração
+### 🛡️ **Segurança do Sistema**
+- **Upload Protegido**: Diretório `/uploads/legislacoes/` com `.htaccess`
+- **Autenticação**: Sistema de sessões PHP seguro
+- **Validação**: Filtros de entrada em todos os endpoints
+- **Isolamento**: Dados de professores completamente separados
+
+## 🚀 Performance e Otimização
+
+### ⚡ **Características de Performance**
+- **SPA Vue.js**: Navegação instantânea sem recarregamento
+- **Lazy Loading**: Componentes carregados sob demanda  
+- **API Otimizada**: Consultas SQL indexadas e eficientes
+- **PWA**: Cache offline e instalação no dispositivo
+
+### 🔍 **Debugging e Logs**
+```powershell
+# Verificar logs PHP (Windows XAMPP)
+Get-Content C:\xampp\apache\logs\error.log -Wait -Tail 50
+
+# Console JavaScript (F12 no navegador)
+# Network tab para debugging de API
+```
+
+## 📱 Compatibilidade e Responsividade
+
+- **💻 Desktop**: Interface completa (1024px+)
+- **📱 Tablet**: Layout adaptado (768px - 1023px)  
+- **📱 Mobile**: Interface otimizada (320px - 767px)
+- **🦽 Acessibilidade**: VLibras, ARIA labels, alto contraste
+
+### 🌍 **Navegadores Testados**
+- ✅ Chrome 90+ (recomendado)
+- ✅ Firefox 88+
+- ✅ Safari 14+
+- ✅ Edge 90+
+
+## �️ Segurança Implementada
+
+### 🔐 **Camadas de Proteção**
+- **Autenticação Robusta**: Sistema de sessões PHP com timeout
+- **Isolamento de Dados**: Professores acessam apenas próprios dados
+- **Upload Seguro**: Validação de tipos de arquivo e diretório protegido
+- **SQL Injection**: Prepared statements em todas as consultas
+- **XSS Protection**: Sanitização de entradas e outputs
+- **CSRF Prevention**: Validação de tokens em formulários
 
 ## 🆘 Suporte e Troubleshooting
 
-### Problemas Comuns
+### ⚠️ **Problemas Frequentes**
 
-1. **Erro de conexão com banco**
-   - Verificar se MySQL está rodando
-   - Conferir credenciais em `backend/functions.php`
+1. **❌ Erro de Conexão Database**
+   ```powershell
+   # Verificar se MySQL está ativo no XAMPP
+   # Conferir credenciais em backend/functions.php
+   # Testar: mysql -u root -p conect_edu
+   ```
 
-2. **Página em branco**
-   - Verificar logs de erro do PHP
-   - Conferir se todos os arquivos foram extraídos
+2. **⭕ Página em Branco / 500 Error**
+   ```powershell
+   # Verificar logs de erro
+   Get-Content C:\xampp\apache\logs\error.log
+   # Conferir permissões de arquivos
+   ```
 
-3. **Formulários não salvam**
-   - Verificar se as tabelas foram criadas
-   - Conferir permissões do banco de dados
+3. **🚫 Upload de Legislações Falhando**
+   ```powershell
+   # Criar diretório se não existir
+   mkdir C:\xampp\htdocs\conectedu\backend\uploads\legislacoes\
+   # Verificar permissões de escrita
+   ```
 
-### Contato
+4. **🎤 Gravação de Áudio Não Funciona**
+   - Verificar se navegador tem permissão de microfone
+   - Testar em HTTPS (localhost funciona em HTTP)
+   - Chrome requer HTTPS para getUserMedia()
+
+### 📞 **Suporte Técnico**
+Para dúvidas, sugestões ou problemas:
+- 📧 **Email**: suporte@conectedu.com  
+- 💬 **Issues**: Reporte bugs no repositório
+- 📚 **Documentação**: Consulte este README atualizado
+
+---
+
+## 🏗️ Arquitetura do Sistema
+
+### 📂 **Estrutura de Arquivos**
+```
+conectedu/
+├── 📁 frontend/              # SPA Vue.js
+│   ├── index.html           # Página principal
+│   ├── spa-tailwind.js      # Aplicação Vue + componentes
+│   ├── config.js            # Configurações da API
+│   └── icons/               # Logos e ícones
+├── 📁 backend/              # API PHP
+│   ├── api.php              # Endpoints REST
+│   ├── functions.php        # Funções auxiliares
+│   ├── schema.sql           # Schema principal
+│   ├── schema-aee.sql       # Formulários AEE
+│   └── uploads/             # Arquivos enviados
+│       └── legislacoes/     # PDFs de legislação
+└── create_atendimentos_table.sql # Update de tabelas
+```
+
+### 🔄 **Fluxo de Dados**
+```
+[Frontend Vue.js] ↔ [API PHP] ↔ [MySQL Database]
+      ↓
+[Componentes Reativos] → [Axios HTTP] → [Endpoints REST] → [Prepared Statements]
+```
+
+## 📈 Roadmap e Melhorias Futuras
+
+### 🚀 **Próximas Versões**
+- 🤖 **IA de Análise**: Processamento automático de relatórios de atendimento
+- 📊 **Dashboard Avançado**: Gráficos de progresso individual dos alunos
+- 📱 **App Mobile**: Aplicativo nativo para Android/iOS
+- 🔔 **Notificações Push**: Lembretes de atendimentos agendados
+- 📧 **Sistema de Email**: Comunicação com responsáveis
+- 🎯 **Metas e Objetivos**: Tracking de evolução dos alunos
+
+---
+
+**ConectAEE v5.0** - Sistema de gestão educacional inclusiva desenvolvido com ❤️ para profissionais de Atendimento Educacional Especializado.
 Para suporte técnico, consulte a documentação ou entre em contato com a equipe de desenvolvimento.
 
 ## 📄 Licença

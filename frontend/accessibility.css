@@ -169,7 +169,7 @@
 
 /* Fonte para disléxicos */
 [data-font-family="dyslexic"] {
-  font-family: 'OpenDyslexic', 'Comic Sans MS', cursive !important;
+  font-family: 'Comic Neue', 'Comic Sans MS', cursive !important;
   font-weight: 400 !important;
   letter-spacing: 0.05em !important;
   line-height: 1.6 !important;

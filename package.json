@@ -1,0 +1,22 @@
+{
+  "name": "conectedu-frontend",
+  "version": "1.0.0",
+  "description": "Sistema de AEE ConectEDU - Frontend",
+  "main": "index.js",
+  "scripts": {
+    "build-css": "tailwindcss -i ./frontend/tailwind-src.css -o ./frontend/tailwind-local.css --watch",
+    "build-css-prod": "tailwindcss -i ./frontend/tailwind-src.css -o ./frontend/tailwind-local.css --minify",
+    "dev": "npm run build-css",
+    "build": "npm run build-css-prod"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.10",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32"
+  },
+  "keywords": ["aee", "educacao", "inclusao", "vue", "tailwind"],
+  "author": "Sistema ConectEDU",
+  "license": "MIT"
+}

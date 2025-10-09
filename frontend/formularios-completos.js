@@ -15,9 +15,11 @@ const EntrevistaResponsavelCompleta = {
         <div class="bg-white shadow rounded-lg p-6">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Data da Entrevista</label>
-              <input v-model="form.data_entrevista" type="date" required 
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent">
+              <DatePicker
+                v-model="form.data_entrevista"
+                label="Data da Entrevista"
+                :required="true"
+                placeholder="DD/MM/AAAA" />
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Entrevista</label>
@@ -420,6 +422,10 @@ const EntrevistaResponsavelCompleta = {
       } finally {
         this.loading = false;
       }
+    },
+    
+    getMaxDate() {
+      return new Date().toISOString().split('T')[0];
     }
   }
 };

@@ -139,17 +139,6 @@ const AlunosTW = {
                 <span>Nome</span>
                 <svg v-if="sortField === 'name'" class="w-4 h-4" :class="sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                   <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Selecionar Aluno <span class="text-red-500">*</span></label>
-                    <input v-model="alunoFiltroPDI" placeholder="Filtrar alunos..." class="mb-2 w-full px-3 py-2 border border-gray-300 rounded" />
-                    <select v-model="form.student_id" required 
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                      @change="preencherDadosAluno">
-                      <option value="">Selecione um aluno</option>
-                      <option v-for="aluno in alunosFiltradosPDI" :key="aluno.id" :value="aluno.id">{{ aluno.name }}</option>
-                    </select>
-                  </div>
-                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
                 </svg>
               </div>
             </th>
@@ -319,8 +308,15 @@ const AlunosTW = {
       </div>
     </div>
 
-    <div v-if="editing" class="bg-white shadow rounded-lg p-6 space-y-6" role="dialog" aria-labelledby="form-heading">
-      <h1 id="form-heading" class="text-2xl font-bold text-gray-900">{{ form.id ? 'Editar Aluno' : 'Novo Aluno' }}</h1>
+    <!-- Modal de Criar/Editar Aluno -->
+    <div v-if="editing" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" role="dialog" aria-labelledby="form-heading" aria-modal="true">
+      <div class="bg-gray-50 rounded-lg w-full max-w-4xl h-[90vh] overflow-y-auto shadow-xl p-6 space-y-6">
+        <div class="flex items-center justify-between">
+          <h1 id="form-heading" class="text-2xl font-bold text-gray-900">{{ form.id ? 'Editar Aluno' : 'Novo Aluno' }}</h1>
+          <button @click="cancel" class="text-gray-500 hover:text-gray-700" aria-label="Fechar">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
       
       <!-- Barra de Progresso -->
       <div class="mb-8">
@@ -390,7 +386,7 @@ const AlunosTW = {
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-                        <button @click="newEscola" 
+            <label class="block text-sm font-medium text-gray-700 mb-2">
               <i class="fas fa-graduation-cap text-blue-500 mr-1"></i>
               Modalidade AEE *
             </label>
@@ -403,24 +399,19 @@ const AlunosTW = {
             </select>
             <div class="text-xs text-gray-700 mt-1">Escolha o tipo de atendimento AEE</div>
           </div>
-                          class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent flex-1 placeholder-gray-700 text-gray-900">
-              Status
-            </label>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
             <select v-model="form.status" 
                     class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
               <option value="ativo">✅ Ativo</option>
-                          <thead class="bg-gray-50">
+              <option value="inativo">❌ Inativo</option>
             </select>
-                              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Nome</th>
-                              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Endereço</th>
-                              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Cidade</th>
-                              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Telefone</th>
-                              <th class="px-6 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">Ações</th>
+          </div>
           <h3 class="text-lg font-medium text-gray-900 mb-4">
             <i class="fas fa-id-card text-blue-500 mr-2"></i>Dados Pessoais Complementares
           </h3>
           
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div v-if="!$isFieldFilledInInterview(form.id, 'data_nascimento')">
               <label class="block text-sm font-medium text-gray-700 mb-2">Data de Nascimento</label>
               <input v-model="form.birth_date" type="date"
@@ -432,13 +423,6 @@ const AlunosTW = {
               <input v-model="form.cpf" type="text" 
                      class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                      placeholder="000.000.000-00">
-            </div>
-            
-            <div v-if="!$isFieldFilledInInterview(form.id, 'rg')">
-              <label class="block text-sm font-medium text-gray-700 mb-2">RG</label>
-              <input v-model="form.rg" type="text"
-                     class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                     placeholder="00.000.000-0">
             </div>
           </div>
           
@@ -636,6 +620,7 @@ const AlunosTW = {
           </button>
         </div>
       </div>
+      </div>
     </div>
   </div>
   `,
@@ -671,6 +656,7 @@ const AlunosTW = {
       const end = Math.min(this.totalPages, this.currentPage + range);
       const pages = [];
       for (let i = start; i <= end; i++) {
+        pages.push(i);
       }
       return pages;
     },
@@ -829,16 +815,31 @@ const AlunosTW = {
       } 
     },
     async del(s){
-      if (!this._confirmDeleteAluno || this._confirmDeleteAluno !== s.id) {
-        this._confirmDeleteAluno = s.id;
-        this.$showToast('Confirme', `Clique novamente para excluir o aluno "${s.name}"`, 'warning');
-        setTimeout(()=>{ if(this._confirmDeleteAluno===s.id) this._confirmDeleteAluno=null; }, 3000);
-        return;
+      const confirmed = await this.$confirmToast(
+        'Confirmar exclusão',
+        `Deseja realmente excluir o aluno "${s.name}"? Esta ação não pode ser desfeita.`,
+        { confirmText: 'Excluir', cancelText: 'Cancelar', type: 'warning', timeoutMs: 15000 }
+      );
+      if (!confirmed) return;
+      this.deletingStudentId = s.id;
+      try {
+        const r=await api.post('/students/delete', {}, { params:{ id:s.id } });
+        if(r.data?.ok){
+          this.$showToast('Sucesso', 'Aluno excluído', 'success');
+          // Remove localmente
+          this.rows = (this.rows || []).filter(x => x.id !== s.id);
+          await this.load();
+        } else {
+          this.$showToast('Erro', r.data?.error||'Erro ao excluir', 'error');
+        }
+      } catch (e) {
+        const status = e.response?.status;
+        if (status === 403) this.$showToast('Sem permissão', 'Você não tem permissão para excluir este aluno.', 'warning');
+        else if (status === 404) this.$showToast('Não encontrado', 'O aluno já não existe mais.', 'info');
+        else this.$showToast('Erro', 'Erro ao excluir', 'error');
+      } finally {
+        this.deletingStudentId = null;
       }
-      this._confirmDeleteAluno = null;
-      const r=await api.post('/students/delete', {}, { params:{ id:s.id } });
-      if(r.data?.ok){ this.$showToast('Sucesso', 'Aluno excluído', 'success'); this.load(); }
-      else this.$showToast('Erro', r.data?.error||'Erro ao excluir', 'error');
     }
   },
   async mounted(){ await this.loadLists(); await this.load(); }
@@ -1150,9 +1151,14 @@ const UsuariosTW = {
       </table>
     </div>
 
-    <div v-if="editing" class="bg-white shadow rounded p-4 space-y-3">
-      <h2 class="text-lg font-semibold">{{ form.id ? 'Editar Usuário' : 'Novo Usuário' }}</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+    <!-- Modal de Criar/Editar Usuário -->
+    <div v-if="editing" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div class="bg-gray-50 rounded-lg w-full max-w-4xl h-[90vh] shadow-xl overflow-hidden flex flex-col">
+        <div class="flex items-center justify-between p-4 border-b">
+          <h2 class="text-lg font-semibold">{{ form.id ? 'Editar Usuário' : 'Novo Usuário' }}</h2>
+          <button @click="cancel" class="text-gray-500 hover:text-gray-700" aria-label="Fechar"><i class="fas fa-times"></i></button>
+        </div>
+      <div class="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-3">
         <div>
           <label class="text-sm font-medium text-gray-700 mb-1 block" for="u-nome">Nome</label>
           <input id="u-nome" v-model="form.name" class="border rounded px-3 py-2 w-full" placeholder="Nome">
@@ -1181,7 +1187,7 @@ const UsuariosTW = {
           <input id="u-pass" v-model="form.password" type="password" class="border rounded px-3 py-2 w-full" :placeholder="form.id ? '••••••' : 'Defina uma senha'">
         </div>
       </div>
-      <div class="flex gap-2">
+      <div class="flex gap-2 justify-end p-4 border-t">
         <button class="px-3 py-2 bg-brand-primary text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
                 @click="save" 
                 :disabled="savingForm">
@@ -1194,6 +1200,7 @@ const UsuariosTW = {
         <button class="px-3 py-2 border rounded hover:bg-gray-50 transition-colors" @click="cancel" :disabled="savingForm">
           Cancelar
         </button>
+      </div>
       </div>
     </div>
   </div>
@@ -1345,10 +1352,10 @@ const EscolasTW = {
           <p class="mt-1 text-sm text-gray-700">Gerencie as escolas do sistema</p>
         </div>
   <button v-if="canManage" @click="newEscola" 
-    class="px-4 py-2 bg-blue-100 text-blue-900 rounded-lg hover:bg-blue-200 flex items-center space-x-2 border border-blue-300">
-          <i class="fas fa-plus"></i>
+    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2">
+      <i class="fas fa-plus"></i>
     <span>Nova Escola</span>
-        </button>
+    </button>
       </div>
 
       <!-- Filtros -->
@@ -1357,9 +1364,6 @@ const EscolasTW = {
           v-model="searchTerm" 
           placeholder="Buscar escolas..." 
           class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent flex-1 placeholder-gray-700 text-gray-900">
-        <button v-if="canManage" @click="newEscola" class="px-4 py-2 bg-blue-100 text-blue-900 rounded-lg hover:bg-blue-200 transition-colors border border-blue-300">
-          <i class="fas fa-plus mr-2"></i>Nova Escola
-        </button>
       </div>
 
       <!-- Tabela -->
@@ -1387,9 +1391,10 @@ const EscolasTW = {
                   <i class="fas fa-edit mr-1" aria-hidden="true"></i>
                   <span>Editar</span>
                 </button>
-                <button @click="deleteEscola(escola)" class="inline-flex items-center text-red-800 hover:text-red-900 px-2 py-1 border border-red-200 rounded">
+                <button @click="deleteEscola(escola)" :disabled="deletingId === escola.id" class="inline-flex items-center text-red-800 hover:text-red-900 px-2 py-1 border border-red-200 rounded disabled:opacity-60 disabled:cursor-not-allowed">
                   <i class="fas fa-trash mr-1" aria-hidden="true"></i>
-                  <span>Excluir</span>
+                  <span v-if="deletingId === escola.id">Excluindo...</span>
+                  <span v-else>Excluir</span>
                 </button>
               </td>
             </tr>
@@ -1402,27 +1407,30 @@ const EscolasTW = {
         </table>
       </div>
 
-      <!-- Modal de Edição -->
-      <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-          <h2 class="text-lg font-semibold mb-4">{{ editingId ? 'Editar Escola' : 'Nova Escola' }}</h2>
+      <!-- Modal de Edição (padrão unificado) -->
+      <div v-if="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div class="bg-gray-50 rounded-lg w-full max-w-4xl h-[90vh] shadow-xl overflow-hidden flex flex-col">
+          <div class="flex items-center justify-between p-4 border-b">
+            <h2 class="text-lg font-semibold">{{ editingId ? 'Editar Escola' : 'Nova Escola' }}</h2>
+            <button @click="closeModal" class="text-gray-500 hover:text-gray-700" aria-label="Fechar"><i class="fas fa-times"></i></button>
+          </div>
           
-          <div class="space-y-4">
-            <div>
+          <div class="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="md:col-span-2">
               <label class="block text-sm font-medium text-gray-700 mb-2">Nome *</label>
               <input 
                 v-model="form.name" 
                 type="text" 
                 required
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent">
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </div>
             
-            <div>
+            <div class="md:col-span-2">
               <label class="block text-sm font-medium text-gray-700 mb-2">Endereço</label>
               <textarea 
                 v-model="form.address" 
                 rows="2"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
             </div>
             
             <div>
@@ -1430,7 +1438,7 @@ const EscolasTW = {
               <input 
                 v-model="form.city" 
                 type="text"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent">
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </div>
             
             <div>
@@ -1438,15 +1446,15 @@ const EscolasTW = {
               <input 
                 v-model="form.phone" 
                 type="tel"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent">
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </div>
           </div>
           
-          <div class="flex justify-end space-x-3 mt-6">
-            <button @click="closeModal" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors text-gray-900">
+          <div class="flex justify-end space-x-3 p-4 border-t">
+            <button @click="closeModal" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
               Cancelar
             </button>
-            <button @click="save" :disabled="!form.name" class="px-4 py-2 bg-blue-100 text-blue-900 rounded-lg hover:bg-blue-200 disabled:opacity-50 transition-colors border border-blue-300">
+            <button @click="save" :disabled="!form.name" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors">
               {{ editingId ? 'Atualizar' : 'Salvar' }}
             </button>
           </div>
@@ -1466,7 +1474,10 @@ const EscolasTW = {
         address: '',
         city: '',
         phone: ''
-      }
+      },
+      user: null,
+      deletingId: null,
+      saving: false
     };
   },
   
@@ -1481,7 +1492,7 @@ const EscolasTW = {
       );
     },
     canManage(){
-      try{ return this.$parent && this.$parent.user && this.$parent.user.role === 'admin'; }catch(e){ return false; }
+      return this.user && this.user.role === 'admin';
     }
   },
   
@@ -1522,7 +1533,7 @@ const EscolasTW = {
         this.$showToast && this.$showToast('Atenção', 'Nome é obrigatório', 'warning');
         return;
       }
-      
+      this.saving = true;
       try {
         if (this.editingId) {
           const response = await api.post('/schools/update', this.form, { params: { id: this.editingId } });
@@ -1542,17 +1553,19 @@ const EscolasTW = {
       } catch (error) {
         console.error('Erro ao salvar escola:', error);
         this.$showToast && this.$showToast('Erro', 'Erro ao salvar escola', 'error');
+      } finally {
+        this.saving = false;
       }
     },
     
     async deleteEscola(escola) {
-      if (!this._confirmDeleteSchool || this._confirmDeleteSchool !== escola.id) {
-        this._confirmDeleteSchool = escola.id;
-        this.$showToast && this.$showToast('Confirme', `Clique novamente para excluir a escola "${escola.name}"`, 'warning');
-        setTimeout(()=>{ if(this._confirmDeleteSchool===escola.id) this._confirmDeleteSchool=null; }, 3000);
-        return;
-      }
-      this._confirmDeleteSchool = null;
+      const confirmed = await this.$confirmToast(
+        'Confirmar exclusão',
+        `Deseja realmente excluir a escola "${escola.name}"? Esta ação não pode ser desfeita.`,
+        { confirmText: 'Excluir', cancelText: 'Cancelar', type: 'warning', timeoutMs: 15000 }
+      );
+      if (!confirmed) return;
+      this.deletingId = escola.id;
       try {
         const response = await api.post('/schools/delete', {}, { params: { id: escola.id } });
         if (response.data?.ok) {
@@ -1563,13 +1576,26 @@ const EscolasTW = {
         }
       } catch (error) {
         console.error('Erro ao excluir escola:', error);
-        this.$showToast && this.$showToast('Erro', 'Erro ao excluir escola', 'error');
+        const status = error.response?.status;
+        if (status === 403) this.$showToast && this.$showToast('Sem permissão', 'Apenas administradores podem excluir escolas.', 'warning');
+        else if (status === 404) this.$showToast && this.$showToast('Não encontrada', 'Escola não existe mais.', 'info');
+        else this.$showToast && this.$showToast('Erro', 'Erro ao excluir escola', 'error');
+      } finally {
+        this.deletingId = null;
       }
     }
   },
   
   async mounted() {
     console.log('🏫 EscolasTW component mounted!');
+    // Carregar usuário para habilitar ações
+    try {
+      const response = await api.get('/user');
+      this.user = (response.data && response.data.data) ? response.data.data : response.data;
+    } catch (e) {
+      // se falhar, mantém ações invisíveis
+      console.warn('Não foi possível obter o usuário atual.');
+    }
     await this.loadEscolas();
   }
 };
@@ -1594,19 +1620,14 @@ const LegislacoesTW = {
         </button>
       </div>
 
-      <!-- Formulário de Upload (apenas admin) -->
-      <div v-if="showUploadForm && user && user.role === 'admin'" class="bg-white shadow rounded-lg p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold text-gray-900">Nova Legislação</h2>
-          <button @click="cancelUpload" class="text-gray-400 hover:text-gray-600">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
-        </div>
-        
-        <form @submit.prevent="uploadLegislacao" class="space-y-4">
-          <div>
+      <!-- Modal de Upload (apenas admin) -->
+      <div v-if="showUploadForm && user && user.role === 'admin'" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+  <form @submit.prevent="uploadLegislacao" class="bg-gray-50 rounded-lg w-full max-w-4xl h-[90vh] shadow-xl overflow-hidden flex flex-col">
+          <div class="flex items-center justify-between p-4 border-b">
+            <h2 class="text-lg font-semibold text-gray-900">Nova Legislação</h2>
+            <button type="button" @click="cancelUpload" class="text-gray-500 hover:text-gray-700" aria-label="Fechar"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="flex-1 overflow-y-auto p-6 space-y-4">
             <label class="block text-sm font-medium text-gray-700 mb-2">Título *</label>
             <input 
               v-model="form.titulo" 
@@ -1616,7 +1637,7 @@ const LegislacoesTW = {
               placeholder="Ex: Lei Brasileira de Inclusão da Pessoa com Deficiência">
           </div>
           
-          <div>
+          <div class="px-6">
             <label class="block text-sm font-medium text-gray-700 mb-2">Descrição</label>
             <textarea 
               v-model="form.descricao" 
@@ -1625,7 +1646,7 @@ const LegislacoesTW = {
               placeholder="Breve descrição sobre a legislação..."></textarea>
           </div>
           
-          <div>
+          <div class="px-6">
             <label class="block text-sm font-medium text-gray-700 mb-2">Arquivo PDF *</label>
             <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors">
               <div class="space-y-1 text-center">
@@ -1647,11 +1668,11 @@ const LegislacoesTW = {
             </div>
           </div>
           
-          <div v-if="uploadError" class="bg-red-50 border border-red-200 rounded p-3">
+          <div v-if="uploadError" class="mx-6 bg-red-50 border border-red-200 rounded p-3">
             <p class="text-sm text-red-600">{{ uploadError }}</p>
           </div>
           
-          <div class="flex justify-end space-x-3">
+          <div class="flex justify-end space-x-3 p-4 border-t">
             <button type="button" @click="cancelUpload" class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50">
               Cancelar
             </button>
@@ -1764,11 +1785,19 @@ const LegislacoesTW = {
                 <button 
                   v-if="user && user.role === 'admin'"
                   @click="deleteLegislacao(legislacao)"
-                  class="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                  :disabled="deletingId === legislacao.id"
+                  class="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-60 disabled:cursor-not-allowed">
                   <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                   </svg>
-                  Excluir
+                  <span v-if="deletingId === legislacao.id" class="flex items-center">
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-red-700" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Excluindo...
+                  </span>
+                  <span v-else>Excluir</span>
                 </button>
               </div>
             </div>
@@ -1828,7 +1857,8 @@ const LegislacoesTW = {
         total: 0,
         total_pages: 0
       },
-      user: null
+      user: null,
+      deletingId: null
     }
   },
   async mounted() {
@@ -1848,7 +1878,8 @@ const LegislacoesTW = {
       try {
         const params = {
           page: this.pagination.page,
-          per_page: this.pagination.per_page
+          per_page: this.pagination.per_page,
+          _ts: Date.now()
         };
         
         if (this.searchQuery) {
@@ -1872,7 +1903,7 @@ const LegislacoesTW = {
         this.loading = false;
       }
     },
-    
+
     async search() {
       this.pagination.page = 1;
       await this.loadLegislacoes();
@@ -1884,19 +1915,16 @@ const LegislacoesTW = {
         await this.loadLegislacoes();
       }
     },
-    
+
     getVisiblePages() {
       const current = this.pagination.page;
       const total = this.pagination.total_pages;
       const pages = [];
-      
       const start = Math.max(1, current - 2);
       const end = Math.min(total, current + 2);
-      
       for (let i = start; i <= end; i++) {
         pages.push(i);
       }
-      
       return pages;
     },
     
@@ -1964,24 +1992,51 @@ const LegislacoesTW = {
     },
     
     async deleteLegislacao(legislacao) {
-      if (!this._confirmDeleteLeg || this._confirmDeleteLeg !== legislacao.id) {
-        this._confirmDeleteLeg = legislacao.id;
-        this.$showToast('Confirme', `Clique novamente para excluir a legislação "${legislacao.titulo}"`, 'warning');
-        setTimeout(()=>{ if(this._confirmDeleteLeg===legislacao.id) this._confirmDeleteLeg=null; }, 3000);
-        return;
-      }
-      this._confirmDeleteLeg = null;
+      // Confirmação via toast à direita, com botões
+      const confirmed = await this.$confirmToast(
+        'Confirmar exclusão',
+        `Deseja realmente excluir a legislação "${legislacao.titulo}"? Esta ação não pode ser desfeita.`,
+        { confirmText: 'Excluir', cancelText: 'Cancelar', type: 'warning', timeoutMs: 15000 }
+      );
+      if (!confirmed) return;
+
+      this.deletingId = legislacao.id;
       try {
         const response = await api.delete(`/legislacoes/${legislacao.id}`);
         if (response.data?.ok) {
-          this.$showToast('Sucesso', 'Legislação excluída com sucesso!', 'success');
+          // Detalhes de deleção do backend
+          const info = response.data?.data || {};
+          const hadFile = !!info.had_file;
+          const fileDeleted = !!info.file_deleted;
+          const filename = info.filename || '';
+
+          // Log de diagnóstico no console para ambiente de desenvolvimento
+          try { console.debug('🔧 legislações.delete resp:', { hadFile, fileDeleted, filename }); } catch (e) {}
+
+          // Feedback ao usuário considerando o status do arquivo físico
+          if (hadFile && !fileDeleted) {
+            this.$showToast('Aviso', 'Registro removido, mas o arquivo físico não pôde ser excluído do servidor.', 'warning');
+          } else {
+            this.$showToast('Sucesso', 'Legislação excluída com sucesso!', 'success');
+          }
+          // Remove localmente para resposta imediata
+          this.legislacoes = (this.legislacoes || []).filter(l => l.id !== legislacao.id);
+          // Recarrega do servidor para garantir sincronização
           await this.loadLegislacoes();
         } else {
-          this.$showToast('Erro', response.data?.error || 'Erro ao excluir legislação', 'error');
+          const code = response.data?.error || 'Erro ao excluir legislação';
+          if (code === 'NOT_DELETED') this.$showToast('Aviso', 'Não foi possível remover este documento agora. Tente novamente.', 'warning');
+          else this.$showToast('Erro', code, 'error');
         }
       } catch (error) {
         console.error('Erro ao excluir:', error);
-        this.$showToast('Erro', 'Erro ao excluir legislação', 'error');
+        const status = error.response?.status;
+        if (status === 403) this.$showToast('Sem permissão', 'Apenas administradores podem excluir legislações.', 'warning');
+        else if (status === 404) this.$showToast('Não encontrado', 'Documento não existe mais.', 'info');
+        else if (status === 409) this.$showToast('Aviso', 'Não foi possível remover este documento agora. Tente novamente.', 'warning');
+        else this.$showToast('Erro', 'Erro ao excluir legislação', 'error');
+      } finally {
+        this.deletingId = null;
       }
     },
     
@@ -2146,6 +2201,14 @@ const Layout = {
               </svg>
               Legislações
             </router-link>
+            <button class="nav-link-tw w-full text-left" @click="$root.logout && $root.logout()">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 16l4-4m0 0l-4-4m4 4H7"/>
+                <path d="M7 4h6a2 2 0 012 2v2"/>
+                <path d="M15 16v2a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2"/>
+              </svg>
+              Sair
+            </button>
           </div>
         </nav>
       </aside>
@@ -2153,7 +2216,7 @@ const Layout = {
       <!-- Conteúdo principal -->
       <main class="flex-1 flex flex-col overflow-hidden lg:ml-0">
         <!-- Header melhorado com gradiente e informações úteis -->
-        <header class="flex-shrink-0 bg-gradient-to-r from-blue-600 to-cyan-500  shadow-lg">
+        <header class="flex-shrink-0 bg-blue-600   shadow-lg">
           <div class="px-4 py-3 lg:px-6">
             <div class="flex items-center justify-between">
               <!-- Lado esquerdo: Menu mobile + Info do sistema -->
@@ -2674,19 +2737,12 @@ const Relatorios = {
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-bold text-gray-900">Relatórios do Sistema</h1>
-          <p class="mt-1 text-sm text-gray-600">Gere relatórios detalhados de alunos, atendimentos e formulários AEE</p>
         </div>
       </div>
 
       <!-- Etapa 1: Seleção de Aluno -->
       <div class="bg-white shadow rounded p-6 space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Buscar Aluno</label>
-            <input v-model="query" @keyup.enter="buscar" 
-                   class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-brand-primary focus:border-transparent" 
-                   placeholder="Digite o nome do aluno..." />
-          </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Selecionar Aluno</label>
             <select v-model="alunoId" @change="carregarDadosAluno"
@@ -2742,9 +2798,37 @@ const Relatorios = {
           <p class="text-sm text-gray-600">{{ descricaoRelatorio }}</p>
         </div>
         
-        <div class="p-6">
-          <!-- Relatório Geral -->
-          <div v-if="tipoRelatorio === 'geral'" class="space-y-6">
+        </div>
+
+        <!-- Notas e Análises do Aluno -->
+        <div v-if="dadosRelatorio" class="bg-white shadow rounded p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <i class="fas fa-sticky-note text-amber-600 mr-2"></i>
+            Notas e Análises do Aluno
+          </h3>
+          <div v-if="dadosRelatorio.notes && dadosRelatorio.notes.length" class="space-y-4">
+            <div v-for="n in dadosRelatorio.notes" :key="n.id" class="border rounded-lg p-4">
+              <div class="flex justify-between items-start mb-2">
+                <div>
+                  <div class="text-sm text-gray-500">{{ new Date(n.created_at).toLocaleString('pt-BR') }} <span v-if="n.source" class="ml-2 px-2 py-0.5 text-xs rounded bg-gray-100 text-gray-700">{{ n.source }}</span></div>
+                  <div class="font-medium text-gray-900">{{ n.title || 'Nota' }}</div>
+                </div>
+                <button class="text-blue-600 text-sm hover:underline" @click="n.__editing = !n.__editing">{{ n.__editing ? 'Cancelar' : 'Editar' }}</button>
+              </div>
+              <div v-if="!n.__editing" class="whitespace-pre-wrap text-gray-800 text-sm">{{ n.content }}</div>
+              <div v-else class="space-y-2">
+                <input v-model="n.title" class="w-full border rounded px-3 py-2 text-sm" placeholder="Título (opcional)">
+                <textarea v-model="n.content" rows="6" class="w-full border rounded px-3 py-2 text-sm"></textarea>
+                <div class="text-right">
+                  <button class="px-4 py-2 bg-green-600 text-white rounded text-sm" @click="salvarNota(n)">Salvar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else class="text-sm text-gray-500">Nenhuma nota registrada para este aluno.</div>
+        </div>
+
+        <!-- Análise IA -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="space-y-4">
                 <h3 class="font-medium text-gray-900 border-b pb-2">Informações Pessoais</h3>
@@ -2753,35 +2837,7 @@ const Relatorios = {
                   <p><strong>Data de Nascimento:</strong> {{ formatarData(dadosRelatorio.aluno?.birthdate) }}</p>
                   <p><strong>Escola:</strong> {{ dadosRelatorio.aluno?.school || 'Não informada' }}</p>
                   <p><strong>Série:</strong> {{ dadosRelatorio.aluno?.class || 'Não informada' }}</p>
-                </div>
-              </div>
-              <div class="space-y-4">
-                <h3 class="font-medium text-gray-900 border-b pb-2">Estatísticas</h3>
-                <div class="space-y-2 text-sm">
-                  <p><strong>Total de Atendimentos:</strong> {{ dadosRelatorio.estatisticas?.total_atendimentos || 0 }}</p>
-                  <p><strong>Formulários Preenchidos:</strong> {{ dadosRelatorio.estatisticas?.total_formularios || 0 }}</p>
-                  <p><strong>Último Atendimento:</strong> {{ dadosRelatorio.estatisticas?.ultimo_atendimento }}</p>
-                </div>
-              </div>
-            </div>
-            <!-- Relatórios de Atendimento incluidos no Geral -->
-            <div class="space-y-3">
-              <h3 class="font-medium text-gray-900 border-b pb-2">Relatórios de Atendimento</h3>
-              <div v-if="dadosRelatorio.atendimentos && dadosRelatorio.atendimentos.length > 0">
-                <div v-for="atendimento in dadosRelatorio.atendimentos" :key="atendimento.id" class="border rounded-lg p-4">
-                  <div class="flex justify-between items-center">
-                    <div class="text-sm text-gray-700">
-                      <span class="font-medium">Data:</span> {{ formatarData(atendimento.data_atendimento || atendimento.date) || '-' }}
-                      <span class="ml-3 font-medium">Período:</span> {{ atendimento.periodo || atendimento.period || '-' }}
-                    </div>
-                    <span class="text-xs px-2 py-1 rounded bg-amber-100 text-amber-700">Atendimento</span>
-                  </div>
-                  <div class="mt-2 text-sm text-gray-700">
-                    <span class="font-medium">Descrição:</span> {{ atendimento.descricao || atendimento.activities || '-' }}
-                  </div>
-                </div>
-              </div>
-              <div v-else class="text-gray-500 text-sm">Nenhum relatório de atendimento encontrado.</div>
+    data(){
             </div>
           </div>
 
@@ -3009,7 +3065,6 @@ const Relatorios = {
   query: '',
       alunos: [],
   alunoFiltroPDI: '',
-  alunoFiltroPlano: '',
       alunoId: '',
       alunoSelecionado: null,
       tipoRelatorio: 'geral',
@@ -3216,38 +3271,40 @@ const Relatorios = {
     },
     async analiseIA(){
       if (!this.dadosRelatorio) return;
-      
       this.carregandoIA = true; 
       this.erroIA = null; 
       this.analiseIA_resultado = null;
-      
       try {
-        // Simular análise IA (a ser implementado com serviço real)
-        const analiseSimulada = `
-Análise automatizada do aluno ${this.dadosRelatorio.aluno.name}:
-
-📊 RESUMO ESTATÍSTICO:
-- Total de atendimentos registrados: ${this.dadosRelatorio.estatisticas.total_atendimentos}
-- Frequência de atendimentos: ${this.dadosRelatorio.estatisticas.total_atendimentos > 0 ? 'Regular' : 'Irregular'}
-
-📈 PONTOS DE ATENÇÃO:
-${this.dadosRelatorio.estatisticas.total_atendimentos === 0 
-  ? '- Aluno ainda não possui atendimentos registrados. Recomenda-se iniciar acompanhamento.' 
-  : '- Acompanhamento em andamento. Continue monitorando o progresso.'}
-
-🎯 RECOMENDAÇÕES:
-- Manter registro consistente dos atendimentos
-- Avaliar periodicidade dos encontros
-- Documentar evolução do aluno
-
-⚠️ Nota: Esta é uma análise preliminar. Para avaliação completa, consulte um profissional especializado.
-        `;
-        
-        // Simular delay da IA
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        this.analiseIA_resultado = analiseSimulada.trim();
-        
+        const resp = await api.get('/ai/evaluate-student', { params: { student_id: this.alunoId } });
+        const data = resp.data?.data || resp.data;
+        // Backend retorna JSON com chaves: resumo, forcas[], desafios[], objetivos_smart[], estrategias_recomendadas[]
+        const r = data || {};
+        const linhas = [];
+        linhas.push(`Análise automatizada do aluno ${this.dadosRelatorio.aluno.name}:`);
+        if (r.resumo) {
+          linhas.push('\n📌 Resumo');
+          linhas.push(String(r.resumo));
+        }
+        if (Array.isArray(r.forcas) && r.forcas.length) {
+          linhas.push('\n💪 Forças');
+          r.forcas.forEach((f,i)=>linhas.push(`- ${f}`));
+        }
+        if (Array.isArray(r.desafios) && r.desafios.length) {
+          linhas.push('\n⚠️ Desafios');
+          r.desafios.forEach((d,i)=>linhas.push(`- ${d}`));
+        }
+        if (Array.isArray(r.objetivos_smart) && r.objetivos_smart.length) {
+          linhas.push('\n🎯 Objetivos SMART');
+          r.objetivos_smart.forEach((o,i)=>linhas.push(`- ${o}`));
+        }
+        if (Array.isArray(r.estrategias_recomendadas) && r.estrategias_recomendadas.length) {
+          linhas.push('\n🧩 Estratégias e Atividades Recomendadas');
+          r.estrategias_recomendadas.forEach((e,i)=>linhas.push(`- ${e}`));
+        }
+        if (!linhas.length) {
+          linhas.push('Não foi possível gerar uma análise detalhada no momento. Tente novamente mais tarde.');
+        }
+        this.analiseIA_resultado = linhas.join('\n');
       } catch(err){
         this.erroIA = err?.response?.data?.error || err.message || 'Erro na análise com IA';
       } finally { 
@@ -3682,11 +3739,7 @@ const EntrevistaResponsavel = {
     progressPercentage() {
       return (this.currentStep / (this.totalSteps || 1)) * 100;
     },
-    alunosFiltradosPlano(){
-      const t = (this.alunoFiltroPlano||'').toLowerCase();
-      if(!t) return this.alunos;
-      return this.alunos.filter(a=> String(a.name||'').toLowerCase().includes(t));
-    }
+    
   },
   
   created() {
@@ -3744,6 +3797,36 @@ const EntrevistaResponsavel = {
         if (escola) {
           this.form.escola = escola.name;
         }
+      }
+    },
+
+    // Navegação entre etapas
+    nextStep() {
+      // Valida a etapa atual antes de avançar
+      if (!this.validateCurrentStep()) return;
+      if (this.currentStep < this.totalSteps) {
+        this.currentStep += 1;
+        // Atualiza o maior passo alcançado para liberar navegação pelos "pills"
+        if (this.currentStep > this.maxCompletedStep) {
+          this.maxCompletedStep = this.currentStep;
+        }
+      }
+      // Move o foco para o topo do card para melhor UX
+      try { document.querySelector('.step-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (_) {}
+    },
+
+    previousStep() {
+      if (this.currentStep > 1) {
+        this.currentStep -= 1;
+      }
+      try { document.querySelector('.step-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (_) {}
+    },
+
+    goToStep(step) {
+      // Permite ir apenas até o maior passo concluído
+      if (step >= 1 && step <= this.maxCompletedStep) {
+        this.currentStep = step;
+        try { document.querySelector('.step-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (_) {}
       }
     },
 
@@ -3955,8 +4038,7 @@ const PDI = {
                       <option value="">Selecione um aluno</option>
                       <option v-for="aluno in alunos" :key="aluno.id" :value="aluno.id">{{ aluno.name }}</option>
                     </select>
-                      alunos: [],
-                      escolas: [],
+                  </div>
 
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -3969,14 +4051,17 @@ const PDI = {
                       </select>
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Ano/Série</label>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Série/Ano</label>
                       <input v-model="form.ano_serie" type="text" required 
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
                     </div>
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">Professor AEE</label>
-                      <input v-model="form.professor_aee" type="text" required 
+                      <select v-model="form.professor_aee" required
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                        <option value="">Selecione</option>
+                        <option v-for="p in professores" :key="p.id" :value="p.name">{{ p.name }}</option>
+                      </select>
                     </div>
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">Período</label>
@@ -4185,6 +4270,8 @@ const PDI = {
       loading: false,
       validationErrors: {},
       alunos: [],
+  escolas: [],
+      professores: [],
       form: {
         student_id: '',
         escola: '',
@@ -4218,7 +4305,7 @@ const PDI = {
     }
   },
   async mounted() {
-    await Promise.all([this.carregarAlunos(), this.carregarEscolas()]);
+    await Promise.all([this.carregarAlunos(), this.carregarEscolas(), this.carregarProfessores()]);
   },
   methods: {
     async carregarAlunos() {
@@ -4242,6 +4329,16 @@ const PDI = {
         console.error('Erro ao carregar escolas:', error);
         this.$showToast && this.$showToast('Erro', 'Não foi possível carregar a lista de escolas.', 'error');
         this.escolas = [];
+      }
+    },
+    async carregarProfessores() {
+      try {
+        const resp = await api.get('/professores');
+        const arr = resp.data?.data;
+        this.professores = Array.isArray(arr) ? arr : [];
+      } catch (e) {
+        console.error('Erro ao carregar professores:', e);
+        this.professores = [];
       }
     },
     
@@ -4424,11 +4521,10 @@ const PlanoAtendimento = {
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                       Selecionar Aluno <span class="text-red-500">*</span>
                     </label>
-                    <input v-model="alunoFiltroPlano" placeholder="Filtrar alunos..." class="mb-2 w-full px-3 py-2 border border-gray-300 rounded" />
                     <select v-model="form.student_id" @change="preencherDadosAlunoPlano" required 
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
                       <option value="">Selecione um aluno</option>
-                      <option v-for="aluno in alunosFiltradosPlano" :key="aluno.id" :value="aluno.id">{{ aluno.name }}</option>
+                      <option v-for="aluno in alunos" :key="aluno.id" :value="aluno.id">{{ aluno.name }}</option>
                     </select>
                   </div>
 
@@ -5256,7 +5352,7 @@ const RelatorioAtendimento = {
     async loadRelatorios() {
       try {
         this.loadingRelatorios = true;
-        let params = {};
+        let params = { _ts: Date.now() };
         if (this.$parent.user && this.$parent.user.role !== 'admin') {
           params.teacher_id = this.$parent.user.id;
         }
@@ -5423,25 +5519,29 @@ const RelatorioAtendimento = {
     },
 
     async deleteRelatorio(relatorio) {
-      if (!this._confirmDeleteRel || this._confirmDeleteRel !== relatorio.id) {
-        this._confirmDeleteRel = relatorio.id;
-        this.$showToast('Confirme', 'Clique novamente para excluir este relatório', 'warning');
-        setTimeout(()=>{ if(this._confirmDeleteRel===relatorio.id) this._confirmDeleteRel=null; }, 3000);
-        return;
-      }
-      this._confirmDeleteRel = null;
+      const confirmed = await this.$confirmToast(
+        'Confirmar exclusão',
+        'Deseja realmente excluir este relatório de atendimento? Esta ação não pode ser desfeita.',
+        { confirmText: 'Excluir', cancelText: 'Cancelar', type: 'warning', timeoutMs: 15000 }
+      );
+      if (!confirmed) return;
       try {
         this.deletingId = relatorio.id;
         const r = await api.delete(`/atendimentos/${relatorio.id}`);
         if (r.data?.ok) {
           this.$showToast('Sucesso', 'Relatório excluído', 'success');
+          // Remover localmente e recarregar
+          this.relatorios = (this.relatorios || []).filter(x => x.id !== relatorio.id);
           await this.loadRelatorios();
         } else {
           this.$showToast('Erro', r.data?.error || 'Erro ao excluir relatório', 'error');
         }
       } catch (e) {
         console.error(e);
-        this.$showToast('Erro', 'Erro ao excluir relatório', 'error');
+        const status = e.response?.status;
+        if (status === 403) this.$showToast('Sem permissão', 'Você não tem permissão para excluir este relatório.', 'warning');
+        else if (status === 404) this.$showToast('Não encontrado', 'O relatório já não existe mais.', 'info');
+        else this.$showToast('Erro', 'Erro ao excluir relatório', 'error');
       } finally {
         this.deletingId = null;
       }
@@ -5538,6 +5638,22 @@ const app = createApp({
                 {{ toast.title }}
               </h4>
               <p class="text-sm text-gray-700 mt-1">{{ toast.message }}</p>
+              <div v-if="toast.actions && toast.actions.length" class="mt-3 flex justify-end space-x-2">
+                <button
+                  v-for="(action, idx) in toast.actions"
+                  :key="idx"
+                  @click="handleToastAction(toast, action)"
+                  class="px-3 py-1.5 rounded text-sm font-medium focus:outline-none"
+                  :class="{
+                    'bg-red-600 text-white hover:bg-red-700': action.style === 'danger',
+                    'bg-blue-600 text-white hover:bg-blue-700': action.style === 'primary',
+                    'bg-gray-100 text-gray-700 hover:bg-gray-200': !action.style || action.style === 'secondary'
+                  }"
+                >
+                  <i v-if="action.icon" :class="[action.icon, 'mr-2']"></i>
+                  {{ action.label }}
+                </button>
+              </div>
             </div>
             <button @click="removeToast(toast.id)" 
                     class="ml-4 text-gray-400 hover:text-gray-600 focus:outline-none">
@@ -5552,18 +5668,31 @@ const app = createApp({
     return {
       loading: true,
       toasts: [],
-      toastIdCounter: 0
+      toastIdCounter: 0,
+      // Voice modal (reutilizável)
+      voiceModal: {
+        open: false,
+        targetSetter: null, // função que recebe o texto transcrito
+        targetEl: null, // textarea/input alvo (DOM)
+        isRecording: false,
+        isProcessing: false,
+        recordingTime: 0,
+        mediaRecorder: null,
+        audioChunks: [],
+        timer: null
+      }
     }
   },
   computed: {},
   methods: {
-    showToast(title, message, type = 'info', duration = 5000) {
+    showToast(title, message, type = 'info', duration = 5000, actions = null) {
       const toast = {
         id: ++this.toastIdCounter,
         title,
         message,
         type,
-        visible: true
+        visible: true,
+        actions
       };
       
       this.toasts.push(toast);
@@ -5574,6 +5703,51 @@ const app = createApp({
           this.removeToast(toast.id);
         }, duration);
       }
+    },
+    handleToastAction(toast, action) {
+      try {
+        if (action && typeof action.onClick === 'function') action.onClick();
+      } finally {
+        // sempre fechar após ação
+        this.removeToast(toast.id);
+      }
+    },
+    // Retorna uma Promise resolvendo true/false
+    confirmToast(title, message, opts = {}) {
+      const {
+        confirmText = 'Confirmar',
+        cancelText = 'Cancelar',
+        type = 'warning',
+        timeoutMs = 10000
+      } = opts;
+
+      return new Promise((resolve) => {
+        const id = ++this.toastIdCounter;
+        const toast = {
+          id,
+          title,
+          message,
+          type,
+          visible: true,
+          actions: [
+            { label: cancelText, style: 'secondary', icon: 'fas fa-times', onClick: () => resolve(false) },
+            { label: confirmText, style: 'danger', icon: 'fas fa-trash', onClick: () => resolve(true) }
+          ]
+        };
+        this.toasts.push(toast);
+
+        // Auto-cancel após timeout
+        if (timeoutMs && timeoutMs > 0) {
+          setTimeout(() => {
+            const idx = this.toasts.findIndex(t => t.id === id);
+            if (idx > -1) {
+              this.toasts[idx].visible = false;
+              setTimeout(() => this.toasts.splice(idx, 1), 300);
+              resolve(false);
+            }
+          }, timeoutMs);
+        }
+      });
     },
     removeToast(id) {
       const index = this.toasts.findIndex(t => t.id === id);
@@ -5620,6 +5794,103 @@ const app = createApp({
         info: 'text-blue-800'
       };
       return colors[type] || colors.info;
+    },
+    // ===== Voice capture (global modal) =====
+    openVoiceModal(setterFn) {
+      this.voiceModal.targetSetter = setterFn;
+      this.voiceModal.targetEl = null;
+      this.voiceModal.open = true;
+      this.voiceModal.isRecording = false;
+      this.voiceModal.isProcessing = false;
+      this.voiceModal.recordingTime = 0;
+      this.voiceModal.audioChunks = [];
+    },
+    openVoiceModalForActive(targetEl = null) {
+      // Abre modal e define o elemento alvo (textarea) para inserir o texto
+      this.voiceModal.targetSetter = null;
+      this.voiceModal.targetEl = targetEl || document.activeElement || null;
+      this.voiceModal.open = true;
+      this.voiceModal.isRecording = false;
+      this.voiceModal.isProcessing = false;
+      this.voiceModal.recordingTime = 0;
+      this.voiceModal.audioChunks = [];
+    },
+    closeVoiceModal() {
+      if (this.voiceModal.isRecording) {
+        try { this.stopVoiceRecording(); } catch (_) {}
+      }
+      this.voiceModal.open = false;
+      this.voiceModal.targetSetter = null;
+      this.voiceModal.targetEl = null;
+    },
+    async toggleVoiceRecording() {
+      if (this.voiceModal.isRecording) return this.stopVoiceRecording();
+      return this.startVoiceRecording();
+    },
+    async startVoiceRecording() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const rec = new MediaRecorder(stream);
+        this.voiceModal.mediaRecorder = rec;
+        this.voiceModal.audioChunks = [];
+        this.voiceModal.recordingTime = 0;
+        rec.ondataavailable = (e) => this.voiceModal.audioChunks.push(e.data);
+        rec.onstop = async () => {
+          const audioBlob = new Blob(this.voiceModal.audioChunks, { type: 'audio/wav' });
+          // parar tracks
+          stream.getTracks().forEach(t => t.stop());
+          await this.processVoiceAudio(audioBlob);
+        };
+        rec.start();
+        this.voiceModal.isRecording = true;
+        this.voiceModal.timer = setInterval(() => { this.voiceModal.recordingTime++; }, 1000);
+      } catch (err) {
+        console.error('Erro ao acessar microfone:', err);
+        this.$showToast('Erro', 'Erro ao acessar o microfone. Verifique permissões.', 'error');
+      }
+    },
+    stopVoiceRecording() {
+      if (!this.voiceModal.mediaRecorder || !this.voiceModal.isRecording) return;
+      if (this.voiceModal.recordingTime < 1) {
+        this.$showToast('Atenção', 'Grave pelo menos 1 segundo.', 'info');
+        return;
+      }
+      this.voiceModal.mediaRecorder.stop();
+      this.voiceModal.isRecording = false;
+      if (this.voiceModal.timer) { clearInterval(this.voiceModal.timer); this.voiceModal.timer = null; }
+    },
+    async processVoiceAudio(audioBlob) {
+      this.voiceModal.isProcessing = true;
+      try {
+        if (audioBlob.size < 1000) throw new Error('Áudio muito curto.');
+        const fd = new FormData();
+        fd.append('audio', audioBlob, 'recording.wav');
+        const { data } = await api.post('/voice/transcribe', fd, { timeout: 120000 });
+        const txt = data?.data?.text || '';
+        if (!txt) throw new Error('Transcrição vazia.');
+        if (typeof this.voiceModal.targetSetter === 'function') {
+          this.voiceModal.targetSetter(txt);
+        } else if (this.voiceModal.targetEl && (this.voiceModal.targetEl.tagName === 'TEXTAREA' || (this.voiceModal.targetEl.tagName === 'INPUT' && this.voiceModal.targetEl.type === 'text'))) {
+          const el = this.voiceModal.targetEl;
+          const start = el.selectionStart ?? el.value.length;
+          const end = el.selectionEnd ?? el.value.length;
+          const before = el.value.slice(0, start);
+          const after = el.value.slice(end);
+          const spacer = before && !before.endsWith(' ') ? ' ' : '';
+          el.value = before + spacer + txt + after;
+          // reposiciona cursor e dispara evento para v-model
+          const pos = (before + spacer + txt).length;
+          try { el.setSelectionRange(pos, pos); } catch (_) {}
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        this.$showToast('Sucesso', 'Áudio transcrito com sucesso!', 'success');
+        this.closeVoiceModal();
+      } catch (e) {
+        console.error('Erro na transcrição:', e);
+        this.$showToast('Erro', e.message || 'Falha ao transcrever.', 'error');
+      } finally {
+        this.voiceModal.isProcessing = false;
+      }
     }
   },
   async mounted() {
@@ -5640,6 +5911,19 @@ const app = createApp({
 // Adicionar método global para toast
 app.config.globalProperties.$showToast = function(title, message, type = 'info', duration = 5000) {
   this.$root.showToast(title, message, type, duration);
+};
+
+// Adicionar método global para confirmação via toast
+app.config.globalProperties.$confirmToast = function(title, message, options = {}) {
+  return this.$root.confirmToast(title, message, options);
+};
+
+// Helper global para abrir o modal de voz e anexar texto ao v-model alvo
+app.config.globalProperties.$voiceToField = function(setterFn) {
+  this.$root.openVoiceModal(setterFn);
+};
+app.config.globalProperties.$voiceToActive = function(targetEl) {
+  this.$root.openVoiceModalForActive(targetEl);
 };
 
 // Método global para verificar se campo foi preenchido na entrevista
@@ -5852,6 +6136,60 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
+// Modal global de voz (injeção no body via portal simples)
+document.body.insertAdjacentHTML('beforeend', `
+  <div id="voice-modal-root"></div>
+`);
+
+// Renderização reativa simples do modal usando Mutation + template inline
+const voiceTpl = document.createElement('template');
+voiceTpl.innerHTML = `
+  <div v-if="$root.voiceModal.open" class="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
+    <div class="bg-gray-50 rounded-lg w-full max-w-md p-5 shadow-xl">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-semibold text-gray-900">Capturar por voz</h3>
+        <button class="text-gray-500 hover:text-gray-700" @click="$root.closeVoiceModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="space-y-3">
+        <div class="text-sm text-gray-600">Grave sua fala e adicionaremos o texto no campo selecionado.</div>
+        <div class="flex items-center gap-3">
+          <button @click="$root.toggleVoiceRecording()" :disabled="$root.voiceModal.isProcessing"
+                  class="px-3 py-2 rounded-md text-sm font-medium"
+                  :class="$root.voiceModal.isRecording ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'">
+            <i :class="$root.voiceModal.isRecording ? 'fas fa-stop' : 'fas fa-microphone'"></i>
+            <span class="ml-2">{{$root.voiceModal.isRecording ? 'Parar' : 'Gravar'}}</span>
+          </button>
+          <div v-if="$root.voiceModal.isRecording" class="text-red-600 text-sm flex items-center gap-2">
+            <span class="w-2 h-2 bg-red-600 rounded-full animate-pulse"></span>
+            <span>{{ Math.floor($root.voiceModal.recordingTime/60) }}:{{ String($root.voiceModal.recordingTime%60).padStart(2,'0') }}</span>
+          </div>
+        </div>
+        <div v-if="$root.voiceModal.isProcessing" class="bg-yellow-50 border border-yellow-200 rounded p-3">
+          <div class="flex items-center gap-2 text-yellow-800 text-sm">
+            <span class="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-600"></span>
+            Convertendo áudio para texto...
+          </div>
+        </div>
+        <div class="flex justify-end">
+          <button class="px-3 py-2 rounded-md border" @click="$root.closeVoiceModal()">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+`;
+
+// Monta um mini-app Vue para renderizar o modal usando o mesmo root
+const mountVoicePortal = (mainApp) => {
+  const Portal = { template: voiceTpl.innerHTML };
+  const voiceApp = Vue.createApp({ template: '<Portal />', components: { Portal } });
+  voiceApp.config.globalProperties.$root = mainApp._instance.proxy; // compartilhar root
+  voiceApp.mount('#voice-modal-root');
+};
+// será chamado após o app principal montar
+
+// ====== Mic buttons auto-injection for big textareas ======
+// Removido: injeção automática de botões "Falar" ao lado de textareas (requisito do cliente)
+
 // Registrar componente DatePicker
 if (typeof DatePickerComponent !== 'undefined') {
   app.component('DatePicker', DatePickerComponent);
@@ -5860,6 +6198,8 @@ if (typeof DatePickerComponent !== 'undefined') {
 // Usar router e montar aplicação
 app.use(router);
 app.mount('#app');
+// montar portal do modal de voz após app existir
+try { mountVoicePortal(app); } catch (_) {}
 
 // Inicialização completa
 // console.log('ConectEdu v5.0 - Sistema inicializado com Tailwind CSS');

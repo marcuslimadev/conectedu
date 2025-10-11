@@ -52,6 +52,9 @@ $restRoutes = [
     'users/create' => 'users.create',
     'users/update' => 'users.update',
     'users/delete' => 'users.delete',
+
+  // Professores (somente lista básica para selects)
+  'professores' => 'professores.list',
     
     // Forms routes
     'forms/anamnese' => 'forms.anamnese.list',
@@ -151,6 +154,10 @@ $restRoutes = [
     
     // AI routes
     'ai/evaluate-student' => 'ai.evaluate_student',
+  // Student notes routes
+  'student-notes' => 'student_notes.list',
+  'student-notes/create' => 'student_notes.create',
+  'student-notes/update' => 'student_notes.update',
   // Voice routes
   'voice/transcribe' => 'voice.transcribe',
   'voice/tts' => 'voice.tts',
@@ -160,12 +167,12 @@ $restRoutes = [
 ];
 
 // Determinar a action: primeiro tenta REST, depois query parameter
+// Importante: NÃO definir 'health' como fallback aqui, para permitir que rotas dinâmicas (preg_match)
+// sejam avaliadas mais abaixo. Apenas definiremos 'health' quando explicitamente solicitado.
 $action = $_GET['action'] ?? null;
 
 if (!$action && $pathInfo && isset($restRoutes[$pathInfo])) {
-    $action = $restRoutes[$pathInfo];
-} elseif (!$action) {
-    $action = 'health'; // Default fallback
+  $action = $restRoutes[$pathInfo];
 }
 
 
@@ -363,6 +370,20 @@ if ($action === 'users.delete') {
   if (!$id) res(false, null, 'INVALID_ID', 422);
   $pdo->prepare('DELETE FROM users WHERE id=?')->execute([$id]);
   res(true, []);
+}
+
+// Lista de professores (para selects) — visível a qualquer usuário autenticado
+if ($action === 'professores.list') {
+  $u = require_auth();
+  $q = trim($_GET['q'] ?? '');
+  $limit = min(200, max(1, (int)($_GET['limit'] ?? 100)));
+  $sql = 'SELECT id,name FROM users WHERE role="professor" AND status="ativo"';
+  $p = [];
+  if ($q) { $sql .= ' AND name LIKE ?'; $p[] = '%'.$q.'%'; }
+  $sql .= ' ORDER BY name ASC LIMIT ' . $limit;
+  $stm = $pdo->prepare($sql);
+  $stm->execute($p);
+  res(true, $stm->fetchAll(PDO::FETCH_ASSOC));
 }
 
 if ($action === 'support_teachers.list') {
@@ -1039,7 +1060,23 @@ if ($action === 'reports.student') {
   $wps = $pdo->prepare('SELECT id,week_start,objectives,notes,created_at FROM weekly_plans WHERE student_id=? ORDER BY week_start DESC LIMIT 8');
   $wps->execute([$sid]);
   $wps = $wps->fetchAll(PDO::FETCH_ASSOC);
-  res(true, ['student' => $stu, 'anamneses' => $anam, 'pdis' => $pdis, 'pais' => $pais, 'attendance' => $att, 'weekly_plans' => $wps]);
+  // Notas do aluno (histórico livre e análises IA)
+  $pdo->exec('CREATE TABLE IF NOT EXISTS student_notes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id INT NOT NULL,
+    teacher_id INT NULL,
+    title VARCHAR(255) NULL,
+    content TEXT NOT NULL,
+    source VARCHAR(50) NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NULL,
+    INDEX(student_id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+  $notesQ = $pdo->prepare('SELECT id,student_id,teacher_id,title,content,source,created_at,updated_at FROM student_notes WHERE student_id=? ORDER BY id DESC');
+  $notesQ->execute([$sid]);
+  $notes = $notesQ->fetchAll(PDO::FETCH_ASSOC);
+
+  res(true, ['student' => $stu, 'anamneses' => $anam, 'pdis' => $pdis, 'pais' => $pais, 'attendance' => $att, 'weekly_plans' => $wps, 'notes' => $notes]);
 }
 
 
@@ -1403,6 +1440,76 @@ if ($action === 'ai.evaluate_student') {
     $j = ['resumo' => $txt];
   }
   res(true, $j);
+}
+
+// ---------------------- Student Notes (histórico de análises/observações) ----------------------
+if ($action === 'student_notes.list') {
+  $u = require_auth();
+  $pdo = db();
+  // tabela
+  $pdo->exec('CREATE TABLE IF NOT EXISTS student_notes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id INT NOT NULL,
+    teacher_id INT NULL,
+    title VARCHAR(255) NULL,
+    content TEXT NOT NULL,
+    source VARCHAR(50) NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NULL,
+    INDEX(student_id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+  $sid = (int)($_GET['student_id'] ?? $_GET['aluno_id'] ?? 0);
+  if (!$sid) res(false, null, 'MISSING_STUDENT_ID', 422);
+  $q = $pdo->prepare('SELECT id,student_id,teacher_id,title,content,source,created_at,updated_at FROM student_notes WHERE student_id=? ORDER BY id DESC');
+  $q->execute([$sid]);
+  $rows = $q->fetchAll(PDO::FETCH_ASSOC);
+  res(true, ['rows' => $rows]);
+}
+
+if ($action === 'student_notes.create') {
+  $u = require_auth();
+  $pdo = db();
+  $pdo->exec('CREATE TABLE IF NOT EXISTS student_notes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id INT NOT NULL,
+    teacher_id INT NULL,
+    title VARCHAR(255) NULL,
+    content TEXT NOT NULL,
+    source VARCHAR(50) NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NULL,
+    INDEX(student_id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+  $B = body();
+  $sid = (int)($B['student_id'] ?? 0);
+  $title = trim($B['title'] ?? '') ?: null;
+  $content = trim($B['content'] ?? '');
+  $source = trim($B['source'] ?? 'manual');
+  if (!$sid || !$content) res(false, null, 'INVALID_INPUT', 422);
+  $stm = $pdo->prepare('INSERT INTO student_notes (student_id,teacher_id,title,content,source,created_at) VALUES (?,?,?,?,?,NOW())');
+  $stm->execute([$sid, $u['id'] ?? null, $title, $content, $source]);
+  $id = $pdo->lastInsertId();
+  // log
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+  $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute(['Nota aluno: criada #'.$id.' — Aluno #'.$sid]);
+  res(true, ['id' => (int)$id]);
+}
+
+if ($action === 'student_notes.update') {
+  $u = require_auth();
+  $pdo = db();
+  $id = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
+  if (!$id) res(false, null, 'MISSING_ID', 422);
+  $B = body();
+  $title = isset($B['title']) ? (trim($B['title']) ?: null) : null;
+  $content = $B['content'] ?? null;
+  if ($content === null) res(false, null, 'INVALID_INPUT', 422);
+  $stm = $pdo->prepare('UPDATE student_notes SET title=?, content=?, updated_at=NOW() WHERE id=?');
+  $stm->execute([$title, $content, $id]);
+  // log
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+  $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute(['Nota aluno: atualizada #'.$id]);
+  res(true, ['id' => $id]);
 }
 
 // (fallback no final do arquivo)
@@ -1859,14 +1966,29 @@ if (preg_match('/^legislacoes\/(\d+)$/', $pathInfo, $matches) && $_SERVER['REQUE
   $stmt = $pdo->prepare('DELETE FROM legislacoes WHERE id = ?');
   $result = $stmt->execute([$id]);
   
-  if ($result) {
+  if ($result && $stmt->rowCount() > 0) {
     // Tentar deletar o arquivo físico
-    $arquivoPath = __DIR__ . '/uploads/legislacoes/' . $legislacao['arquivo_pdf'];
-    if (file_exists($arquivoPath)) {
-      unlink($arquivoPath);
+    $fileDeleted = false;
+    $hadFile = false;
+    $arquivo = $legislacao['arquivo_pdf'] ?? '';
+    $arquivoPath = __DIR__ . '/uploads/legislacoes/' . $arquivo;
+    if ($arquivo) {
+      if (file_exists($arquivoPath)) {
+        $hadFile = true;
+        $fileDeleted = @unlink($arquivoPath);
+        if (!$fileDeleted) {
+          @error_log('UNLINK_FAILED legislacoes id=' . $id . ' path=' . $arquivoPath);
+        }
+      } else {
+        @error_log('FILE_NOT_FOUND legislacoes id=' . $id . ' path=' . $arquivoPath);
+      }
     }
-    res(true, null);
+    res(true, ['file_deleted' => $fileDeleted, 'had_file' => $hadFile, 'filename' => $arquivo]);
   } else {
+    // Se executou mas não removeu linhas, retornar 409 para indicar que não foi possível
+    if ($result && $stmt->rowCount() === 0) {
+      res(false, null, 'NOT_DELETED', 409);
+    }
     res(false, null, 'DELETE_FAILED', 500);
   }
 }
@@ -1954,7 +2076,7 @@ if ($action === 'schools.list') {
 
 // Criar escola
 if ($action === 'schools.create') {
-  $user = require_auth();
+  $user = require_admin();
   $data = body();
   
   if (empty($data['name'])) {
@@ -1978,7 +2100,7 @@ if ($action === 'schools.create') {
 
 // Atualizar escola
 if ($action === 'schools.update') {
-  $user = require_auth();
+  $user = require_admin();
   $data = body();
   $id = (int)($_GET['id'] ?? 0);
   
@@ -2007,7 +2129,7 @@ if ($action === 'schools.update') {
 
 // Deletar escola
 if ($action === 'schools.delete') {
-  $user = require_auth();
+  $user = require_admin();
   $id = (int)($_GET['id'] ?? 0);
   
   if (!$id) {

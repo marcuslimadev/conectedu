@@ -40,6 +40,13 @@ $restRoutes = [
     'students/delete' => 'students.delete',
     'alunos' => 'students.list',
     
+    // Schools routes
+    'schools' => 'schools.list',
+    'schools/create' => 'schools.create',
+    'schools/update' => 'schools.update',
+    'schools/delete' => 'schools.delete',
+    'escolas' => 'schools.list',
+    
     // Users routes (admin)
     'users' => 'users.list',
     'users/create' => 'users.create',
@@ -130,8 +137,9 @@ $restRoutes = [
     'reports/student' => 'reports.student',
     'reports/student/pdf' => 'reports.student.pdf',
     
-    // Atendimentos routes
-    'atendimentos' => 'atendimentos.list',
+  // Atendimentos routes
+  // Mapeia para ação genérica e decide pelo método HTTP (GET=list, POST=create)
+  'atendimentos' => 'atendimentos',
     
     // Legislações routes
     'legislacoes' => 'legislacoes.list',
@@ -143,6 +151,9 @@ $restRoutes = [
     
     // AI routes
     'ai/evaluate-student' => 'ai.evaluate_student',
+  // Voice routes
+  'voice/transcribe' => 'voice.transcribe',
+  'voice/tts' => 'voice.tts',
     
     // Health check
     'health' => 'health'
@@ -163,6 +174,34 @@ $B = body();
 
 if ($action === 'health') {
   res(true, ['time' => date('c')]);
+}
+
+// ---------- VOICE: Speech-to-Text (Transcrição) ----------
+if ($action === 'voice.transcribe') {
+  // Auth opcional (pode exigir depois):
+  $u = require_auth();
+  // Aceita multipart/form-data com campo 'audio'
+  if (!isset($_FILES['audio']) || $_FILES['audio']['error']!==UPLOAD_ERR_OK) {
+    res(false,null,'AUDIO_UPLOAD_REQUIRED',422);
+  }
+  $tmp=$_FILES['audio']['tmp_name'];
+  $name=$_FILES['audio']['name'] ?? 'audio.wav';
+  $text=openai_transcribe($tmp,$name);
+  res(true,['text'=>$text]);
+}
+
+// ---------- VOICE: Text-to-Speech (TTS) ----------
+if ($action === 'voice.tts') {
+  $u = require_auth();
+  $text=trim($B['text'] ?? '');
+  $voice=trim($B['voice'] ?? 'alloy');
+  $format=strtolower(trim($B['format'] ?? 'mp3'));
+  if(!$text) res(false,null,'TEXT_REQUIRED',422);
+  $bin=openai_tts_binary($text,$voice,$format);
+  $mime = $format==='wav' ? 'audio/wav' : ($format==='ogg'?'audio/ogg':'audio/mpeg');
+  header('Content-Type: '.$mime);
+  header('Content-Length: '.strlen($bin));
+  echo $bin; exit;
 }
 
 if ($action === 'auth.register') {
@@ -452,35 +491,45 @@ if ($action === 'courses.delete') {
 }
 
 if ($action === 'students.search') {
-  $u = require_auth();
+  // $u = require_auth(); // Removido para permitir busca de alunos na entrevista
   $q = trim($_GET['q'] ?? '');
   $limit = min(30, max(1, (int)($_GET['limit'] ?? 10)));
-  $stm = $pdo->prepare('SELECT id,name,modalidade,status FROM students WHERE name LIKE ? ORDER BY name LIMIT ' . $limit);
-  $stm->execute(['%' . $q . '%']);
+  
+  $sql = 'SELECT s.id, s.name, s.modalidade, s.status, s.responsible_name, s.responsible_phone, s.grade, s.class_name, s.school_id, sch.name as school_name FROM students s LEFT JOIN schools sch ON s.school_id = sch.id WHERE s.name LIKE ? ORDER BY s.name LIMIT ' . $limit;
+  $params = ['%' . $q . '%'];
+  $stm = $pdo->prepare($sql);
+  $stm->execute($params);
   res(true, $stm->fetchAll(PDO::FETCH_ASSOC));
 }
 if ($action === 'students.list') {
-  // $u = require_auth(); // Removido temporariamente para teste
+  $u = require_auth();
   $q = $_GET['q'] ?? '';
   $status = $_GET['status'] ?? '';
   $modalidade = $_GET['modalidade'] ?? '';
   $page = max(1, (int)($_GET['page'] ?? 1));
   $per = min(200, max(1, (int)($_GET['per_page'] ?? 50)));
-  $sql = 'SELECT * FROM students WHERE 1';
+  $sql = 'SELECT s.*, sch.name as school_name FROM students s LEFT JOIN schools sch ON s.school_id = sch.id WHERE 1';
   $p = [];
+  
+  // Professores só veem alunos que criaram, admins veem todos
+  if ($u['role'] !== 'admin') {
+    $sql .= ' AND s.created_by_teacher_id = ?';
+    $p[] = $u['id'];
+  }
+  
   if ($q) {
-    $sql .= ' AND name LIKE ?';
+    $sql .= ' AND s.name LIKE ?';
     $p[] = '%' . $q . '%';
   }
   if ($status) {
-    $sql .= ' AND status=?';
+    $sql .= ' AND s.status=?';
     $p[] = $status;
   }
   if ($modalidade) {
-    $sql .= ' AND modalidade=?';
+    $sql .= ' AND s.modalidade=?';
     $p[] = $modalidade;
   }
-  $stm = $pdo->prepare($sql . ' ORDER BY id DESC LIMIT ' . $per . ' OFFSET ' . (($page - 1) * $per));
+  $stm = $pdo->prepare($sql . ' ORDER BY s.id DESC LIMIT ' . $per . ' OFFSET ' . (($page - 1) * $per));
   $stm->execute($p);
   $rows = $stm->fetchAll(PDO::FETCH_ASSOC);
   res(true, ['rows' => $rows, 'page' => $page, 'per_page' => $per]);
@@ -489,7 +538,20 @@ if ($action === 'students.create') {
   $u = require_auth();
   $f = $B;
   if (!($f['name'] ?? '')) res(false, null, 'INVALID_INPUT', 422);
-  $cols = ['name', 'photo_url', 'birthdate', 'responsible_name', 'responsible_phone', 'responsible_email', 'school', 'class', 'shift', 'disability_type', 'cid_code', 'status', 'modalidade', 'support_teacher_id', 'srm_room_id'];
+  // Campos modernos + alguns legados ainda aceitos
+  $cols = [
+    'name', 'photo_url',
+    // dados pessoais
+    'birth_date', 'cpf', 'rg',
+    // relacionamento com escola e turma
+    'school_id', 'grade', 'class_name', 'address',
+    // responsáveis
+    'responsible_name', 'responsible_phone', 'responsible_email',
+    // outros
+    'shift', 'disability_type', 'cid_code', 'status', 'modalidade', 'support_teacher_id', 'srm_room_id',
+    // autoria
+    'created_by_teacher_id'
+  ];
   $vals = [];
   $ph = [];
   foreach ($cols as $c) {
@@ -515,7 +577,19 @@ if ($action === 'students.update') {
   $row0 = $pdo->query('SELECT name FROM students WHERE id=' . $id)->fetch(PDO::FETCH_ASSOC);
   $sets = [];
   $vals = [];
-  foreach (['name', 'photo_url', 'birthdate', 'responsible_name', 'responsible_phone', 'responsible_email', 'school', 'class', 'shift', 'disability_type', 'cid_code', 'status', 'modalidade', 'support_teacher_id', 'srm_room_id'] as $c) {
+  foreach ([
+    'name', 'photo_url',
+    // dados pessoais
+    'birth_date', 'cpf', 'rg',
+    // relacionamento com escola e turma
+    'school_id', 'grade', 'class_name', 'address',
+    // responsáveis
+    'responsible_name', 'responsible_phone', 'responsible_email',
+    // outros
+    'shift', 'disability_type', 'cid_code', 'status', 'modalidade', 'support_teacher_id', 'srm_room_id',
+    // autoria
+    'created_by_teacher_id'
+  ] as $c) {
     if (array_key_exists($c, $f)) {
       $sets[] = "$c=?";
       $vals[] = $f[$c];
@@ -571,7 +645,12 @@ if ($action === 'pdi.create') {
   $u = require_auth();
   $sid = (int)($B['student_id'] ?? 0);
   if (!$sid) res(false, null, 'INVALID_STUDENT', 422);
-  $pdo->prepare('INSERT INTO pdis (student_id,objectives,strategies,start_date,end_date,status,details,created_at) VALUES (?,?,?,?,?,?,?,NOW())')->execute([$sid, $B['objectives'] ?? null, $B['strategies'] ?? null, $B['start_date'] ?? null, $B['end_date'] ?? null, $B['status'] ?? 'ativo', isset($B['details']) ? json_encode($B['details'], JSON_UNESCAPED_UNICODE) : null]);
+  // Permite incluir school_id e escola (nome) em details, mantendo esquema atual
+  $details = $B['details'] ?? [];
+  if (!is_array($details)) { $details = []; }
+  if (isset($B['escola_id'])) $details['escola_id'] = (int)$B['escola_id'];
+  if (isset($B['escola'])) $details['escola'] = $B['escola'];
+  $pdo->prepare('INSERT INTO pdis (student_id,objectives,strategies,start_date,end_date,status,details,created_at) VALUES (?,?,?,?,?,?,?,NOW())')->execute([$sid, $B['objectives'] ?? null, $B['strategies'] ?? null, $B['start_date'] ?? null, $B['end_date'] ?? null, $B['status'] ?? 'ativo', $details ? json_encode($details, JSON_UNESCAPED_UNICODE) : null]);
   $pid = $pdo->lastInsertId();
   // log
   $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
@@ -620,7 +699,16 @@ if ($action === 'plans.create') {
   $sid = (int)($B['student_id'] ?? 0);
   $week = $B['week_start'] ?? null;
   if (!$sid || !$week) res(false, null, 'INVALID_INPUT', 422);
-  $pdo->prepare('INSERT INTO weekly_plans (student_id,week_start,objectives,notes,created_at) VALUES (?,?,?, ?,NOW())')->execute([$sid, $week, $B['objectives'] ?? null, $B['notes'] ?? null]);
+  // Permitir salvar escola de origem no notes (ou JSON dedicado se existir)
+  $notes = $B['notes'] ?? null;
+  $details = $B['details'] ?? [];
+  if (!is_array($details)) { $details = []; }
+  if (isset($B['escola_origem_id'])) $details['escola_origem_id'] = (int)$B['escola_origem_id'];
+  if (isset($B['escola_origem'])) $details['escola_origem'] = $B['escola_origem'];
+  if ($details) {
+    $notes = trim(($notes ? $notes . "\n" : '') . '[escola_origem] ' . json_encode($details, JSON_UNESCAPED_UNICODE));
+  }
+  $pdo->prepare('INSERT INTO weekly_plans (student_id,week_start,objectives,notes,created_at) VALUES (?,?,?, ?,NOW())')->execute([$sid, $week, $B['objectives'] ?? null, $notes]);
   $pid = $pdo->lastInsertId();
   foreach ($B['items'] ?? [] as $it) {
     $pdo->prepare('INSERT INTO weekly_plan_items (weekly_plan_id,day,time_start,time_end,description,materials,interventions) VALUES (?,?,?,?,?,?,?)')->execute([$pid, $it['day'] ?? 'seg', $it['time_start'] ?? null, $it['time_end'] ?? null, $it['description'] ?? null, $it['materials'] ?? null, $it['interventions'] ?? null]);
@@ -993,6 +1081,23 @@ if ($action === 'reports.student.pdf' || ($action === 'reports.student' && ($_GE
   $att->execute([$sid]);
   $att = $att->fetchAll(PDO::FETCH_ASSOC);
 
+  // Relatórios de Atendimento (AEE)
+  $ats = $pdo->prepare('SELECT a.id, a.data_atendimento, a.descricao, a.objetivos, a.recursos, a.observacoes, u.name AS teacher_name, u.email AS teacher_email 
+                        FROM atendimentos a 
+                        LEFT JOIN users u ON u.id = a.teacher_id 
+                        WHERE a.student_id = ? 
+                        ORDER BY a.data_atendimento DESC, a.id DESC');
+  $ats->execute([$sid]);
+  $ats = $ats->fetchAll(PDO::FETCH_ASSOC);
+
+  // Professor proprietário do aluno (owner)
+  $owner = null;
+  if (!empty($stu['created_by_teacher_id'])) {
+    $st = $pdo->prepare('SELECT id,name,email,role FROM users WHERE id=?');
+    $st->execute([$stu['created_by_teacher_id']]);
+    $owner = $st->fetch(PDO::FETCH_ASSOC) ?: null;
+  }
+
   $vendor = __DIR__ . '/vendor/autoload.php';
   if (!file_exists($vendor)) {
     res(false, null, 'MPDF_NOT_INSTALLED', 500);
@@ -1002,10 +1107,36 @@ if ($action === 'reports.student.pdf' || ($action === 'reports.student' && ($_GE
     res(false, null, 'MPDF_AUTOLOAD_FAILED', 500);
   }
   $mpdf = new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => 'A4', 'margin_top' => 12, 'margin_bottom' => 12]);
-  $css = 'body{font-family: DejaVu Sans; font-size: 11px; color:#0f172a;} h1{font-size:18px;margin:0 0 6px} h2{font-size:14px;margin:16px 0 8px} .muted{color:#64748b} .tag{display:inline-block;background:#e0f2fe;color:#0369a1;padding:2px 6px;border-radius:6px;font-size:10px} table{border-collapse:collapse;width:100%} th,td{border:1px solid #e2e8f0;padding:6px 8px} th{background:#f1f5f9;text-align:left}';
+  $css = 'body{font-family: DejaVu Sans; font-size: 11px; color:#0f172a;} h1{font-size:18px;margin:0 0 6px} h2{font-size:14px;margin:16px 0 8px} .muted{color:#64748b} .tag{display:inline-block;background:#e0f2fe;color:#0369a1;padding:2px 6px;border-radius:6px;font-size:10px} table{border-collapse:collapse;width:100%} th,td{border:1px solid #e2e8f0;padding:6px 8px} th{background:#f1f5f9;text-align:left} .header{display:flex;align-items:center;gap:12px;margin-bottom:8px} .title{font-size:18px;font-weight:bold;margin:0} .sub{color:#475569;font-size:11px;margin:0} .meta{margin:4px 0 12px;color:#475569;font-size:10px}';
   $mpdf->WriteHTML('<style>' . $css . '</style>', 1);
-  $mpdf->WriteHTML('<h1>Relatório do Estudante</h1>', 2);
-  $mpdf->WriteHTML('<div class="muted">' . $stu['name'] . ' • Modalidade: ' . strtoupper($stu['modalidade']) . ' • Status: ' . $stu['status'] . ' • CID: ' . ($stu['cid_code'] ?: '-') . '</div>');
+  // Logo (base64) + título
+  $logoTag = '';
+  $logoFile = realpath(__DIR__ . '/../frontend/icons/logo-icon.png');
+  if ($logoFile && file_exists($logoFile)) {
+    $imgData = base64_encode(@file_get_contents($logoFile));
+    if ($imgData) {
+      $logoTag = '<img src="data:image/png;base64,' . $imgData . '" style="height:40px;" />';
+    }
+  }
+  $headerHtml = '<div class="header">' . ($logoTag ?: '') . '<div><div class="title">Relatório do Estudante</div><div class="sub">ConectEDU • AEE</div></div></div>';
+  $mpdf->WriteHTML($headerHtml, 2);
+  $mpdf->WriteHTML('<div class="muted">' . htmlspecialchars($stu['name']) . ' • Modalidade: ' . strtoupper((string)($stu['modalidade'] ?? '')) . ' • Status: ' . htmlspecialchars((string)($stu['status'] ?? '-')) . ' • CID: ' . ((($stu['cid_code'] ?? '') ?: '-')) . '</div>');
+  $mpdf->WriteHTML('<div class="meta">Emitido por: ' . htmlspecialchars($u['name']) . ' (' . htmlspecialchars($u['email'] ?? '') . ') • Gerado em: ' . date('d/m/Y H:i') . '</div>');
+
+  // Bloco de identificação do aluno e professor
+  $birth = $stu['birthdate'] ? date('d/m/Y', strtotime($stu['birthdate'])) : '-';
+  // Montagem segura do responsável (nome + telefone)
+  $respName = isset($stu['responsible_name']) && $stu['responsible_name'] !== '' ? $stu['responsible_name'] : '-';
+  $respPhone = isset($stu['responsible_phone']) && $stu['responsible_phone'] !== '' ? '(' . $stu['responsible_phone'] . ')' : '';
+  $respFull = trim($respName . ' ' . $respPhone);
+  $mpdf->WriteHTML('<h2>Identificação do Estudante e Professor</h2><table><tbody>');
+  $mpdf->WriteHTML('<tr><th>Aluno</th><td>' . htmlspecialchars($stu['name']) . '</td><th>Data de Nascimento</th><td>' . $birth . '</td></tr>');
+  $mpdf->WriteHTML('<tr><th>Modalidade</th><td>' . strtoupper((string)($stu['modalidade'] ?? '')) . '</td><th>Status</th><td>' . htmlspecialchars((string)($stu['status'] ?? '-')) . '</td></tr>');
+  $mpdf->WriteHTML('<tr><th>CID</th><td>' . htmlspecialchars($stu['cid_code'] ?: '-') . '</td><th>Deficiência</th><td>' . htmlspecialchars($stu['disability_type'] ?: '-') . '</td></tr>');
+  $mpdf->WriteHTML('<tr><th>Escola</th><td>' . htmlspecialchars($stu['school'] ?: '-') . '</td><th>Série/Turma</th><td>' . htmlspecialchars($stu['class'] ?: '-') . '</td></tr>');
+  $mpdf->WriteHTML('<tr><th>Turno</th><td>' . htmlspecialchars($stu['shift'] ?: '-') . '</td><th>Responsável</th><td>' . htmlspecialchars($respFull) . '</td></tr>');
+  $mpdf->WriteHTML('<tr><th>Professor (owner)</th><td>' . htmlspecialchars($owner['name'] ?? '-') . '</td><th>E-mail do professor</th><td>' . htmlspecialchars($owner['email'] ?? '-') . '</td></tr>');
+  $mpdf->WriteHTML('</tbody></table>');
 
   $mpdf->WriteHTML('<h2>Anamneses</h2><table><thead><tr><th>#</th><th>Data</th><th>Resumo</th></tr></thead><tbody>', 2);
   if (count($anam) == 0) {
@@ -1036,6 +1167,19 @@ if ($action === 'reports.student.pdf' || ($action === 'reports.student' && ($_GE
   } else {
     foreach ($pais as $r) {
       $mpdf->WriteHTML('<tr><td>' . $r['id'] . '</td><td>' . ($r['start_date'] ?: '-') . ' a ' . ($r['end_date'] ?: '-') . '</td><td>' . $r['status'] . '</td><td>' . htmlspecialchars($r['services'] ?: '-') . '</td></tr>');
+    }
+  }
+  $mpdf->WriteHTML('</tbody></table>');
+
+  // Relatórios de Atendimento (AEE)
+  $mpdf->WriteHTML('<h2>Relatórios de Atendimento</h2><table><thead><tr><th>#</th><th>Data</th><th>Professor</th><th>Resumo</th></tr></thead><tbody>');
+  if (count($ats) == 0) {
+    $mpdf->WriteHTML('<tr><td colspan="4" class="muted">Sem registros</td></tr>');
+  } else {
+    foreach ($ats as $r) {
+      $desc = trim($r['descricao'] ?? '');
+      if (mb_strlen($desc) > 140) $desc = mb_substr($desc, 0, 140) . '...';
+      $mpdf->WriteHTML('<tr><td>' . $r['id'] . '</td><td>' . date('d/m/Y', strtotime($r['data_atendimento'])) . '</td><td>' . htmlspecialchars($r['teacher_name'] ?: '-') . '</td><td>' . nl2br(htmlspecialchars($desc ?: '-')) . '</td></tr>');
     }
   }
   $mpdf->WriteHTML('</tbody></table>');
@@ -1266,7 +1410,14 @@ if ($action === 'ai.evaluate_student') {
 if ($action === 'entrevistas-responsavel.create') {
   $u = require_auth();
   $f = $B;
-  if (!($f['nome_estudante'] ?? '')) res(false, null, 'INVALID_INPUT', 422);
+  // Campo nome_estudante não é mais obrigatório; derivar do student_id quando possível
+  if (($f['student_id'] ?? null) && !($f['nome_estudante'] ?? '')) {
+    $sid = (int)$f['student_id'];
+    $q = $pdo->prepare('SELECT name FROM students WHERE id=?');
+    $q->execute([$sid]);
+    $nm = $q->fetchColumn();
+    if ($nm) $f['nome_estudante'] = $nm;
+  }
 
   $cols = ['student_id', 'data_entrevista', 'tipo_entrevista', 'motivo_entrevista', 'nome_estudante', 'naturalidade', 'nome_escola', 'serie_ano', 'turno', 'nome_pai', 'idade_pai', 'escolaridade_pai', 'nome_mae', 'idade_mae', 'escolaridade_mae', 'endereco', 'bairro', 'cidade', 'telefone', 'composicao_familia_concepcao', 'tem_irmaos', 'quantidade_irmaos', 'idades_irmaos', 'situacao_pais', 'vida_social_familia', 'habito_familiar', 'beneficios_sociais', 'gravidez_planejada', 'experiencia_gestacao', 'saude_mae_gestacao', 'estado_emocional_mae', 'fez_prenatal', 'mes_inicio_prenatal', 'tratamento_necessario', 'qual_tratamento', 'tipo_parto', 'nasceu_tempo_normal', 'observacoes_nascimento', 'bebe_necessitou_oxigenio', 'bebe_teve_convulsao', 'bebe_ictericia', 'bebe_incubadora', 'foi_amamentado', 'amamentado_ate_idade', 'problemas_alimentacao', 'alimentacao_atual'];
 
@@ -1321,7 +1472,14 @@ if ($action === 'entrevistas-responsavel.get') {
 if ($action === 'pdi-conectaee.create') {
   $u = require_auth();
   $f = $B;
-  if (!($f['nome_aluno'] ?? '')) res(false, null, 'INVALID_INPUT', 422);
+  // Campo nome_aluno não é mais obrigatório; tentar preencher a partir de student_id se disponível
+  if (($f['student_id'] ?? null) && !($f['nome_aluno'] ?? '')) {
+    $sid = (int)$f['student_id'];
+    $q = $pdo->prepare('SELECT name FROM students WHERE id=?');
+    $q->execute([$sid]);
+    $nm = $q->fetchColumn();
+    if ($nm) $f['nome_aluno'] = $nm;
+  }
 
   $cols = ['nome_aluno', 'escola', 'ano_serie', 'professor_aee', 'periodo', 'diagnostico', 'caracteristicas', 'habilidades', 'dificuldades', 'objetivo_geral', 'objetivos_especificos', 'estrategias', 'recursos', 'tecnologia_assistiva', 'criterios_avaliacao', 'periodicidade_revisao'];
 
@@ -1363,7 +1521,14 @@ if ($action === 'pdi-conectaee.list') {
 if ($action === 'planos-atendimento.create') {
   $u = require_auth();
   $f = $B;
-  if (!($f['nome_aluno'] ?? '')) res(false, null, 'INVALID_INPUT', 422);
+  // Campo nome_aluno não é mais obrigatório; tentar preencher a partir de student_id se disponível
+  if (($f['student_id'] ?? null) && !($f['nome_aluno'] ?? '')) {
+    $sid = (int)$f['student_id'];
+    $q = $pdo->prepare('SELECT name FROM students WHERE id=?');
+    $q->execute([$sid]);
+    $nm = $q->fetchColumn();
+    if ($nm) $f['nome_aluno'] = $nm;
+  }
 
   $cols = ['nome_aluno', 'matricula', 'escola_origem', 'tipo_necessidade', 'descricao_necessidades', 'objetivo_geral', 'objetivos_especificos', 'atividades', 'metodologia', 'recursos_didaticos', 'frequencia_semanal', 'duracao_sessao', 'periodo_atendimento', 'horarios_especificos', 'instrumentos_avaliacao', 'criterios_avaliacao', 'periodicidade_revisao', 'observacoes'];
 
@@ -1443,15 +1608,23 @@ if ($action === 'dashboard.atividades') {
 }
 
 // Endpoint para relatórios de atendimento
-if ($action === 'atendimentos.list') {
+// Atendimentos - GET lista / POST cria
+if ($action === 'atendimentos' && $_SERVER['REQUEST_METHOD'] === 'GET') {
   $u = require_auth();
   
   $params = [];
-  $where = '';
+  $where = ' WHERE 1=1';
+  
+  // Filtro opcional por aluno
+  $studentFilter = isset($_GET['student_id']) ? (int)$_GET['student_id'] : (isset($_GET['aluno_id']) ? (int)$_GET['aluno_id'] : 0);
+  if ($studentFilter > 0) {
+    $where .= ' AND a.student_id = ?';
+    $params[] = $studentFilter;
+  }
   
   // Filtrar por professor se não for admin
   if ($u['role'] !== 'admin') {
-    $where = ' WHERE teacher_id = ?';
+    $where .= ' AND a.teacher_id = ?';
     $params[] = $u['id'];
   }
   
@@ -1494,10 +1667,19 @@ if ($action === 'atendimentos' && $_SERVER['REQUEST_METHOD'] === 'POST') {
   }
   
   if ($u['role'] !== 'admin') {
-    $stmt = $pdo->prepare('SELECT id FROM students WHERE id = ? AND created_by_teacher_id = ?');
-    $stmt->execute([$student_id, $u['id']]);
-    if (!$stmt->fetch()) {
+    // Busca ownership do aluno
+    $stmt = $pdo->prepare('SELECT created_by_teacher_id FROM students WHERE id = ?');
+    $stmt->execute([$student_id]);
+    $stuRow = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$stuRow) {
       res(false, null, 'STUDENT_NOT_FOUND', 404);
+    }
+    // Se aluno ainda não tem professor associado, faz o "claim" para o professor atual
+    if ($stuRow['created_by_teacher_id'] === null) {
+      $upd = $pdo->prepare('UPDATE students SET created_by_teacher_id = ? WHERE id = ?');
+      $upd->execute([$u['id'], $student_id]);
+    } elseif ((int)$stuRow['created_by_teacher_id'] !== (int)$u['id']) {
+      res(false, null, 'FORBIDDEN_STUDENT', 403);
     }
   }
   
@@ -1708,12 +1890,136 @@ if (preg_match('/^legislacoes\/(\d+)\/download$/', $pathInfo, $matches)) {
     res(false, null, 'FILE_NOT_FOUND', 404);
   }
   
-  // Definir headers para download
-  header('Content-Type: application/pdf');
-  header('Content-Disposition: inline; filename="' . $legislacao['nome_original'] . '"');
+  // Definir headers para download (UTF-8 seguro)
+  $nomeOriginal = $legislacao['nome_original'] ?: basename($arquivoPath);
+  $asciiFallback = @iconv('UTF-8','ASCII//TRANSLIT//IGNORE',$nomeOriginal);
+  if(!$asciiFallback) { $asciiFallback = preg_replace('/[^A-Za-z0-9_\.\-]+/','_', $nomeOriginal); }
+  header('Content-Type: application/pdf; charset=UTF-8');
+  header('X-Content-Type-Options: nosniff');
+  header('Content-Disposition: inline; filename="' . $asciiFallback . '"; filename*=UTF-8\'' . rawurlencode($nomeOriginal) . '' );
   header('Content-Length: ' . filesize($arquivoPath));
   header('Cache-Control: no-cache, must-revalidate');
   
   readfile($arquivoPath);
   exit;
 }
+
+// ==================== SCHOOLS (Escolas) ====================
+
+// Lista escolas
+if ($action === 'schools.list') {
+  // $user = require_auth(); // Removido para permitir acesso público às escolas
+  
+  $page = max(1, (int)($_GET['page'] ?? 1));
+  $perPage = max(1, min(100, (int)($_GET['per_page'] ?? 10)));
+  $offset = ($page - 1) * $perPage;
+  
+  $where = [];
+  $params = [];
+  
+  // Filtro por busca
+  if (!empty($_GET['q'])) {
+    $where[] = '(name LIKE ? OR address LIKE ? OR city LIKE ?)';
+    $search = '%' . $_GET['q'] . '%';
+    $params[] = $search;
+    $params[] = $search;
+    $params[] = $search;
+  }
+  
+  $whereClause = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+  
+  // Contar total
+  $countSql = "SELECT COUNT(*) FROM schools $whereClause";
+  $stmt = $pdo->prepare($countSql);
+  $stmt->execute($params);
+  $total = $stmt->fetchColumn();
+  
+  // Buscar dados
+  $sql = "SELECT id, name, address, city, phone, email, created_by_teacher_id, created_at 
+          FROM schools $whereClause 
+          ORDER BY name ASC 
+          LIMIT $perPage OFFSET $offset";
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+  $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  
+  res(true, [
+    'rows' => $rows,
+    'total' => $total,
+    'page' => $page,
+    'per_page' => $perPage,
+    'total_pages' => ceil($total / $perPage)
+  ]);
+}
+
+// Criar escola
+if ($action === 'schools.create') {
+  $user = require_auth();
+  $data = body();
+  
+  if (empty($data['name'])) {
+    res(false, null, 'SCHOOL_NAME_REQUIRED', 422);
+  }
+  
+  $stmt = $pdo->prepare('INSERT INTO schools (name, address, city, phone, email, created_by_teacher_id, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())');
+  if ($stmt->execute([
+    $data['name'],
+    $data['address'] ?? '',
+    $data['city'] ?? '',
+    $data['phone'] ?? '',
+    $data['email'] ?? '',
+    $user['id']
+  ])) {
+    res(true, ['id' => $pdo->lastInsertId()]);
+  } else {
+    res(false, null, 'CREATE_FAILED', 500);
+  }
+}
+
+// Atualizar escola
+if ($action === 'schools.update') {
+  $user = require_auth();
+  $data = body();
+  $id = (int)($_GET['id'] ?? 0);
+  
+  if (!$id) {
+    res(false, null, 'ID_REQUIRED', 422);
+  }
+  
+  if (empty($data['name'])) {
+    res(false, null, 'SCHOOL_NAME_REQUIRED', 422);
+  }
+  
+  $stmt = $pdo->prepare('UPDATE schools SET name=?, address=?, city=?, phone=?, email=? WHERE id=?');
+  if ($stmt->execute([
+    $data['name'],
+    $data['address'] ?? '',
+    $data['city'] ?? '',
+    $data['phone'] ?? '',
+    $data['email'] ?? '',
+    $id
+  ])) {
+    res(true, null);
+  } else {
+    res(false, null, 'UPDATE_FAILED', 500);
+  }
+}
+
+// Deletar escola
+if ($action === 'schools.delete') {
+  $user = require_auth();
+  $id = (int)($_GET['id'] ?? 0);
+  
+  if (!$id) {
+    res(false, null, 'ID_REQUIRED', 422);
+  }
+  
+  $stmt = $pdo->prepare('DELETE FROM schools WHERE id=?');
+  if ($stmt->execute([$id])) {
+    res(true, null);
+  } else {
+    res(false, null, 'DELETE_FAILED', 500);
+  }
+}
+
+res(false, null, 'NOT_FOUND', 404);

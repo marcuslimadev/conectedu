@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Escolas - Debug</title>
+    <script src="https://unpkg.com/vue@3.4.38/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.4/dist/axios.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .escola { border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .loading { color: blue; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>Teste de Carregamento de Escolas</h1>
+    
+    <div id="app">
+        <button @click="testarAPI">Testar API</button>
+        <button @click="testarDirecto">Testar Direto</button>
+        <hr>
+        
+        <div v-if="loading" class="loading">Carregando...</div>
+        <div v-if="erro" class="error">Erro: {{ erro }}</div>
+        <div v-if="sucesso" class="success">{{ sucesso }}</div>
+        
+        <div v-if="escolas.length > 0">
+            <h2>Escolas encontradas ({{ escolas.length }}):</h2>
+            <div v-for="escola in escolas" :key="escola.id" class="escola">
+                <strong>{{ escola.name }}</strong><br>
+                <small>{{ escola.city }} - {{ escola.address }}</small>
+            </div>
+        </div>
+        
+        <div v-else-if="!loading && !erro">
+            <p>Nenhuma escola encontrada</p>
+        </div>
+    </div>
+
+    <script>
+        // Configuração simples
+        const api = axios.create({
+            baseURL: '/conectedu/backend/api.php',
+            timeout: 15000
+        });
+
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    escolas: [],
+                    loading: false,
+                    erro: '',
+                    sucesso: ''
+                };
+            },
+            methods: {
+                async testarAPI() {
+                    console.log('Testando API...');
+                    this.loading = true;
+                    this.erro = '';
+                    this.sucesso = '';
+                    
+                    try {
+                        const response = await api.get('/schools');
+                        console.log('Resposta:', response.data);
+                        
+                        if (response.data && response.data.data && response.data.data.rows) {
+                            this.escolas = response.data.data.rows;
+                            this.sucesso = `${this.escolas.length} escolas carregadas com sucesso!`;
+                        } else {
+                            this.erro = 'Estrutura de resposta inválida';
+                        }
+                    } catch (error) {
+                        console.error('Erro:', error);
+                        this.erro = error.message;
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                
+                async testarDirecto() {
+                    console.log('Testando fetch direto...');
+                    this.loading = true;
+                    this.erro = '';
+                    this.sucesso = '';
+                    
+                    try {
+                        const response = await fetch('/conectedu/backend/api.php/schools');
+                        const data = await response.json();
+                        console.log('Resposta fetch:', data);
+                        
+                        if (data && data.data && data.data.rows) {
+                            this.escolas = data.data.rows;
+                            this.sucesso = `${this.escolas.length} escolas carregadas com fetch!`;
+                        } else {
+                            this.erro = 'Estrutura de resposta inválida (fetch)';
+                        }
+                    } catch (error) {
+                        console.error('Erro fetch:', error);
+                        this.erro = error.message;
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            },
+            
+            async mounted() {
+                console.log('App montado');
+                // Testar automaticamente
+                await this.testarAPI();
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

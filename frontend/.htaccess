@@ -1,0 +1,57 @@
+# DESABILITAR CACHE COMPLETAMENTE - MODO DESENVOLVIMENTO
+<IfModule mod_headers.c>
+    # Desabilitar cache para TODOS os arquivos web
+    <FilesMatch "\.(js|css|html|json|php)$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0, s-maxage=0"
+        Header set Pragma "no-cache"
+        Header set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
+        Header unset ETag
+        Header unset Last-Modified
+    </FilesMatch>
+    
+    # Cache mínimo para imagens (apenas 1 hora)
+    <FilesMatch "\.(png|jpg|jpeg|gif|ico|svg|webp)$">
+        Header set Cache-Control "public, max-age=3600"
+    </FilesMatch>
+    
+    # Arquivos específicos críticos
+    <Files "spa-tailwind.js">
+        Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0, s-maxage=0"
+        Header set Pragma "no-cache"
+        Header set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
+        Header unset ETag
+        Header unset Last-Modified
+    </Files>
+    
+    <Files "config.js">
+        Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0, s-maxage=0"
+        Header set Pragma "no-cache"
+        Header set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
+        Header unset ETag
+        Header unset Last-Modified
+    </Files>
+    
+    <Files "index.html">
+        Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0, s-maxage=0"
+        Header set Pragma "no-cache"
+        Header set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
+        Header unset ETag
+        Header unset Last-Modified
+    </Files>
+    
+    # Desabilitar service worker e manifest
+    <Files "service-worker.js">
+        Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
+        Header set Pragma "no-cache"
+        Header set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
+    </Files>
+    
+    <Files "manifest.json">
+        Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
+        Header set Pragma "no-cache"
+        Header set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
+    </Files>
+</IfModule>
+
+# Desabilitar ETags completamente
+FileETag None

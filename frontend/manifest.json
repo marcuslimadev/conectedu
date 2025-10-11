@@ -1,7 +1,7 @@
 {
   "name": "ConectAEE",
   "short_name": "ConectAEE",
-  "start_url": "./index.html#/login",
+  "start_url": "./#/login",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4A90E2",

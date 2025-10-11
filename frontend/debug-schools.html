@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Escolas</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.4/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Debug - Carregamento de Escolas</h1>
+    <button onclick="testAPI()">Testar API /schools</button>
+    <div id="result"></div>
+
+    <script>
+        const api = axios.create({
+            baseURL: '/conectedu/backend/api.php',
+            timeout: 15000
+        });
+
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Carregando...</p>';
+            
+            try {
+                console.log('Fazendo requisição para:', api.defaults.baseURL + '/schools');
+                const response = await api.get('/schools');
+                console.log('Resposta completa:', response);
+                console.log('Dados:', response.data);
+                
+                resultDiv.innerHTML = `
+                    <h3>✅ Sucesso!</h3>
+                    <p><strong>Status:</strong> ${response.status}</p>
+                    <p><strong>OK:</strong> ${response.data.ok}</p>
+                    <p><strong>Total escolas:</strong> ${response.data.data?.total || 0}</p>
+                    <p><strong>Escolas encontradas:</strong> ${response.data.data?.rows?.length || 0}</p>
+                    <pre>${JSON.stringify(response.data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                console.error('Erro:', error);
+                resultDiv.innerHTML = `
+                    <h3>❌ Erro!</h3>
+                    <p><strong>Mensagem:</strong> ${error.message}</p>
+                    <p><strong>Status:</strong> ${error.response?.status || 'N/A'}</p>
+                    <p><strong>Dados do erro:</strong></p>
+                    <pre>${JSON.stringify(error.response?.data || error.message, null, 2)}</pre>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

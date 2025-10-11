@@ -166,7 +166,54 @@ O sistema é totalmente responsivo com breakpoints:
 - ✅ Estados de foco visíveis
 - ✅ Tamanhos de toque adequados (44px+)
 
-## 🚀 Deploy
+## � Integração de Voz (STT/TTS)
+
+O backend expõe duas ações novas para conversão de áudio e síntese de fala utilizando os serviços de voz da OpenAI, reutilizando a chave configurada em `backend/.env`.
+
+### Endpoints Disponíveis
+
+| Endpoint | Método | Auth | Descrição |
+|----------|--------|------|-----------|
+| `/backend/api.php?action=voice.transcribe` ou `POST /voice/transcribe` | `POST multipart/form-data` | ✅ | Recebe um arquivo de áudio (campo `audio`) e retorna `{ text }` com a transcrição usando Whisper (`OPENAI_STT_MODEL`, padrão `whisper-1`). |
+| `/backend/api.php?action=voice.tts` ou `POST /voice/tts` | `POST application/json` | ✅ | Recebe `{ text, voice?, format? }` e retorna binário de áudio sintetizado (`OPENAI_TTS_MODEL`, padrão `tts-1`). |
+
+### Configuração da Chave OpenAI
+
+1. **Obtenha uma chave**: Acesse [OpenAI API Keys](https://platform.openai.com/account/api-keys) e gere uma nova chave
+2. **Configure no `.env`**: Adicione `OPENAI_API_KEY=sua_chave_aqui` no arquivo `backend/.env`
+3. **Modelos customizáveis**: `OPENAI_STT_MODEL`, `OPENAI_TTS_MODEL`
+4. **Chaves de projeto**: Se usar chave `sk-proj-*`, adicione também `OPENAI_PROJECT_ID` (opcional, auto-detectado)
+
+> **⚠️ Importante**: Sem uma chave válida da OpenAI, os endpoints de voz retornarão erro `OPENAI_KEY_MISSING`. A chave atual no `.env` está inválida ou expirada.
+
+### Uso no Frontend (SPA Vue)
+
+- **Transcrição (STT):** Na tela de relatórios, o botão “Gravar Áudio” envia o blob capturado para `/voice/transcribe`. A resposta preenche automaticamente a descrição do atendimento.
+- **Síntese (TTS):** O botão “Ouvir descrição” chama `/voice/tts` e reproduz o áudio retornado (MP3 por padrão).
+
+### Teste Manual Rápido (PowerShell)
+
+```powershell
+# Transcrição
+$file = Get-Item .\amostra.wav
+Invoke-WebRequest -Method Post \
+   -Headers @{ Authorization = "Bearer <TOKEN_AQUI>" } \
+   -InFile $file.FullName \
+   -ContentType 'multipart/form-data' \
+   -Uri 'http://localhost/conectedu/backend/api.php?action=voice.transcribe'
+
+# TTS (recebe MP3)
+Invoke-WebRequest -Method Post \
+   -Headers @{ Authorization = "Bearer <TOKEN_AQUI>" } \
+   -Body (@{ text = 'Olá, ConectEDU!'; voice='alloy'; format='mp3' } | ConvertTo-Json) \
+   -ContentType 'application/json' \
+   -OutFile 'fala.mp3' \
+   -Uri 'http://localhost/conectedu/backend/api.php?action=voice.tts'
+```
+
+> **Dica:** Os requests exigem token JWT válido. Faça login na SPA, copie o token salvo em `localStorage` e envie no header `Authorization: Bearer ...`.
+
+## �🚀 Deploy
 
 ### Preparação para Produção
 

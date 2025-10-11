@@ -1,9 +1,18 @@
 // ConectAEE v5.0 - Sistema de Gestão Educacional com Tailwind CSS
+
+// Debug inicial
+console.log('🔧 INICIANDO spa-tailwind.js');
+console.log('🔧 window.CONFIG existe?', !!window.CONFIG);
+console.log('🔧 CONFIG existe?', typeof CONFIG !== 'undefined' ? CONFIG : 'UNDEFINED');
+console.log('🔧 axios existe?', typeof axios !== 'undefined');
+
 // Configuração da API
 const api = axios.create({
   baseURL: CONFIG.API_BASE, 
   timeout: 15000
 });
+
+console.log('🔧 api criado com baseURL:', CONFIG.API_BASE);
 
 // Interceptadores para autenticação
 api.interceptors.request.use(cfg => {
@@ -130,15 +139,16 @@ const AlunosTW = {
                 <span>Nome</span>
                 <svg v-if="sortField === 'name'" class="w-4 h-4" :class="sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                   <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                </svg>
-              </div>
-            </th>
-            <th class="px-3 py-2 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none" 
-                @click="sortBy('modalidade')" @keydown.enter="sortBy('modalidade')" @keydown.space="sortBy('modalidade')" tabindex="0"
-                role="columnheader" :aria-sort="sortField === 'modalidade' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
-              <div class="flex items-center justify-between">
-                <span>Modalidade</span>
-                <svg v-if="sortField === 'modalidade'" class="w-4 h-4" :class="sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Selecionar Aluno <span class="text-red-500">*</span></label>
+                    <input v-model="alunoFiltroPDI" placeholder="Filtrar alunos..." class="mb-2 w-full px-3 py-2 border border-gray-300 rounded" />
+                    <select v-model="form.student_id" required 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      @change="preencherDadosAluno">
+                      <option value="">Selecione um aluno</option>
+                      <option v-for="aluno in alunosFiltradosPDI" :key="aluno.id" :value="aluno.id">{{ aluno.name }}</option>
+                    </select>
+                  </div>
                   <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
                 </svg>
               </div>
@@ -159,12 +169,12 @@ const AlunosTW = {
         </thead>
         <tbody>
           <tr v-for="s in rows" :key="s.id" class="border-t hover:bg-gray-50">
-            <td class="px-3 py-2 font-medium">{{ s.name }}</td>
+            <td class="px-3 py-2 font-medium">{{ s.name || '—' }}</td>
             <td class="px-3 py-2">
-              <span class="px-2 py-1 rounded text-xs font-medium uppercase bg-blue-100 text-blue-800">{{ s.modalidade }}</span>
+              <span class="px-2 py-1 rounded text-xs font-medium uppercase bg-blue-100 text-blue-800">{{ s.modalidade || '—' }}</span>
             </td>
             <td class="px-3 py-2">
-              <span :class="['px-2 py-1 rounded text-xs font-medium', s.status==='ativo'?'bg-green-100 text-green-700':'bg-gray-100 text-gray-600']">{{ s.status }}</span>
+              <span :class="['px-2 py-1 rounded text-xs font-medium', s.status==='ativo'?'bg-green-100 text-green-700':'bg-gray-100 text-gray-600']">{{ s.status || '—' }}</span>
             </td>
             <td class="px-3 py-2 text-sm text-gray-600">
               <span v-if="s.modalidade==='apoio'">Prof #{{ s.support_teacher_id || '-' }}</span>
@@ -181,7 +191,11 @@ const AlunosTW = {
               </button>
             </td>
           </tr>
-          <tr v-if="!rows || rows.length===0"><td colspan="5" class="px-3 py-6 text-center text-gray-500">Sem registros</td></tr>
+          <tr v-if="!rows || rows.length===0">
+            <td colspan="5" class="px-3 py-6 text-center text-gray-700">
+              {{ (filters.q || filters.status || filters.modalidade) ? 'Nenhum resultado para os filtros aplicados' : 'Sem registros' }}
+            </td>
+          </tr>
         </tbody>
       </table>
       
@@ -229,11 +243,11 @@ const AlunosTW = {
         
         <div class="space-y-2 text-sm">
           <div class="flex justify-between">
-            <span class="text-gray-500">Modalidade:</span>
+            <span class="text-gray-700">Modalidade:</span>
             <span class="px-2 py-1 rounded text-xs font-medium uppercase bg-blue-100 text-blue-800">{{ s.modalidade }}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-gray-500">Vínculo:</span>
+            <span class="text-gray-700">Vínculo:</span>
             <span class="text-gray-900">
               <span v-if="s.modalidade==='apoio'">Prof #{{ s.support_teacher_id || '-' }}</span>
               <span v-else>SRM #{{ s.srm_room_id || '-' }}</span>
@@ -251,7 +265,7 @@ const AlunosTW = {
         </div>
       </div>
       
-      <div v-if="!rows || rows.length===0" class="bg-white shadow rounded-lg p-8 text-center text-gray-500">
+      <div v-if="!rows || rows.length===0" class="bg-white shadow rounded-lg p-8 text-center text-gray-700">
         Nenhum aluno encontrado
       </div>
       
@@ -328,11 +342,11 @@ const AlunosTW = {
           <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-200"
                :class="index < currentStepAluno ? 'bg-blue-500 border-blue-500 text-white' : 
                        index === currentStepAluno ? 'bg-blue-100 border-blue-500 text-blue-700' : 
-                       'bg-gray-100 border-gray-300 text-gray-400'">
+                       'bg-gray-100 border-gray-300 text-gray-600'">
             <i :class="step.icon"></i>
           </div>
           <span class="text-xs mt-2 text-center max-w-20"
-                :class="index <= currentStepAluno ? 'text-blue-600 font-medium' : 'text-gray-400'">
+                :class="index <= currentStepAluno ? 'text-blue-600 font-medium' : 'text-gray-700'">
             {{ step.title }}
           </span>
         </div>
@@ -345,7 +359,7 @@ const AlunosTW = {
           <p class="text-sm text-gray-600">Informe os dados principais do aluno</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
               <i class="fas fa-user text-blue-500 mr-1"></i>
@@ -359,6 +373,24 @@ const AlunosTW = {
           
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-school text-blue-500 mr-1"></i>
+              Escola *
+            </label>
+            <select v-model="form.school_id" 
+                    class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required>
+              <option disabled value="">Selecione a escola</option>
+              <option v-for="escola in schools" :key="escola.id" :value="escola.id">
+                {{ escola.name }}
+              </option>
+            </select>
+            <div class="text-xs text-gray-700 mt-1">Escola onde o aluno estuda</div>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+                        <button @click="newEscola" 
               <i class="fas fa-graduation-cap text-blue-500 mr-1"></i>
               Modalidade AEE *
             </label>
@@ -369,19 +401,68 @@ const AlunosTW = {
               <option value="apoio">👨‍🏫 Apoio Pedagógico</option>
               <option value="srm">🏫 Sala de Recursos Multifuncionais</option>
             </select>
-            <div class="text-xs text-gray-500 mt-1">Escolha o tipo de atendimento AEE</div>
+            <div class="text-xs text-gray-700 mt-1">Escolha o tipo de atendimento AEE</div>
           </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              <i class="fas fa-toggle-on text-blue-500 mr-1"></i>
+                          class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent flex-1 placeholder-gray-700 text-gray-900">
               Status
             </label>
             <select v-model="form.status" 
                     class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
               <option value="ativo">✅ Ativo</option>
-              <option value="inativo">❌ Inativo</option>
+                          <thead class="bg-gray-50">
             </select>
+                              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Nome</th>
+                              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Endereço</th>
+                              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Cidade</th>
+                              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Telefone</th>
+                              <th class="px-6 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">Ações</th>
+          <h3 class="text-lg font-medium text-gray-900 mb-4">
+            <i class="fas fa-id-card text-blue-500 mr-2"></i>Dados Pessoais Complementares
+          </h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div v-if="!$isFieldFilledInInterview(form.id, 'data_nascimento')">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Data de Nascimento</label>
+              <input v-model="form.birth_date" type="date"
+                     class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div v-if="!$isFieldFilledInInterview(form.id, 'cpf')">
+              <label class="block text-sm font-medium text-gray-700 mb-2">CPF</label>
+              <input v-model="form.cpf" type="text" 
+                     class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                     placeholder="000.000.000-00">
+            </div>
+            
+            <div v-if="!$isFieldFilledInInterview(form.id, 'rg')">
+              <label class="block text-sm font-medium text-gray-700 mb-2">RG</label>
+              <input v-model="form.rg" type="text"
+                     class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                     placeholder="00.000.000-0">
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+            <div v-if="!$isFieldFilledInInterview(form.id, 'serie')">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Série/Ano</label>
+              <input v-model="form.grade" type="text"
+                     class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                     placeholder="Ex: 5º Ano, 8ª Série">
+            </div>
+            
+            <div v-if="!$isFieldFilledInInterview(form.id, 'turma')">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Turma</label>
+              <input v-model="form.class_name" type="text"
+                     class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                     placeholder="Ex: Turma A, B">
+            </div>
+          </div>
+          
+          <div class="mt-4" v-if="!$isFieldFilledInInterview(form.id, 'endereco')">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Endereço Completo</label>
+            <textarea v-model="form.address" rows="2"
+                      class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Rua, número, bairro, cidade, CEP"></textarea>
           </div>
         </div>
       </div>
@@ -443,7 +524,7 @@ const AlunosTW = {
           </div>
         </div>
 
-        <div v-if="!form.modalidade" class="text-center py-8 text-gray-500">
+        <div v-if="!form.modalidade" class="text-center py-8 text-gray-700">
           <i class="fas fa-arrow-left text-2xl mb-2"></i>
           <p>Primeiro selecione a modalidade na etapa anterior</p>
         </div>
@@ -457,7 +538,7 @@ const AlunosTW = {
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
+          <div v-if="!$isFieldFilledInInterview(form.id, 'nome_responsavel')">
             <label class="block text-sm font-medium text-gray-700 mb-2">
               <i class="fas fa-user-friends text-blue-500 mr-1"></i>
               Nome do Responsável
@@ -467,7 +548,7 @@ const AlunosTW = {
                    placeholder="Nome do pai, mãe ou responsável">
           </div>
           
-          <div>
+          <div v-if="!$isFieldFilledInInterview(form.id, 'telefone')">
             <label class="block text-sm font-medium text-gray-700 mb-2">
               <i class="fas fa-phone text-blue-500 mr-1"></i>
               Telefone de Contato
@@ -475,6 +556,18 @@ const AlunosTW = {
             <input v-model="form.responsible_phone" 
                    class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                    placeholder="(11) 99999-9999">
+          </div>
+        </div>
+        
+        <!-- Alerta informativo sobre campos já preenchidos -->
+        <div v-if="$isFieldFilledInInterview(form.id, 'nome_responsavel') || $isFieldFilledInInterview(form.id, 'telefone')" 
+             class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div class="flex items-center">
+            <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+            <div>
+              <h3 class="font-medium text-blue-800">Informações já coletadas</h3>
+              <p class="text-sm text-blue-700">Alguns campos não são exibidos pois já foram preenchidos na entrevista com o responsável.</p>
+            </div>
           </div>
         </div>
 
@@ -486,7 +579,7 @@ const AlunosTW = {
           <input v-model="form.cid_code" 
                  class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                  placeholder="Código CID, se disponível">
-          <div class="text-xs text-gray-500 mt-1">Classificação Internacional de Doenças (opcional)</div>
+          <div class="text-xs text-gray-700 mt-1">Classificação Internacional de Doenças (opcional)</div>
         </div>
 
         <!-- Resumo dos dados -->
@@ -558,9 +651,10 @@ const AlunosTW = {
       { title: 'Atribuições', icon: 'fas fa-chalkboard-teacher' },
       { title: 'Contato', icon: 'fas fa-phone' }
     ],
-    form:{ id:null, name:'', modalidade:'', status:'ativo', _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'' }, 
+    form:{ id:null, name:'', modalidade:'', status:'ativo', school_id:null, _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:'' }, 
     teachers:[], 
     rooms:[],
+    schools:[],
     // Paginação
     currentPage: 1,
     perPage: 10,
@@ -577,14 +671,13 @@ const AlunosTW = {
       const end = Math.min(this.totalPages, this.currentPage + range);
       const pages = [];
       for (let i = start; i <= end; i++) {
-        pages.push(i);
       }
       return pages;
     },
     canProceedAluno() {
       switch (this.currentStepAluno) {
         case 0:
-          return this.form.name && this.form.name.trim().length > 0 && this.form.modalidade;
+          return this.form.name && this.form.name.trim().length > 0 && this.form.modalidade && this.form.school_id;
         case 1:
           return true; // Atribuições são opcionais
         case 2:
@@ -621,17 +714,17 @@ const AlunosTW = {
     newAluno(){ 
       this.editing=true; 
       this.currentStepAluno = 0;
-      this.form={ id:null, name:'', modalidade:'', status:'ativo', _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'' }; 
+      this.form={ id:null, name:'', modalidade:'', status:'ativo', school_id:null, _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:'' }; 
     },
     edit(s){ 
       this.editing=true; 
       this.currentStepAluno = 0;
-      this.form=Object.assign({_st_name:'', _room_name:''}, s); 
+      this.form=Object.assign({_st_name:'', _room_name:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:''}, s); 
     },
     cancel(){ 
       this.editing=false; 
       this.currentStepAluno = 0;
-      this.form={ id:null, name:'', modalidade:'', status:'ativo', _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'' }; 
+      this.form={ id:null, name:'', modalidade:'', status:'ativo', school_id:null, _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:'' }; 
     },
     async load(){ 
       const params={ 
@@ -642,11 +735,7 @@ const AlunosTW = {
       }; 
       if(this.filters.q) params.q=this.filters.q; 
       if(this.filters.status) params.status=this.filters.status; 
-      if(this.filters.modalidade) params.modalidade=this.filters.modalidade; 
-      // Professores veem apenas seus próprios alunos
-      if(this.$parent.user && this.$parent.user.role !== 'admin') {
-        params.teacher_id = this.$parent.user.id;
-      }
+      if(this.filters.modalidade) params.modalidade=this.filters.modalidade;
       const r=await api.get('/students',{params}); 
       this.rows = r.data?.data?.rows || []; 
       this.totalItems = r.data?.data?.total || 0;
@@ -678,10 +767,48 @@ const AlunosTW = {
       this.currentPage = 1; // Resetar para primeira página
       this.load();
     },
-    async loadLists(){ const t=await api.get('/support-teachers'); this.teachers=t.data?.data||[]; const r=await api.get('/srm-rooms'); this.rooms=r.data?.data||[]; },
+    async loadLists(){ 
+      try {
+        const results = await Promise.allSettled([
+          api.get('/support-teachers'),
+          api.get('/srm-rooms'),
+          api.get('/schools')
+        ]);
+        // support-teachers
+        if (results[0].status === 'fulfilled') {
+          const t = results[0].value;
+          this.teachers = (t.data?.data) || [];
+        } else {
+          this.teachers = [];
+          console.error('Falha ao carregar professores de apoio:', results[0].reason);
+        }
+        // srm-rooms
+        if (results[1].status === 'fulfilled') {
+          const r = results[1].value;
+          this.rooms = (r.data?.data) || [];
+        } else {
+          this.rooms = [];
+          console.error('Falha ao carregar salas SRM:', results[1].reason);
+        }
+        // schools com fallback de parsing
+        if (results[2].status === 'fulfilled') {
+          const s = results[2].value;
+          const d = s.data;
+          this.schools = (d?.data?.rows) || (Array.isArray(d?.data) ? d.data : (Array.isArray(d) ? d : []));
+        } else {
+          this.schools = [];
+          console.error('Falha ao carregar escolas:', results[2].reason);
+          this.$showToast && this.$showToast('Atenção', 'Não foi possível carregar a lista de escolas agora. Tente novamente mais tarde.', 'info');
+        }
+      } catch (err) {
+        console.error('Erro inesperado ao carregar listas:', err);
+        this.$showToast && this.$showToast('Erro', 'Erro ao carregar listas iniciais (escolas, professores, salas).', 'error');
+        this.teachers = []; this.rooms = []; this.schools = [];
+      }
+    },
     async save(){ 
-      if(!this.form.name || !this.form.modalidade){ 
-        this.$showModal('Atenção', 'Preencha nome e modalidade', 'info'); 
+      if(!this.form.name || !this.form.modalidade || !this.form.school_id){ 
+        this.$showToast('Atenção', 'Preencha nome, modalidade e escola', 'warning'); 
         return; 
       } 
       const payload=Object.assign({}, this.form); 
@@ -694,14 +821,25 @@ const AlunosTW = {
       if(!this.form.id){ 
         const r=await api.post('/students/create', payload); 
         if(r.data?.ok){ await this.load(); this.cancel(); } 
-        else this.$showModal('Erro', r.data?.error||'Erro ao criar', 'error'); 
+        else this.$showToast('Erro', r.data?.error||'Erro ao criar', 'error'); 
       } else { 
         const r=await api.put('/students/update', payload, { params:{ id:this.form.id } }); 
         if(r.data?.ok){ await this.load(); this.cancel(); } 
-        else this.$showModal('Erro', r.data?.error||'Erro ao atualizar', 'error'); 
+        else this.$showToast('Erro', r.data?.error||'Erro ao atualizar', 'error'); 
       } 
     },
-    async del(s){ if(!confirm('Excluir aluno?')) return; const r=await api.post('/students/delete', {}, { params:{ id:s.id } }); if(r.data?.ok){ this.load(); } else this.$showModal('Erro', r.data?.error||'Erro ao excluir', 'error'); }
+    async del(s){
+      if (!this._confirmDeleteAluno || this._confirmDeleteAluno !== s.id) {
+        this._confirmDeleteAluno = s.id;
+        this.$showToast('Confirme', `Clique novamente para excluir o aluno "${s.name}"`, 'warning');
+        setTimeout(()=>{ if(this._confirmDeleteAluno===s.id) this._confirmDeleteAluno=null; }, 3000);
+        return;
+      }
+      this._confirmDeleteAluno = null;
+      const r=await api.post('/students/delete', {}, { params:{ id:s.id } });
+      if(r.data?.ok){ this.$showToast('Sucesso', 'Aluno excluído', 'success'); this.load(); }
+      else this.$showToast('Erro', r.data?.error||'Erro ao excluir', 'error');
+    }
   },
   async mounted(){ await this.loadLists(); await this.load(); }
 };
@@ -736,14 +874,14 @@ const RegisterTW = {
           <div>
             <label class="text-sm font-medium text-gray-700 mb-1 block" for="reg-password">Senha</label>
             <input id="reg-password" v-model="form.password" type="password" required class="border rounded px-3 py-2 w-full" placeholder="Sua senha">
-            <div class="mt-1 text-xs text-gray-500">
+            <div class="mt-1 text-xs text-gray-700">
               <p>A senha deve conter:</p>
               <ul class="list-disc list-inside space-y-1">
-                <li :class="passwordChecks.length ? 'text-green-600' : 'text-gray-500'">Pelo menos 8 caracteres</li>
-                <li :class="passwordChecks.uppercase ? 'text-green-600' : 'text-gray-500'">Uma letra maiúscula</li>
-                <li :class="passwordChecks.lowercase ? 'text-green-600' : 'text-gray-500'">Uma letra minúscula</li>
-                <li :class="passwordChecks.number ? 'text-green-600' : 'text-gray-500'">Um número</li>
-                <li :class="passwordChecks.special ? 'text-green-600' : 'text-gray-500'">Um caractere especial (!@#$%^&*)</li>
+                <li :class="passwordChecks.length ? 'text-green-600' : 'text-gray-700'">Pelo menos 8 caracteres</li>
+                <li :class="passwordChecks.uppercase ? 'text-green-600' : 'text-gray-700'">Uma letra maiúscula</li>
+                <li :class="passwordChecks.lowercase ? 'text-green-600' : 'text-gray-700'">Uma letra minúscula</li>
+                <li :class="passwordChecks.number ? 'text-green-600' : 'text-gray-700'">Um número</li>
+                <li :class="passwordChecks.special ? 'text-green-600' : 'text-gray-700'">Um caractere especial (!@#$%^&*)</li>
               </ul>
             </div>
           </div>
@@ -930,13 +1068,13 @@ const UsuariosTW = {
     <div v-if="showNotifications" class="bg-white shadow rounded p-4 space-y-3">
       <div class="flex items-center justify-between">
         <h2 class="text-lg font-semibold">Notificações</h2>
-        <button @click="showNotifications = false" class="text-gray-400 hover:text-gray-600">
+        <button @click="showNotifications = false" class="text-gray-600 hover:text-gray-800">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
           </svg>
         </button>
       </div>
-      <div v-if="!notifications || notifications.length === 0" class="text-center text-gray-500 py-4">
+      <div v-if="!notifications || notifications.length === 0" class="text-center text-gray-700 py-4">
         Nenhuma notificação
       </div>
       <div v-else class="space-y-2">
@@ -945,7 +1083,7 @@ const UsuariosTW = {
             <div class="flex-1">
               <h3 class="font-medium text-sm">{{ n.title }}</h3>
               <p class="text-sm text-gray-600 mt-1">{{ n.message }}</p>
-              <p class="text-xs text-gray-400 mt-1">{{ formatDate(n.created_at) }}</p>
+              <p class="text-xs text-gray-600 mt-1">{{ formatDate(n.created_at) }}</p>
             </div>
             <div class="ml-4 space-x-2">
               <button @click="markAsRead(n.id)" class="px-2 py-1 text-xs border rounded">Marcar como lida</button>
@@ -968,8 +1106,8 @@ const UsuariosTW = {
         </thead>
         <tbody>
           <tr v-for="u in rows" :key="u.id" class="border-t">
-            <td class="px-3 py-2">{{ u.name || 'Nome não informado' }}</td>
-            <td class="px-3 py-2">{{ u.email || 'Email não informado' }}</td>
+            <td class="px-3 py-2">{{ u.name || '—' }}</td>
+            <td class="px-3 py-2">{{ u.email || '—' }}</td>
             <td class="px-3 py-2">
               <span :class="[
                 'px-2 py-1 rounded text-xs font-medium',
@@ -1003,7 +1141,11 @@ const UsuariosTW = {
               </button>
             </td>
           </tr>
-          <tr v-if="!rows || rows.length===0"><td colspan="5" class="px-3 py-6 text-center text-gray-500">Sem usuários</td></tr>
+          <tr v-if="!rows || rows.length===0">
+            <td colspan="5" class="px-3 py-6 text-center text-gray-700">
+              {{ (filters.q || filters.role || filters.status) ? 'Nenhum usuário encontrado para os filtros aplicados' : 'Sem usuários' }}
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -1090,7 +1232,7 @@ const UsuariosTW = {
           } 
           const r=await api.post('/users/create', payload); 
           if(r.data?.ok){ 
-            this.showSuccessMessage('Usuário criado com sucesso!');
+            this.showSuccessMessage(`Usuário "${payload.name}" criado com sucesso!`);
             await this.load(); 
             this.cancel(); 
           } else {
@@ -1101,7 +1243,7 @@ const UsuariosTW = {
           if(!payload.password) delete payload.password; 
           const r=await api.post('/users/update', payload, { params:{ id:this.form.id } }); 
           if(r.data?.ok){ 
-            this.showSuccessMessage('Usuário atualizado com sucesso!');
+            this.showSuccessMessage(`Usuário "${payload.name || this.form.name}" atualizado com sucesso!`);
             await this.load(); 
             this.cancel(); 
           } else {
@@ -1115,12 +1257,18 @@ const UsuariosTW = {
       }
     },
     async del(u){ 
-      if(!confirm(`Tem certeza que deseja excluir o usuário "${u.name}"?\n\nEsta ação não pode ser desfeita.`)) return; 
+      if (!this._confirmDeleteUser || this._confirmDeleteUser !== u.id) {
+        this._confirmDeleteUser = u.id;
+        this.$showToast && this.$showToast('Confirme', `Clique novamente para excluir o usuário "${u.name}"`, 'warning');
+        setTimeout(()=>{ if(this._confirmDeleteUser===u.id) this._confirmDeleteUser=null; }, 3000);
+        return;
+      }
+      this._confirmDeleteUser = null;
       this.deletingUserId = u.id;
       try {
         const r = await api.post('/users/delete', {}, { params:{ id:u.id } }); 
         if(r.data?.ok){ 
-          this.showSuccessMessage('Usuário excluído com sucesso!');
+          this.showSuccessMessage(`Usuário "${u.name}" excluído com sucesso!`);
           this.load(); 
         } else {
           this.showErrorMessage(r.data?.error||'Erro ao excluir');
@@ -1166,7 +1314,7 @@ const UsuariosTW = {
         this.notifications = r.data?.data || []; 
         this.showNotifications = true; 
       } catch(e) { 
-        this.$showModal('Erro', 'Erro ao carregar notificações', 'error'); 
+        this.$showToast('Erro', 'Erro ao carregar notificações', 'error'); 
       } 
     },
 
@@ -1175,7 +1323,7 @@ const UsuariosTW = {
         await api.post('/notifications/read', { notification_id: notificationId });
         this.loadNotifications();
       } catch(e) {
-        this.$showModal('Erro', 'Erro ao marcar notificação como lida', 'error');
+        this.$showToast('Erro', 'Erro ao marcar notificação como lida', 'error');
       }
     },
     formatDate(dateStr) {
@@ -1184,6 +1332,246 @@ const UsuariosTW = {
   },
 
   async mounted(){ this.load(); this.loadNotifications(); }
+};
+
+// Componente de Escolas - Recriado seguindo padrão dos outros componentes
+const EscolasTW = {
+  template: `
+    <div class="space-y-6">
+      <!-- Header -->
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Escolas</h1>
+          <p class="mt-1 text-sm text-gray-700">Gerencie as escolas do sistema</p>
+        </div>
+  <button v-if="canManage" @click="newEscola" 
+    class="px-4 py-2 bg-blue-100 text-blue-900 rounded-lg hover:bg-blue-200 flex items-center space-x-2 border border-blue-300">
+          <i class="fas fa-plus"></i>
+    <span>Nova Escola</span>
+        </button>
+      </div>
+
+      <!-- Filtros -->
+      <div class="flex gap-3 mb-6">
+        <input 
+          v-model="searchTerm" 
+          placeholder="Buscar escolas..." 
+          class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent flex-1 placeholder-gray-700 text-gray-900">
+        <button v-if="canManage" @click="newEscola" class="px-4 py-2 bg-blue-100 text-blue-900 rounded-lg hover:bg-blue-200 transition-colors border border-blue-300">
+          <i class="fas fa-plus mr-2"></i>Nova Escola
+        </button>
+      </div>
+
+      <!-- Tabela -->
+      <div class="bg-white shadow rounded-lg overflow-hidden">
+        <table class="min-w-full">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Endereço</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cidade</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Telefone</th>
+              <th v-if="canManage" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr v-for="escola in filteredRows" :key="escola.id" class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="font-medium text-gray-900">{{ escola.name || '—' }}</div>
+              </td>
+              <td class="px-6 py-4 text-gray-800">{{ escola.address || '—' }}</td>
+              <td class="px-6 py-4 text-gray-800">{{ escola.city || '—' }}</td>
+              <td class="px-6 py-4 text-gray-800">{{ escola.phone || '—' }}</td>
+              <td v-if="canManage" class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button @click="edit(escola)" class="inline-flex items-center text-blue-800 hover:text-blue-900 mr-3 px-2 py-1 border border-blue-200 rounded">
+                  <i class="fas fa-edit mr-1" aria-hidden="true"></i>
+                  <span>Editar</span>
+                </button>
+                <button @click="deleteEscola(escola)" class="inline-flex items-center text-red-800 hover:text-red-900 px-2 py-1 border border-red-200 rounded">
+                  <i class="fas fa-trash mr-1" aria-hidden="true"></i>
+                  <span>Excluir</span>
+                </button>
+              </td>
+            </tr>
+            <tr v-if="!filteredRows.length">
+              <td :colspan="canManage ? 5 : 4" class="px-6 py-4 text-center text-gray-700">
+                {{ searchTerm ? 'Nenhuma escola encontrada para a busca' : 'Nenhuma escola cadastrada' }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Modal de Edição -->
+      <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+          <h2 class="text-lg font-semibold mb-4">{{ editingId ? 'Editar Escola' : 'Nova Escola' }}</h2>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Nome *</label>
+              <input 
+                v-model="form.name" 
+                type="text" 
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent">
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Endereço</label>
+              <textarea 
+                v-model="form.address" 
+                rows="2"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Cidade</label>
+              <input 
+                v-model="form.city" 
+                type="text"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent">
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Telefone</label>
+              <input 
+                v-model="form.phone" 
+                type="tel"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent">
+            </div>
+          </div>
+          
+          <div class="flex justify-end space-x-3 mt-6">
+            <button @click="closeModal" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors text-gray-900">
+              Cancelar
+            </button>
+            <button @click="save" :disabled="!form.name" class="px-4 py-2 bg-blue-100 text-blue-900 rounded-lg hover:bg-blue-200 disabled:opacity-50 transition-colors border border-blue-300">
+              {{ editingId ? 'Atualizar' : 'Salvar' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+  
+  data() {
+    return {
+      rows: [],
+      searchTerm: '',
+      showModal: false,
+      editingId: null,
+      form: {
+        name: '',
+        address: '',
+        city: '',
+        phone: ''
+      }
+    };
+  },
+  
+  computed: {
+    filteredRows() {
+      if (!this.searchTerm) return this.rows;
+      const term = this.searchTerm.toLowerCase();
+      return this.rows.filter(escola => 
+        escola.name?.toLowerCase().includes(term) ||
+        escola.city?.toLowerCase().includes(term) ||
+        escola.address?.toLowerCase().includes(term)
+      );
+    },
+    canManage(){
+      try{ return this.$parent && this.$parent.user && this.$parent.user.role === 'admin'; }catch(e){ return false; }
+    }
+  },
+  
+  methods: {
+    async loadEscolas() {
+      try {
+        console.log('🔄 Carregando escolas...');
+        const response = await api.get('/schools');
+        console.log('🔄 Response recebida:', response);
+        this.rows = response.data?.data?.rows || [];
+        console.log('🔄 Rows carregadas:', this.rows.length);
+      } catch (error) {
+        console.error('Erro ao carregar escolas:', error);
+        this.$showToast && this.$showToast('Erro', 'Erro ao carregar escolas', 'error');
+      }
+    },
+    
+    newEscola() {
+      this.editingId = null;
+      this.form = { name: '', address: '', city: '', phone: '' };
+      this.showModal = true;
+    },
+    
+    edit(escola) {
+      this.editingId = escola.id;
+      this.form = { ...escola };
+      this.showModal = true;
+    },
+    
+    closeModal() {
+      this.showModal = false;
+      this.editingId = null;
+      this.form = { name: '', address: '', city: '', phone: '' };
+    },
+    
+    async save() {
+      if (!this.form.name) {
+        this.$showToast && this.$showToast('Atenção', 'Nome é obrigatório', 'warning');
+        return;
+      }
+      
+      try {
+        if (this.editingId) {
+          const response = await api.post('/schools/update', this.form, { params: { id: this.editingId } });
+          if (response.data?.ok) {
+            this.$showToast && this.$showToast('Sucesso', `Escola "${this.form.name}" atualizada com sucesso!`, 'success');
+            this.closeModal();
+            await this.loadEscolas();
+          }
+        } else {
+          const response = await api.post('/schools/create', this.form);
+          if (response.data?.ok) {
+            this.$showToast && this.$showToast('Sucesso', `Escola "${this.form.name}" criada com sucesso!`, 'success');
+            this.closeModal();
+            await this.loadEscolas();
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao salvar escola:', error);
+        this.$showToast && this.$showToast('Erro', 'Erro ao salvar escola', 'error');
+      }
+    },
+    
+    async deleteEscola(escola) {
+      if (!this._confirmDeleteSchool || this._confirmDeleteSchool !== escola.id) {
+        this._confirmDeleteSchool = escola.id;
+        this.$showToast && this.$showToast('Confirme', `Clique novamente para excluir a escola "${escola.name}"`, 'warning');
+        setTimeout(()=>{ if(this._confirmDeleteSchool===escola.id) this._confirmDeleteSchool=null; }, 3000);
+        return;
+      }
+      this._confirmDeleteSchool = null;
+      try {
+        const response = await api.post('/schools/delete', {}, { params: { id: escola.id } });
+        if (response.data?.ok) {
+          this.$showToast && this.$showToast('Sucesso', `Escola "${escola.name}" excluída com sucesso!`, 'success');
+          await this.loadEscolas();
+        } else {
+          this.$showToast && this.$showToast('Erro', response.data?.error || 'Erro ao excluir escola', 'error');
+        }
+      } catch (error) {
+        console.error('Erro ao excluir escola:', error);
+        this.$showToast && this.$showToast('Erro', 'Erro ao excluir escola', 'error');
+      }
+    }
+  },
+  
+  async mounted() {
+    console.log('🏫 EscolasTW component mounted!');
+    await this.loadEscolas();
+  }
 };
 
 // Componente de Legislações
@@ -1479,7 +1867,7 @@ const LegislacoesTW = {
         };
       } catch (error) {
         console.error('Erro ao carregar legislações:', error);
-        this.$showModal('Erro', 'Erro ao carregar legislações', 'error');
+        this.$showToast('Erro', 'Erro ao carregar legislações', 'error');
       } finally {
         this.loading = false;
       }
@@ -1516,13 +1904,13 @@ const LegislacoesTW = {
       const file = event.target.files[0];
       if (file) {
         if (file.type !== 'application/pdf') {
-          this.$showModal('Atenção', 'Por favor, selecione apenas arquivos PDF.', 'info');
+          this.$showToast('Atenção', 'Por favor, selecione apenas arquivos PDF.', 'warning');
           event.target.value = '';
           return;
         }
         
         if (file.size > 50 * 1024 * 1024) {
-          this.$showModal('Atenção', 'O arquivo deve ter no máximo 50MB.', 'info');
+          this.$showToast('Atenção', 'O arquivo deve ter no máximo 50MB.', 'warning');
           event.target.value = '';
           return;
         }
@@ -1554,7 +1942,7 @@ const LegislacoesTW = {
         });
         
         if (response.data?.ok) {
-          this.$showModal('Sucesso', 'Legislação adicionada com sucesso!', 'success');
+          this.$showToast('Sucesso', 'Legislação adicionada com sucesso!', 'success');
           this.cancelUpload();
           await this.loadLegislacoes();
         } else {
@@ -1576,21 +1964,24 @@ const LegislacoesTW = {
     },
     
     async deleteLegislacao(legislacao) {
-      if (!confirm(`Tem certeza que deseja excluir a legislação "${legislacao.titulo}"?`)) {
+      if (!this._confirmDeleteLeg || this._confirmDeleteLeg !== legislacao.id) {
+        this._confirmDeleteLeg = legislacao.id;
+        this.$showToast('Confirme', `Clique novamente para excluir a legislação "${legislacao.titulo}"`, 'warning');
+        setTimeout(()=>{ if(this._confirmDeleteLeg===legislacao.id) this._confirmDeleteLeg=null; }, 3000);
         return;
       }
-      
+      this._confirmDeleteLeg = null;
       try {
         const response = await api.delete(`/legislacoes/${legislacao.id}`);
         if (response.data?.ok) {
-          this.$showModal('Sucesso', 'Legislação excluída com sucesso!', 'success');
+          this.$showToast('Sucesso', 'Legislação excluída com sucesso!', 'success');
           await this.loadLegislacoes();
         } else {
-          this.$showModal('Erro', 'Erro ao excluir legislação', 'error');
+          this.$showToast('Erro', response.data?.error || 'Erro ao excluir legislação', 'error');
         }
       } catch (error) {
         console.error('Erro ao excluir:', error);
-        this.$showModal('Erro', 'Erro ao excluir legislação', 'error');
+        this.$showToast('Erro', 'Erro ao excluir legislação', 'error');
       }
     },
     
@@ -1646,7 +2037,7 @@ const Layout = {
         <!-- Navegação Scrollable -->
         <nav class="flex-1 overflow-y-auto p-3 space-y-4">
           <div>
-            <h6 class="mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            <h6 class="mb-2 text-xs font-semibold text-gray-700 uppercase tracking-wider">
               Dashboard
             </h6>
             <router-link to="/" class="nav-link-tw" @click="closeMobileSidebar">
@@ -1661,30 +2052,38 @@ const Layout = {
           </div>
           
           <div>
-            <h6 class="mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            <h6 class="mb-2 text-xs font-semibold text-gray-700 uppercase tracking-wider">
               Gestão
             </h6>
-            <router-link to="/alunos" class="nav-link-tw" @click="closeMobileSidebar">
+            <router-link to="alunos" class="nav-link-tw" @click="closeMobileSidebar">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>
               </svg>
               Alunos
             </router-link>
-            <router-link v-if="user && user.role === 'admin'" to="/usuarios" class="nav-link-tw" @click="closeMobileSidebar">
+            <router-link v-if="user && user.role === 'admin'" to="usuarios" class="nav-link-tw" @click="closeMobileSidebar">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M17 21v-2a4 4 0 0 0-3-3.87M7 21v-2a4 4 0 0 1 3-3.87"/>
                 <circle cx="12" cy="7" r="4"/>
               </svg>
               Usuários
             </router-link>
+            <router-link to="escolas" class="nav-link-tw" @click="closeMobileSidebar">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 14l9-5-9-5-9 5 9 5z"/>
+                <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+              </svg>
+              Escolas
+            </router-link>
           </div>
           
           <div>
-            <h6 class="mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            <h6 class="mb-2 text-xs font-semibold text-gray-700 uppercase tracking-wider">
               Formulários AEE
             </h6>
-            <router-link to="/entrevista-responsavel" class="nav-link-tw" @click="closeMobileSidebar">
+            <router-link to="entrevista-responsavel" class="nav-link-tw" @click="closeMobileSidebar">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4.586a1 1 0 01-.707-.293l-5.414-5.414a1 1 0 01-.293-.707V2z"/>
                 <polyline points="14,2 14,8 20,8"/>
@@ -1694,19 +2093,19 @@ const Layout = {
               </svg>
               Entrevista com Responsável
             </router-link>
-            <router-link to="/pdi" class="nav-link-tw" @click="closeMobileSidebar">
+            <router-link to="pdi" class="nav-link-tw" @click="closeMobileSidebar">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
               </svg>
               PDI - ConectAEE
             </router-link>
-            <router-link to="/plano-atendimento" class="nav-link-tw" @click="closeMobileSidebar">
+            <router-link to="plano-atendimento" class="nav-link-tw" @click="closeMobileSidebar">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/>
               </svg>
               Plano de Atendimento Individual
             </router-link>
-            <router-link to="/relatorio-atendimento" class="nav-link-tw" @click="closeMobileSidebar">
+            <router-link to="relatorio-atendimento" class="nav-link-tw" @click="closeMobileSidebar">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
                 <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
@@ -1718,10 +2117,10 @@ const Layout = {
           </div>
           
           <div>
-            <h6 class="mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            <h6 class="mb-2 text-xs font-semibold text-gray-700 uppercase tracking-wider">
               Relatórios
             </h6>
-            <router-link to="/relatorios" class="nav-link-tw" @click="closeMobileSidebar">
+            <router-link to="relatorios" class="nav-link-tw" @click="closeMobileSidebar">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                 <polyline points="14,2 14,8 20,8"/>
@@ -1734,10 +2133,10 @@ const Layout = {
           </div>
           
           <div>
-            <h6 class="mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            <h6 class="mb-2 text-xs font-semibold text-gray-700 uppercase tracking-wider">
               Recursos
             </h6>
-            <router-link to="/legislacoes" class="nav-link-tw" @click="closeMobileSidebar">
+            <router-link to="legislacoes" class="nav-link-tw" @click="closeMobileSidebar">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                 <polyline points="14,2 14,8 20,8"/>
@@ -1753,24 +2152,83 @@ const Layout = {
       
       <!-- Conteúdo principal -->
       <main class="flex-1 flex flex-col overflow-hidden lg:ml-0">
-        <!-- Header fixo -->
-        <header class="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3 lg:px-6">
-          <div class="flex items-center justify-between">
-            <button 
-              class="lg:hidden p-2 rounded-md text-gray-500 hover:bg-gray-100"
-              @click="sidebarOpen = !sidebarOpen">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-              </svg>
-            </button>
-            
-            <div class="flex items-center space-x-2 lg:space-x-4">
-              <span class="text-xs lg:text-sm text-gray-600 truncate">Bem-vindo, {{ user?.name || 'Usuário' }}</span>
-              <button 
-                @click="logout" 
-                class="px-3 py-2 text-xs lg:text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors">
-                Sair
-              </button>
+        <!-- Header melhorado com gradiente e informações úteis -->
+        <header class="flex-shrink-0 bg-gradient-to-r from-blue-600 to-cyan-500  shadow-lg">
+          <div class="px-4 py-3 lg:px-6">
+            <div class="flex items-center justify-between">
+              <!-- Lado esquerdo: Menu mobile + Info do sistema -->
+              <div class="flex items-center gap-3">
+                <button 
+                  class="lg:hidden p-2 rounded-md text-white hover:bg-white/10 transition-colors"
+                  @click="sidebarOpen = !sidebarOpen">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                  </svg>
+                </button>
+                
+                <!-- Logo e info do sistema -->
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor"/>
+                    </svg>
+                  </div>
+                  <div class="hidden sm:block">
+                    <h1 class="text-lg font-semibold">ConectAEE</h1>
+                    <p class="text-xs text-white/90">Sistema de Gestão Educacional AEE</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Centro: Informações contextuais -->
+              <div class="hidden md:flex items-center gap-4 text-sm">
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 4h6m-6 4h6"/>
+                  </svg>
+                  <span class="text-white/90">{{ currentPageTitle }}</span>
+                </div>
+                <div class="w-px h-4 bg-white/30"></div>
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <span class="text-white/90">{{ currentTimeDisplay }}</span>
+                </div>
+              </div>
+              
+              <!-- Lado direito: Info do usuário + ações -->
+              <div class="flex items-center gap-2 lg:gap-4">
+                <!-- Notificações (se houver) -->
+                <button class="hidden lg:block relative p-2 rounded-md text-white hover:bg-white/10 transition-colors">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5-5v-5a5 5 0 00-10 0v5l-5 5h5m0 0v1a2 2 0 002 2h2a2 2 0 002-2v-1"/>
+                  </svg>
+                </button>
+                
+                <!-- Info do usuário -->
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                  </div>
+                  <div class="hidden sm:block">
+                    <p class="text-sm font-medium">{{ user?.name || 'Usuário' }}</p>
+                    <p class="text-xs text-white/90 capitalize">{{ user?.role || 'Professor' }}</p>
+                  </div>
+                </div>
+                
+                <!-- Botão de logout -->
+                <button 
+                  @click="logout" 
+                  class="px-3 py-2 text-xs lg:text-sm font-medium text-white bg-white/20 backdrop-blur-sm rounded-md hover:bg-white/30 transition-colors border border-white/20">
+                  <svg class="w-4 h-4 lg:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                  </svg>
+                  <span class="hidden lg:inline">Sair</span>
+                </button>
+              </div>
             </div>
           </div>
         </header>
@@ -1784,8 +2242,11 @@ const Layout = {
   `,
   data() {
     return {
-      sidebarOpen: false,
+      sidebarOpen: window.innerWidth >= 1024, // Aberto em desktop, fechado em mobile
       user: null,
+      timeInterval: null,
+      currentTimeDisplay: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', hour12: false }),
+      currentPageTitle: 'ConectAEE',
       modal: {
         visible: false,
         title: '',
@@ -1823,8 +2284,16 @@ const Layout = {
       this.modal.visible = false;
     },
     closeMobileSidebar() {
-      if (window.innerWidth < 1024) {
+      const width = window.innerWidth;
+      
+      // Só fecha o sidebar em telas pequenas (mobile/tablet)
+      if (width < 1024) {
         this.sidebarOpen = false;
+      } else {
+        // Garantir que está aberto no desktop
+        if (!this.sidebarOpen) {
+          this.sidebarOpen = true;
+        }
       }
     },
     async logout() {
@@ -1845,6 +2314,70 @@ const Layout = {
     } catch (error) {
       console.error('Erro ao carregar dados do usuário:', error);
     }
+    
+    // Atualizar o relógio a cada minuto
+    this.timeInterval = setInterval(() => {
+      this.currentTimeDisplay = new Date().toLocaleTimeString('pt-BR', { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        hour12: false 
+      });
+    }, 60000);
+    
+    // Atualizar título inicial
+    this.updatePageTitle();
+    
+    // Listener para redimensionamento da janela
+    window.addEventListener('resize', this.handleResize);
+  },
+  watch: {
+    $route() {
+      this.updatePageTitle();
+      // Garantir estado correto do sidebar após navegação
+      this.ensureCorrectSidebarState();
+    }
+  },
+  methods: {
+    // ... outros métodos já existem acima
+    updatePageTitle() {
+      const titles = {
+        '/': 'Dashboard',
+        '/alunos': 'Gestão de Alunos',
+        '/usuarios': 'Gestão de Usuários',
+        '/escolas': 'Gestão de Escolas', // compat: caso navegue diretamente
+        '/escolas/': 'Gestão de Escolas',
+        '/entrevista-responsavel': 'Entrevista com Responsável',
+        '/pdi-conectaee': 'PDI ConectAEE',
+        '/planos-atendimento': 'Planos de Atendimento',
+        '/legislacoes': 'Diretório de Legislações',
+        '/relatorios-atendimento': 'Relatórios de Atendimento'
+      };
+      this.currentPageTitle = titles[this.$route?.path] || 'ConectAEE';
+    },
+    handleResize() {
+      const width = window.innerWidth;
+      if (width >= 1024) {
+        // Em desktop, sempre manter sidebar aberto
+        if (!this.sidebarOpen) {
+          this.sidebarOpen = true;
+        }
+      }
+      // Em mobile, não forçar estado - deixar o usuário controlar
+    },
+    ensureCorrectSidebarState() {
+      const width = window.innerWidth;
+      
+      if (width >= 1024 && !this.sidebarOpen) {
+        this.sidebarOpen = true;
+      }
+    }
+  },
+  beforeUnmount() {
+    if (this.timeInterval) {
+      clearInterval(this.timeInterval);
+    }
+    // Remover listener de resize
+    window.removeEventListener('resize', this.handleResize);
   }
 };
 
@@ -1967,8 +2500,8 @@ const Dashboard = {
         <p class="mt-1 text-sm text-gray-600">Visão geral do sistema educacional</p>
       </div>
       
-      <!-- Cards de estatísticas -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Cards de estatísticas (removidos Cursos e Agenda) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
         <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
           <div class="p-5">
             <div class="flex items-center">
@@ -1980,41 +2513,6 @@ const Dashboard = {
                 <dl>
                   <dt class="text-sm font-medium text-gray-500 truncate">Total de Alunos</dt>
                   <dd class="text-lg font-medium text-gray-900">{{ stats.alunos }}</dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
-          <div class="p-5">
-            <div class="flex items-center">
-              <div class="flex-shrink-0">
-                <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-              </div>
-              <div class="ml-5 w-0 flex-1">
-                <dl>
-                  <dt class="text-sm font-medium text-gray-500 truncate">Cursos Ativos</dt>
-                  <dd class="text-lg font-medium text-gray-900">{{ stats.cursos }}</dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
-          <div class="p-5">
-            <div class="flex items-center">
-              <div class="flex-shrink-0">
-                <svg class="h-8 w-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a4 4 0 118 0v4m-4 8a2 2 0 100-4 2 2 0 000 4zm6-6V7a4 4 0 10-8 0v4h8z"/>
-                </svg>
-              </div>
-              <div class="ml-5 w-0 flex-1">
-                <dl>
-                  <dt class="text-sm font-medium text-gray-500 truncate">Eventos Hoje</dt>
-                  <dd class="text-lg font-medium text-gray-900">{{ stats.eventos_hoje }}</dd>
                 </dl>
               </div>
             </div>
@@ -2106,8 +2604,6 @@ const Dashboard = {
     return {
       stats: {
         alunos: 0,
-        cursos: 0,
-        eventos_hoje: 0,
         formularios: 0
       },
       atividades: []
@@ -2126,8 +2622,6 @@ const Dashboard = {
         const cards = d.cards || {};
         this.stats = {
           alunos: Number(cards.total_students || 0),
-          cursos: Number(cards.active_students || 0),
-          eventos_hoje: Array.isArray(d.recent) ? Math.min(d.recent.length, 99) : 0,
           formularios: Number(cards.formularios_pendentes || 0)
         };
       } catch (error) {
@@ -2215,7 +2709,7 @@ const Relatorios = {
 
         <div class="flex flex-wrap gap-3" v-if="alunoId">
           <button @click="gerarRelatorio" :disabled="carregandoRelatorio"
-                  class="px-4 py-2 bg-brand-primary text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50">
+                  class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50">
             <span v-if="carregandoRelatorio" class="inline-flex items-center">
               <div class="animate-spin -ml-1 mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
               Gerando...
@@ -2269,6 +2763,25 @@ const Relatorios = {
                   <p><strong>Último Atendimento:</strong> {{ dadosRelatorio.estatisticas?.ultimo_atendimento }}</p>
                 </div>
               </div>
+            </div>
+            <!-- Relatórios de Atendimento incluidos no Geral -->
+            <div class="space-y-3">
+              <h3 class="font-medium text-gray-900 border-b pb-2">Relatórios de Atendimento</h3>
+              <div v-if="dadosRelatorio.atendimentos && dadosRelatorio.atendimentos.length > 0">
+                <div v-for="atendimento in dadosRelatorio.atendimentos" :key="atendimento.id" class="border rounded-lg p-4">
+                  <div class="flex justify-between items-center">
+                    <div class="text-sm text-gray-700">
+                      <span class="font-medium">Data:</span> {{ formatarData(atendimento.data_atendimento || atendimento.date) || '-' }}
+                      <span class="ml-3 font-medium">Período:</span> {{ atendimento.periodo || atendimento.period || '-' }}
+                    </div>
+                    <span class="text-xs px-2 py-1 rounded bg-amber-100 text-amber-700">Atendimento</span>
+                  </div>
+                  <div class="mt-2 text-sm text-gray-700">
+                    <span class="font-medium">Descrição:</span> {{ atendimento.descricao || atendimento.activities || '-' }}
+                  </div>
+                </div>
+              </div>
+              <div v-else class="text-gray-500 text-sm">Nenhum relatório de atendimento encontrado.</div>
             </div>
           </div>
 
@@ -2476,7 +2989,7 @@ const Relatorios = {
             </div>
           </div>
           
-          <div v-if="tipoRelatorio === 'evolucao'" class="text-center text-gray-500 py-8">
+          <div v-if="tipoRelatorio === 'evolucao'" class="text-center text-gray-700 py-8">
             Relatório de evolução em desenvolvimento
           </div>
         </div>
@@ -2493,8 +3006,10 @@ const Relatorios = {
   `,
   data(){
     return {
-      query: '',
+  query: '',
       alunos: [],
+  alunoFiltroPDI: '',
+  alunoFiltroPlano: '',
       alunoId: '',
       alunoSelecionado: null,
       tipoRelatorio: 'geral',
@@ -2557,6 +3072,14 @@ const Relatorios = {
       return stats?.total_atendimentos > 0;
     }
   },
+  computed: {
+    progressoPDI(){ return (this.currentStep / (this.totalSteps || 1)) * 100; },
+    alunosFiltradosPDI(){
+      const t=(this.alunoFiltroPDI||'').toLowerCase();
+      if(!t) return this.alunos;
+      return this.alunos.filter(a=> String(a.name||'').toLowerCase().includes(t));
+    }
+  },
   methods: {
     async buscar(){
       const params = { q: this.query, per_page: 50 };
@@ -2566,7 +3089,7 @@ const Relatorios = {
       }
       catch(e){ 
         console.error('Erro ao buscar alunos:', e);
-        this.$showModal('Erro', 'Erro ao buscar alunos', 'error'); 
+        this.$showToast('Erro', 'Erro ao buscar alunos', 'error'); 
       }
     },
     
@@ -2657,10 +3180,18 @@ const Relatorios = {
           weekly_plans: reportData.weekly_plans || []
         };
 
+        // Mensagens de vazio mais informativas
+        if ((this.tipoRelatorio === 'atendimentos') && atendimentos.length === 0) {
+          this.$showToast && this.$showToast('Informação', 'Nenhum atendimento registrado para este aluno.', 'info');
+        }
+        if (this.tipoRelatorio === 'formularios' && (!this.dadosRelatorio.anamneses.length && !this.dadosRelatorio.pdis.length && !this.dadosRelatorio.pais.length)) {
+          this.$showToast && this.$showToast('Informação', 'Nenhum formulário AEE encontrado para este aluno.', 'info');
+        }
+
       } catch(e){ 
         console.error('Erro ao gerar relatório:', e);
         const errorMsg = e.response?.data?.error || e.response?.data?.message || e.message;
-        this.$showModal('Erro', 'Erro ao gerar relatório: ' + errorMsg, 'error'); 
+        this.$showToast('Erro', 'Erro ao gerar relatório: ' + errorMsg, 'error'); 
       } finally {
         this.carregandoRelatorio = false;
       }
@@ -2672,13 +3203,13 @@ const Relatorios = {
       try {
         const token = localStorage.getItem('token');
         if (!token) {
-          this.$showModal('Erro', 'Token de autenticação não encontrado. Faça login novamente.', 'error');
+          this.$showToast('Erro', 'Token de autenticação não encontrado. Faça login novamente.', 'error');
           return;
         }
         const url = `${CONFIG.API_BASE}/reports/student/pdf?student_id=${this.alunoId}&tipo=${this.tipoRelatorio}&token=${encodeURIComponent(token)}`;
         window.open(url, '_blank');
       } catch(e) {
-        this.$showModal('Erro', 'Erro ao exportar PDF: ' + e.message, 'error');
+        this.$showToast('Erro', 'Erro ao exportar PDF: ' + e.message, 'error');
       } finally {
         this.carregandoPDF = false;
       }
@@ -2763,6 +3294,11 @@ const EntrevistaResponsavel = {
           <p class="text-gray-600">Complete as informações em etapas organizadas</p>
         </div>
 
+        <!-- DEBUG: Banner temporário para confirmação de carregamento -->
+        <div class="mb-4 px-3 py-2 text-xs text-indigo-800 bg-indigo-50 border border-indigo-200 rounded" style="display: none;" id="debug-entrevista-banner">
+          EntrevistaResponsavel carregado (debug)
+        </div>
+
         <!-- Progress Bar -->
         <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
           <div class="flex items-center justify-between mb-4">
@@ -2793,7 +3329,7 @@ const EntrevistaResponsavel = {
                       ? 'bg-indigo-600 text-white shadow-lg' 
                       : index + 1 <= maxCompletedStep 
                         ? 'bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50' 
-                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-gray-100 text-gray-600 cursor-not-allowed'
                   ]">
             <i :class="step.icon + ' mr-2'"></i>{{ step.title }}
           </button>
@@ -2830,29 +3366,42 @@ const EntrevistaResponsavel = {
 
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Nome completo do aluno</label>
-                      <input v-model="form.nome_aluno" type="text" readonly 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50">
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Escola <span class="text-red-500">*</span>
+                      </label>
+                      <select v-model="form.escola_id" required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        :class="validationErrors.escola ? 'border-red-300 bg-red-50' : ''"
+                        @change="preencherDadosEscolaEntrevista">
+                        <option value="">Selecione uma escola</option>
+                        <option v-for="escola in escolas" :key="escola.id" :value="escola.id">
+                          {{ escola.name }}
+                        </option>
+                      </select>
+                      <p v-if="validationErrors.escola" class="mt-2 text-sm text-red-600">{{ validationErrors.escola }}</p>
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Escola</label>
-                      <input v-model="form.escola" type="text" required 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Série/Ano</label>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Série/Ano <span class="text-red-500">*</span>
+                      </label>
                       <input v-model="form.serie" type="text" required 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        :class="validationErrors.serie ? 'border-red-300 bg-red-50' : ''">
+                      <p v-if="validationErrors.serie" class="mt-2 text-sm text-red-600">{{ validationErrors.serie }}</p>
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Turno</label>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Turno <span class="text-red-500">*</span>
+                      </label>
                       <select v-model="form.turno" required 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        :class="validationErrors.turno ? 'border-red-300 bg-red-50' : ''">
                         <option value="">Selecione</option>
                         <option value="matutino">Matutino</option>
                         <option value="vespertino">Vespertino</option>
-                        <option value="noite">Noturno</option>
+                        <option value="noturno">Noturno</option>
                       </select>
+                      <p v-if="validationErrors.turno" class="mt-2 text-sm text-red-600">{{ validationErrors.turno }}</p>
                     </div>
                   </div>
                 </div>
@@ -3030,7 +3579,7 @@ const EntrevistaResponsavel = {
                     <div class="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <span class="font-medium text-gray-700">Aluno:</span>
-                        <span class="text-gray-600">{{ form.nome_aluno || 'Não informado' }}</span>
+                        <span class="text-gray-600">{{ (alunos.find(a=>a.id==form.student_id)?.name) || 'Não informado' }}</span>
                       </div>
                       <div>
                         <span class="font-medium text-gray-700">Responsável:</span>
@@ -3091,16 +3640,19 @@ const EntrevistaResponsavel = {
   
   data() {
     return {
+      __debug: true,
       currentStep: 1,
       totalSteps: 5,
       maxCompletedStep: 1,
       loading: false,
       validationErrors: {},
       alunos: [],
+      escolas: [],
+      preenchidosNaEntrevista: new Set(), // Campos já preenchidos na entrevista
       form: {
         student_id: '',
-        nome_aluno: '',
         escola: '',
+        escola_id: '',
         serie: '',
         turno: '',
         nome_responsavel: '',
@@ -3129,20 +3681,72 @@ const EntrevistaResponsavel = {
   computed: {
     progressPercentage() {
       return (this.currentStep / (this.totalSteps || 1)) * 100;
+    },
+    alunosFiltradosPlano(){
+      const t = (this.alunoFiltroPlano||'').toLowerCase();
+      if(!t) return this.alunos;
+      return this.alunos.filter(a=> String(a.name||'').toLowerCase().includes(t));
     }
   },
   
-  async mounted() {
-    await this.carregarAlunos();
+  created() {
+    try {
+      console.log('🧭 [EntrevistaResponsavel] created');
+      const el = document.getElementById('debug-entrevista-banner');
+      if (el) el.style.display = 'block';
+    } catch (e) { console.warn('Debug banner não inserido', e); }
   },
   
   methods: {
     async carregarAlunos() {
       try {
+        console.log('🔄 [Entrevista] Carregando alunos...');
         const response = await api.get('/students');
         this.alunos = response.data?.data?.rows || [];
+        console.log('✅ [Entrevista] Alunos carregados:', this.alunos.length);
       } catch (error) {
+        console.error('❌ [Entrevista] Erro ao carregar alunos:', error);
+        this.alunos = [];
+      }
+    },
     
+    preencherDadosAlunoEntrevista() {
+      if (this.form.student_id) {
+        const aluno = this.alunos.find(a => a.id == this.form.student_id);
+        if (aluno) {
+          // Preencher escola se disponível
+          if (aluno.school_name) {
+            this.form.escola = aluno.school_name;
+          }
+          if (aluno.school_id) {
+            this.form.escola_id = aluno.school_id;
+          }
+          if (aluno.grade) {
+            this.form.serie = aluno.grade;
+          }
+          if (aluno.class_name) {
+            this.form.turma = aluno.class_name;
+          }
+          // Preencher outros dados se disponíveis
+          if (aluno.responsible_name) {
+            this.form.nome_responsavel = aluno.responsible_name;
+          }
+          if (aluno.responsible_phone) {
+            this.form.telefone = aluno.responsible_phone;
+          }
+        }
+      }
+    },
+
+    preencherDadosEscolaEntrevista() {
+      if (this.form.escola_id) {
+        const escola = this.escolas.find(e => e.id == this.form.escola_id);
+        if (escola) {
+          this.form.escola = escola.name;
+        }
+      }
+    },
+
     validateCurrentStep() {
       this.validationErrors = {};
       let isValid = true;
@@ -3150,6 +3754,18 @@ const EntrevistaResponsavel = {
       if (this.currentStep === 1) {
         if (!this.form.student_id) {
           this.validationErrors.student_id = 'Selecione um aluno';
+          isValid = false;
+        }
+        if (!this.form.escola_id) {
+          this.validationErrors.escola = 'Selecione uma escola';
+          isValid = false;
+        }
+        if (!this.form.serie) {
+          this.validationErrors.serie = 'Informe a série/ano';
+          isValid = false;
+        }
+        if (!this.form.turno) {
+          this.validationErrors.turno = 'Selecione o turno';
           isValid = false;
         }
       } else if (this.currentStep === 2) {
@@ -3197,7 +3813,6 @@ const EntrevistaResponsavel = {
         // Mapear os campos do formulário para os campos esperados pela API
         const dadosParaSalvar = {
           student_id: this.form.student_id,
-          nome_estudante: this.form.nome_aluno,
           nome_escola: this.form.escola,
           serie_ano: this.form.serie,
           turno: this.form.turno,
@@ -3215,18 +3830,22 @@ const EntrevistaResponsavel = {
           }
         });
         
-        console.log('Dados sendo enviados:', dadosLimpos);
+        // console.log('Dados sendo enviados:', dadosLimpos);
         
         const response = await api.post('/entrevistas-responsavel', dadosLimpos);
         if (response.data?.ok) {
-          this.$showModal('Sucesso', 'Entrevista salva com sucesso!', 'success');
+          // Salvar dados da entrevista no localStorage para evitar duplicação
+          const interviewKey = `interview_${this.form.student_id}`;
+          localStorage.setItem(interviewKey, JSON.stringify(this.form));
+          
+          this.$showToast('Sucesso', 'Entrevista salva com sucesso!', 'success');
           this.$router.push('/');
         } else {
-          this.$showModal('Erro', 'Erro ao salvar entrevista', 'error');
+          this.$showToast('Erro', 'Erro ao salvar entrevista', 'error');
         }
       } catch (error) {
         console.error('Erro completo:', error);
-        this.$showModal('Erro', 'Erro ao salvar entrevista: ' + (error.response?.data?.message || error.message), 'error');
+        this.$showToast('Erro', 'Erro ao salvar entrevista: ' + (error.response?.data?.message || error.message), 'error');
       } finally {
         this.loading = false;
       }
@@ -3234,18 +3853,33 @@ const EntrevistaResponsavel = {
     
     exportarPDF() {
       if (!this.form.student_id) {
-        this.$showModal('Atenção', 'Selecione um aluno primeiro para gerar o PDF.', 'info');
+        this.$showToast('Atenção', 'Selecione um aluno primeiro para gerar o PDF.', 'info');
         return;
       }
       
       const token = localStorage.getItem('token');
       if (!token) {
-        this.$showModal('Erro', 'Token de autenticação não encontrado. Faça login novamente.', 'error');
+        this.$showToast('Erro', 'Token de autenticação não encontrado. Faça login novamente.', 'error');
         return;
       }
       
       const url = `${CONFIG.API_BASE}/forms/anamnese/pdf?student_id=${this.form.student_id}&token=${encodeURIComponent(token)}`;
       window.open(url, '_blank');
+    }
+  },
+  
+  async mounted() {
+    console.log('🚀 [EntrevistaResponsavel] mounted');
+    try {
+      // Preferir endpoints simples e consistentes
+      await this.carregarAlunos();
+      console.log('🔄 [Entrevista] Carregando escolas...');
+      const escolasResponse = await api.get('/schools');
+      this.escolas = escolasResponse.data?.data?.rows || [];
+      console.log('✅ [Entrevista] Escolas carregadas:', this.escolas.length);
+    } catch (error) {
+      console.error('❌ [Entrevista] Erro ao carregar dados:', error);
+      this.$showToast && this.$showToast('Erro', 'Erro ao carregar dados necessários', 'error');
     }
   }
 };
@@ -3291,7 +3925,7 @@ const PDI = {
                       ? 'bg-emerald-600 text-white shadow-lg' 
                       : index + 1 <= maxCompletedStep 
                         ? 'bg-white text-emerald-600 border border-emerald-200 hover:bg-emerald-50' 
-                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-gray-100 text-gray-600 cursor-not-allowed'
                   ]">
             <i :class="step.icon + ' mr-2'"></i>{{ step.title }}
           </button>
@@ -3321,18 +3955,18 @@ const PDI = {
                       <option value="">Selecione um aluno</option>
                       <option v-for="aluno in alunos" :key="aluno.id" :value="aluno.id">{{ aluno.name }}</option>
                     </select>
-                  </div>
+                      alunos: [],
+                      escolas: [],
 
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Nome do Aluno</label>
-                      <input v-model="form.nome_aluno" type="text" readonly 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50">
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Escola</label>
-                      <input v-model="form.escola" type="text" required 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Escola <span class="text-red-500">*</span></label>
+                      <select v-model="form.escola_id" required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                        @change="preencherEscolaPDI">
+                        <option value="">Selecione uma escola</option>
+                        <option v-for="escola in escolas" :key="escola.id" :value="escola.id">{{ escola.name }}</option>
+                      </select>
                     </div>
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">Ano/Série</label>
@@ -3480,12 +4114,12 @@ const PDI = {
                   </div>
 
                   <!-- Resumo dos dados -->
-                  <div class="bg-emerald-50 rounded-lg p-6 mt-8">
+                    <div class="bg-emerald-50 rounded-lg p-6 mt-8">
                     <h3 class="text-lg font-semibold text-emerald-900 mb-4">📋 Resumo do PDI</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div>
                         <span class="font-medium text-gray-700">Aluno:</span>
-                        <p class="text-gray-600">{{ form.nome_aluno || 'Não informado' }}</p>
+                          <p class="text-gray-600">{{ (alunos.find(a=>a.id==form.student_id)?.name) || 'Não informado' }}</p>
                       </div>
                       <div>
                         <span class="font-medium text-gray-700">Escola:</span>
@@ -3553,7 +4187,6 @@ const PDI = {
       alunos: [],
       form: {
         student_id: '',
-        nome_aluno: '',
         escola: '',
         ano_serie: '',
         professor_aee: '',
@@ -3585,7 +4218,7 @@ const PDI = {
     }
   },
   async mounted() {
-    await this.carregarAlunos();
+    await Promise.all([this.carregarAlunos(), this.carregarEscolas()]);
   },
   methods: {
     async carregarAlunos() {
@@ -3596,18 +4229,44 @@ const PDI = {
         console.error('Erro ao carregar alunos:', error);
       }
     },
+    async carregarEscolas() {
+      try {
+        const response = await api.get('/schools');
+        const d = response.data;
+        this.escolas = (d?.data?.rows) || (Array.isArray(d?.data) ? d.data : (Array.isArray(d) ? d : []));
+        if (!Array.isArray(this.escolas)) this.escolas = [];
+        if (this.escolas.length === 0) {
+          this.$showToast && this.$showToast('Atenção', 'Nenhuma escola encontrada. Cadastre uma escola em "Gestão de Escolas".', 'info');
+        }
+      } catch (error) {
+        console.error('Erro ao carregar escolas:', error);
+        this.$showToast && this.$showToast('Erro', 'Não foi possível carregar a lista de escolas.', 'error');
+        this.escolas = [];
+      }
+    },
     
     preencherDadosAluno() {
       const alunoSelecionado = this.alunos.find(aluno => aluno.id == this.form.student_id);
       if (alunoSelecionado) {
-        this.form.nome_aluno = alunoSelecionado.name;
-        // Preenche outros campos se disponíveis
-        if (alunoSelecionado.school) {
-          this.form.escola = alunoSelecionado.school;
+        // Nome do aluno não é mais um campo separado nos formulários
+        // Preenche escola a partir dos dados do aluno (quando houver)
+        if (alunoSelecionado.school_name) {
+          this.form.escola = alunoSelecionado.school_name;
         }
-        if (alunoSelecionado.class) {
-          this.form.ano_serie = alunoSelecionado.class;
+        if (alunoSelecionado.school_id) {
+          this.form.escola_id = alunoSelecionado.school_id;
         }
+        if (alunoSelecionado.class_name) {
+          this.form.ano_serie = alunoSelecionado.class_name;
+        } else if (alunoSelecionado.grade) {
+          this.form.ano_serie = alunoSelecionado.grade;
+        }
+      }
+    },
+    preencherEscolaPDI() {
+      const escola = this.escolas.find(e => e.id == this.form.escola_id);
+      if (escola) {
+        this.form.escola = escola.name;
       }
     },
 
@@ -3641,6 +4300,14 @@ const PDI = {
           this.validationErrors.student_id = 'Selecione um aluno';
           isValid = false;
         }
+        if (!this.form.escola_id) {
+          this.validationErrors.escola_id = 'Selecione a escola';
+          isValid = false;
+        }
+        if (!this.form.objetivo_geral || String(this.form.objetivo_geral).trim().length < 5) {
+          // feedback imediato para objetivo geral ainda na etapa 1 se estiver visível em layouts simplificados
+          this.$showToast('Atenção', 'Informe o objetivo geral do PDI (mín. 5 caracteres)', 'warning');
+        }
       }
       
       return isValid;
@@ -3653,15 +4320,17 @@ const PDI = {
       
       this.loading = true;
       try {
+        // Enviar o form com escola_id incluso
         const response = await api.post('/pdi', this.form);
         if (response.data?.ok) {
-          this.$showModal('Sucesso', 'PDI salvo com sucesso!', 'success');
+          const nomeAluno = (this.alunos.find(a=>a.id==this.form.student_id)?.name) || 'Aluno';
+          this.$showToast('Sucesso', `PDI de "${nomeAluno}" salvo com sucesso!`, 'success');
           this.$router.push('/');
         } else {
-          this.$showModal('Erro', 'Erro ao salvar PDI', 'error');
+          this.$showToast('Erro', 'Erro ao salvar PDI', 'error');
         }
       } catch (error) {
-        this.$showModal('Erro', 'Erro ao salvar PDI: ' + (error.response?.data?.message || error.message), 'error');
+        this.$showToast('Erro', 'Erro ao salvar PDI: ' + (error.response?.data?.message || error.message), 'error');
       } finally {
         this.loading = false;
       }
@@ -3669,13 +4338,13 @@ const PDI = {
     
     exportarPDF() {
       if (!this.form.student_id) {
-        this.$showModal('Atenção', 'Selecione um aluno primeiro para gerar o PDF.', 'info');
+        this.$showToast('Atenção', 'Selecione um aluno primeiro para gerar o PDF.', 'info');
         return;
       }
       
       const token = localStorage.getItem('token');
       if (!token) {
-        this.$showModal('Erro', 'Token de autenticação não encontrado. Faça login novamente.', 'error');
+        this.$showToast('Erro', 'Token de autenticação não encontrado. Faça login novamente.', 'error');
         return;
       }
       
@@ -3730,7 +4399,7 @@ const PlanoAtendimento = {
                       ? 'bg-violet-600 text-white shadow-lg' 
                       : index + 1 <= maxCompletedStep 
                         ? 'bg-white text-violet-600 border border-violet-200 hover:bg-violet-50' 
-                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-gray-100 text-gray-600 cursor-not-allowed'
                   ]">
             <i :class="step.icon + ' mr-2'"></i>{{ step.title }}
           </button>
@@ -3755,28 +4424,28 @@ const PlanoAtendimento = {
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                       Selecionar Aluno <span class="text-red-500">*</span>
                     </label>
+                    <input v-model="alunoFiltroPlano" placeholder="Filtrar alunos..." class="mb-2 w-full px-3 py-2 border border-gray-300 rounded" />
                     <select v-model="form.student_id" @change="preencherDadosAlunoPlano" required 
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
                       <option value="">Selecione um aluno</option>
-                      <option v-for="aluno in alunos" :key="aluno.id" :value="aluno.id">{{ aluno.name }}</option>
+                      <option v-for="aluno in alunosFiltradosPlano" :key="aluno.id" :value="aluno.id">{{ aluno.name }}</option>
                     </select>
                   </div>
 
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Nome Completo</label>
-                      <input v-model="form.nome_aluno" type="text" readonly 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50">
-                    </div>
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">Matrícula</label>
                       <input v-model="form.matricula" type="text" required 
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Escola de Origem</label>
-                      <input v-model="form.escola_origem" type="text" required 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Escola de Origem <span class="text-red-500">*</span></label>
+                      <select v-model="form.escola_origem_id" required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                        @change="preencherEscolaPlano">
+                        <option value="">Selecione uma escola</option>
+                        <option v-for="escola in escolas" :key="escola.id" :value="escola.id">{{ escola.name }}</option>
+                      </select>
                     </div>
                   </div>
                 </div>
@@ -3968,7 +4637,7 @@ const PlanoAtendimento = {
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div>
                         <span class="font-medium text-gray-700">Aluno:</span>
-                        <p class="text-gray-600">{{ form.nome_aluno || 'Não informado' }}</p>
+                        <p class="text-gray-600">{{ (alunos.find(a=>a.id==form.student_id)?.name) || 'Não informado' }}</p>
                       </div>
                       <div>
                         <span class="font-medium text-gray-700">Escola:</span>
@@ -4027,11 +4696,12 @@ const PlanoAtendimento = {
       loading: false,
       validationErrors: {},
       alunos: [],
+      escolas: [],
       form: {
         student_id: '',
-        nome_aluno: '',
         matricula: '',
         escola_origem: '',
+        escola_origem_id: '',
         tipo_necessidade: '',
         descricao_necessidades: '',
         objetivo_geral: '',
@@ -4063,7 +4733,7 @@ const PlanoAtendimento = {
     }
   },
   async mounted() {
-    await this.carregarAlunos();
+    await Promise.all([this.carregarAlunos(), this.carregarEscolas()]);
   },
   methods: {
     async carregarAlunos() {
@@ -4074,17 +4744,40 @@ const PlanoAtendimento = {
         console.error('Erro ao carregar alunos:', error);
       }
     },
+    async carregarEscolas() {
+      try {
+        const response = await api.get('/schools');
+        const d = response.data;
+        this.escolas = (d?.data?.rows) || (Array.isArray(d?.data) ? d.data : (Array.isArray(d) ? d : []));
+        if (!Array.isArray(this.escolas)) this.escolas = [];
+        if (this.escolas.length === 0) {
+          this.$showToast && this.$showToast('Atenção', 'Nenhuma escola encontrada. Cadastre uma escola em "Gestão de Escolas".', 'info');
+        }
+      } catch (error) {
+        console.error('Erro ao carregar escolas:', error);
+        this.$showToast && this.$showToast('Erro', 'Não foi possível carregar a lista de escolas.', 'error');
+        this.escolas = [];
+      }
+    },
     preencherDadosAlunoPlano() {
       const alunoSelecionado = this.alunos.find(aluno => aluno.id == this.form.student_id);
       if (alunoSelecionado) {
-        this.form.nome_aluno = alunoSelecionado.name;
         // Preenche outros campos se disponíveis
         if (alunoSelecionado.registration_number) {
           this.form.matricula = alunoSelecionado.registration_number;
         }
-        if (alunoSelecionado.school) {
-          this.form.escola_origem = alunoSelecionado.school;
+        if (alunoSelecionado.school_name) {
+          this.form.escola_origem = alunoSelecionado.school_name;
         }
+        if (alunoSelecionado.school_id) {
+          this.form.escola_origem_id = alunoSelecionado.school_id;
+        }
+      }
+    },
+    preencherEscolaPlano() {
+      const escola = this.escolas.find(e => e.id == this.form.escola_origem_id);
+      if (escola) {
+        this.form.escola_origem = escola.name;
       }
     },
 
@@ -4118,6 +4811,28 @@ const PlanoAtendimento = {
           this.validationErrors.student_id = 'Selecione um aluno';
           isValid = false;
         }
+        if (!this.form.escola_origem_id) {
+          this.validationErrors.escola_origem_id = 'Selecione a escola de origem';
+          isValid = false;
+        }
+        if (!this.form.matricula) {
+          this.validationErrors.matricula = 'Informe a matrícula';
+          isValid = false;
+        }
+      }
+      if (this.currentStep === 4) {
+        if (!this.form.frequencia_semanal) {
+          this.validationErrors.frequencia_semanal = 'Selecione a frequência semanal';
+          isValid = false;
+        }
+        if (!this.form.duracao_sessao) {
+          this.validationErrors.duracao_sessao = 'Selecione a duração da sessão';
+          isValid = false;
+        }
+        if (!this.form.periodo_atendimento) {
+          this.validationErrors.periodo_atendimento = 'Selecione o período de atendimento';
+          isValid = false;
+        }
       }
       
       return isValid;
@@ -4125,6 +4840,7 @@ const PlanoAtendimento = {
 
     async salvarPlano() {
       if (!this.validateCurrentStep()) {
+        this.$showToast && this.$showToast('Atenção', 'Preencha os campos obrigatórios antes de finalizar o plano.', 'warning');
         return;
       }
       
@@ -4132,13 +4848,14 @@ const PlanoAtendimento = {
       try {
         const response = await api.post('/planos-atendimento', this.form);
         if (response.data?.ok) {
-          this.$showModal('Sucesso', 'Plano de Atendimento salvo com sucesso!', 'success');
+          const nomeAlunoPlano = (this.alunos.find(a=>a.id==this.form.student_id)?.name) || 'Aluno';
+          this.$showToast('Sucesso', `Plano de Atendimento de "${nomeAlunoPlano}" salvo com sucesso!`, 'success');
           this.$router.push('/');
         } else {
-          this.$showModal('Erro', 'Erro ao salvar plano', 'error');
+          this.$showToast('Erro', 'Erro ao salvar plano', 'error');
         }
       } catch (error) {
-        this.$showModal('Erro', 'Erro ao salvar plano: ' + (error.response?.data?.message || error.message), 'error');
+        this.$showToast('Erro', 'Erro ao salvar plano: ' + (error.response?.data?.message || error.message), 'error');
       } finally {
         this.loading = false;
       }
@@ -4177,11 +4894,11 @@ const RelatorioAtendimento = {
             <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-200"
                  :class="index < currentStep ? 'bg-amber-500 border-amber-500 text-white' : 
                          index === currentStep ? 'bg-amber-100 border-amber-500 text-amber-700' : 
-                         'bg-gray-100 border-gray-300 text-gray-400'">
+                         'bg-gray-100 border-gray-300 text-gray-600'">
               <i :class="step.icon"></i>
             </div>
             <span class="text-xs mt-2 text-center max-w-20"
-                  :class="index <= currentStep ? 'text-amber-600 font-medium' : 'text-gray-400'">
+                  :class="index <= currentStep ? 'text-amber-600 font-medium' : 'text-gray-700'">
               {{ step.title }}
             </span>
           </div>
@@ -4277,6 +4994,19 @@ const RelatorioAtendimento = {
                         placeholder="Digite ou grave a descrição detalhada do atendimento..."
                         class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                         required></textarea>
+
+              <div class="flex justify-end mt-2">
+                <button type="button"
+                        @click="speak(form.descricao)"
+                        :disabled="!form.descricao || isProcessingAudio"
+                        class="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                        :class="(!form.descricao || isProcessingAudio)
+                          ? 'bg-gray-100 text-gray-600 cursor-not-allowed'
+                          : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'">
+                  <i class="fas fa-volume-up"></i>
+                  <span>Ouvir descrição</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -4347,10 +5077,10 @@ const RelatorioAtendimento = {
           </div>
 
           <!-- Navegação -->
-          <div class="flex justify-between pt-6 border-t">
+            <div class="flex justify-between pt-6 border-t">
             <button type="button" 
                     @click="previousStep" 
-                    :disabled="currentStep === 0"
+                    :disabled="currentStep === 0 || loading || isProcessingAudio"
                     class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
               <i class="fas fa-arrow-left mr-1"></i>
               Anterior
@@ -4359,14 +5089,15 @@ const RelatorioAtendimento = {
             <div class="flex space-x-3">
               <button type="button" 
                       @click="cancel" 
-                      class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                      :disabled="loading || isProcessingAudio"
+                      class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
                 Cancelar
               </button>
               
               <button v-if="currentStep < totalSteps - 1" 
                       type="button" 
                       @click="nextStep"
-                      :disabled="!canProceed"
+                      :disabled="!canProceed || loading || isProcessingAudio"
                       class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed">
                 Próximo
                 <i class="fas fa-arrow-right ml-1"></i>
@@ -4383,7 +5114,8 @@ const RelatorioAtendimento = {
               
               <!-- Botão PDF -->
               <button v-if="form.student_id" type="button" @click="exportarPDF"
-                      class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200">
+                      :disabled="loading || isProcessingAudio"
+                      class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
                 <i class="fas fa-file-pdf mr-1"></i>
                 📄 Exportar PDF
               </button>
@@ -4395,6 +5127,10 @@ const RelatorioAtendimento = {
       <!-- Lista de relatórios -->
       <div class="bg-white shadow rounded-lg p-6">
         <h2 class="text-lg font-semibold text-gray-900 mb-4">Relatórios Anteriores</h2>
+        <div v-if="loadingRelatorios" class="text-sm text-gray-500 py-2 flex items-center gap-2">
+          <span class="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></span>
+          Carregando relatórios...
+        </div>
         <div v-if="!relatorios || relatorios.length === 0" class="text-center text-gray-500 py-8">
           Nenhum relatório de atendimento encontrado.
         </div>
@@ -4409,8 +5145,16 @@ const RelatorioAtendimento = {
                 <p class="text-sm text-gray-600 line-clamp-2">{{ r.descricao }}</p>
               </div>
               <div class="flex space-x-2">
-                <button @click="edit(r)" class="text-blue-600 hover:text-blue-800 text-sm">Editar</button>
-                <button @click="deleteRelatorio(r)" class="text-red-600 hover:text-red-800 text-sm">Excluir</button>
+                <button @click="edit(r)" :disabled="loading || isProcessingAudio" class="text-blue-600 hover:text-blue-800 text-sm disabled:opacity-50 disabled:cursor-not-allowed">Editar</button>
+                <button @click="deleteRelatorio(r)"
+                        :disabled="deletingId===r.id || loading"
+                        class="text-red-600 hover:text-red-800 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                  <span v-if="deletingId===r.id" class="inline-flex items-center gap-1">
+                    <span class="animate-spin rounded-full h-3 w-3 border-b-2 border-red-600"></span>
+                    Excluindo...
+                  </span>
+                  <span v-else>Excluir</span>
+                </button>
               </div>
             </div>
           </div>
@@ -4439,6 +5183,9 @@ const RelatorioAtendimento = {
       alunos: [],
       relatorios: [],
       loading: false,
+      loadingRelatorios: false,
+      loadingStudents: false,
+      deletingId: null,
       isRecording: false,
       isProcessingAudio: false,
       recordingTime: 0,
@@ -4492,6 +5239,7 @@ const RelatorioAtendimento = {
     },
     async loadStudents() {
       try {
+        this.loadingStudents = true;
         let params = {};
         if (this.$parent.user && this.$parent.user.role !== 'admin') {
           params.teacher_id = this.$parent.user.id;
@@ -4500,11 +5248,14 @@ const RelatorioAtendimento = {
         this.alunos = (r.data?.data?.rows) || [];
       } catch (e) {
         console.error('Erro ao carregar alunos:', e);
+      } finally {
+        this.loadingStudents = false;
       }
     },
     
     async loadRelatorios() {
       try {
+        this.loadingRelatorios = true;
         let params = {};
         if (this.$parent.user && this.$parent.user.role !== 'admin') {
           params.teacher_id = this.$parent.user.id;
@@ -4513,6 +5264,8 @@ const RelatorioAtendimento = {
         this.relatorios = (r.data?.data?.rows) || [];
       } catch (e) {
         console.error('Erro ao carregar relatórios:', e);
+      } finally {
+        this.loadingRelatorios = false;
       }
     },
 
@@ -4553,12 +5306,18 @@ const RelatorioAtendimento = {
 
       } catch (error) {
         console.error('Erro ao iniciar gravação:', error);
-        this.$showModal('Erro', 'Erro ao acessar o microfone. Verifique as permissões.', 'error');
+        this.$showToast('Erro', 'Erro ao acessar o microfone. Verifique as permissões.', 'error');
       }
     },
 
     async stopRecording() {
       if (this.mediaRecorder && this.isRecording) {
+        // Verificar se a gravação tem pelo menos 1 segundo
+        if (this.recordingTime < 1) {
+          this.$showToast('Atenção', 'Grave pelo menos 1 segundo de áudio para uma transcrição adequada.', 'info');
+          return;
+        }
+        
         this.mediaRecorder.stop();
         this.isRecording = false;
         
@@ -4573,17 +5332,24 @@ const RelatorioAtendimento = {
       this.isProcessingAudio = true;
       
       try {
-        // Aqui seria a integração com API de speech-to-text
-        // Por enquanto, vamos simular com um placeholder
+        // Validar tamanho do blob antes de enviar
+        if (audioBlob.size < 1000) { // Menos de 1KB
+          throw new Error('Áudio muito curto. Grave pelo menos 1 segundo.');
+        }
         
+        // Integração real com backend (OpenAI Whisper via PHP):
         const formData = new FormData();
         formData.append('audio', audioBlob, 'recording.wav');
-        
-        // Simulação de processamento (substituir por API real)
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Texto simulado - substituir pela resposta real da API
-        const transcricao = 'Texto convertido do áudio será inserido aqui quando a API de conversão estiver implementada.';
+
+        const { data } = await api.post('/voice/transcribe', formData, {
+          // Não definir Content-Type manualmente para permitir boundary automático
+          timeout: 120000
+        });
+
+        const transcricao = data?.data?.text || '';
+        if (!transcricao) {
+          throw new Error('Transcrição vazia - tente falar mais claramente');
+        }
         
         // Adicionar ao texto existente
         if (this.form.descricao) {
@@ -4592,9 +5358,12 @@ const RelatorioAtendimento = {
           this.form.descricao = transcricao;
         }
         
+        this.$showToast('Sucesso', 'Áudio transcrito com sucesso!', 'success');
+        
       } catch (error) {
         console.error('Erro ao processar áudio:', error);
-        this.$showModal('Erro', 'Erro ao converter áudio para texto.', 'error');
+        const msg = error.response?.data?.error || error.message || 'Erro ao converter áudio para texto.';
+        this.$showToast('Erro', msg, 'error');
       } finally {
         this.isProcessingAudio = false;
       }
@@ -4610,16 +5379,30 @@ const RelatorioAtendimento = {
 
         const r = await api.post('/atendimentos', payload);
         if (r.data?.ok) {
-          this.$showModal('Sucesso', 'Relatório salvo com sucesso!', 'success');
+          this.$showToast('Sucesso', 'Relatório salvo com sucesso!', 'success');
           this.cancel();
           await this.loadRelatorios();
         } else {
-          this.$showModal('Erro', r.data?.error || 'Erro ao salvar relatório', 'error');
+          this.$showToast('Erro', r.data?.error || 'Erro ao salvar relatório', 'error');
         }
       } catch (e) {
-        this.$showModal('Erro', 'Erro ao salvar relatório', 'error');
+        this.$showToast('Erro', 'Erro ao salvar relatório', 'error');
       } finally {
         this.loading = false;
+      }
+    },
+
+    async speak(text) {
+      try {
+        if (!text) return;
+        const resp = await api.post('/voice/tts', { text, voice: 'alloy', format: 'mp3' }, { responseType: 'arraybuffer' });
+        const blob = new Blob([resp.data], { type: 'audio/mpeg' });
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audio.play();
+      } catch (err) {
+        console.error('Erro no TTS:', err);
+        this.$showToast('Erro', 'Falha ao sintetizar fala.', 'error');
       }
     },
 
@@ -4640,20 +5423,29 @@ const RelatorioAtendimento = {
     },
 
     async deleteRelatorio(relatorio) {
-      if (!confirm('Excluir este relatório?')) return;
-      
+      if (!this._confirmDeleteRel || this._confirmDeleteRel !== relatorio.id) {
+        this._confirmDeleteRel = relatorio.id;
+        this.$showToast('Confirme', 'Clique novamente para excluir este relatório', 'warning');
+        setTimeout(()=>{ if(this._confirmDeleteRel===relatorio.id) this._confirmDeleteRel=null; }, 3000);
+        return;
+      }
+      this._confirmDeleteRel = null;
       try {
+        this.deletingId = relatorio.id;
         const r = await api.delete(`/atendimentos/${relatorio.id}`);
         if (r.data?.ok) {
+          this.$showToast('Sucesso', 'Relatório excluído', 'success');
           await this.loadRelatorios();
         } else {
-          this.$showModal('Erro', r.data?.error || 'Erro ao excluir relatório', 'error');
+          this.$showToast('Erro', r.data?.error || 'Erro ao excluir relatório', 'error');
         }
       } catch (e) {
-        this.$showModal('Erro', 'Erro ao excluir relatório', 'error');
+        console.error(e);
+        this.$showToast('Erro', 'Erro ao excluir relatório', 'error');
+      } finally {
+        this.deletingId = null;
       }
     },
-
     formatDate(date) {
       return new Date(date).toLocaleDateString('pt-BR');
     },
@@ -4664,13 +5456,13 @@ const RelatorioAtendimento = {
     
     exportarPDF() {
       if (!this.form.student_id) {
-        this.$showModal('Atenção', 'Selecione um aluno primeiro para gerar o PDF.', 'info');
+        this.$showToast('Atenção', 'Selecione um aluno primeiro para gerar o PDF.', 'info');
         return;
       }
       
       const token = localStorage.getItem('token');
       if (!token) {
-        this.$showModal('Erro', 'Token de autenticação não encontrado. Faça login novamente.', 'error');
+        this.$showToast('Erro', 'Token de autenticação não encontrado. Faça login novamente.', 'error');
         return;
       }
       
@@ -4693,6 +5485,8 @@ const routes = [
       { path: '', component: Dashboard },
       { path: 'alunos', component: AlunosTW },
       { path: 'usuarios', component: UsuariosTW },
+      // Mantém rota dentro do layout para usuários logados também
+      { path: 'escolas', component: EscolasTW },
       { path: 'relatorio-atendimento', component: RelatorioAtendimento },
       { path: 'entrevista-responsavel', component: EntrevistaResponsavel },
       { path: 'pdi', component: PDI },
@@ -4723,30 +5517,32 @@ const { createApp } = Vue;
 
 const app = createApp({
   components: {
-    PainelDesenvolvimento: window.PainelDesenvolvimento
+    // PainelDesenvolvimento: window.PainelDesenvolvimento
   },
   template: `
     <div>
-      <PainelDesenvolvimento />
+      <!-- <PainelDesenvolvimento /> -->
       <router-view></router-view>
       
-      <!-- Modal Component -->
-      <div v-if="modal.visible" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-          <div class="mt-3 text-center">
-            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full" :class="modalIconBg">
-              <i :class="modalIcon" class="text-xl"></i>
+      <!-- Toast Container -->
+      <div class="fixed top-4 right-4 z-50 space-y-2" style="max-width: 400px;">
+        <div v-for="toast in toasts" :key="toast.id" 
+             class="transform transition-all duration-300 ease-in-out opacity-100 translate-x-0"
+             :class="[toastClasses(toast.type), toast.visible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full']">
+          <div class="flex items-start p-4 rounded-lg shadow-lg border-l-4" :class="toastBorderColor(toast.type)">
+            <div class="flex-shrink-0">
+              <i :class="toastIcon(toast.type)" class="text-xl"></i>
             </div>
-            <h3 class="text-lg font-medium text-gray-900 mt-5">{{ modal.title }}</h3>
-            <div class="mt-2 px-7 py-3">
-              <p class="text-sm text-gray-500">{{ modal.message }}</p>
+            <div class="ml-3 flex-1">
+              <h4 v-if="toast.title" class="text-sm font-semibold" :class="toastTextColor(toast.type)">
+                {{ toast.title }}
+              </h4>
+              <p class="text-sm text-gray-700 mt-1">{{ toast.message }}</p>
             </div>
-            <div class="items-center px-4 py-3">
-              <button @click="closeModal" 
-                      class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
-                OK
-              </button>
-            </div>
+            <button @click="removeToast(toast.id)" 
+                    class="ml-4 text-gray-400 hover:text-gray-600 focus:outline-none">
+              <i class="fas fa-times text-sm"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -4755,41 +5551,75 @@ const app = createApp({
   data() {
     return {
       loading: true,
-      modal: {
-        visible: false,
-        title: '',
-        message: '',
-        type: 'info' // 'success', 'error', 'info'
-      }
+      toasts: [],
+      toastIdCounter: 0
     }
   },
-  computed: {
-    modalIcon() {
-      const icons = {
-        success: 'fas fa-check-circle text-green-600',
-        error: 'fas fa-times-circle text-red-600',
-        info: 'fas fa-info-circle text-blue-600'
-      };
-      return icons[this.modal.type] || icons.info;
-    },
-    modalIconBg() {
-      const colors = {
-        success: 'bg-green-100',
-        error: 'bg-red-100',
-        info: 'bg-blue-100'
-      };
-      return colors[this.modal.type] || colors.info;
-    }
-  },
+  computed: {},
   methods: {
-    showModal(title, message, type = 'info') {
-      this.modal.title = title;
-      this.modal.message = message;
-      this.modal.type = type;
-      this.modal.visible = true;
+    showToast(title, message, type = 'info', duration = 5000) {
+      const toast = {
+        id: ++this.toastIdCounter,
+        title,
+        message,
+        type,
+        visible: true
+      };
+      
+      this.toasts.push(toast);
+      
+      // Auto-remove after duration
+      if (duration > 0) {
+        setTimeout(() => {
+          this.removeToast(toast.id);
+        }, duration);
+      }
     },
-    closeModal() {
-      this.modal.visible = false;
+    removeToast(id) {
+      const index = this.toasts.findIndex(t => t.id === id);
+      if (index > -1) {
+        // Fade out animation
+        this.toasts[index].visible = false;
+        setTimeout(() => {
+          this.toasts.splice(index, 1);
+        }, 300);
+      }
+    },
+    toastClasses(type) {
+      const classes = {
+        success: 'bg-green-50 text-green-800',
+        error: 'bg-red-50 text-red-800',
+        warning: 'bg-yellow-50 text-yellow-800',
+        info: 'bg-blue-50 text-blue-800'
+      };
+      return classes[type] || classes.info;
+    },
+    toastBorderColor(type) {
+      const colors = {
+        success: 'border-green-400',
+        error: 'border-red-400',
+        warning: 'border-yellow-400',
+        info: 'border-blue-400'
+      };
+      return colors[type] || colors.info;
+    },
+    toastIcon(type) {
+      const icons = {
+        success: 'fas fa-check-circle text-green-500',
+        error: 'fas fa-times-circle text-red-500',
+        warning: 'fas fa-exclamation-triangle text-yellow-500',
+        info: 'fas fa-info-circle text-blue-500'
+      };
+      return icons[type] || icons.info;
+    },
+    toastTextColor(type) {
+      const colors = {
+        success: 'text-green-800',
+        error: 'text-red-800',
+        warning: 'text-yellow-800',
+        info: 'text-blue-800'
+      };
+      return colors[type] || colors.info;
     }
   },
   async mounted() {
@@ -4807,9 +5637,25 @@ const app = createApp({
   }
 });
 
-// Adicionar método global para modal
-app.config.globalProperties.$showModal = function(title, message, type = 'info') {
-  this.$root.showModal(title, message, type);
+// Adicionar método global para toast
+app.config.globalProperties.$showToast = function(title, message, type = 'info', duration = 5000) {
+  this.$root.showToast(title, message, type, duration);
+};
+
+// Método global para verificar se campo foi preenchido na entrevista
+app.config.globalProperties.$isFieldFilledInInterview = function(studentId, fieldName) {
+  // Verificar se existem dados da entrevista do aluno
+  const interviewKey = `interview_${studentId}`;
+  const interviewData = localStorage.getItem(interviewKey);
+  if (interviewData) {
+    try {
+      const data = JSON.parse(interviewData);
+      return data[fieldName] && data[fieldName].trim() !== '';
+    } catch (e) {
+      return false;
+    }
+  }
+  return false;
 };
 
 // Adicionar estilos customizados para navegação
@@ -5016,5 +5862,5 @@ app.use(router);
 app.mount('#app');
 
 // Inicialização completa
-console.log('ConectEdu v5.0 - Sistema inicializado com Tailwind CSS');
+// console.log('ConectEdu v5.0 - Sistema inicializado com Tailwind CSS');
 

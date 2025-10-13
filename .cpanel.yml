@@ -13,3 +13,9 @@ deployment:
     # Copia o backend para a pasta /backend do site
     - /bin/mkdir -p $DEPLOYPATH/backend
     - /bin/cp -R backend/* $DEPLOYPATH/backend
+
+    # Executa as migrações do banco de dados
+    - cd $DEPLOYPATH/backend && /usr/bin/php -f migrations.php
+
+    # Cria o usuário admin padrão (se não existir)
+    - cd $DEPLOYPATH/backend && /usr/bin/php -f create_admin.php

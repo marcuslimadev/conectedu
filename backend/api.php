@@ -175,6 +175,16 @@ $restRoutes = [
 // sejam avaliadas mais abaixo. Apenas definiremos 'health' quando explicitamente solicitado.
 $action = $_GET['action'] ?? null;
 
+// Se veio via query (?action=...), propaga para $pathInfo para habilitar rotas dinâmicas (preg_match)
+if (!$pathInfo && isset($_GET['action'])) {
+  $pathInfo = trim($_GET['action'], '/');
+}
+
+// Quando houver action explícita (via query) que seja um alias, normaliza usando $restRoutes
+if ($action && isset($restRoutes[$action])) {
+  $action = $restRoutes[$action];
+}
+
 if (!$action && $pathInfo && isset($restRoutes[$pathInfo])) {
   $action = $restRoutes[$pathInfo];
 }

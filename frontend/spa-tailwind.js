@@ -14,8 +14,77 @@ const api = axios.create({
 
 console.log('🔧 api criado com baseURL:', CONFIG.API_BASE);
 
+// Roteamento da API: detecção automática de PATH_INFO vs query (?action=)
+window.__API_ROUTING = window.__API_ROUTING || { mode: 'path', detected: false };
+
+async function ensureApiRouting() {
+  if (window.__API_ROUTING.detected) return window.__API_ROUTING.mode;
+  const base = CONFIG.API_BASE;
+  const tryFetch = async (url) => {
+    try {
+      const r = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
+      if (r.ok) {
+        // não precisamos validar payload; basta HTTP 200/2xx
+        return true;
+      }
+    } catch (e) { /* ignore */ }
+    return false;
+  };
+  // Primeiro tenta modo PATH
+  const okPath = await tryFetch(base.replace(/\/$/, '') + '/health');
+  if (okPath) {
+    window.__API_ROUTING.mode = 'path';
+    window.__API_ROUTING.detected = true;
+    console.log('🔧 API routing: modo PATH confirmado');
+    return 'path';
+  }
+  // Fallback para modo QUERY
+  const okQuery = await tryFetch(base + (base.includes('?') ? '&' : '?') + 'action=health');
+  if (okQuery) {
+    window.__API_ROUTING.mode = 'query';
+    window.__API_ROUTING.detected = true;
+    console.log('🔧 API routing: modo QUERY (?action=) ativado');
+    return 'query';
+  }
+  // Se ambos falharem, mantém path por padrão (pode ser CORS ou offline)
+  window.__API_ROUTING.detected = true;
+  console.warn('⚠️ Não foi possível detectar o modo de roteamento da API. Mantendo PATH como padrão.');
+  return window.__API_ROUTING.mode;
+}
+
+// Helper para montar URLs absolutas respeitando o modo detectado
+function buildApiUrl(route, query) {
+  const r = route.startsWith('/') ? route : '/' + route;
+  const mode = window.__API_ROUTING?.mode || 'path';
+  if (mode === 'query') {
+    let url = CONFIG.API_BASE + (CONFIG.API_BASE.includes('?') ? '&' : '?') + 'action=' + r.slice(1);
+    if (query && String(query).length) {
+      const q = String(query).startsWith('?') ? String(query).slice(1) : String(query);
+      url += '&' + q;
+    }
+    return url;
+  } else {
+    let url = CONFIG.API_BASE.replace(/\/$/, '') + r;
+    if (query && String(query).length) {
+      url += (String(query).startsWith('?') ? String(query) : '?' + String(query));
+    }
+    return url;
+  }
+}
+
 // Interceptadores para autenticação
 api.interceptors.request.use(cfg => {
+  // Reescrita de URL para ambientes sem PATH_INFO
+  // - Só aplica para URLs relativas (não absolutas) e quando modo=query
+  const isAbsolute = /^(https?:)?\/\//i.test(cfg.url || '');
+  const mode = window.__API_ROUTING?.mode || 'path';
+  if (!isAbsolute && mode === 'query' && typeof cfg.url === 'string') {
+    let route = cfg.url.startsWith('/') ? cfg.url.slice(1) : cfg.url;
+    // Evita dupla aplicação caso já esteja em formato ?action=
+    if (!route.startsWith('?')) {
+      cfg.url = '?action=' + route;
+    }
+  }
   const token = localStorage.getItem('token');
   if (token) {
     cfg.headers['Authorization'] = 'Bearer ' + token;
@@ -2072,7 +2141,9 @@ const LegislacoesTW = {
     },
     
     getPdfUrl(id) {
-      return `${CONFIG.API_BASE}/legislacoes/${id}/download`;
+      // Inclui token na query e usa buildApiUrl para suportar hosts sem PATH_INFO
+      const token = localStorage.getItem('token') || '';
+      return buildApiUrl(`/legislacoes/${id}/download`, `token=${encodeURIComponent(token)}`);
     },
     
     formatFileSize(bytes) {
@@ -2669,6 +2740,8 @@ const Login = {
       this.error = null;
       
       try {
+        // Detecta e configura o modo de roteamento da API antes da primeira chamada
+        await ensureApiRouting();
         const response = await api.post('/login', {
           email: this.email,
           password: this.password
@@ -3243,7 +3316,8 @@ const Relatorios = {
       try {
         const token = localStorage.getItem('token');
         if (!token) { this.$showToast && this.$showToast('Erro', 'Faça login novamente.', 'error'); return; }
-        const url = `${CONFIG.API_BASE}/reports/student/pdf?student_id=${this.alunoId}&tipo=${this.tipoRelatorio}&token=${encodeURIComponent(token)}`;
+        const q = `student_id=${this.alunoId}&tipo=${this.tipoRelatorio}&token=${encodeURIComponent(token)}`;
+        const url = buildApiUrl('/reports/student/pdf', q);
         window.open(url, '_blank');
       } catch(e) {
         this.$showToast && this.$showToast('Erro', 'Erro ao exportar PDF: ' + e.message, 'error');
@@ -3971,8 +4045,8 @@ const EntrevistaResponsavel = {
         return;
       }
       
-      const url = `${CONFIG.API_BASE}/forms/anamnese/pdf?student_id=${this.form.student_id}&token=${encodeURIComponent(token)}`;
-      window.open(url, '_blank');
+  const url = buildApiUrl('/forms/anamnese/pdf', `student_id=${this.form.student_id}&token=${encodeURIComponent(token)}`);
+  window.open(url, '_blank');
     }
   },
   
@@ -4510,8 +4584,8 @@ const PDI = {
         return;
       }
       
-      const url = `${CONFIG.API_BASE}/pdi/pdf?student_id=${this.form.student_id}&token=${encodeURIComponent(token)}`;
-      window.open(url, '_blank');
+  const url = buildApiUrl('/pdi/pdf', `student_id=${this.form.student_id}&token=${encodeURIComponent(token)}`);
+  window.open(url, '_blank');
     },
     
     getMaxDate() {
@@ -5671,8 +5745,8 @@ const RelatorioAtendimento = {
         return;
       }
       
-      const url = `${CONFIG.API_BASE}/pai/pdf?student_id=${this.form.student_id}&token=${encodeURIComponent(token)}`;
-      window.open(url, '_blank');
+  const url = buildApiUrl('/pai/pdf', `student_id=${this.form.student_id}&token=${encodeURIComponent(token)}`);
+  window.open(url, '_blank');
     }
   }
 };

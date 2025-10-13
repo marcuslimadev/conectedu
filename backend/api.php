@@ -27,6 +27,9 @@ $pathInfo = trim($pathInfo, '/');
 // Mapeamento de rotas REST para actions
 $restRoutes = [
     // Auth routes
+    // Diagnóstico do sistema (não requer auth)
+    'diagnose' => 'diagnose',
+    
     'auth/login' => 'auth.login',
     'auth/register' => 'auth.register', 
     'auth/logout' => 'auth.logout',
@@ -210,6 +213,46 @@ $B = body();
 
 if ($action === 'health') {
   res(true, ['time' => date('c')]);
+}
+
+// ---------- DIAGNÓSTICO: Verificar estado do sistema ----------
+if ($action === 'diagnose') {
+  $diagnostics = [
+    'php_version' => phpversion(),
+    'time' => date('c'),
+    'db_connection' => false,
+    'users_count' => 0,
+    'admin_exists' => false,
+    'migrations_table_exists' => false,
+  ];
+  
+  try {
+    $pdo = db();
+    $diagnostics['db_connection'] = true;
+    
+    // Verificar se tabela users existe
+    $result = $pdo->query("SHOW TABLES LIKE 'users'");
+    if ($result->rowCount() > 0) {
+      // Contar usuários
+      $count = $pdo->query("SELECT COUNT(*) as total FROM users")->fetch(PDO::FETCH_ASSOC);
+      $diagnostics['users_count'] = (int)$count['total'];
+      
+      // Verificar se admin existe
+      $admin = $pdo->prepare("SELECT COUNT(*) as total FROM users WHERE email = 'admin@teste.com'");
+      $admin->execute();
+      $adminCount = $admin->fetch(PDO::FETCH_ASSOC);
+      $diagnostics['admin_exists'] = (int)$adminCount['total'] > 0;
+    }
+    
+    // Verificar tabela de migrações
+    $result = $pdo->query("SHOW TABLES LIKE 'migrations'");
+    $diagnostics['migrations_table_exists'] = $result->rowCount() > 0;
+    
+  } catch (Exception $e) {
+    $diagnostics['error'] = $e->getMessage();
+  }
+  
+  res(true, $diagnostics);
 }
 
 // ---------- MIGRATIONS: Executar migrações manualmente ----------

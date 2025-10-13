@@ -38,6 +38,6 @@ if (!headers_sent()) {
   <meta http-equiv="Expires" content="0">
   </head>
 <body>
-  <p>Redirecionando para a aplicação… <a href="frontend/">clique aqui</a> se não for redirecionado automaticamente.</p>
+  <p>Redirecionando para a aplicação… <a href="frontend/">clique aqui.</a> se não for redirecionado automaticamente.</p>
 </body>
 </html>

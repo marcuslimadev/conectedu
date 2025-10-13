@@ -64,11 +64,13 @@ $restRoutes = [
     'entrevistas-responsavel' => 'entrevistas-responsavel.create',
     'entrevistas-responsavel/create' => 'entrevistas-responsavel.create',
     'entrevistas-responsavel/list' => 'entrevistas-responsavel.list',
-    'entrevistas-responsavel/get' => 'entrevistas-responsavel.get',
+  'entrevistas-responsavel/get' => 'entrevistas-responsavel.get',
+  'entrevistas-responsavel/update' => 'entrevistas-responsavel.update',
     
     // PDI routes
     'pdi' => 'pdi.list',
     'pdi/create' => 'pdi.create',
+  'pdi/update' => 'pdi.update',
     'pdi/pdf' => 'pdi.pdf',
     // PDI ConectAEE simplificado
     'pdi-conectaee' => 'pdi-conectaee.create',
@@ -78,11 +80,13 @@ $restRoutes = [
     // PAI routes
     'pai' => 'pai.list',
     'pai/create' => 'pai.create',
+  'pai/update' => 'pai.update',
     'pai/pdf' => 'pai.pdf',
     // Planos de Atendimento Individual (formulário separado)
     'planos-atendimento' => 'planos-atendimento.create',
     'planos-atendimento/create' => 'planos-atendimento.create',
-    'planos-atendimento/list' => 'planos-atendimento.list',
+  'planos-atendimento/list' => 'planos-atendimento.list',
+  'planos-atendimento/update' => 'planos-atendimento.update',
     
     // Plans routes
     'plans' => 'plans.list',
@@ -691,6 +695,27 @@ if ($action === 'pdi.list') {
   res(true, $rows);
 }
 
+if ($action === 'pdi.update') {
+  $u = require_auth();
+  $id = (int)($B['id'] ?? 0);
+  if (!$id) res(false, null, 'INVALID_ID', 422);
+  // Campos atualizáveis
+  $fields = ['objectives','strategies','start_date','end_date','status'];
+  $sets = [];$vals=[];
+  foreach ($fields as $f) {
+    if (array_key_exists($f, $B)) { $sets[] = "$f = ?"; $vals[] = $B[$f]; }
+  }
+  if (isset($B['details'])) { $sets[] = 'details = ?'; $vals[] = is_array($B['details']) ? json_encode($B['details'], JSON_UNESCAPED_UNICODE) : $B['details']; }
+  if (!$sets) res(false, null, 'NO_FIELDS', 422);
+  $vals[] = $id;
+  $sql = 'UPDATE pdis SET ' . implode(',', $sets) . ' WHERE id=?';
+  $pdo->prepare($sql)->execute($vals);
+  // log
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+  $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute(['PDI: atualizado #'.$id]);
+  res(true, ['id'=>$id]);
+}
+
 if ($action === 'pai.create') {
   $u = require_auth();
   $sid = (int)($B['student_id'] ?? 0);
@@ -713,6 +738,23 @@ if ($action === 'pai.list') {
     if ($r['details']) $r['details'] = json_decode($r['details'], true);
   }
   res(true, $rows);
+}
+
+if ($action === 'pai.update') {
+  $u = require_auth();
+  $id = (int)($B['id'] ?? 0);
+  if (!$id) res(false, null, 'INVALID_ID', 422);
+  $fields = ['goals','services','start_date','end_date','status'];
+  $sets = [];$vals=[];
+  foreach ($fields as $f) { if (array_key_exists($f, $B)) { $sets[] = "$f = ?"; $vals[] = $B[$f]; } }
+  if (isset($B['details'])) { $sets[] = 'details = ?'; $vals[] = is_array($B['details']) ? json_encode($B['details'], JSON_UNESCAPED_UNICODE) : $B['details']; }
+  if (!$sets) res(false, null, 'NO_FIELDS', 422);
+  $vals[] = $id;
+  $sql = 'UPDATE pais SET ' . implode(',', $sets) . ' WHERE id=?';
+  $pdo->prepare($sql)->execute($vals);
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+  $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute(['PAI: atualizado #'.$id]);
+  res(true, ['id'=>$id]);
 }
 
 if ($action === 'plans.create') {
@@ -1548,13 +1590,12 @@ if ($action === 'entrevistas-responsavel.list') {
   $q = $_GET['q'] ?? '';
   $page = max(1, (int)($_GET['page'] ?? 1));
   $per = min(200, max(1, (int)($_GET['per_page'] ?? 50)));
+  $student_id = (int)($_GET['student_id'] ?? 0);
 
   $sql = 'SELECT * FROM entrevistas_responsavel WHERE 1';
   $p = [];
-  if ($q) {
-    $sql .= ' AND nome_estudante LIKE ?';
-    $p[] = '%' . $q . '%';
-  }
+  if ($q) { $sql .= ' AND nome_estudante LIKE ?'; $p[] = '%' . $q . '%'; }
+  if ($student_id) { $sql .= ' AND student_id = ?'; $p[] = $student_id; }
 
   $stm = $pdo->prepare($sql . ' ORDER BY id DESC LIMIT ' . $per . ' OFFSET ' . (($page - 1) * $per));
   $stm->execute($p);
@@ -1573,6 +1614,23 @@ if ($action === 'entrevistas-responsavel.get') {
   if (!$row) res(false, null, 'NOT_FOUND', 404);
 
   res(true, $row);
+}
+
+if ($action === 'entrevistas-responsavel.update') {
+  $u = require_auth();
+  $id = (int)($B['id'] ?? 0);
+  if (!$id) res(false, null, 'INVALID_ID', 422);
+  // Montar update dinâmico com base nos campos enviados
+  $allow = ['data_entrevista','tipo_entrevista','motivo_entrevista','nome_estudante','naturalidade','nome_escola','serie_ano','turno','nome_pai','idade_pai','escolaridade_pai','nome_mae','idade_mae','escolaridade_mae','endereco','bairro','cidade','telefone','composicao_familia_concepcao','tem_irmaos','quantidade_irmaos','idades_irmaos','situacao_pais','vida_social_familia','habito_familiar','beneficios_sociais','gravidez_planejada','experiencia_gestacao','saude_mae_gestacao','estado_emocional_mae','fez_prenatal','mes_inicio_prenatal','tratamento_necessario','qual_tratamento','tipo_parto','nasceu_tempo_normal','observacoes_nascimento','bebe_necessitou_oxigenio','bebe_teve_convulsao','bebe_ictericia','bebe_incubadora','foi_amamentado','amamentado_ate_idade','problemas_alimentacao','alimentacao_atual'];
+  $sets=[];$vals=[];
+  foreach ($allow as $f) { if (array_key_exists($f,$B)) { $sets[] = "$f = ?"; $vals[] = $B[$f]; } }
+  if (!$sets) res(false, null, 'NO_FIELDS', 422);
+  $sql = 'UPDATE entrevistas_responsavel SET ' . implode(',', $sets) . ', updated_at=NOW() WHERE id=?';
+  $vals[] = $id;
+  $pdo->prepare($sql)->execute($vals);
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+  $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute(['Entrevista: atualizada #'.$id]);
+  res(true, ['id'=>$id]);
 }
 
 // Endpoints para PDI ConectAEE
@@ -1657,6 +1715,7 @@ if ($action === 'planos-atendimento.create') {
 if ($action === 'planos-atendimento.list') {
   $u = require_auth();
   $q = $_GET['q'] ?? '';
+  $sid = (int)($_GET['student_id'] ?? 0);
   $page = max(1, (int)($_GET['page'] ?? 1));
   $per = min(200, max(1, (int)($_GET['per_page'] ?? 50)));
 
@@ -1666,11 +1725,37 @@ if ($action === 'planos-atendimento.list') {
     $sql .= ' AND nome_aluno LIKE ?';
     $p[] = '%' . $q . '%';
   }
+  if ($sid) {
+    // Tentar identificar por nome do aluno
+    $qs = $pdo->prepare('SELECT name FROM students WHERE id=?');
+    $qs->execute([$sid]);
+    $nm = $qs->fetchColumn();
+    if ($nm) {
+      $sql .= ' AND nome_aluno = ?';
+      $p[] = $nm;
+    }
+  }
 
   $stm = $pdo->prepare($sql . ' ORDER BY id DESC LIMIT ' . $per . ' OFFSET ' . (($page - 1) * $per));
   $stm->execute($p);
   $rows = $stm->fetchAll(PDO::FETCH_ASSOC);
   res(true, ['rows' => $rows, 'page' => $page, 'per_page' => $per]);
+}
+
+if ($action === 'planos-atendimento.update') {
+  $u = require_auth();
+  $id = (int)($B['id'] ?? 0);
+  if (!$id) res(false, null, 'INVALID_ID', 422);
+  $allow = ['nome_escola','nome_aluno','data_nascimento','idade','serie_ano','turno','nome_responsavel','telefone_contato','endereco_residencial','diagnostico_cid','professor_regente','professor_aee','outros_profissionais','data_elaboracao','data_avaliacao_diagnostica','periodo_vigencia','data_prevista_reavaliacao','historico_escolar','historico_familiar_social','interesses_preferencias','dificuldades','potencialidades_observadas','oralidade','compreensao','expressao_verbal','clareza_frases_completas','interage_verbalmente','escreve','grafia_legivel','escreve_certo','producao_textos','copia','faz_garatujas','desenha','leitura_nivel','comunicacao_nao_verbal','raciocinio_logico_matematico','conceitos_academicos','atencao_concentracao','memoria','organizacao_planejamento','interacao_social','autonomia_independencia','manejo_emocoes','comportamento_sala','coordenacao_motora_fina','coordenacao_motora_grossa','orientacao_espacial_temporal','percepcao_visual_auditiva','objetivo_geral','objetivos_especificos','adaptacoes_curriculares','recursos_didaticos_tecnologias','estrategias_ensino','adaptacoes_ambiente_escolar','atendimento_aee','envolvimento_familia','articulacao_outros_profissionais','criterios_avaliacao','periodicidade_reavaliacoes','registro_progresso','professor_regente_assinatura','professor_aee_assinatura','coordenacao_pedagogica_assinatura','direcao_escolar_assinatura','responsavel_aluno_assinatura'];
+  $sets=[];$vals=[];
+  foreach ($allow as $f) { if (array_key_exists($f,$B)) { $sets[] = "$f = ?"; $vals[] = $B[$f]; } }
+  if (!$sets) res(false, null, 'NO_FIELDS', 422);
+  $sql = 'UPDATE planos_atendimento SET ' . implode(',', $sets) . ', updated_at=NOW() WHERE id=?';
+  $vals[] = $id;
+  $pdo->prepare($sql)->execute($vals);
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+  $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute(['Plano Atendimento: atualizado #'.$id]);
+  res(true, ['id'=>$id]);
 }
 
 // Endpoint para estatísticas do dashboard
@@ -1822,6 +1907,72 @@ if (preg_match('/^atendimentos\/(\d+)$/', $pathInfo, $matches) && $_SERVER['REQU
   } else {
     res(false, null, 'DELETE_FAILED', 500);
   }
+}
+
+// Endpoint para atualizar relatório de atendimento
+if (preg_match('/^atendimentos\/(\d+)$/', $pathInfo, $matches) && in_array($_SERVER['REQUEST_METHOD'], ['PUT','POST','PATCH'])) {
+  $u = require_auth();
+  $id = (int)$matches[1];
+
+  // Buscar registro existente
+  $stmt = $pdo->prepare('SELECT * FROM atendimentos WHERE id = ?');
+  $stmt->execute([$id]);
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+  if (!$row) res(false, null, 'NOT_FOUND', 404);
+
+  // Verificar permissão de edição (somente dono ou admin)
+  if ($u['role'] !== 'admin' && (int)$row['teacher_id'] !== (int)$u['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+
+  $B = body();
+  if (!$B) res(false, null, 'INVALID_JSON', 400);
+
+  $allowed = ['data_atendimento','descricao','objetivos','recursos','observacoes','student_id'];
+  $sets = [];
+  $params = [];
+
+  // Atualização opcional de student_id com checagem de posse
+  if (array_key_exists('student_id', $B)) {
+    $newStudentId = (int)$B['student_id'];
+    if ($newStudentId && $newStudentId !== (int)$row['student_id']) {
+      if ($u['role'] !== 'admin') {
+        // Verifica posse do novo aluno
+        $st = $pdo->prepare('SELECT created_by_teacher_id FROM students WHERE id = ?');
+        $st->execute([$newStudentId]);
+        $stu = $st->fetch(PDO::FETCH_ASSOC);
+        if (!$stu) res(false, null, 'STUDENT_NOT_FOUND', 404);
+        if ($stu['created_by_teacher_id'] === null) {
+          // claim aluno
+          $upd = $pdo->prepare('UPDATE students SET created_by_teacher_id = ? WHERE id = ?');
+          $upd->execute([$u['id'], $newStudentId]);
+        } elseif ((int)$stu['created_by_teacher_id'] !== (int)$u['id']) {
+          res(false, null, 'FORBIDDEN_STUDENT', 403);
+        }
+      }
+      $sets[] = 'student_id = ?';
+      $params[] = $newStudentId;
+    }
+  }
+
+  // Demais campos de texto/datas
+  foreach (['data_atendimento','descricao','objetivos','recursos','observacoes'] as $col) {
+    if (array_key_exists($col, $B)) {
+      $sets[] = "$col = ?";
+      $params[] = ($B[$col] === null ? null : trim((string)$B[$col]));
+    }
+  }
+
+  if (empty($sets)) {
+    res(false, null, 'NO_FIELDS_TO_UPDATE', 400);
+  }
+
+  $sql = 'UPDATE atendimentos SET ' . implode(', ', $sets) . ', updated_at = NOW() WHERE id = ?';
+  $params[] = $id;
+  $stmt = $pdo->prepare($sql);
+  $ok = $stmt->execute($params);
+  if ($ok) res(true, ['id' => $id]);
+  res(false, null, 'UPDATE_FAILED', 500);
 }
 
 // Endpoint para listar legislações

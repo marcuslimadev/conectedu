@@ -128,11 +128,11 @@ const AlunosTW = {
     </div>
 
     <!-- Visualização Desktop -->
-    <div class="bg-white shadow rounded overflow-x-auto hidden md:block" role="region" aria-labelledby="alunos-heading">
+    <div class="bg-white shadow rounded-lg overflow-hidden hidden md:block" role="region" aria-labelledby="alunos-heading">
       <table class="min-w-full" role="table" aria-label="Lista de alunos">
-        <thead>
+        <thead class="bg-gray-50">
           <tr class="text-left">
-            <th class="px-3 py-2 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none" 
+            <th class="px-6 py-3 text-gray-700 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none" 
                 @click="sortBy('name')" @keydown.enter="sortBy('name')" @keydown.space="sortBy('name')" tabindex="0"
                 role="columnheader" :aria-sort="sortField === 'name' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
               <div class="flex items-center justify-between">
@@ -142,7 +142,7 @@ const AlunosTW = {
                 </svg>
               </div>
             </th>
-            <th class="px-3 py-2 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none" 
+      <th class="px-6 py-3 text-gray-700 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none" 
                 @click="sortBy('status')" @keydown.enter="sortBy('status')" @keydown.space="sortBy('status')" tabindex="0"
                 role="columnheader" :aria-sort="sortField === 'status' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
               <div class="flex items-center justify-between">
@@ -152,36 +152,38 @@ const AlunosTW = {
                 </svg>
               </div>
             </th>
-            <th class="px-3 py-2" role="columnheader">Vínculo</th>
-            <th class="px-3 py-2 text-right" role="columnheader">Ações</th>
+            <th class="px-6 py-3 text-gray-700" role="columnheader">Vínculo</th>
+            <th class="px-6 py-3 text-right text-gray-700" role="columnheader">Ações</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="s in rows" :key="s.id" class="border-t hover:bg-gray-50">
-            <td class="px-3 py-2 font-medium">{{ s.name || '—' }}</td>
-            <td class="px-3 py-2">
+            <td class="px-6 py-4 font-medium">{{ s.name || '—' }}</td>
+            <td class="px-6 py-4">
               <span class="px-2 py-1 rounded text-xs font-medium uppercase bg-blue-100 text-blue-800">{{ s.modalidade || '—' }}</span>
             </td>
-            <td class="px-3 py-2">
+            <td class="px-6 py-4">
               <span :class="['px-2 py-1 rounded text-xs font-medium', s.status==='ativo'?'bg-green-100 text-green-700':'bg-gray-100 text-gray-600']">{{ s.status || '—' }}</span>
             </td>
-            <td class="px-3 py-2 text-sm text-gray-600">
+            <td class="px-6 py-4 text-sm text-gray-600">
               <span v-if="s.modalidade==='apoio'">Prof #{{ s.support_teacher_id || '-' }}</span>
               <span v-else>SRM #{{ s.srm_room_id || '-' }}</span>
             </td>
-            <td class="px-3 py-2 text-right space-x-2">
-              <button class="px-2 py-1 text-sm border rounded hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-colors" 
+            <td class="px-6 py-4 text-right space-x-2">
+              <button class="inline-flex items-center text-blue-800 hover:text-blue-900 mr-1 px-2 py-1 border border-blue-200 rounded transition-colors" 
                       @click="edit(s)" :aria-label="'Editar aluno ' + s.name">
-                <i class="fas fa-edit mr-1" aria-hidden="true"></i>Editar
+                <i class="fas fa-edit mr-1" aria-hidden="true"></i>
+                <span>Editar</span>
               </button>
-              <button class="px-2 py-1 text-sm border rounded text-red-600 hover:bg-red-50 focus:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 transition-colors" 
+              <button class="inline-flex items-center text-red-800 hover:text-red-900 px-2 py-1 border border-red-200 rounded transition-colors" 
                       @click="del(s)" :aria-label="'Excluir aluno ' + s.name">
-                <i class="fas fa-trash mr-1" aria-hidden="true"></i>Excluir
+                <i class="fas fa-trash mr-1" aria-hidden="true"></i>
+                <span>Excluir</span>
               </button>
             </td>
           </tr>
           <tr v-if="!rows || rows.length===0">
-            <td colspan="5" class="px-3 py-6 text-center text-gray-700">
+            <td colspan="5" class="px-6 py-4 text-center text-gray-700">
               {{ (filters.q || filters.status || filters.modalidade) ? 'Nenhum resultado para os filtros aplicados' : 'Sem registros' }}
             </td>
           </tr>
@@ -310,7 +312,7 @@ const AlunosTW = {
 
     <!-- Modal de Criar/Editar Aluno -->
     <div v-if="editing" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" role="dialog" aria-labelledby="form-heading" aria-modal="true">
-      <div class="bg-gray-50 rounded-lg w-full max-w-4xl h-[90vh] overflow-y-auto shadow-xl p-6 space-y-6">
+      <div class="bg-gray-50 rounded-lg w-full max-w-4xl h-[90vh] overflow-y-auto shadow-xl p-6 space-y-6 border border-gray-200">
         <div class="flex items-center justify-between">
           <h1 id="form-heading" class="text-2xl font-bold text-gray-900">{{ form.id ? 'Editar Aluno' : 'Novo Aluno' }}</h1>
           <button @click="cancel" class="text-gray-500 hover:text-gray-700" aria-label="Fechar">
@@ -406,6 +408,18 @@ const AlunosTW = {
               <option value="ativo">✅ Ativo</option>
               <option value="inativo">❌ Inativo</option>
             </select>
+          </div>
+          <!-- Professor responsável (somente admin escolhe) -->
+          <div class="md:col-span-2" v-if="$root.user && $root.user.role === 'admin'">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-user-tie text-blue-500 mr-1"></i>
+              Professor Responsável (obrigatório)
+            </label>
+            <select v-model="form.created_by_teacher_id" class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+              <option disabled value="">Selecione o professor responsável</option>
+              <option v-for="p in professores" :key="'p'+p.id" :value="p.id">{{ p.name }} (#{{ p.id }})</option>
+            </select>
+            <div class="text-xs text-gray-700 mt-1">O professor que ficará responsável por este aluno no sistema.</div>
           </div>
           <h3 class="text-lg font-medium text-gray-900 mb-4">
             <i class="fas fa-id-card text-blue-500 mr-2"></i>Dados Pessoais Complementares
@@ -636,10 +650,11 @@ const AlunosTW = {
       { title: 'Atribuições', icon: 'fas fa-chalkboard-teacher' },
       { title: 'Contato', icon: 'fas fa-phone' }
     ],
-    form:{ id:null, name:'', modalidade:'', status:'ativo', school_id:null, _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:'' }, 
-    teachers:[], 
+  form:{ id:null, name:'', modalidade:'', status:'ativo', school_id:null, _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:'', created_by_teacher_id:null }, 
+  teachers:[], 
     rooms:[],
     schools:[],
+  professores:[],
     // Paginação
     currentPage: 1,
     perPage: 10,
@@ -663,7 +678,10 @@ const AlunosTW = {
     canProceedAluno() {
       switch (this.currentStepAluno) {
         case 0:
-          return this.form.name && this.form.name.trim().length > 0 && this.form.modalidade && this.form.school_id;
+          // Admin precisa selecionar professor responsável
+          const adminNeedsProfessor = (this.$root?.user?.role === 'admin');
+          const hasProfessor = adminNeedsProfessor ? !!this.form.created_by_teacher_id : true;
+          return this.form.name && this.form.name.trim().length > 0 && this.form.modalidade && this.form.school_id && hasProfessor;
         case 1:
           return true; // Atribuições são opcionais
         case 2:
@@ -700,17 +718,23 @@ const AlunosTW = {
     newAluno(){ 
       this.editing=true; 
       this.currentStepAluno = 0;
-      this.form={ id:null, name:'', modalidade:'', status:'ativo', school_id:null, _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:'' }; 
+      this.form={ id:null, name:'', modalidade:'', status:'ativo', school_id:null, _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:'', created_by_teacher_id:null }; 
+      // Preencher automaticamente para professor não-admin
+      if (this.$root?.user && this.$root.user.role !== 'admin') {
+        this.form.created_by_teacher_id = this.$root.user.id;
+      }
+      this.loadLists();
     },
     edit(s){ 
       this.editing=true; 
       this.currentStepAluno = 0;
-      this.form=Object.assign({_st_name:'', _room_name:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:''}, s); 
+      this.form=Object.assign({_st_name:'', _room_name:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:'', created_by_teacher_id: s.created_by_teacher_id || null}, s); 
+      this.loadLists();
     },
     cancel(){ 
       this.editing=false; 
       this.currentStepAluno = 0;
-      this.form={ id:null, name:'', modalidade:'', status:'ativo', school_id:null, _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:'' }; 
+      this.form={ id:null, name:'', modalidade:'', status:'ativo', school_id:null, _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:'', created_by_teacher_id:null }; 
     },
     async load(){ 
       const params={ 
@@ -758,7 +782,8 @@ const AlunosTW = {
         const results = await Promise.allSettled([
           api.get('/support-teachers'),
           api.get('/srm-rooms'),
-          api.get('/schools')
+          api.get('/schools'),
+          api.get('/professores')
         ]);
         // support-teachers
         if (results[0].status === 'fulfilled') {
@@ -786,10 +811,19 @@ const AlunosTW = {
           console.error('Falha ao carregar escolas:', results[2].reason);
           this.$showToast && this.$showToast('Atenção', 'Não foi possível carregar a lista de escolas agora. Tente novamente mais tarde.', 'info');
         }
+        // professores (usuarios role=professor)
+        if (results[3].status === 'fulfilled') {
+          const p = results[3].value;
+          // endpoint retorna array direto
+          this.professores = (p.data?.data) || (Array.isArray(p.data) ? p.data : []);
+        } else {
+          this.professores = [];
+          console.error('Falha ao carregar professores:', results[3].reason);
+        }
       } catch (err) {
         console.error('Erro inesperado ao carregar listas:', err);
         this.$showToast && this.$showToast('Erro', 'Erro ao carregar listas iniciais (escolas, professores, salas).', 'error');
-        this.teachers = []; this.rooms = []; this.schools = [];
+        this.teachers = []; this.rooms = []; this.schools = []; this.professores = [];
       }
     },
     async save(){ 
@@ -800,7 +834,7 @@ const AlunosTW = {
       const payload=Object.assign({}, this.form); 
       delete payload._st_name; 
       delete payload._room_name; 
-      // Associar aluno ao professor atual
+      // Associar aluno ao professor atual (se não-admin) ou manter seleção do admin
       if(!this.form.id && this.$parent.user && this.$parent.user.role !== 'admin') {
         payload.created_by_teacher_id = this.$parent.user.id;
       }
@@ -996,19 +1030,6 @@ const UsuariosTW = {
         <h1 id="usuarios-heading" class="text-2xl font-bold text-gray-900">Usuários</h1>
       </div>
       <div class="space-x-2">
-        <button @click="loadNotifications" 
-                class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
-                :aria-label="notifications.length > 0 ? 'Ver ' + notifications.length + ' notificações' : 'Ver notificações'">
-          <span v-if="notifications.length > 0" class="inline-flex items-center">
-            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-              <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
-            </svg>
-            Notificações ({{ notifications.length }})
-          </span>
-          <span v-else>
-            <i class="fas fa-bell mr-1" aria-hidden="true"></i>Notificações
-          </span>
-        </button>
         <button @click="novo" 
                 class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
                 aria-label="Adicionar novo usuário">
@@ -1065,51 +1086,26 @@ const UsuariosTW = {
       <button @click="load" class="px-3 py-2 bg-gray-800 text-white rounded">Filtrar</button>
     </div>
 
-    <!-- Notificações -->
-    <div v-if="showNotifications" class="bg-white shadow rounded p-4 space-y-3">
-      <div class="flex items-center justify-between">
-        <h2 class="text-lg font-semibold">Notificações</h2>
-        <button @click="showNotifications = false" class="text-gray-600 hover:text-gray-800">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-          </svg>
-        </button>
-      </div>
-      <div v-if="!notifications || notifications.length === 0" class="text-center text-gray-700 py-4">
-        Nenhuma notificação
-      </div>
-      <div v-else class="space-y-2">
-        <div v-for="n in notifications" :key="n.id" class="border rounded p-3" :class="n.read_at ? 'bg-gray-50' : 'bg-yellow-50 border-yellow-200'">
-          <div class="flex items-start justify-between">
-            <div class="flex-1">
-              <h3 class="font-medium text-sm">{{ n.title }}</h3>
-              <p class="text-sm text-gray-600 mt-1">{{ n.message }}</p>
-              <p class="text-xs text-gray-600 mt-1">{{ formatDate(n.created_at) }}</p>
-            </div>
-            <div class="ml-4 space-x-2">
-              <button @click="markAsRead(n.id)" class="px-2 py-1 text-xs border rounded">Marcar como lida</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    
 
-    <div class="bg-white shadow rounded overflow-x-auto">
+    <div class="bg-white shadow rounded-lg overflow-hidden">
       <table class="min-w-full">
-        <thead>
+        <thead class="bg-gray-50">
           <tr class="text-left">
-            <th class="px-3 py-2">Nome</th>
-            <th class="px-3 py-2">Email</th>
-            <th class="px-3 py-2">Perfil</th>
-            <th class="px-3 py-2">Status</th>
-            <th class="px-3 py-2 text-right">Ações</th>
+            <th class="px-6 py-3 text-left font-semibold text-gray-700">Nome</th>
+            <th class="px-6 py-3 text-left font-semibold text-gray-700">Email</th>
+            <th class="px-6 py-3 text-left font-semibold text-gray-700">Perfil</th>
+            <th class="px-6 py-3 text-left font-semibold text-gray-700">Status</th>
+            <th class="px-6 py-3 text-right font-semibold text-gray-700">Ações</th>
           </tr>
         </thead>
-        <tbody>
-          <tr v-for="u in rows" :key="u.id" class="border-t">
-            <td class="px-3 py-2">{{ u.name || '—' }}</td>
-            <td class="px-3 py-2">{{ u.email || '—' }}</td>
-            <td class="px-3 py-2">
+        <tbody class="divide-y divide-gray-200">
+          <tr v-for="u in rows" :key="u.id" class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="font-medium text-gray-900">{{ u.name || '—' }}</div>
+            </td>
+            <td class="px-6 py-4 text-gray-800">{{ u.email || '—' }}</td>
+            <td class="px-6 py-4">
               <span :class="[
                 'px-2 py-1 rounded text-xs font-medium',
                 u.role === 'admin' ? 'bg-purple-100 text-purple-700' :
@@ -1118,7 +1114,7 @@ const UsuariosTW = {
                 'bg-gray-100 text-gray-600'
               ]">{{ getRoleLabel(u.role) }}</span>
             </td>
-            <td class="px-3 py-2">
+            <td class="px-6 py-4">
               <span :class="[
                 'px-2 py-1 rounded text-xs font-medium',
                 u.status === 'ativo' ? 'bg-green-100 text-green-700' :
@@ -1126,11 +1122,12 @@ const UsuariosTW = {
                 'bg-gray-100 text-gray-600'
               ]">{{ getStatusLabel(u.status) }}</span>
             </td>
-            <td class="px-3 py-2 text-right space-x-2">
-              <button class="px-2 py-1 text-sm border rounded hover:bg-gray-50 transition-colors" @click="edit(u)">
-                Editar
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <button class="inline-flex items-center text-blue-800 hover:text-blue-900 mr-3 px-2 py-1 border border-blue-200 rounded" @click="edit(u)">
+                <i class="fas fa-edit mr-1" aria-hidden="true"></i>
+                <span>Editar</span>
               </button>
-              <button class="px-2 py-1 text-sm border rounded text-red-600 hover:bg-red-50 transition-colors" 
+              <button class="inline-flex items-center text-red-800 hover:text-red-900 px-2 py-1 border border-red-200 rounded" 
                       @click="del(u)" 
                       :disabled="deletingUserId === u.id"
                       :class="deletingUserId === u.id ? 'opacity-50 cursor-not-allowed' : ''">
@@ -1138,12 +1135,15 @@ const UsuariosTW = {
                   <div class="animate-spin -ml-1 mr-1 h-3 w-3 border border-red-600 border-t-transparent rounded-full"></div>
                   Excluindo...
                 </span>
-                <span v-else>Excluir</span>
+                <span v-else>
+                  <i class="fas fa-trash mr-1" aria-hidden="true"></i>
+                  Excluir
+                </span>
               </button>
             </td>
           </tr>
           <tr v-if="!rows || rows.length===0">
-            <td colspan="5" class="px-3 py-6 text-center text-gray-700">
+            <td colspan="5" class="px-6 py-6 text-center text-gray-700">
               {{ (filters.q || filters.role || filters.status) ? 'Nenhum usuário encontrado para os filtros aplicados' : 'Sem usuários' }}
             </td>
           </tr>
@@ -1153,7 +1153,7 @@ const UsuariosTW = {
 
     <!-- Modal de Criar/Editar Usuário -->
     <div v-if="editing" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div class="bg-gray-50 rounded-lg w-full max-w-4xl h-[90vh] shadow-xl overflow-hidden flex flex-col">
+      <div class="bg-gray-50 rounded-lg w-full max-w-4xl h-[90vh] shadow-xl overflow-hidden flex flex-col border border-gray-200">
         <div class="flex items-center justify-between p-4 border-b">
           <h2 class="text-lg font-semibold">{{ form.id ? 'Editar Usuário' : 'Novo Usuário' }}</h2>
           <button @click="cancel" class="text-gray-500 hover:text-gray-700" aria-label="Fechar"><i class="fas fa-times"></i></button>
@@ -1213,8 +1213,6 @@ const UsuariosTW = {
     savingForm: false,
     deletingUserId: null,
     form:{ id:null, name:'', email:'', role:'professor', status:'ativo', password:'' },
-    notifications: [],
-    showNotifications: false,
     successMessage: '',
     errorMessage: ''
   }},
@@ -1315,30 +1313,12 @@ const UsuariosTW = {
         this.errorMessage = '';
       }, 8000);
     },
-    async loadNotifications(){ 
-      try {
-        const r = await api.get('/notifications'); 
-        this.notifications = r.data?.data || []; 
-        this.showNotifications = true; 
-      } catch(e) { 
-        this.$showToast('Erro', 'Erro ao carregar notificações', 'error'); 
-      } 
-    },
-
-    async markAsRead(notificationId) {
-      try {
-        await api.post('/notifications/read', { notification_id: notificationId });
-        this.loadNotifications();
-      } catch(e) {
-        this.$showToast('Erro', 'Erro ao marcar notificação como lida', 'error');
-      }
-    },
     formatDate(dateStr) {
       return new Date(dateStr).toLocaleString('pt-BR');
     }
   },
 
-  async mounted(){ this.load(); this.loadNotifications(); }
+  async mounted(){ this.load(); }
 };
 
 // Componente de Escolas - Recriado seguindo padrão dos outros componentes
@@ -1349,7 +1329,6 @@ const EscolasTW = {
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-bold text-gray-900">Escolas</h1>
-          <p class="mt-1 text-sm text-gray-700">Gerencie as escolas do sistema</p>
         </div>
   <button v-if="canManage" @click="newEscola" 
     class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2">
@@ -1371,11 +1350,41 @@ const EscolasTW = {
         <table class="min-w-full">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Endereço</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cidade</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Telefone</th>
-              <th v-if="canManage" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+              <th 
+                class="px-6 py-3 text-left font-semibold text-gray-700 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none"
+                @click="sortBy('name')" @keydown.enter="sortBy('name')" @keydown.space="sortBy('name')" tabindex="0"
+                role="columnheader" :aria-sort="sortField === 'name' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
+                <div class="flex items-center justify-between">
+                  <span>Nome</span>
+                  <svg v-if="sortField === 'name'" class="w-4 h-4" :class="sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                  </svg>
+                </div>
+              </th>
+              <th class="px-6 py-3 text-left font-semibold text-gray-700">Endereço</th>
+              <th 
+                class="px-6 py-3 text-left font-semibold text-gray-700 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none"
+                @click="sortBy('city')" @keydown.enter="sortBy('city')" @keydown.space="sortBy('city')" tabindex="0"
+                role="columnheader" :aria-sort="sortField === 'city' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
+                <div class="flex items-center justify-between">
+                  <span>Cidade</span>
+                  <svg v-if="sortField === 'city'" class="w-4 h-4" :class="sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                  </svg>
+                </div>
+              </th>
+              <th 
+                class="px-6 py-3 text-left font-semibold text-gray-700 cursor-pointer"
+                @click="sortBy('phone')" @keydown.enter="sortBy('phone')" @keydown.space="sortBy('phone')" tabindex="0"
+                role="columnheader" :aria-sort="sortField === 'phone' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
+                <div class="flex items-center justify-between">
+                  <span>Telefone</span>
+                  <svg v-if="sortField === 'phone'" class="w-4 h-4" :class="sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                  </svg>
+                </div>
+              </th>
+              <th v-if="canManage" class="px-6 py-3 text-right font-semibold text-gray-700">Ações</th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
@@ -1409,7 +1418,7 @@ const EscolasTW = {
 
       <!-- Modal de Edição (padrão unificado) -->
       <div v-if="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <div class="bg-gray-50 rounded-lg w-full max-w-4xl h-[90vh] shadow-xl overflow-hidden flex flex-col">
+        <div class="bg-gray-50 rounded-lg w-full max-w-4xl h-[90vh] shadow-xl overflow-hidden flex flex-col border border-gray-200">
           <div class="flex items-center justify-between p-4 border-b">
             <h2 class="text-lg font-semibold">{{ editingId ? 'Editar Escola' : 'Nova Escola' }}</h2>
             <button @click="closeModal" class="text-gray-500 hover:text-gray-700" aria-label="Fechar"><i class="fas fa-times"></i></button>
@@ -1477,19 +1486,33 @@ const EscolasTW = {
       },
       user: null,
       deletingId: null,
-      saving: false
+      saving: false,
+      sortField: 'name',
+      sortDirection: 'asc'
     };
   },
   
   computed: {
     filteredRows() {
-      if (!this.searchTerm) return this.rows;
-      const term = this.searchTerm.toLowerCase();
-      return this.rows.filter(escola => 
-        escola.name?.toLowerCase().includes(term) ||
-        escola.city?.toLowerCase().includes(term) ||
-        escola.address?.toLowerCase().includes(term)
-      );
+      // Filtra
+      const base = !this.searchTerm ? this.rows : this.rows.filter(escola => {
+        const term = this.searchTerm.toLowerCase();
+        return (
+          (escola.name || '').toLowerCase().includes(term) ||
+          (escola.city || '').toLowerCase().includes(term) ||
+          (escola.address || '').toLowerCase().includes(term)
+        );
+      });
+      // Ordena
+      const dir = this.sortDirection === 'asc' ? 1 : -1;
+      const field = this.sortField;
+      return [...base].sort((a,b)=>{
+        const av = (a?.[field] ?? '').toString().toLowerCase();
+        const bv = (b?.[field] ?? '').toString().toLowerCase();
+        if (av < bv) return -1 * dir;
+        if (av > bv) return 1 * dir;
+        return 0;
+      });
     },
     canManage(){
       return this.user && this.user.role === 'admin';
@@ -1497,6 +1520,14 @@ const EscolasTW = {
   },
   
   methods: {
+    sortBy(field) {
+      if (this.sortField === field) {
+        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.sortField = field;
+        this.sortDirection = 'asc';
+      }
+    },
     async loadEscolas() {
       try {
         console.log('🔄 Carregando escolas...');
@@ -1622,7 +1653,7 @@ const LegislacoesTW = {
 
       <!-- Modal de Upload (apenas admin) -->
       <div v-if="showUploadForm && user && user.role === 'admin'" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-  <form @submit.prevent="uploadLegislacao" class="bg-gray-50 rounded-lg w-full max-w-4xl h-[90vh] shadow-xl overflow-hidden flex flex-col">
+  <form @submit.prevent="uploadLegislacao" class="bg-gray-50 rounded-lg w-full max-w-4xl h-[90vh] shadow-xl overflow-hidden flex flex-col border border-gray-200">
           <div class="flex items-center justify-between p-4 border-b">
             <h2 class="text-lg font-semibold text-gray-900">Nova Legislação</h2>
             <button type="button" @click="cancelUpload" class="text-gray-500 hover:text-gray-700" aria-label="Fechar"><i class="fas fa-times"></i></button>
@@ -2201,7 +2232,7 @@ const Layout = {
               </svg>
               Legislações
             </router-link>
-            <button class="nav-link-tw w-full text-left" @click="$root.logout && $root.logout()">
+            <button type="button" class="nav-link-tw logout-link w-full text-left" @click.prevent="logout()">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M17 16l4-4m0 0l-4-4m4 4H7"/>
                 <path d="M7 4h6a2 2 0 012 2v2"/>
@@ -2262,13 +2293,6 @@ const Layout = {
               
               <!-- Lado direito: Info do usuário + ações -->
               <div class="flex items-center gap-2 lg:gap-4">
-                <!-- Notificações (se houver) -->
-                <button class="hidden lg:block relative p-2 rounded-md text-white hover:bg-white/10 transition-colors">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5-5v-5a5 5 0 00-10 0v5l-5 5h5m0 0v1a2 2 0 002 2h2a2 2 0 002-2v-1"/>
-                  </svg>
-                </button>
-                
                 <!-- Info do usuário -->
                 <div class="flex items-center gap-2">
                   <div class="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
@@ -2281,15 +2305,13 @@ const Layout = {
                     <p class="text-xs text-white/90 capitalize">{{ user?.role || 'Professor' }}</p>
                   </div>
                 </div>
-                
-                <!-- Botão de logout -->
+                <!-- Botão Sair -->
                 <button 
-                  @click="logout" 
-                  class="px-3 py-2 text-xs lg:text-sm font-medium text-white bg-white/20 backdrop-blur-sm rounded-md hover:bg-white/30 transition-colors border border-white/20">
-                  <svg class="w-4 h-4 lg:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                  </svg>
-                  <span class="hidden lg:inline">Sair</span>
+                  class="px-3 py-1.5 rounded border border-red-200 text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300"
+                  @click="logout" :disabled="loggingOut"
+                  :class="loggingOut ? 'opacity-60 cursor-not-allowed' : ''">
+                  <span v-if="!loggingOut">Sair</span>
+                  <span v-else>Saindo...</span>
                 </button>
               </div>
             </div>
@@ -2307,6 +2329,7 @@ const Layout = {
     return {
       sidebarOpen: window.innerWidth >= 1024, // Aberto em desktop, fechado em mobile
       user: null,
+      loggingOut: false,
       timeInterval: null,
       currentTimeDisplay: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', hour12: false }),
       currentPageTitle: 'ConectAEE',
@@ -2360,13 +2383,40 @@ const Layout = {
       }
     },
     async logout() {
+      if (this.loggingOut) return;
+      this.loggingOut = true;
+      console.log('🔒 Logout iniciado');
       try {
-        await api.post('/logout');
+        // Tenta informar o backend (se o endpoint existir)
+        await api.post('/logout').catch(() => {});
+        console.log('🔒 Logout: backend notificado (se disponível)');
       } catch (error) {
         console.error('Erro no logout:', error);
       } finally {
-        localStorage.removeItem('token');
-        this.$router.push('/login');
+        try {
+          // Fecha a sidebar em mobile para evitar estado inconsistente
+          if (window.innerWidth < 1024) this.sidebarOpen = false;
+          // Limpa token e header Authorization
+          localStorage.removeItem('token');
+          console.log('🔒 Logout: token removido');
+          if (api?.defaults?.headers?.common?.Authorization) delete api.defaults.headers.common['Authorization'];
+          this.user = null;
+          // Feedback visual
+          if (this.$showToast) this.$showToast('Sessão encerrada', 'Você saiu da conta com segurança.', 'success', 3000);
+          // Redireciona via router (suave)
+          if (this.$route.path !== '/login') {
+            await this.$router.push('/login').catch(() => {});
+            console.log('🔒 Logout: navegação para /login');
+          }
+          // Fallback hard caso algo impeça a navegação
+          setTimeout(() => {
+            if (location.hash !== '#/login') location.hash = '#/login';
+            this.loggingOut = false;
+            console.log('🔒 Logout finalizado');
+          }, 50);
+        } catch (e) {
+          this.loggingOut = false;
+        }
       }
     }
   },
@@ -2740,7 +2790,7 @@ const Relatorios = {
         </div>
       </div>
 
-      <!-- Etapa 1: Seleção de Aluno -->
+      <!-- Seleção de Aluno e Tipo -->
       <div class="bg-white shadow rounded p-6 space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -2791,61 +2841,37 @@ const Relatorios = {
         </div>
       </div>
 
-      <!-- Resultados do Relatório -->
+      <!-- Resultado do Relatório -->
       <div v-if="dadosRelatorio" class="bg-white shadow rounded overflow-hidden">
         <div class="bg-gray-50 px-6 py-4 border-b">
           <h2 class="text-lg font-semibold text-gray-900">{{ tituloRelatorio }}</h2>
           <p class="text-sm text-gray-600">{{ descricaoRelatorio }}</p>
         </div>
-        
-        </div>
-
-        <!-- Notas e Análises do Aluno -->
-        <div v-if="dadosRelatorio" class="bg-white shadow rounded p-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <i class="fas fa-sticky-note text-amber-600 mr-2"></i>
-            Notas e Análises do Aluno
-          </h3>
-          <div v-if="dadosRelatorio.notes && dadosRelatorio.notes.length" class="space-y-4">
-            <div v-for="n in dadosRelatorio.notes" :key="n.id" class="border rounded-lg p-4">
-              <div class="flex justify-between items-start mb-2">
-                <div>
-                  <div class="text-sm text-gray-500">{{ new Date(n.created_at).toLocaleString('pt-BR') }} <span v-if="n.source" class="ml-2 px-2 py-0.5 text-xs rounded bg-gray-100 text-gray-700">{{ n.source }}</span></div>
-                  <div class="font-medium text-gray-900">{{ n.title || 'Nota' }}</div>
-                </div>
-                <button class="text-blue-600 text-sm hover:underline" @click="n.__editing = !n.__editing">{{ n.__editing ? 'Cancelar' : 'Editar' }}</button>
-              </div>
-              <div v-if="!n.__editing" class="whitespace-pre-wrap text-gray-800 text-sm">{{ n.content }}</div>
-              <div v-else class="space-y-2">
-                <input v-model="n.title" class="w-full border rounded px-3 py-2 text-sm" placeholder="Título (opcional)">
-                <textarea v-model="n.content" rows="6" class="w-full border rounded px-3 py-2 text-sm"></textarea>
-                <div class="text-right">
-                  <button class="px-4 py-2 bg-green-600 text-white rounded text-sm" @click="salvarNota(n)">Salvar</button>
-                </div>
+        <div class="p-6 space-y-6">
+          <div class="grid grid-cols-1 md-grid-cols-2 md:grid-cols-2 gap-6">
+            <div class="space-y-4">
+              <h3 class="font-medium text-gray-900 border-b pb-2">Informações Pessoais</h3>
+              <div class="space-y-2 text-sm">
+                <p><strong>Nome:</strong> {{ dadosRelatorio.aluno?.name || 'Não informado' }}</p>
+                <p><strong>Data de Nascimento:</strong> {{ formatarData(dadosRelatorio.aluno?.birthdate) }}</p>
+                <p><strong>Escola:</strong> {{ dadosRelatorio.aluno?.school || 'Não informada' }}</p>
+                <p><strong>Série:</strong> {{ dadosRelatorio.aluno?.class || 'Não informada' }}</p>
               </div>
             </div>
-          </div>
-          <div v-else class="text-sm text-gray-500">Nenhuma nota registrada para este aluno.</div>
-        </div>
-
-        <!-- Análise IA -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="space-y-4">
-                <h3 class="font-medium text-gray-900 border-b pb-2">Informações Pessoais</h3>
-                <div class="space-y-2 text-sm">
-                  <p><strong>Nome:</strong> {{ dadosRelatorio.aluno?.name || 'Não informado' }}</p>
-                  <p><strong>Data de Nascimento:</strong> {{ formatarData(dadosRelatorio.aluno?.birthdate) }}</p>
-                  <p><strong>Escola:</strong> {{ dadosRelatorio.aluno?.school || 'Não informada' }}</p>
-                  <p><strong>Série:</strong> {{ dadosRelatorio.aluno?.class || 'Não informada' }}</p>
-    data(){
+            <div class="space-y-4">
+              <h3 class="font-medium text-gray-900 border-b pb-2">Estatísticas</h3>
+              <div class="space-y-2 text-sm">
+                <p><strong>Total de atendimentos:</strong> {{ dadosRelatorio.estatisticas?.total_atendimentos || 0 }}</p>
+                <p><strong>Total de formulários:</strong> {{ dadosRelatorio.estatisticas?.total_formularios || 0 }}</p>
+                <p><strong>PDIs:</strong> {{ dadosRelatorio.estatisticas?.total_pdis || 0 }} — <strong>PAIs:</strong> {{ dadosRelatorio.estatisticas?.total_pais || 0 }}</p>
+              </div>
             </div>
           </div>
 
           <!-- Histórico de Atendimentos -->
           <div v-if="tipoRelatorio === 'atendimentos'" class="space-y-4">
             <div v-if="dadosRelatorio.atendimentos && dadosRelatorio.atendimentos.length > 0">
-              <div v-for="atendimento in dadosRelatorio.atendimentos" :key="atendimento.id" 
-                   class="border rounded-lg p-4 hover:bg-gray-50">
+              <div v-for="atendimento in dadosRelatorio.atendimentos" :key="atendimento.id" class="border rounded-lg p-4 hover:bg-gray-50">
                 <div class="flex justify-between items-start mb-2">
                   <h4 class="font-medium text-gray-900">{{ formatarData(atendimento.data_atendimento) }}</h4>
                   <span class="text-xs text-gray-500">ID: {{ atendimento.id }}</span>
@@ -2855,9 +2881,7 @@ const Relatorios = {
                 <p class="text-sm text-gray-700"><strong>Observações:</strong> {{ atendimento.observacoes || 'Nenhuma observação' }}</p>
               </div>
             </div>
-            <div v-else class="text-center text-gray-500 py-8">
-              Nenhum atendimento registrado para este aluno
-            </div>
+            <div v-else class="text-center text-gray-500 py-8">Nenhum atendimento registrado para este aluno</div>
           </div>
 
           <!-- Formulários AEE -->
@@ -2868,65 +2892,35 @@ const Relatorios = {
                 <i class="fas fa-clipboard-list text-blue-600 mr-2"></i>
                 Anamneses e Entrevistas
               </h3>
-              
               <div v-if="dadosRelatorio.anamneses && dadosRelatorio.anamneses.length > 0">
                 <div class="space-y-4">
-                  <div v-for="anamnese in dadosRelatorio.anamneses" :key="anamnese.id" 
-                       class="border rounded-lg p-4 hover:bg-gray-50">
+                  <div v-for="anamnese in dadosRelatorio.anamneses" :key="anamnese.id" class="border rounded-lg p-4 hover:bg-gray-50">
                     <div class="flex justify-between items-start mb-3">
-                      <h4 class="font-medium text-gray-900">
-                        {{ anamnese.tipo === 'entrevista_responsavel' ? 'Entrevista com Responsável' : 'Anamnese' }}
-                      </h4>
+                      <h4 class="font-medium text-gray-900">{{ anamnese.tipo === 'entrevista_responsavel' ? 'Entrevista com Responsável' : 'Anamnese' }}</h4>
                       <div class="text-xs text-gray-500">
                         {{ formatarData(anamnese.created_at) }}
-                        <span v-if="anamnese.tipo === 'entrevista_responsavel'" class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                          Entrevista
-                        </span>
+                        <span v-if="anamnese.tipo === 'entrevista_responsavel'" class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">Entrevista</span>
                       </div>
                     </div>
-                    
-                    <!-- Conteúdo da Anamnese -->
                     <div v-if="anamnese.tipo !== 'entrevista_responsavel'" class="space-y-2">
                       <div v-for="(value, key) in anamnese.answers" :key="key" class="text-sm">
                         <span class="font-medium text-gray-700">{{ key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) }}:</span>
                         <span class="text-gray-600 ml-1">{{ value }}</span>
                       </div>
                     </div>
-                    
-                    <!-- Conteúdo da Entrevista -->
                     <div v-else class="space-y-3">
                       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div v-if="anamnese.answers.nome_estudante">
-                          <span class="font-medium text-gray-700">Nome do Estudante:</span>
-                          <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_estudante }}</span>
-                        </div>
-                        <div v-if="anamnese.answers.data_nascimento">
-                          <span class="font-medium text-gray-700">Data de Nascimento:</span>
-                          <span class="text-gray-600 ml-1">{{ formatarData(anamnese.answers.data_nascimento) }}</span>
-                        </div>
-                        <div v-if="anamnese.answers.nome_escola">
-                          <span class="font-medium text-gray-700">Escola:</span>
-                          <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_escola }}</span>
-                        </div>
-                        <div v-if="anamnese.answers.serie_ano">
-                          <span class="font-medium text-gray-700">Série/Ano:</span>
-                          <span class="text-gray-600 ml-1">{{ anamnese.answers.serie_ano }}</span>
-                        </div>
-                        <div v-if="anamnese.answers.nome_pai">
-                          <span class="font-medium text-gray-700">Nome do Pai:</span>
-                          <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_pai }}</span>
-                        </div>
-                        <div v-if="anamnese.answers.nome_mae">
-                          <span class="font-medium text-gray-700">Nome da Mãe:</span>
-                          <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_mae }}</span>
-                        </div>
+                        <div v-if="anamnese.answers.nome_estudante"><span class="font-medium text-gray-700">Nome do Estudante:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_estudante }}</span></div>
+                        <div v-if="anamnese.answers.data_nascimento"><span class="font-medium text-gray-700">Data de Nascimento:</span> <span class="text-gray-600 ml-1">{{ formatarData(anamnese.answers.data_nascimento) }}</span></div>
+                        <div v-if="anamnese.answers.nome_escola"><span class="font-medium text-gray-700">Escola:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_escola }}</span></div>
+                        <div v-if="anamnese.answers.serie_ano"><span class="font-medium text-gray-700">Série/Ano:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.serie_ano }}</span></div>
+                        <div v-if="anamnese.answers.nome_pai"><span class="font-medium text-gray-700">Nome do Pai:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_pai }}</span></div>
+                        <div v-if="anamnese.answers.nome_mae"><span class="font-medium text-gray-700">Nome da Mãe:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_mae }}</span></div>
                       </div>
-                      
                       <div v-if="anamnese.answers.motivo_entrevista" class="mt-3">
                         <span class="font-medium text-gray-700">Motivo da Entrevista:</span>
                         <p class="text-gray-600 mt-1">{{ anamnese.answers.motivo_entrevista }}</p>
                       </div>
-                      
                       <div v-if="anamnese.answers.informacoes_complementares" class="mt-3">
                         <span class="font-medium text-gray-700">Informações Complementares:</span>
                         <p class="text-gray-600 mt-1">{{ anamnese.answers.informacoes_complementares }}</p>
@@ -2935,138 +2929,113 @@ const Relatorios = {
                   </div>
                 </div>
               </div>
-              
-              <div v-else class="text-center text-gray-500 py-8">
-                <i class="fas fa-clipboard-list text-3xl mb-2"></i>
-                <p>Nenhuma anamnese ou entrevista registrada para este aluno</p>
-              </div>
+              <div v-else class="text-center text-gray-500 py-8"><i class="fas fa-clipboard-list text-3xl mb-2"></i><p>Nenhuma anamnese ou entrevista registrada para este aluno</p></div>
             </div>
-            
+
             <!-- PDIs -->
             <div class="bg-white border rounded-lg p-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <i class="fas fa-tasks text-green-600 mr-2"></i>
-                Planos de Desenvolvimento Individual (PDIs)
-              </h3>
-              
+              <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center"><i class="fas fa-tasks text-green-600 mr-2"></i>Planos de Desenvolvimento Individual (PDIs)</h3>
               <div v-if="dadosRelatorio.pdis && dadosRelatorio.pdis.length > 0">
                 <div class="space-y-4">
-                  <div v-for="pdi in dadosRelatorio.pdis" :key="pdi.id" 
-                       class="border rounded-lg p-4 hover:bg-gray-50">
+                  <div v-for="pdi in dadosRelatorio.pdis" :key="pdi.id" class="border rounded-lg p-4 hover:bg-gray-50">
                     <div class="flex justify-between items-start mb-3">
                       <h4 class="font-medium text-gray-900">PDI #{{ pdi.id }}</h4>
-                      <div class="text-xs">
-                        <span class="px-2 py-1 rounded-full text-xs" 
-                              :class="pdi.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
-                          {{ pdi.status }}
-                        </span>
-                      </div>
+                      <div class="text-xs"><span class="px-2 py-1 rounded-full text-xs" :class="pdi.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">{{ pdi.status }}</span></div>
                     </div>
-                    
                     <div class="space-y-2 text-sm">
-                      <div v-if="pdi.objectives">
-                        <span class="font-medium text-gray-700">Objetivos:</span>
-                        <p class="text-gray-600 mt-1">{{ pdi.objectives }}</p>
-                      </div>
-                      <div v-if="pdi.strategies">
-                        <span class="font-medium text-gray-700">Estratégias:</span>
-                        <p class="text-gray-600 mt-1">{{ pdi.strategies }}</p>
-                      </div>
+                      <div v-if="pdi.objectives"><span class="font-medium text-gray-700">Objetivos:</span><p class="text-gray-600 mt-1">{{ pdi.objectives }}</p></div>
+                      <div v-if="pdi.strategies"><span class="font-medium text-gray-700">Estratégias:</span><p class="text-gray-600 mt-1">{{ pdi.strategies }}</p></div>
                       <div class="grid grid-cols-2 gap-4 mt-3">
-                        <div v-if="pdi.start_date">
-                          <span class="font-medium text-gray-700">Data Início:</span>
-                          <span class="text-gray-600 ml-1">{{ formatarData(pdi.start_date) }}</span>
-                        </div>
-                        <div v-if="pdi.end_date">
-                          <span class="font-medium text-gray-700">Data Fim:</span>
-                          <span class="text-gray-600 ml-1">{{ formatarData(pdi.end_date) }}</span>
-                        </div>
+                        <div v-if="pdi.start_date"><span class="font-medium text-gray-700">Data Início:</span><span class="text-gray-600 ml-1">{{ formatarData(pdi.start_date) }}</span></div>
+                        <div v-if="pdi.end_date"><span class="font-medium text-gray-700">Data Fim:</span><span class="text-gray-600 ml-1">{{ formatarData(pdi.end_date) }}</span></div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              
-              <div v-else class="text-center text-gray-500 py-8">
-                <i class="fas fa-tasks text-3xl mb-2"></i>
-                <p>Nenhum PDI registrado para este aluno</p>
-              </div>
+              <div v-else class="text-center text-gray-500 py-8"><i class="fas a-tasks text-3xl mb-2"></i><p>Nenhum PDI registrado para este aluno</p></div>
             </div>
-            
-            <!-- Planos de Atendimento Individualizados (PAIs) -->
+
+            <!-- PAIs -->
             <div class="bg-white border rounded-lg p-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <i class="fas fa-file-alt text-purple-600 mr-2"></i>
-                Planos de Atendimento Individualizados (PAIs)
-              </h3>
-              
+              <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center"><i class="fas fa-file-alt text-purple-600 mr-2"></i>Planos de Atendimento Individualizados (PAIs)</h3>
               <div v-if="dadosRelatorio.pais && dadosRelatorio.pais.length > 0">
                 <div class="space-y-4">
-                  <div v-for="pai in dadosRelatorio.pais" :key="pai.id" 
-                       class="border rounded-lg p-4 hover:bg-gray-50">
+                  <div v-for="pai in dadosRelatorio.pais" :key="pai.id" class="border rounded-lg p-4 hover:bg-gray-50">
                     <div class="flex justify-between items-start mb-3">
                       <h4 class="font-medium text-gray-900">PAI #{{ pai.id }}</h4>
-                      <div class="text-xs">
-                        <span class="px-2 py-1 rounded-full text-xs" 
-                              :class="pai.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
-                          {{ pai.status }}
-                        </span>
-                      </div>
+                      <div class="text-xs"><span class="px-2 py-1 rounded-full text-xs" :class="pai.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">{{ pai.status }}</span></div>
                     </div>
-                    
                     <div class="space-y-2 text-sm">
-                      <div v-if="pai.objectives">
-                        <span class="font-medium text-gray-700">Objetivos:</span>
-                        <p class="text-gray-600 mt-1">{{ pai.objectives }}</p>
-                      </div>
-                      <div v-if="pai.strategies">
-                        <span class="font-medium text-gray-700">Estratégias:</span>
-                        <p class="text-gray-600 mt-1">{{ pai.strategies }}</p>
-                      </div>
+                      <div v-if="pai.objectives"><span class="font-medium text-gray-700">Objetivos:</span><p class="text-gray-600 mt-1">{{ pai.objectives }}</p></div>
+                      <div v-if="pai.strategies"><span class="font-medium text-gray-700">Estratégias:</span><p class="text-gray-600 mt-1">{{ pai.strategies }}</p></div>
                       <div class="grid grid-cols-2 gap-4 mt-3">
-                        <div v-if="pai.start_date">
-                          <span class="font-medium text-gray-700">Data Início:</span>
-                          <span class="text-gray-600 ml-1">{{ formatarData(pai.start_date) }}</span>
-                        </div>
-                        <div v-if="pai.end_date">
-                          <span class="font-medium text-gray-700">Data Fim:</span>
-                          <span class="text-gray-600 ml-1">{{ formatarData(pai.end_date) }}</span>
-                        </div>
+                        <div v-if="pai.start_date"><span class="font-medium text-gray-700">Data Início:</span><span class="text-gray-600 ml-1">{{ formatarData(pai.start_date) }}</span></div>
+                        <div v-if="pai.end_date"><span class="font-medium text-gray-700">Data Fim:</span><span class="text-gray-600 ml-1">{{ formatarData(pai.end_date) }}</span></div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              
-              <div v-else class="text-center text-gray-500 py-8">
-                <i class="fas fa-file-alt text-3xl mb-2"></i>
-                <p>Nenhum PAI registrado para este aluno</p>
-              </div>
+              <div v-else class="text-center text-gray-500 py-8"><i class="fas fa-file-alt text-3xl mb-2"></i><p>Nenhum PAI registrado para este aluno</p></div>
             </div>
           </div>
-          
-          <div v-if="tipoRelatorio === 'evolucao'" class="text-center text-gray-700 py-8">
-            Relatório de evolução em desenvolvimento
+
+          <div v-if="tipoRelatorio === 'evolucao'" class="text-center text-gray-700 py-8">Relatório de evolução em desenvolvimento</div>
+
+          <!-- Notas e Análises do Aluno -->
+          <div class="bg-white border rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center"><i class="fas fa-sticky-note text-amber-600 mr-2"></i>Notas e Análises do Aluno</h3>
+            <!-- Nova nota manual -->
+            <div class="mb-4 p-3 border rounded bg-gray-50">
+              <div class="grid grid-cols-1 md:grid-cols-6 gap-2 items-end">
+                <div class="md:col-span-2">
+                  <label class="block text-xs text-gray-600 mb-1">Título (opcional)</label>
+                  <input v-model="novaNota.title" class="w-full border rounded px-3 py-2 text-sm" placeholder="Ex.: Observações de aula">
+                </div>
+                <div class="md:col-span-3">
+                  <label class="block text-xs text-gray-600 mb-1">Conteúdo</label>
+                  <input v-model="novaNota.content" class="w-full border rounded px-3 py-2 text-sm" placeholder="Escreva uma observação rápida">
+                </div>
+                <div class="md:col-span-1 text-right">
+                  <button class="px-3 py-2 bg-amber-600 text-white rounded text-sm w-full md:w-auto" :disabled="!novaNota.content" @click="criarNotaManual">Adicionar</button>
+                </div>
+              </div>
+            </div>
+            <div v-if="dadosRelatorio.notes && dadosRelatorio.notes.length" class="space-y-4">
+              <div v-for="n in dadosRelatorio.notes" :key="n.id" class="border rounded-lg p-4">
+                <div class="flex justify-between items-start mb-2">
+                  <div>
+                    <div class="text-sm text-gray-500">{{ new Date(n.created_at).toLocaleString('pt-BR') }} <span v-if="n.source" class="ml-2 px-2 py-0.5 text-xs rounded bg-gray-100 text-gray-700">{{ n.source }}</span></div>
+                    <div class="font-medium text-gray-900">{{ n.title || 'Nota' }}</div>
+                  </div>
+                  <button class="text-blue-600 text-sm hover:underline" @click="n.__editing = !n.__editing">{{ n.__editing ? 'Cancelar' : 'Editar' }}</button>
+                </div>
+                <div v-if="!n.__editing" class="whitespace-pre-wrap text-gray-800 text-sm">{{ n.content }}</div>
+                <div v-else class="space-y-2">
+                  <input v-model="n.title" class="w-full border rounded px-3 py-2 text-sm" placeholder="Título (opcional)">
+                  <textarea v-model="n.content" rows="6" class="w-full border rounded px-3 py-2 text-sm"></textarea>
+                  <div class="text-right"><button class="px-4 py-2 bg-green-600 text-white rounded text-sm" @click="salvarNota(n)">Salvar</button></div>
+                </div>
+              </div>
+            </div>
+            <div v-else class="text-sm text-gray-500">Nenhuma nota registrada para este aluno.</div>
           </div>
         </div>
       </div>
 
-      <!-- Análise IA -->
+      <!-- Análise IA (pré-visualização do texto gerado) -->
       <div v-if="analiseIA_resultado" class="bg-white shadow rounded p-6">
         <h2 class="text-lg font-semibold mb-4 text-purple-800">🤖 Análise com Inteligência Artificial</h2>
-        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
-          <p class="text-sm text-purple-700">{{ analiseIA_resultado }}</p>
-        </div>
+        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4"><p class="text-sm text-purple-700">{{ analiseIA_resultado }}</p></div>
       </div>
     </div>
   `,
   data(){
     return {
-  query: '',
+      query: '',
       alunos: [],
-  alunoFiltroPDI: '',
       alunoId: '',
-      alunoSelecionado: null,
       tipoRelatorio: 'geral',
       dadosRelatorio: null,
       carregandoRelatorio: false,
@@ -3074,7 +3043,8 @@ const Relatorios = {
       carregandoIA: false,
       analiseIA_resultado: null,
       erroIA: null,
-      tentouGerar: false
+      tentouGerar: false,
+      novaNota: { title: '', content: '' }
     };
   },
   computed: {
@@ -3092,133 +3062,57 @@ const Relatorios = {
       const aluno = this.dadosRelatorio.aluno;
       return `Relatório detalhado de ${aluno.name} - ${aluno.school || 'Escola não informada'}`;
     },
-    
-    alertaQualidadeDados() {
-      if (!this.dadosRelatorio) return null;
-      
-      const issues = [];
-      const aluno = this.dadosRelatorio.aluno;
-      const stats = this.dadosRelatorio.estatisticas;
-      
-      if (!aluno?.name || aluno.name === 'Não informado') issues.push('nome não informado');
-  if (!aluno?.birthdate) issues.push('data de nascimento não informada');
-      if (!aluno?.school) issues.push('escola não informada');
-      if (!stats?.total_atendimentos || stats.total_atendimentos === 0) issues.push('nenhum atendimento registrado');
-      
-      if (issues.length === 0) return null;
-      
-      return `Este relatório possui dados limitados: ${issues.join(', ')}. Recomenda-se completar as informações do aluno antes de usar este relatório oficialmente.`;
-    },
-    
     podeExportarPDF() {
       if (!this.dadosRelatorio) return false;
       const aluno = this.dadosRelatorio.aluno;
-      const stats = this.dadosRelatorio.estatisticas;
-      
-      // Permite PDF se pelo menos nome e escola estão preenchidos
       return aluno?.name && aluno.name !== 'Não informado' && aluno?.school;
     },
-    
     podeAnalisarIA() {
       if (!this.dadosRelatorio) return false;
       const stats = this.dadosRelatorio.estatisticas;
-      
-      // Permite IA apenas se há pelo menos 1 atendimento
       return stats?.total_atendimentos > 0;
-    }
-  },
-  computed: {
-    progressoPDI(){ return (this.currentStep / (this.totalSteps || 1)) * 100; },
-    alunosFiltradosPDI(){
-      const t=(this.alunoFiltroPDI||'').toLowerCase();
-      if(!t) return this.alunos;
-      return this.alunos.filter(a=> String(a.name||'').toLowerCase().includes(t));
     }
   },
   methods: {
     async buscar(){
-      const params = { q: this.query, per_page: 50 };
-      try { 
-        const r = await api.get('/students', { params }); 
-        this.alunos = (r.data?.data?.rows)||[]; 
+      const params = {};
+      if (this.query) params.q = this.query;
+      params.per_page = 200;
+      try {
+        const r = await api.get('/students', { params });
+        this.alunos = (r.data?.data?.rows) || [];
+      } catch(e){
+        console.error('Erro ao carregar alunos:', e);
+        this.$showToast && this.$showToast('Erro', 'Erro ao carregar alunos', 'error');
       }
-      catch(e){ 
-        console.error('Erro ao buscar alunos:', e);
-        this.$showToast('Erro', 'Erro ao buscar alunos', 'error'); 
-      }
-    },
-    
-    onAlunoSelecionado() {
-      this.tentouGerar = false;
-      this.dadosRelatorio = null;
-      this.analiseIA_resultado = null;
-      
-      if (this.alunoId) {
-        this.alunoSelecionado = this.alunos.find(a => a.id == this.alunoId);
-      } else {
-        this.alunoSelecionado = null;
-      }
-    },
-    
-    onTipoChanged() {
-      // Limpar relatório anterior quando tipo mudar
-      this.dadosRelatorio = null;
-      this.analiseIA_resultado = null;
-    },
-    
-    getDescricaoTipo() {
-      const descricoes = {
-        'geral': 'Informações completas do aluno com estatísticas gerais',
-        'atendimentos': 'Lista detalhada de todos os atendimentos realizados',
-        'formularios': 'Histórico de formulários AEE preenchidos (em desenvolvimento)',
-        'evolucao': 'Análise de progresso e evolução do aluno (em desenvolvimento)'
-      };
-      return descricoes[this.tipoRelatorio] || '';
     },
     async carregarDadosAluno() {
       if (!this.alunoId) {
         this.dadosRelatorio = null;
         return;
       }
-      // Auto-gerar relatório quando aluno for selecionado
       await this.gerarRelatorio();
     },
     async gerarRelatorio(){
-      if(!this.alunoId) {
-        this.tentouGerar = true;
-        return;
-      }
-      
+      if(!this.alunoId) { this.tentouGerar = true; return; }
       this.carregandoRelatorio = true;
       try {
-        // Carregar dados completos do aluno usando a API de relatórios
-        const response = await api.get('/reports/student', { 
-          params: { student_id: this.alunoId } 
-        });
+        const response = await api.get('/reports/student', { params: { student_id: this.alunoId } });
         const reportData = response.data?.data || response.data;
+        if (!reportData) throw new Error('Dados do relatório não encontrados');
 
-        if (!reportData) {
-          throw new Error('Dados do relatório não encontrados');
-        }
-
-        // Carregar atendimentos adicionais se necessário
+        // Atendimentos (opcional)
         let atendimentos = [];
         if (this.tipoRelatorio === 'atendimentos' || this.tipoRelatorio === 'geral') {
           try {
-            const atendimentosResponse = await api.get('/atendimentos', { 
-              params: { aluno_id: this.alunoId } 
-            });
-            atendimentos = atendimentosResponse.data?.data?.rows || [];
-          } catch(e) {
-            console.warn('Erro ao carregar atendimentos:', e);
-          }
+            const at = await api.get('/atendimentos', { params: { aluno_id: this.alunoId } });
+            atendimentos = at.data?.data?.rows || [];
+          } catch(e) { console.warn('Erro ao carregar atendimentos:', e); }
         }
 
-        // Calcular estatísticas baseadas nos dados do relatório
         const estatisticas = {
           total_atendimentos: atendimentos.length,
           total_formularios: (reportData.anamneses?.length || 0) + (reportData.pdis?.length || 0) + (reportData.pais?.length || 0),
-          ultimo_atendimento: reportData.attendance?.length > 0 ? reportData.attendance[0].date : null,
           total_pdis: reportData.pdis?.length || 0,
           total_pais: reportData.pais?.length || 0,
           total_anamneses: reportData.anamneses?.length || 0
@@ -3232,111 +3126,110 @@ const Relatorios = {
           pdis: reportData.pdis || [],
           pais: reportData.pais || [],
           attendance: reportData.attendance || [],
-          weekly_plans: reportData.weekly_plans || []
+          weekly_plans: reportData.weekly_plans || [],
+          notes: reportData.notes || []
         };
-
-        // Mensagens de vazio mais informativas
-        if ((this.tipoRelatorio === 'atendimentos') && atendimentos.length === 0) {
-          this.$showToast && this.$showToast('Informação', 'Nenhum atendimento registrado para este aluno.', 'info');
-        }
-        if (this.tipoRelatorio === 'formularios' && (!this.dadosRelatorio.anamneses.length && !this.dadosRelatorio.pdis.length && !this.dadosRelatorio.pais.length)) {
-          this.$showToast && this.$showToast('Informação', 'Nenhum formulário AEE encontrado para este aluno.', 'info');
-        }
-
-      } catch(e){ 
+      } catch(e){
         console.error('Erro ao gerar relatório:', e);
-        const errorMsg = e.response?.data?.error || e.response?.data?.message || e.message;
-        this.$showToast('Erro', 'Erro ao gerar relatório: ' + errorMsg, 'error'); 
+        const msg = e.response?.data?.error || e.response?.data?.message || e.message;
+        this.$showToast && this.$showToast('Erro', 'Erro ao gerar relatório: ' + msg, 'error');
       } finally {
         this.carregandoRelatorio = false;
       }
     },
     async exportarPDF(){
       if (!this.dadosRelatorio) return;
-      
       this.carregandoPDF = true;
       try {
         const token = localStorage.getItem('token');
-        if (!token) {
-          this.$showToast('Erro', 'Token de autenticação não encontrado. Faça login novamente.', 'error');
-          return;
-        }
+        if (!token) { this.$showToast && this.$showToast('Erro', 'Faça login novamente.', 'error'); return; }
         const url = `${CONFIG.API_BASE}/reports/student/pdf?student_id=${this.alunoId}&tipo=${this.tipoRelatorio}&token=${encodeURIComponent(token)}`;
         window.open(url, '_blank');
       } catch(e) {
-        this.$showToast('Erro', 'Erro ao exportar PDF: ' + e.message, 'error');
-      } finally {
-        this.carregandoPDF = false;
-      }
+        this.$showToast && this.$showToast('Erro', 'Erro ao exportar PDF: ' + e.message, 'error');
+      } finally { this.carregandoPDF = false; }
     },
     async analiseIA(){
       if (!this.dadosRelatorio) return;
-      this.carregandoIA = true; 
-      this.erroIA = null; 
-      this.analiseIA_resultado = null;
+      this.carregandoIA = true; this.erroIA = null; this.analiseIA_resultado = null;
       try {
         const resp = await api.get('/ai/evaluate-student', { params: { student_id: this.alunoId } });
-        const data = resp.data?.data || resp.data;
-        // Backend retorna JSON com chaves: resumo, forcas[], desafios[], objetivos_smart[], estrategias_recomendadas[]
-        const r = data || {};
+        const r = resp.data?.data || resp.data || {};
         const linhas = [];
         linhas.push(`Análise automatizada do aluno ${this.dadosRelatorio.aluno.name}:`);
-        if (r.resumo) {
-          linhas.push('\n📌 Resumo');
-          linhas.push(String(r.resumo));
-        }
-        if (Array.isArray(r.forcas) && r.forcas.length) {
-          linhas.push('\n💪 Forças');
-          r.forcas.forEach((f,i)=>linhas.push(`- ${f}`));
-        }
-        if (Array.isArray(r.desafios) && r.desafios.length) {
-          linhas.push('\n⚠️ Desafios');
-          r.desafios.forEach((d,i)=>linhas.push(`- ${d}`));
-        }
-        if (Array.isArray(r.objetivos_smart) && r.objetivos_smart.length) {
-          linhas.push('\n🎯 Objetivos SMART');
-          r.objetivos_smart.forEach((o,i)=>linhas.push(`- ${o}`));
-        }
-        if (Array.isArray(r.estrategias_recomendadas) && r.estrategias_recomendadas.length) {
-          linhas.push('\n🧩 Estratégias e Atividades Recomendadas');
-          r.estrategias_recomendadas.forEach((e,i)=>linhas.push(`- ${e}`));
-        }
-        if (!linhas.length) {
-          linhas.push('Não foi possível gerar uma análise detalhada no momento. Tente novamente mais tarde.');
-        }
+        if (r.resumo) { linhas.push('\n📌 Resumo'); linhas.push(String(r.resumo)); }
+        if (Array.isArray(r.forcas) && r.forcas.length) { linhas.push('\n💪 Forças'); r.forcas.forEach(f=>linhas.push(`- ${f}`)); }
+        if (Array.isArray(r.desafios) && r.desafios.length) { linhas.push('\n⚠️ Desafios'); r.desafios.forEach(d=>linhas.push(`- ${d}`)); }
+        if (Array.isArray(r.objetivos_smart) && r.objetivos_smart.length) { linhas.push('\n🎯 Objetivos SMART'); r.objetivos_smart.forEach(o=>linhas.push(`- ${o}`)); }
+        if (Array.isArray(r.estrategias_recomendadas) && r.estrategias_recomendadas.length) { linhas.push('\n🧩 Estratégias e Atividades Recomendadas'); r.estrategias_recomendadas.forEach(e=>linhas.push(`- ${e}`)); }
+        if (!linhas.length) linhas.push('Não foi possível gerar uma análise detalhada no momento.');
         this.analiseIA_resultado = linhas.join('\n');
+
+        // Persistir como nota
+        try {
+          await api.post('/student-notes/create', {
+            student_id: this.alunoId,
+            title: `Análise de IA - ${new Date().toLocaleDateString('pt-BR')}`,
+            content: this.analiseIA_resultado,
+            source: 'IA'
+          });
+          this.$showToast && this.$showToast('Sucesso', 'Análise salva no histórico do aluno.', 'success');
+          await this.gerarRelatorio();
+        } catch (e) {
+          console.warn('Falha ao salvar nota de IA:', e);
+        }
       } catch(err){
         this.erroIA = err?.response?.data?.error || err.message || 'Erro na análise com IA';
-      } finally { 
-        this.carregandoIA = false; 
+        this.$showToast && this.$showToast('Erro', this.erroIA, 'error');
+      } finally { this.carregandoIA = false; }
+    },
+    async salvarNota(nota){
+      if (!nota || !nota.id) return;
+      try {
+        await api.post('/student-notes/update', { id: nota.id, title: nota.title, content: nota.content });
+        nota.__editing = false;
+        this.$showToast && this.$showToast('Sucesso', 'Nota atualizada.', 'success');
+        await this.gerarRelatorio();
+      } catch(e) {
+        console.error('Erro ao atualizar nota:', e);
+        const msg = e.response?.data?.error || e.message;
+        this.$showToast && this.$showToast('Erro', 'Não foi possível salvar a nota: ' + msg, 'error');
+      }
+    },
+    async criarNotaManual(){
+      if (!this.alunoId || !this.novaNota.content) return;
+      try {
+        await api.post('/student-notes/create', {
+          student_id: this.alunoId,
+          title: this.novaNota.title || null,
+          content: this.novaNota.content,
+          source: 'manual'
+        });
+        this.$showToast && this.$showToast('Sucesso', 'Nota adicionada ao histórico do aluno.', 'success');
+        this.novaNota = { title: '', content: '' };
+        await this.gerarRelatorio();
+      } catch (e) {
+        console.error('Erro ao criar nota manual:', e);
+        const msg = e.response?.data?.error || e.message;
+        this.$showToast && this.$showToast('Erro', 'Não foi possível adicionar a nota: ' + msg, 'error');
       }
     },
     formatarData(data) {
       if (!data) return 'Não informado';
-      try {
-        return new Date(data).toLocaleDateString('pt-BR');
-      } catch(e) {
-        return 'Data inválida';
-      }
+      try { return new Date(data).toLocaleDateString('pt-BR'); } catch(e) { return 'Data inválida'; }
     },
-    
-    
     calcularIdade(dataNascimento) {
       if (!dataNascimento) return 0;
       const nascimento = new Date(dataNascimento);
       const hoje = new Date();
       let idade = hoje.getFullYear() - nascimento.getFullYear();
       const mes = hoje.getMonth() - nascimento.getMonth();
-      if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
-        idade--;
-      }
+      if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) idade--;
       return idade;
     },
     pretty(o){ try{ return JSON.stringify(o, null, 2); }catch(e){ return String(o); } }
   },
-  async mounted() {
-    await this.buscar(); // Carregar alunos automaticamente
-  }
+  async mounted(){ await this.buscar(); }
 };
 
 
@@ -3763,7 +3656,7 @@ const EntrevistaResponsavel = {
       }
     },
     
-    preencherDadosAlunoEntrevista() {
+    async preencherDadosAlunoEntrevista() {
       if (this.form.student_id) {
         const aluno = this.alunos.find(a => a.id == this.form.student_id);
         if (aluno) {
@@ -3787,6 +3680,33 @@ const EntrevistaResponsavel = {
           if (aluno.responsible_phone) {
             this.form.telefone = aluno.responsible_phone;
           }
+        }
+        // Buscar última entrevista do aluno para edição
+        try {
+          const r = await api.get('/entrevistas-responsavel/list', { params: { student_id: this.form.student_id, per_page: 1 } });
+          const rows = r.data?.data?.rows || r.data?.data || r.data?.rows || [];
+          const ultimo = Array.isArray(rows) && rows.length ? rows[0] : null;
+          if (ultimo) {
+            // Guardar id para update
+            this.form.id = ultimo.id;
+            // Prefill campos básicos se existirem
+            this.form.escola = ultimo.nome_escola || this.form.escola;
+            this.form.serie = ultimo.serie_ano || this.form.serie;
+            this.form.turno = ultimo.turno || this.form.turno;
+            this.form.nome_responsavel = ultimo.nome_responsavel || this.form.nome_responsavel;
+            this.form.telefone = ultimo.telefone || this.form.telefone;
+            this.form.email = ultimo.email || this.form.email;
+            this.form.diagnostico = ultimo.diagnostico || this.form.diagnostico;
+            this.form.medicamentos = ultimo.medicamentos || this.form.medicamentos;
+            this.form.profissionais = ultimo.profissionais || this.form.profissionais;
+            this.form.comportamento_casa = ultimo.comportamento_casa || this.form.comportamento_casa;
+            this.form.dificuldades = ultimo.dificuldades || this.form.dificuldades;
+            this.form.habilidades = ultimo.habilidades || this.form.habilidades;
+            this.form.expectativas = ultimo.expectativas || this.form.expectativas;
+            this.form.informacoes_adicionais = ultimo.informacoes_adicionais || this.form.informacoes_adicionais;
+          }
+        } catch (e) {
+          console.warn('Não foi possível carregar entrevista existente:', e);
         }
       }
     },
@@ -3915,13 +3835,18 @@ const EntrevistaResponsavel = {
         
         // console.log('Dados sendo enviados:', dadosLimpos);
         
-        const response = await api.post('/entrevistas-responsavel', dadosLimpos);
+        let response;
+        if (this.form.id) {
+          response = await api.post('/entrevistas-responsavel/update', { id: this.form.id, ...dadosLimpos });
+        } else {
+          response = await api.post('/entrevistas-responsavel', dadosLimpos);
+        }
         if (response.data?.ok) {
           // Salvar dados da entrevista no localStorage para evitar duplicação
           const interviewKey = `interview_${this.form.student_id}`;
           localStorage.setItem(interviewKey, JSON.stringify(this.form));
           
-          this.$showToast('Sucesso', 'Entrevista salva com sucesso!', 'success');
+          this.$showToast('Sucesso', this.form.id ? 'Entrevista atualizada com sucesso!' : 'Entrevista salva com sucesso!', 'success');
           this.$router.push('/');
         } else {
           this.$showToast('Erro', 'Erro ao salvar entrevista', 'error');
@@ -4342,7 +4267,7 @@ const PDI = {
       }
     },
     
-    preencherDadosAluno() {
+    async preencherDadosAluno() {
       const alunoSelecionado = this.alunos.find(aluno => aluno.id == this.form.student_id);
       if (alunoSelecionado) {
         // Nome do aluno não é mais um campo separado nos formulários
@@ -4357,6 +4282,31 @@ const PDI = {
           this.form.ano_serie = alunoSelecionado.class_name;
         } else if (alunoSelecionado.grade) {
           this.form.ano_serie = alunoSelecionado.grade;
+        }
+        // Carregar último PDI existente para este aluno (se houver)
+        try {
+          const r = await api.get('/pdi', { params: { student_id: this.form.student_id } });
+          const lista = Array.isArray(r.data?.data) ? r.data.data : Array.isArray(r.data) ? r.data : [];
+          if (lista.length > 0) {
+            const ultimo = lista[0];
+            this.form.id = ultimo.id;
+            // Preencher a partir de details quando disponível
+            const det = ultimo.details || {};
+            Object.keys(det).forEach(k => {
+              if (k in this.form && det[k] != null) this.form[k] = det[k];
+            });
+            // Mapear campos básicos se disponíveis
+            if (!this.form.escola && det.escola) this.form.escola = det.escola;
+            if (!this.form.escola_id && det.escola_id) this.form.escola_id = det.escola_id;
+            // Objetivos e estratégias do registro base para campos do formulário
+            if (ultimo.objectives) this.form.objetivo_geral = ultimo.objectives;
+            if (ultimo.strategies) this.form.estrategias = ultimo.strategies;
+          } else {
+            // Novo PDI: limpar id
+            delete this.form.id;
+          }
+        } catch (e) {
+          console.warn('Falha ao carregar PDI existente:', e);
         }
       }
     },
@@ -4417,11 +4367,26 @@ const PDI = {
       
       this.loading = true;
       try {
-        // Enviar o form com escola_id incluso
-        const response = await api.post('/pdi', this.form);
+        // Monta payload usando details para manter compatibilidade com backend
+        const details = { ...this.form };
+        // Remover chaves não desejadas nas details
+        delete details.id;
+        const payloadBase = {
+          student_id: this.form.student_id,
+          details,
+          objectives: this.form.objetivo_geral || null,
+          strategies: this.form.estrategias || null,
+          status: 'ativo'
+        };
+        let response;
+        if (this.form.id) {
+          response = await api.post('/pdi/update', { id: this.form.id, ...payloadBase });
+        } else {
+          response = await api.post('/pdi/create', payloadBase);
+        }
         if (response.data?.ok) {
           const nomeAluno = (this.alunos.find(a=>a.id==this.form.student_id)?.name) || 'Aluno';
-          this.$showToast('Sucesso', `PDI de "${nomeAluno}" salvo com sucesso!`, 'success');
+          this.$showToast('Sucesso', this.form.id ? `PDI de "${nomeAluno}" atualizado com sucesso!` : `PDI de "${nomeAluno}" salvo com sucesso!`, 'success');
           this.$router.push('/');
         } else {
           this.$showToast('Erro', 'Erro ao salvar PDI', 'error');
@@ -4855,7 +4820,7 @@ const PlanoAtendimento = {
         this.escolas = [];
       }
     },
-    preencherDadosAlunoPlano() {
+    async preencherDadosAlunoPlano() {
       const alunoSelecionado = this.alunos.find(aluno => aluno.id == this.form.student_id);
       if (alunoSelecionado) {
         // Preenche outros campos se disponíveis
@@ -4867,6 +4832,22 @@ const PlanoAtendimento = {
         }
         if (alunoSelecionado.school_id) {
           this.form.escola_origem_id = alunoSelecionado.school_id;
+        }
+        // Tentar carregar último Plano de Atendimento deste aluno pelo nome
+        try {
+          const r = await api.get('/planos-atendimento/list', { params: { q: alunoSelecionado.name, per_page: 1 } });
+          const rows = r.data?.data?.rows || r.data?.rows || [];
+          const ultimo = Array.isArray(rows) && rows.length ? rows[0] : null;
+          if (ultimo && ultimo.nome_aluno === alunoSelecionado.name) {
+            this.form.id = ultimo.id;
+            // Mapear campos conhecidos existentes no formulário
+            const map = ['matricula','escola_origem','tipo_necessidade','descricao_necessidades','objetivo_geral','objetivos_especificos','atividades','metodologia','recursos_didaticos','frequencia_semanal','duracao_sessao','periodo_atendimento','horarios_especificos','instrumentos_avaliacao','criterios_avaliacao','periodicidade_revisao','observacoes'];
+            map.forEach(k => { if (ultimo[k] != null) this.form[k] = ultimo[k]; });
+          } else {
+            delete this.form.id;
+          }
+        } catch (e) {
+          console.warn('Falha ao carregar Plano de Atendimento existente:', e);
         }
       }
     },
@@ -4942,10 +4923,16 @@ const PlanoAtendimento = {
       
       this.loading = true;
       try {
-        const response = await api.post('/planos-atendimento', this.form);
+        let response;
+        if (this.form.id) {
+          const { id, ...payload } = this.form;
+          response = await api.post('/planos-atendimento/update', { id, ...payload });
+        } else {
+          response = await api.post('/planos-atendimento/create', this.form);
+        }
         if (response.data?.ok) {
           const nomeAlunoPlano = (this.alunos.find(a=>a.id==this.form.student_id)?.name) || 'Aluno';
-          this.$showToast('Sucesso', `Plano de Atendimento de "${nomeAlunoPlano}" salvo com sucesso!`, 'success');
+          this.$showToast('Sucesso', this.form.id ? `Plano de Atendimento de "${nomeAlunoPlano}" atualizado com sucesso!` : `Plano de Atendimento de "${nomeAlunoPlano}" salvo com sucesso!`, 'success');
           this.$router.push('/');
         } else {
           this.$showToast('Erro', 'Erro ao salvar plano', 'error');
@@ -5269,6 +5256,7 @@ const RelatorioAtendimento = {
         { title: 'Finalização', icon: 'fas fa-check-circle' }
       ],
       form: {
+        id: null,
         student_id: '',
         data_atendimento: new Date().toISOString().split('T')[0],
         descricao: '',
@@ -5468,14 +5456,20 @@ const RelatorioAtendimento = {
     async save() {
       this.loading = true;
       try {
-        const payload = { ...this.form };
+        const { id, ...rest } = this.form || {};
+        const payload = { ...rest };
         if (this.$parent.user && this.$parent.user.role !== 'admin') {
           payload.teacher_id = this.$parent.user.id;
         }
 
-        const r = await api.post('/atendimentos', payload);
+        let r;
+        if (id) {
+          r = await api.post(`/atendimentos/${id}`, payload);
+        } else {
+          r = await api.post('/atendimentos', payload);
+        }
         if (r.data?.ok) {
-          this.$showToast('Sucesso', 'Relatório salvo com sucesso!', 'success');
+          this.$showToast('Sucesso', id ? 'Relatório atualizado com sucesso!' : 'Relatório salvo com sucesso!', 'success');
           this.cancel();
           await this.loadRelatorios();
         } else {
@@ -5505,6 +5499,7 @@ const RelatorioAtendimento = {
     cancel() {
       this.currentStep = 0;
       this.form = {
+        id: null,
         student_id: '',
         data_atendimento: new Date().toISOString().split('T')[0],
         descricao: '',
@@ -5515,7 +5510,17 @@ const RelatorioAtendimento = {
     },
 
     edit(relatorio) {
-      this.form = { ...relatorio };
+      this.form = { 
+        id: relatorio.id, 
+        student_id: relatorio.student_id, 
+        data_atendimento: relatorio.data_atendimento,
+        descricao: relatorio.descricao || '',
+        objetivos: relatorio.objetivos || '',
+        recursos: relatorio.recursos || '',
+        observacoes: relatorio.observacoes || ''
+      };
+      // Leva o usuário para a primeira etapa para revisar/atualizar
+      this.currentStep = 0;
     },
 
     async deleteRelatorio(relatorio) {
@@ -5958,6 +5963,18 @@ style.textContent = `
     margin-bottom: 0.25rem;
   }
   
+  /* Variante vermelha para sair */
+  .nav-link-tw.logout-link {
+    color: #b91c1c; /* red-700 */
+    border: 1px solid transparent;
+  }
+  .nav-link-tw.logout-link:hover {
+    background-color: #fee2e2; /* red-100 */
+    color: #991b1b; /* red-800 */
+    transform: translateX(4px);
+  }
+  .nav-link-tw.logout-link svg { color: currentColor; }
+  
   .nav-link-tw:hover {
     background-color: #f3f4f6;
     color: #111827;
@@ -6145,7 +6162,7 @@ document.body.insertAdjacentHTML('beforeend', `
 const voiceTpl = document.createElement('template');
 voiceTpl.innerHTML = `
   <div v-if="$root.voiceModal.open" class="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
-    <div class="bg-gray-50 rounded-lg w-full max-w-md p-5 shadow-xl">
+    <div class="bg-gray-50 rounded-lg w-full max-w-md p-5 shadow-xl border border-gray-200">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-lg font-semibold text-gray-900">Capturar por voz</h3>
         <button class="text-gray-500 hover:text-gray-700" @click="$root.closeVoiceModal()"><i class="fas fa-times"></i></button>

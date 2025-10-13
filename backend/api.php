@@ -3,6 +3,20 @@
 require __DIR__ . '/functions.php';
 $pdo = db();
 
+// Executar migrações automáticas na primeira vez
+// Cria um arquivo de lock para não executar novamente
+$migrationLockFile = __DIR__ . '/.migrations_completed';
+if (!file_exists($migrationLockFile)) {
+    require_once __DIR__ . '/migrations.php';
+    $result = run_migrations();
+    if ($result['success']) {
+        file_put_contents($migrationLockFile, date('Y-m-d H:i:s'));
+        error_log("ConectEDU: Migrações aplicadas com sucesso!");
+    } else {
+        error_log("ConectEDU: Erro ao aplicar migrações - " . $result['message']);
+    }
+}
+
 // Sistema de roteamento REST - converte URLs REST para actions
 $requestUri = $_SERVER['REQUEST_URI'] ?? '';
 $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
@@ -166,8 +180,9 @@ $restRoutes = [
   'voice/transcribe' => 'voice.transcribe',
   'voice/tts' => 'voice.tts',
     
-    // Health check
-    'health' => 'health'
+    // Health check & Migrations
+    'health' => 'health',
+    'migrations/run' => 'migrations.run'
 ];
 
 // Determinar a action: primeiro tenta REST, depois query parameter
@@ -195,6 +210,25 @@ $B = body();
 
 if ($action === 'health') {
   res(true, ['time' => date('c')]);
+}
+
+// ---------- MIGRATIONS: Executar migrações manualmente ----------
+if ($action === 'migrations.run') {
+  $u = require_auth();
+  if ($u['role'] !== 'admin') {
+    res(false, null, 'ADMIN_ONLY', 403);
+  }
+  
+  require_once __DIR__ . '/migrations.php';
+  $result = run_migrations();
+  
+  if ($result['success']) {
+    // Atualizar arquivo de lock
+    $lockFile = __DIR__ . '/.migrations_completed';
+    file_put_contents($lockFile, date('Y-m-d H:i:s'));
+  }
+  
+  res($result['success'], $result, $result['message']);
 }
 
 // ---------- VOICE: Speech-to-Text (Transcrição) ----------
@@ -543,7 +577,11 @@ if ($action === 'students.list') {
   $modalidade = $_GET['modalidade'] ?? '';
   $page = max(1, (int)($_GET['page'] ?? 1));
   $per = min(200, max(1, (int)($_GET['per_page'] ?? 50)));
-  $sql = 'SELECT s.*, sch.name as school_name FROM students s LEFT JOIN schools sch ON s.school_id = sch.id WHERE 1';
+  $sql = 'SELECT s.*, sch.name as school_name, prof.name as support_teacher_name 
+          FROM students s 
+          LEFT JOIN schools sch ON s.school_id = sch.id 
+          LEFT JOIN users prof ON s.support_teacher_id = prof.id
+          WHERE 1';
   $p = [];
   
   // Professores só veem alunos que criaram, admins veem todos
@@ -572,7 +610,14 @@ if ($action === 'students.list') {
 if ($action === 'students.create') {
   $u = require_auth();
   $f = $B;
-  if (!($f['name'] ?? '')) res(false, null, 'INVALID_INPUT', 422);
+  
+  // Debug: log do payload recebido
+  error_log('DEBUG students.create - Payload: ' . json_encode($f));
+  
+  if (!($f['name'] ?? '')) res(false, null, 'Nome é obrigatório', 422);
+  if (!($f['modalidade'] ?? '')) res(false, null, 'Modalidade é obrigatória', 422);
+  if (!($f['school_id'] ?? '')) res(false, null, 'Escola é obrigatória', 422);
+  
   // Campos modernos + alguns legados ainda aceitos
   $cols = [
     'name', 'photo_url',
@@ -595,9 +640,15 @@ if ($action === 'students.create') {
       $ph[] = '?';
     }
   }
-  $sql = 'INSERT INTO students (' . implode(',', array_keys($vals)) . ',created_at,updated_at) VALUES (' . implode(',', $ph) . ',NOW(),NOW())';
-  $pdo->prepare($sql)->execute(array_values($vals));
-  $id = $pdo->lastInsertId();
+  
+  try {
+    $sql = 'INSERT INTO students (' . implode(',', array_keys($vals)) . ',created_at,updated_at) VALUES (' . implode(',', $ph) . ',NOW(),NOW())';
+    $pdo->prepare($sql)->execute(array_values($vals));
+    $id = $pdo->lastInsertId();
+  } catch (PDOException $e) {
+    error_log('Erro ao criar aluno: ' . $e->getMessage());
+    res(false, null, 'Erro ao criar aluno: ' . $e->getMessage(), 500);
+  }
   // log
   $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
   $msg = 'Aluno: criado #' . $id . ' — ' . ($f['name'] ?? '');
@@ -1154,6 +1205,20 @@ if ($action === 'reports.student.pdf' || ($action === 'reports.student' && ($_GE
   foreach ($anam as &$r) {
     $r['answers'] = json_decode($r['answers'], true);
   }
+  
+  // Buscar entrevistas_responsavel e formatar como anamneses para o PDF
+  $entrevistas = $pdo->prepare('SELECT * FROM entrevistas_responsavel WHERE student_id=? ORDER BY created_at DESC');
+  $entrevistas->execute([$sid]);
+  $entrevistas = $entrevistas->fetchAll(PDO::FETCH_ASSOC);
+  foreach ($entrevistas as $ent) {
+    $anam[] = [
+      'id' => 'ENT-' . $ent['id'],
+      'answers' => $ent,
+      'created_at' => $ent['created_at'],
+      'tipo' => 'entrevista_responsavel'
+    ];
+  }
+  
   $pdis = $pdo->prepare('SELECT * FROM pdis WHERE student_id=? ORDER BY id DESC');
   $pdis->execute([$sid]);
   $pdis = $pdis->fetchAll(PDO::FETCH_ASSOC);
@@ -1227,15 +1292,27 @@ if ($action === 'reports.student.pdf' || ($action === 'reports.student' && ($_GE
   $mpdf->WriteHTML('<tr><th>Professor (owner)</th><td>' . htmlspecialchars($owner['name'] ?? '-') . '</td><th>E-mail do professor</th><td>' . htmlspecialchars($owner['email'] ?? '-') . '</td></tr>');
   $mpdf->WriteHTML('</tbody></table>');
 
-  $mpdf->WriteHTML('<h2>Anamneses</h2><table><thead><tr><th>#</th><th>Data</th><th>Resumo</th></tr></thead><tbody>', 2);
+  $mpdf->WriteHTML('<h2>Anamneses e Entrevistas</h2><table><thead><tr><th>#</th><th>Tipo</th><th>Data</th><th>Resumo</th></tr></thead><tbody>', 2);
   if (count($anam) == 0) {
-    $mpdf->WriteHTML('<tr><td colspan="3" class="muted">Sem registros</td></tr>');
+    $mpdf->WriteHTML('<tr><td colspan="4" class="muted">Sem registros</td></tr>');
   } else {
     foreach ($anam as $r) {
       $sum = '';
-      if (isset($r['answers']['ident']['nome'])) $sum .= 'Nome: ' . $r['answers']['ident']['nome'] . '; ';
-      if (isset($r['answers']['saude']['deficiencia'])) $sum .= 'Deficiência: ' . $r['answers']['saude']['deficiencia'] . '; ';
-      $mpdf->WriteHTML('<tr><td>' . $r['id'] . '</td><td>' . $r['created_at'] . '</td><td>' . htmlspecialchars($sum) . '</td></tr>');
+      $tipo = isset($r['tipo']) && $r['tipo'] === 'entrevista_responsavel' ? 'Entrevista' : 'Anamnese';
+      
+      // Se for entrevista, extrair dados diferentes
+      if (isset($r['tipo']) && $r['tipo'] === 'entrevista_responsavel') {
+        if (isset($r['answers']['nome_responsavel'])) $sum .= 'Resp.: ' . $r['answers']['nome_responsavel'] . '; ';
+        if (isset($r['answers']['parentesco'])) $sum .= 'Parentesco: ' . $r['answers']['parentesco'] . '; ';
+        if (isset($r['answers']['diagnostico'])) $sum .= 'Diagnóstico: ' . $r['answers']['diagnostico'] . '; ';
+        if (isset($r['answers']['medicamentos'])) $sum .= 'Medicamentos: ' . $r['answers']['medicamentos'] . '; ';
+      } else {
+        // Se for anamnese antiga
+        if (isset($r['answers']['ident']['nome'])) $sum .= 'Nome: ' . $r['answers']['ident']['nome'] . '; ';
+        if (isset($r['answers']['saude']['deficiencia'])) $sum .= 'Deficiência: ' . $r['answers']['saude']['deficiencia'] . '; ';
+      }
+      
+      $mpdf->WriteHTML('<tr><td>' . $r['id'] . '</td><td>' . $tipo . '</td><td>' . date('d/m/Y H:i', strtotime($r['created_at'])) . '</td><td>' . htmlspecialchars($sum) . '</td></tr>');
     }
   }
   $mpdf->WriteHTML('</tbody></table>');
@@ -1272,6 +1349,53 @@ if ($action === 'reports.student.pdf' || ($action === 'reports.student' && ($_GE
     }
   }
   $mpdf->WriteHTML('</tbody></table>');
+
+  // Detalhamento completo das Entrevistas (somente entrevistas, não anamneses antigas)
+  $entrevistasDetalhadas = array_filter($anam, function($r) {
+    return isset($r['tipo']) && $r['tipo'] === 'entrevista_responsavel';
+  });
+  
+  if (count($entrevistasDetalhadas) > 0) {
+    $mpdf->WriteHTML('<h2>Detalhamento das Entrevistas com Responsável</h2>');
+    foreach ($entrevistasDetalhadas as $ent) {
+      $ans = $ent['answers'];
+      $mpdf->WriteHTML('<h3 style="font-size:12px;margin:12px 0 6px;color:#0369a1;">Entrevista #' . $ent['id'] . ' - ' . date('d/m/Y H:i', strtotime($ent['created_at'])) . '</h3>');
+      
+      // Dados Básicos
+      $mpdf->WriteHTML('<h4 style="font-size:11px;margin:8px 0 4px;color:#1e40af;">📋 Dados Básicos</h4>');
+      $mpdf->WriteHTML('<table><tbody>');
+      $mpdf->WriteHTML('<tr><th>Nome do Responsável</th><td>' . htmlspecialchars($ans['nome_responsavel'] ?? '-') . '</td></tr>');
+      $mpdf->WriteHTML('<tr><th>Parentesco</th><td>' . htmlspecialchars($ans['parentesco'] ?? '-') . '</td></tr>');
+      $mpdf->WriteHTML('<tr><th>Telefone</th><td>' . htmlspecialchars($ans['telefone'] ?? '-') . '</td></tr>');
+      $mpdf->WriteHTML('<tr><th>Profissão</th><td>' . htmlspecialchars($ans['profissao'] ?? '-') . '</td></tr>');
+      $mpdf->WriteHTML('</tbody></table>');
+      
+      // Histórico Médico
+      $mpdf->WriteHTML('<h4 style="font-size:11px;margin:8px 0 4px;color:#dc2626;">🏥 Histórico Médico</h4>');
+      $mpdf->WriteHTML('<table><tbody>');
+      $mpdf->WriteHTML('<tr><th>Diagnóstico</th><td>' . nl2br(htmlspecialchars($ans['diagnostico'] ?? '-')) . '</td></tr>');
+      $mpdf->WriteHTML('<tr><th>Laudos Disponíveis</th><td>' . htmlspecialchars($ans['laudos_disponiveis'] ?? '-') . '</td></tr>');
+      $mpdf->WriteHTML('<tr><th>Tratamentos</th><td>' . nl2br(htmlspecialchars($ans['tratamentos'] ?? '-')) . '</td></tr>');
+      $mpdf->WriteHTML('<tr><th>Medicamentos</th><td>' . nl2br(htmlspecialchars($ans['medicamentos'] ?? '-')) . '</td></tr>');
+      $mpdf->WriteHTML('</tbody></table>');
+      
+      // Desenvolvimento
+      $mpdf->WriteHTML('<h4 style="font-size:11px;margin:8px 0 4px;color:#7c3aed;">🧠 Desenvolvimento</h4>');
+      $mpdf->WriteHTML('<table><tbody>');
+      $mpdf->WriteHTML('<tr><th>Desenvolvimento Motor</th><td>' . nl2br(htmlspecialchars($ans['desenvolvimento_motor'] ?? '-')) . '</td></tr>');
+      $mpdf->WriteHTML('<tr><th>Desenvolvimento Cognitivo</th><td>' . nl2br(htmlspecialchars($ans['desenvolvimento_cognitivo'] ?? '-')) . '</td></tr>');
+      $mpdf->WriteHTML('<tr><th>Desenvolvimento Social</th><td>' . nl2br(htmlspecialchars($ans['desenvolvimento_social'] ?? '-')) . '</td></tr>');
+      $mpdf->WriteHTML('<tr><th>Comunicação</th><td>' . nl2br(htmlspecialchars($ans['comunicacao'] ?? '-')) . '</td></tr>');
+      $mpdf->WriteHTML('</tbody></table>');
+      
+      // Expectativas
+      $mpdf->WriteHTML('<h4 style="font-size:11px;margin:8px 0 4px;color:#ca8a04;">✨ Expectativas e Observações</h4>');
+      $mpdf->WriteHTML('<table><tbody>');
+      $mpdf->WriteHTML('<tr><th>Expectativas da Família</th><td>' . nl2br(htmlspecialchars($ans['expectativas_familia'] ?? '-')) . '</td></tr>');
+      $mpdf->WriteHTML('<tr><th>Observações Gerais</th><td>' . nl2br(htmlspecialchars($ans['observacoes_gerais'] ?? '-')) . '</td></tr>');
+      $mpdf->WriteHTML('</tbody></table>');
+    }
+  }
 
   $mpdf->WriteHTML('<h2>Frequência (últimos 200)</h2><table><thead><tr><th>Data</th><th>Período</th><th>Status</th><th>Atividades</th></tr></thead><tbody>');
   if (count($att) == 0) {

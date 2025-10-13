@@ -6,3 +6,19 @@
   RewriteEngine On
   RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L]
 </IfModule>
+
+# Proteger arquivos sensíveis
+<Files ".migrations_completed">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files ".env">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<FilesMatch "\.(md|sql)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

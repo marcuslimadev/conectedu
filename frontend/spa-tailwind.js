@@ -235,8 +235,15 @@ const AlunosTW = {
               <span :class="['px-2 py-1 rounded text-xs font-medium', s.status==='ativo'?'bg-green-100 text-green-700':'bg-gray-100 text-gray-600']">{{ s.status || '—' }}</span>
             </td>
             <td class="px-6 py-4 text-sm text-gray-600">
-              <span v-if="s.modalidade==='apoio'">Prof #{{ s.support_teacher_id || '-' }}</span>
-              <span v-else>SRM #{{ s.srm_room_id || '-' }}</span>
+              <span v-if="s.modalidade==='apoio'" class="flex items-center">
+                <i class="fas fa-user-tie text-blue-500 mr-2" aria-hidden="true"></i>
+                {{ s.support_teacher_name || 'Não atribuído' }}
+              </span>
+              <span v-else-if="s.modalidade==='srm'" class="flex items-center">
+                <i class="fas fa-door-open text-green-500 mr-2" aria-hidden="true"></i>
+                SRM #{{ s.srm_room_id || '-' }}
+              </span>
+              <span v-else class="text-gray-400">—</span>
             </td>
             <td class="px-6 py-4 text-right space-x-2">
               <button class="inline-flex items-center text-blue-800 hover:text-blue-900 mr-1 px-2 py-1 border border-blue-200 rounded transition-colors" 
@@ -306,11 +313,18 @@ const AlunosTW = {
             <span class="text-gray-700">Modalidade:</span>
             <span class="px-2 py-1 rounded text-xs font-medium uppercase bg-blue-100 text-blue-800">{{ s.modalidade }}</span>
           </div>
-          <div class="flex justify-between">
+          <div class="flex justify-between items-center">
             <span class="text-gray-700">Vínculo:</span>
-            <span class="text-gray-900">
-              <span v-if="s.modalidade==='apoio'">Prof #{{ s.support_teacher_id || '-' }}</span>
-              <span v-else>SRM #{{ s.srm_room_id || '-' }}</span>
+            <span class="text-gray-900 flex items-center">
+              <span v-if="s.modalidade==='apoio'">
+                <i class="fas fa-user-tie text-blue-500 mr-1"></i>
+                {{ s.support_teacher_name || 'Não atribuído' }}
+              </span>
+              <span v-else-if="s.modalidade==='srm'">
+                <i class="fas fa-door-open text-green-500 mr-1"></i>
+                SRM #{{ s.srm_room_id || '-' }}
+              </span>
+              <span v-else class="text-gray-400">—</span>
             </span>
           </div>
         </div>
@@ -561,7 +575,7 @@ const AlunosTW = {
                    placeholder="Digite o nome do professor ou selecione da lista"
                    @input="mapTeacher">
             <datalist id="dl-teachers">
-              <option v-for="t in teachers" :key="'t'+t.id" :value="t.name + ' (#'+t.id+')'" />
+              <option v-for="prof in professores" :key="'prof'+prof.id" :value="prof.name + ' (#'+prof.id+')'" />
             </datalist>
           </div>
         </div>
@@ -1044,7 +1058,7 @@ const RegisterTW = {
   },
   computed: {
     passwordChecks() {
-      const pass = this.form.password;
+      const pass = this.form.password || '';
       return {
         length: pass.length >= 8,
         uppercase: /[A-Z]/.test(pass),
@@ -1095,16 +1109,10 @@ const UsuariosTW = {
   template: `
   <div class="space-y-4" role="main">
     <div class="flex items-center justify-between">
-      <div>
-        <h1 id="usuarios-heading" class="text-2xl font-bold text-gray-900">Usuários</h1>
-      </div>
-      <div class="space-x-2">
-        <button @click="novo" 
-                class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
-                aria-label="Adicionar novo usuário">
-          <i class="fas fa-plus mr-1" aria-hidden="true"></i>Novo Usuário
-        </button>
-      </div>
+      <h1 class="text-2xl font-bold text-gray-900" id="usuarios-heading">Usuários</h1>
+      <button @click="novo" 
+              class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
+              aria-label="Adicionar novo usuário">Novo Usuário</button>
     </div>
 
     <!-- Mensagens de Feedback -->
@@ -1132,12 +1140,15 @@ const UsuariosTW = {
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
       <div>
-        <label class="sr-only" for="u-busca">Buscar</label>
-        <input id="u-busca" v-model="filters.q" @keyup.enter="load" class="border rounded px-3 py-2 w-full" placeholder="Buscar por nome ou email">
+        <label class="sr-only" for="u-busca">Buscar por nome ou email</label>
+        <input id="u-busca" v-model="filters.q" @keyup.enter="load" 
+               class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent" 
+               placeholder="Buscar por nome ou email">
       </div>
       <div>
         <label class="sr-only" for="u-role">Perfil</label>
-        <select id="u-role" v-model="filters.role" class="border rounded px-3 py-2 w-full">
+        <select id="u-role" v-model="filters.role" 
+                class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent">
           <option value="">Todos os perfis</option>
           <option value="admin">Administrador</option>
           <option value="professor">Professor</option>
@@ -1146,40 +1157,70 @@ const UsuariosTW = {
       </div>
       <div>
         <label class="sr-only" for="u-status">Status</label>
-        <select id="u-status" v-model="filters.status" class="border rounded px-3 py-2 w-full">
+        <select id="u-status" v-model="filters.status" 
+                class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent">
           <option value="">Todos os status</option>
           <option value="ativo">Ativo</option>
           <option value="inativo">Inativo</option>
         </select>
       </div>
-      <button @click="load" class="px-3 py-2 bg-gray-800 text-white rounded">Filtrar</button>
+      <button @click="load" 
+              class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
+              aria-label="Aplicar filtros de busca">
+        <i class="fas fa-search mr-2" aria-hidden="true"></i>Filtrar
+      </button>
     </div>
 
     
 
-    <div class="bg-white shadow rounded-lg overflow-hidden">
-      <table class="min-w-full">
+    <div class="bg-white shadow rounded-lg overflow-hidden" role="region" aria-labelledby="usuarios-heading">
+      <table class="min-w-full" role="table" aria-label="Lista de usuários">
         <thead class="bg-gray-50">
           <tr class="text-left">
-            <th class="px-6 py-3 text-left font-semibold text-gray-700">Nome</th>
-            <th class="px-6 py-3 text-left font-semibold text-gray-700">Email</th>
-            <th class="px-6 py-3 text-left font-semibold text-gray-700">Perfil</th>
-            <th class="px-6 py-3 text-left font-semibold text-gray-700">Status</th>
-            <th class="px-6 py-3 text-right font-semibold text-gray-700">Ações</th>
+            <th class="px-6 py-3 text-gray-700 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none" 
+                @click="sortBy('name')" @keydown.enter="sortBy('name')" @keydown.space="sortBy('name')" tabindex="0"
+                role="columnheader" :aria-sort="sortField === 'name' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
+              <div class="flex items-center justify-between">
+                <span>Nome</span>
+                <svg v-if="sortField === 'name'" class="w-4 h-4" :class="sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+            </th>
+            <th class="px-6 py-3 text-gray-700" role="columnheader">Email</th>
+            <th class="px-6 py-3 text-gray-700 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none" 
+                @click="sortBy('role')" @keydown.enter="sortBy('role')" @keydown.space="sortBy('role')" tabindex="0"
+                role="columnheader" :aria-sort="sortField === 'role' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
+              <div class="flex items-center justify-between">
+                <span>Perfil</span>
+                <svg v-if="sortField === 'role'" class="w-4 h-4" :class="sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+            </th>
+            <th class="px-6 py-3 text-gray-700 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none" 
+                @click="sortBy('status')" @keydown.enter="sortBy('status')" @keydown.space="sortBy('status')" tabindex="0"
+                role="columnheader" :aria-sort="sortField === 'status' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
+              <div class="flex items-center justify-between">
+                <span>Status</span>
+                <svg v-if="sortField === 'status'" class="w-4 h-4" :class="sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+            </th>
+            <th class="px-6 py-3 text-right text-gray-700" role="columnheader">Ações</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200">
-          <tr v-for="u in rows" :key="u.id" class="hover:bg-gray-50">
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="font-medium text-gray-900">{{ u.name || '—' }}</div>
-            </td>
-            <td class="px-6 py-4 text-gray-800">{{ u.email || '—' }}</td>
+        <tbody>
+          <tr v-for="u in paginatedRows" :key="u.id" class="border-t hover:bg-gray-50">
+            <td class="px-6 py-4 font-medium">{{ u.name || '—' }}</td>
+            <td class="px-6 py-4">{{ u.email || '—' }}</td>
             <td class="px-6 py-4">
               <span :class="[
-                'px-2 py-1 rounded text-xs font-medium',
-                u.role === 'admin' ? 'bg-purple-100 text-purple-700' :
-                u.role === 'professor' ? 'bg-blue-100 text-blue-700' :
-                u.role === 'coordenador' ? 'bg-indigo-100 text-indigo-700' :
+                'px-2 py-1 rounded text-xs font-medium uppercase',
+                u.role === 'admin' ? 'bg-purple-100 text-purple-800' :
+                u.role === 'professor' ? 'bg-blue-100 text-blue-800' :
+                u.role === 'coordenador' ? 'bg-indigo-100 text-indigo-800' :
                 'bg-gray-100 text-gray-600'
               ]">{{ getRoleLabel(u.role) }}</span>
             </td>
@@ -1187,21 +1228,20 @@ const UsuariosTW = {
               <span :class="[
                 'px-2 py-1 rounded text-xs font-medium',
                 u.status === 'ativo' ? 'bg-green-100 text-green-700' :
-                u.status === 'inativo' ? 'bg-red-100 text-red-700' :
                 'bg-gray-100 text-gray-600'
-              ]">{{ getStatusLabel(u.status) }}</span>
+              ]">{{ u.status || '—' }}</span>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-              <button class="inline-flex items-center text-blue-800 hover:text-blue-900 mr-3 px-2 py-1 border border-blue-200 rounded" @click="edit(u)">
+            <td class="px-6 py-4 text-right space-x-2">
+              <button class="inline-flex items-center text-blue-800 hover:text-blue-900 mr-1 px-2 py-1 border border-blue-200 rounded transition-colors" 
+                      @click="edit(u)" :aria-label="'Editar usuário ' + u.name">
                 <i class="fas fa-edit mr-1" aria-hidden="true"></i>
                 <span>Editar</span>
               </button>
-              <button class="inline-flex items-center text-red-800 hover:text-red-900 px-2 py-1 border border-red-200 rounded" 
-                      @click="del(u)" 
-                      :disabled="deletingUserId === u.id"
-                      :class="deletingUserId === u.id ? 'opacity-50 cursor-not-allowed' : ''">
-                <span v-if="deletingUserId === u.id" class="inline-flex items-center">
-                  <div class="animate-spin -ml-1 mr-1 h-3 w-3 border border-red-600 border-t-transparent rounded-full"></div>
+              <button class="inline-flex items-center text-red-800 hover:text-red-900 px-2 py-1 border border-red-200 rounded transition-colors" 
+                      @click="del(u)" :aria-label="'Excluir usuário ' + u.name"
+                      :disabled="deletingUserId === u.id">
+                <span v-if="deletingUserId === u.id">
+                  <div class="animate-spin -ml-1 mr-1 h-3 w-3 border border-red-600 border-t-transparent rounded-full inline-block"></div>
                   Excluindo...
                 </span>
                 <span v-else>
@@ -1212,12 +1252,43 @@ const UsuariosTW = {
             </td>
           </tr>
           <tr v-if="!rows || rows.length===0">
-            <td colspan="5" class="px-6 py-6 text-center text-gray-700">
-              {{ (filters.q || filters.role || filters.status) ? 'Nenhum usuário encontrado para os filtros aplicados' : 'Sem usuários' }}
+            <td colspan="5" class="px-6 py-4 text-center text-gray-700">
+              {{ (filters.q || filters.role || filters.status) ? 'Nenhum resultado para os filtros aplicados' : 'Sem registros' }}
             </td>
           </tr>
         </tbody>
       </table>
+      
+      <!-- Paginação -->
+      <nav v-if="totalPages > 1" class="flex items-center justify-between mt-4 px-4 py-3 border-t" role="navigation" aria-label="Navegação por páginas">
+        <div class="text-sm text-gray-700" aria-live="polite">
+          Mostrando {{ (currentPage - 1) * perPage + 1 }} a {{ Math.min(currentPage * perPage, totalItems) }} de {{ totalItems }} usuários
+        </div>
+        <div class="flex items-center space-x-2">
+          <button @click="previousPage" :disabled="currentPage === 1" 
+                  class="px-3 py-1 text-sm border rounded hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  :aria-label="'Ir para página anterior'"
+                  :aria-disabled="currentPage === 1">
+            <i class="fas fa-chevron-left mr-1" aria-hidden="true"></i>Anterior
+          </button>
+          <button v-for="page in visiblePages" :key="page" 
+                @click="goToPage(page)"
+                :class="[
+                  'px-3 py-1 text-sm cursor-pointer rounded transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1',
+                  page === currentPage ? 'bg-blue-600 text-white' : 'border hover:bg-gray-50 focus:bg-gray-50'
+                ]"
+                :aria-label="'Ir para página ' + page"
+                :aria-current="page === currentPage ? 'page' : false">
+            {{ page }}
+          </button>
+          <button @click="nextPage" :disabled="currentPage === totalPages" 
+                  class="px-3 py-1 text-sm border rounded hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  :aria-label="'Ir para próxima página'"
+                  :aria-disabled="currentPage === totalPages">
+            Próxima<i class="fas fa-chevron-right ml-1" aria-hidden="true"></i>
+          </button>
+        </div>
+      </nav>
     </div>
 
     <!-- Modal de Criar/Editar Usuário -->
@@ -1283,10 +1354,46 @@ const UsuariosTW = {
     deletingUserId: null,
     form:{ id:null, name:'', email:'', role:'professor', status:'ativo', password:'' },
     successMessage: '',
-    errorMessage: ''
+    errorMessage: '',
+    // Datatable state
+    currentPage: 1,
+    perPage: 10,
+    sortField: 'name',
+    sortDirection: 'asc'
   }},
+  computed:{
+    totalItems(){ return this.rows?.length || 0; },
+    totalPages(){ return Math.max(1, Math.ceil(this.totalItems / this.perPage)); },
+    visiblePages(){
+      const range=2; const start=Math.max(1,this.currentPage-range); const end=Math.min(this.totalPages,this.currentPage+range); const out=[]; for(let i=start;i<=end;i++) out.push(i); return out;
+    },
+    sortedRows(){
+      const arr=[...(this.rows||[])];
+      const dir = this.sortDirection==='asc'?1:-1; const f=this.sortField;
+      return arr.sort((a,b)=>{
+        const av=(a?.[f]??'').toString().toLowerCase();
+        const bv=(b?.[f]??'').toString().toLowerCase();
+        if(av<bv) return -1*dir; if(av>bv) return 1*dir; return 0;
+      });
+    },
+    paginatedRows(){
+      const start=(this.currentPage-1)*this.perPage; return this.sortedRows.slice(start,start+this.perPage);
+    }
+  },
   methods:{
-    async load(){ const p={}; if(this.filters.q) p.q=this.filters.q; if(this.filters.role) p.role=this.filters.role; if(this.filters.status) p.status=this.filters.status; const r=await api.get('/users',{params:p}); this.rows=r.data?.data?.rows||[]; },
+    async load(){ 
+      try{ 
+        this.loading=true; 
+        const p={}; if(this.filters.q) p.q=this.filters.q; if(this.filters.role) p.role=this.filters.role; if(this.filters.status) p.status=this.filters.status; 
+        const r=await api.get('/users',{params:p}); 
+        this.rows=r.data?.data?.rows||r.data?.data||[]; 
+        this.currentPage=1;
+      } finally { this.loading=false; }
+    },
+    sortBy(field){ if(this.sortField===field){ this.sortDirection=this.sortDirection==='asc'?'desc':'asc'; } else { this.sortField=field; this.sortDirection='asc'; } },
+    previousPage(){ if(this.currentPage>1){ this.currentPage--; } },
+    nextPage(){ if(this.currentPage<this.totalPages){ this.currentPage++; } },
+    goToPage(page){ this.currentPage=page; },
     novo(){ this.editing=true; this.form={ id:null, name:'', email:'', role:'professor', status:'ativo', password:'' }; },
     edit(u){ this.editing=true; this.form=Object.assign({ password:'' }, u); },
     cancel(){ this.editing=false; this.form={ id:null, name:'', email:'', role:'professor', status:'ativo', password:'' }; },
@@ -1393,36 +1500,43 @@ const UsuariosTW = {
 // Componente de Escolas - Recriado seguindo padrão dos outros componentes
 const EscolasTW = {
   template: `
-    <div class="space-y-6">
-      <!-- Header -->
+    <div class="space-y-4" role="main">
       <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-gray-900" id="escolas-heading">Escolas</h1>
+        <button v-if="canManage" @click="newEscola" 
+                class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
+                aria-label="Adicionar nova escola">Nova Escola</button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">Escolas</h1>
+          <label class="sr-only" for="escolas-busca">Buscar por nome</label>
+          <input id="escolas-busca" v-model="searchTerm" @keyup.enter="goToPage(1)" 
+                 class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent" 
+                 placeholder="Buscar por nome">
         </div>
-  <button v-if="canManage" @click="newEscola" 
-    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2">
-      <i class="fas fa-plus"></i>
-    <span>Nova Escola</span>
-    </button>
+        <div>
+          <label class="sr-only" for="escolas-cidade">Cidade</label>
+          <input id="escolas-cidade" v-model="cityFilter" @keyup.enter="goToPage(1)" 
+                 class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent" 
+                 placeholder="Filtrar por cidade">
+        </div>
+        <div></div>
+        <button @click="goToPage(1)" 
+                class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
+                aria-label="Aplicar filtros de busca">
+          <i class="fas fa-search mr-2" aria-hidden="true"></i>Filtrar
+        </button>
       </div>
 
-      <!-- Filtros -->
-      <div class="flex gap-3 mb-6">
-        <input 
-          v-model="searchTerm" 
-          placeholder="Buscar escolas..." 
-          class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent flex-1 placeholder-gray-700 text-gray-900">
-      </div>
-
-      <!-- Tabela -->
-      <div class="bg-white shadow rounded-lg overflow-hidden">
-        <table class="min-w-full">
+      <!-- Visualização Desktop -->
+      <div class="bg-white shadow rounded-lg overflow-hidden" role="region" aria-labelledby="escolas-heading">
+        <table class="min-w-full" role="table" aria-label="Lista de escolas">
           <thead class="bg-gray-50">
-            <tr>
-              <th 
-                class="px-6 py-3 text-left font-semibold text-gray-700 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none"
-                @click="sortBy('name')" @keydown.enter="sortBy('name')" @keydown.space="sortBy('name')" tabindex="0"
-                role="columnheader" :aria-sort="sortField === 'name' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
+            <tr class="text-left">
+              <th class="px-6 py-3 text-gray-700 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none" 
+                  @click="sortBy('name')" @keydown.enter="sortBy('name')" @keydown.space="sortBy('name')" tabindex="0"
+                  role="columnheader" :aria-sort="sortField === 'name' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
                 <div class="flex items-center justify-between">
                   <span>Nome</span>
                   <svg v-if="sortField === 'name'" class="w-4 h-4" :class="sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
@@ -1430,11 +1544,10 @@ const EscolasTW = {
                   </svg>
                 </div>
               </th>
-              <th class="px-6 py-3 text-left font-semibold text-gray-700">Endereço</th>
-              <th 
-                class="px-6 py-3 text-left font-semibold text-gray-700 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none"
-                @click="sortBy('city')" @keydown.enter="sortBy('city')" @keydown.space="sortBy('city')" tabindex="0"
-                role="columnheader" :aria-sort="sortField === 'city' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
+              <th class="px-6 py-3 text-gray-700" role="columnheader">Endereço</th>
+              <th class="px-6 py-3 text-gray-700 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none" 
+                  @click="sortBy('city')" @keydown.enter="sortBy('city')" @keydown.space="sortBy('city')" tabindex="0"
+                  role="columnheader" :aria-sort="sortField === 'city' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
                 <div class="flex items-center justify-between">
                   <span>Cidade</span>
                   <svg v-if="sortField === 'city'" class="w-4 h-4" :class="sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
@@ -1442,47 +1555,74 @@ const EscolasTW = {
                   </svg>
                 </div>
               </th>
-              <th 
-                class="px-6 py-3 text-left font-semibold text-gray-700 cursor-pointer"
-                @click="sortBy('phone')" @keydown.enter="sortBy('phone')" @keydown.space="sortBy('phone')" tabindex="0"
-                role="columnheader" :aria-sort="sortField === 'phone' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
-                <div class="flex items-center justify-between">
-                  <span>Telefone</span>
-                  <svg v-if="sortField === 'phone'" class="w-4 h-4" :class="sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                  </svg>
-                </div>
-              </th>
-              <th v-if="canManage" class="px-6 py-3 text-right font-semibold text-gray-700">Ações</th>
+              <th class="px-6 py-3 text-gray-700" role="columnheader">Telefone</th>
+              <th v-if="canManage" class="px-6 py-3 text-right text-gray-700" role="columnheader">Ações</th>
             </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="escola in filteredRows" :key="escola.id" class="hover:bg-gray-50">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="font-medium text-gray-900">{{ escola.name || '—' }}</div>
-              </td>
-              <td class="px-6 py-4 text-gray-800">{{ escola.address || '—' }}</td>
-              <td class="px-6 py-4 text-gray-800">{{ escola.city || '—' }}</td>
-              <td class="px-6 py-4 text-gray-800">{{ escola.phone || '—' }}</td>
-              <td v-if="canManage" class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button @click="edit(escola)" class="inline-flex items-center text-blue-800 hover:text-blue-900 mr-3 px-2 py-1 border border-blue-200 rounded">
+          <tbody>
+            <tr v-for="escola in paginatedRows" :key="escola.id" class="border-t hover:bg-gray-50">
+              <td class="px-6 py-4 font-medium">{{ escola.name || '—' }}</td>
+              <td class="px-6 py-4">{{ escola.address || '—' }}</td>
+              <td class="px-6 py-4">{{ escola.city || '—' }}</td>
+              <td class="px-6 py-4 text-sm text-gray-600">{{ escola.phone || '—' }}</td>
+              <td v-if="canManage" class="px-6 py-4 text-right space-x-2">
+                <button class="inline-flex items-center text-blue-800 hover:text-blue-900 mr-1 px-2 py-1 border border-blue-200 rounded transition-colors" 
+                        @click="edit(escola)" :aria-label="'Editar escola ' + escola.name">
                   <i class="fas fa-edit mr-1" aria-hidden="true"></i>
                   <span>Editar</span>
                 </button>
-                <button @click="deleteEscola(escola)" :disabled="deletingId === escola.id" class="inline-flex items-center text-red-800 hover:text-red-900 px-2 py-1 border border-red-200 rounded disabled:opacity-60 disabled:cursor-not-allowed">
-                  <i class="fas fa-trash mr-1" aria-hidden="true"></i>
-                  <span v-if="deletingId === escola.id">Excluindo...</span>
-                  <span v-else>Excluir</span>
+                <button class="inline-flex items-center text-red-800 hover:text-red-900 px-2 py-1 border border-red-200 rounded transition-colors" 
+                        @click="deleteEscola(escola)" :aria-label="'Excluir escola ' + escola.name"
+                        :disabled="deletingId === escola.id">
+                  <span v-if="deletingId === escola.id">
+                    <div class="animate-spin -ml-1 mr-1 h-3 w-3 border border-red-600 border-t-transparent rounded-full inline-block"></div>
+                    Excluindo...
+                  </span>
+                  <span v-else>
+                    <i class="fas fa-trash mr-1" aria-hidden="true"></i>
+                    Excluir
+                  </span>
                 </button>
               </td>
             </tr>
-            <tr v-if="!filteredRows.length">
+            <tr v-if="!rows || rows.length===0">
               <td :colspan="canManage ? 5 : 4" class="px-6 py-4 text-center text-gray-700">
-                {{ searchTerm ? 'Nenhuma escola encontrada para a busca' : 'Nenhuma escola cadastrada' }}
+                {{ (searchTerm || cityFilter) ? 'Nenhum resultado para os filtros aplicados' : 'Sem registros' }}
               </td>
             </tr>
           </tbody>
         </table>
+        
+        <!-- Paginação -->
+        <nav v-if="totalPages > 1" class="flex items-center justify-between mt-4 px-4 py-3 border-t" role="navigation" aria-label="Navegação por páginas">
+          <div class="text-sm text-gray-700" aria-live="polite">
+            Mostrando {{ (currentPage - 1) * perPage + 1 }} a {{ Math.min(currentPage * perPage, totalItems) }} de {{ totalItems }} escolas
+          </div>
+          <div class="flex items-center space-x-2">
+            <button @click="previousPage" :disabled="currentPage === 1" 
+                    class="px-3 py-1 text-sm border rounded hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    :aria-label="'Ir para página anterior'"
+                    :aria-disabled="currentPage === 1">
+              <i class="fas fa-chevron-left mr-1" aria-hidden="true"></i>Anterior
+            </button>
+            <button v-for="page in visiblePages" :key="page" 
+                  @click="goToPage(page)"
+                  :class="[
+                    'px-3 py-1 text-sm cursor-pointer rounded transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1',
+                    page === currentPage ? 'bg-blue-600 text-white' : 'border hover:bg-gray-50 focus:bg-gray-50'
+                  ]"
+                  :aria-label="'Ir para página ' + page"
+                  :aria-current="page === currentPage ? 'page' : false">
+              {{ page }}
+            </button>
+            <button @click="nextPage" :disabled="currentPage === totalPages" 
+                    class="px-3 py-1 text-sm border rounded hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    :aria-label="'Ir para próxima página'"
+                    :aria-disabled="currentPage === totalPages">
+              Próxima<i class="fas fa-chevron-right ml-1" aria-hidden="true"></i>
+            </button>
+          </div>
+        </nav>
       </div>
 
       <!-- Modal de Edição (padrão unificado) -->
@@ -1557,7 +1697,10 @@ const EscolasTW = {
       deletingId: null,
       saving: false,
       sortField: 'name',
-      sortDirection: 'asc'
+      sortDirection: 'asc',
+      // datatable
+      currentPage: 1,
+      perPage: 10
     };
   },
   
@@ -1583,6 +1726,10 @@ const EscolasTW = {
         return 0;
       });
     },
+    totalItems(){ return this.filteredRows.length; },
+    totalPages(){ return Math.max(1, Math.ceil(this.totalItems / this.perPage)); },
+    visiblePages(){ const range=2; const start=Math.max(1,this.currentPage-range); const end=Math.min(this.totalPages,this.currentPage+range); const out=[]; for(let i=start;i<=end;i++) out.push(i); return out; },
+    paginatedRows(){ const start=(this.currentPage-1)*this.perPage; return this.filteredRows.slice(start,start+this.perPage); },
     canManage(){
       return this.user && this.user.role === 'admin';
     }
@@ -1597,12 +1744,13 @@ const EscolasTW = {
         this.sortDirection = 'asc';
       }
     },
-    async loadEscolas() {
+  async loadEscolas() {
       try {
         console.log('🔄 Carregando escolas...');
         const response = await api.get('/schools');
         console.log('🔄 Response recebida:', response);
-        this.rows = response.data?.data?.rows || [];
+  this.rows = response.data?.data?.rows || response.data?.data || [];
+  this.currentPage = 1;
         console.log('🔄 Rows carregadas:', this.rows.length);
       } catch (error) {
         console.error('Erro ao carregar escolas:', error);
@@ -1683,7 +1831,10 @@ const EscolasTW = {
       } finally {
         this.deletingId = null;
       }
-    }
+    },
+    previousPage(){ if(this.currentPage>1){ this.currentPage--; } },
+    nextPage(){ if(this.currentPage<this.totalPages){ this.currentPage++; } },
+    goToPage(page){ this.currentPage = page; }
   },
   
   async mounted() {
@@ -2836,53 +2987,109 @@ const Dashboard = {
         </div>
       </div>
       
-      <!-- Lista de atividades recentes -->
+      <!-- Lista de atividades recentes com filtros e ações -->
       <div class="bg-white shadow rounded-lg">
         <div class="px-4 py-5 sm:p-6">
-          <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
-            Últimas Atividades
-          </h3>
-          <div class="flow-root">
-            <ul class="-mb-8">
-              <li v-for="(atividade, index) in atividades" :key="index">
-                <div class="relative pb-8" v-if="index < atividades.length - 1">
-                  <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
-                  <div class="relative flex space-x-3">
-                    <div>
-                      <span class="h-8 w-8 rounded-full bg-brand-primary flex items-center justify-center ring-8 ring-white">
-                        <svg class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                      </span>
-                    </div>
-                    <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
-                      <div>
-                        <p class="text-sm text-gray-500">{{ atividade.descricao }}</p>
-                      </div>
-                      <div class="text-right text-sm whitespace-nowrap text-gray-500">
-                        {{ atividade.data }}
-                      </div>
-                    </div>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Últimas Atividades</h3>
+            <div class="flex items-center gap-2">
+              <button @click="refreshAtividades" class="inline-flex items-center px-3 py-1.5 rounded-md border text-sm text-gray-700 hover:bg-gray-50">
+                <svg class="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6h6M20 20v-6h-6M5 19A9 9 0 0119 5"/></svg>
+                Atualizar
+              </button>
+              <label class="inline-flex items-center text-sm text-gray-600 select-none">
+                <input type="checkbox" v-model="filtros.autoRefresh" class="h-4 w-4 text-brand-primary border-gray-300 rounded mr-2">
+                Auto
+              </label>
+              <button @click="exportCSV" class="inline-flex items-center px-3 py-1.5 rounded-md border text-sm text-gray-700 hover:bg-gray-50">
+                <svg class="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3h8v4M12 12v9m0 0l-3-3m3 3l3-3M5 21h14a2 2 0 002-2v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7a2 2 0 002 2z"/></svg>
+                CSV
+              </button>
+            </div>
+          </div>
+
+          <!-- Barra de filtros -->
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4">
+            <div class="md:col-span-2">
+              <div class="relative">
+                <span class="absolute left-3 top-2.5 text-gray-400">
+                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </span>
+                <input v-model.trim="filtros.q" type="text" placeholder="Buscar descrição..." class="w-full pl-9 pr-3 py-2 rounded-md border border-gray-300 focus:ring-brand-primary focus:border-brand-primary text-sm"/>
+              </div>
+            </div>
+            <div>
+              <select v-model="filtros.tipo" class="w-full py-2 px-3 rounded-md border border-gray-300 text-sm focus:ring-brand-primary focus:border-brand-primary">
+                <option value="">Todos os tipos</option>
+                <option v-for="t in tiposDisponiveis" :key="t" :value="t">{{ t }}</option>
+              </select>
+            </div>
+            <div>
+              <select v-model.number="filtros.periodo" class="w-full py-2 px-3 rounded-md border border-gray-300 text-sm focus:ring-brand-primary focus:border-brand-primary">
+                <option :value="7">Últimos 7 dias</option>
+                <option :value="30">Últimos 30 dias</option>
+                <option :value="90">Últimos 90 dias</option>
+                <option :value="0">Personalizado...</option>
+              </select>
+            </div>
+            <div class="flex gap-2" v-if="filtros.periodo===0">
+              <input type="date" v-model="filtros.de" class="flex-1 py-2 px-3 rounded-md border border-gray-300 text-sm focus:ring-brand-primary focus:border-brand-primary"/>
+              <input type="date" v-model="filtros.ate" class="flex-1 py-2 px-3 rounded-md border border-gray-300 text-sm focus:ring-brand-primary focus:border-brand-primary"/>
+            </div>
+            <div class="md:col-span-1 flex gap-2">
+              <select v-model="filtros.sort" class="flex-1 py-2 px-3 rounded-md border border-gray-300 text-sm focus:ring-brand-primary focus:border-brand-primary">
+                <option value="data_desc">Mais recentes</option>
+                <option value="data_asc">Mais antigas</option>
+                <option value="tipo_asc">Tipo A→Z</option>
+                <option value="tipo_desc">Tipo Z→A</option>
+              </select>
+              <select v-model.number="paginacao.perPage" class="w-24 py-2 px-3 rounded-md border border-gray-300 text-sm focus:ring-brand-primary focus:border-brand-primary">
+                <option :value="10">10</option>
+                <option :value="20">20</option>
+                <option :value="50">50</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Lista / Skeleton / Vazio -->
+          <div v-if="loadingAtividades" class="space-y-3">
+            <div v-for="i in 5" :key="i" class="animate-pulse h-10 bg-gray-100 rounded"></div>
+          </div>
+          <div v-else-if="atividadesFiltradas.length===0" class="text-sm text-gray-500">
+            Nenhuma atividade encontrada para os filtros atuais.
+          </div>
+          <div v-else class="flow-root">
+            <ul class="divide-y divide-gray-100">
+              <li v-for="a in paginaAtual" :key="a.id" class="py-3 flex items-start gap-3">
+                <span class="inline-flex items-center justify-center h-8 w-8 rounded-full" :class="badgeBg(a.tipo)">
+                  <svg class="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5"/>
+                  </svg>
+                </span>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between">
+                    <p class="text-sm text-gray-800">{{ a.descricao }}</p>
+                    <span class="text-xs text-gray-500 whitespace-nowrap">{{ a.data }}</span>
                   </div>
-                </div>
-                <div class="relative flex space-x-3" v-else>
-                  <div>
-                    <span class="h-8 w-8 rounded-full bg-brand-primary flex items-center justify-center ring-8 ring-white">
-                      <svg class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                    </svg>
-                  </div>
-                  <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
-                    <div>
-                      <p class="text-sm text-gray-500">{{ atividade.descricao }}</p>
-                    </div>
-                    <div class="text-right text-sm whitespace-nowrap text-gray-500">
-                      {{ atividade.data }}
-                    </div>
+                  <div class="mt-1">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" :class="chipBg(a.tipo)">{{ a.tipo || 'Geral' }}</span>
                   </div>
                 </div>
               </li>
             </ul>
+          </div>
+
+          <!-- Paginação -->
+          <div v-if="totalPaginas>1" class="mt-4 flex items-center justify-between text-sm text-gray-600">
+            <div>
+              Página {{ paginacao.page }} de {{ totalPaginas }} — {{ atividadesFiltradas.length }} atividades
+            </div>
+            <div class="flex gap-2">
+              <button :disabled="paginacao.page===1" @click="paginacao.page=1" class="px-2 py-1 rounded border disabled:opacity-40">«</button>
+              <button :disabled="paginacao.page===1" @click="paginacao.page--" class="px-2 py-1 rounded border disabled:opacity-40">‹</button>
+              <button :disabled="paginacao.page===totalPaginas" @click="paginacao.page++" class="px-2 py-1 rounded border disabled:opacity-40">›</button>
+              <button :disabled="paginacao.page===totalPaginas" @click="paginacao.page=totalPaginas" class="px-2 py-1 rounded border disabled:opacity-40">»</button>
+            </div>
           </div>
         </div>
       </div>
@@ -2894,13 +3101,21 @@ const Dashboard = {
         alunos: 0,
         formularios: 0
       },
-      atividades: []
+      atividadesRaw: [],
+      filtros: { q: '', tipo: '', periodo: 7, de: '', ate: '', sort: 'data_desc', autoRefresh: false },
+      tiposDisponiveis: ['Aluno','Usuário','Escola','Formulário','PDI','PAI','Plano','Atendimento','Curso'],
+      paginacao: { page: 1, perPage: 10 },
+      loadingAtividades: false,
+      autoTimer: null
     }
   },
   async mounted() {
     await this.loadStats();
     await this.loadAtividades();
     this.renderChart();
+  },
+  beforeUnmount(){
+    try { clearInterval(this.autoTimer); } catch(e){}
   },
   methods: {
     async loadStats() {
@@ -2918,12 +3133,49 @@ const Dashboard = {
     },
     async loadAtividades() {
       try {
+        this.loadingAtividades = true;
         const response = await api.get('/stats');
         const recent = response.data?.data?.recent || [];
-        this.atividades = recent.map(r => ({ descricao: r.message, data: new Date(r.created_at).toLocaleString('pt-BR') }));
+        this.atividadesRaw = recent.map((r, idx) => ({
+          id: r.id || idx,
+          descricao: r.message,
+          created_at: r.created_at,
+          data: new Date(r.created_at).toLocaleString('pt-BR'),
+          tipo: this.inferTipo(r.message)
+        }));
+        this.paginacao.page = 1;
       } catch (error) {
         console.error('Erro ao carregar atividades:', error);
+      } finally {
+        this.loadingAtividades = false;
       }
+    },
+    inferTipo(msg=''){
+      const m = (msg||'').toLowerCase();
+      if (m.includes('aluno') || m.includes('students')) return 'Aluno';
+      if (m.includes('usuário') || m.includes('users')) return 'Usuário';
+      if (m.includes('escola') || m.includes('schools')) return 'Escola';
+      if (m.includes('anamnese') || m.includes('formulário')) return 'Formulário';
+      if (m.includes('pdi')) return 'PDI';
+      if (m.includes('pai')) return 'PAI';
+      if (m.includes('plano de atendimento') || m.includes('plano')) return 'Plano';
+      if (m.includes('atendimento')) return 'Atendimento';
+      if (m.includes('curso') || m.includes('courses')) return 'Curso';
+      return 'Geral';
+    },
+    badgeBg(tipo){
+      const map={Aluno:'bg-blue-500',Usuário:'bg-amber-500',Escola:'bg-emerald-500',Formulário:'bg-cyan-600',PDI:'bg-purple-600',PAI:'bg-pink-600',Plano:'bg-indigo-600',Atendimento:'bg-teal-600',Curso:'bg-orange-500',Geral:'bg-gray-400'}; return map[tipo]||map.Geral;
+    },
+    chipBg(tipo){
+      const map={Aluno:'bg-blue-50 text-blue-700',Usuário:'bg-amber-50 text-amber-700',Escola:'bg-emerald-50 text-emerald-700',Formulário:'bg-cyan-50 text-cyan-700',PDI:'bg-purple-50 text-purple-700',PAI:'bg-pink-50 text-pink-700',Plano:'bg-indigo-50 text-indigo-700',Atendimento:'bg-teal-50 text-teal-700',Curso:'bg-orange-50 text-orange-700',Geral:'bg-gray-100 text-gray-700'}; return map[tipo]||map.Geral;
+    },
+    refreshAtividades(){ this.loadAtividades(); },
+    exportCSV(){
+      const rows = this.atividadesFiltradas.map(a=>({data:a.data,tipo:a.tipo,descricao:a.descricao}));
+      const header = 'data;tipo;descricao\n';
+      const body = rows.map(r=>`${r.data};${r.tipo};"${(r.descricao||'').replace(/"/g,'""')}"`).join('\n');
+      const blob = new Blob([header+body],{type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='atividades.csv'; a.click(); URL.revokeObjectURL(url);
     },
     renderChart() {
       // Implementação do gráfico com Highcharts
@@ -2950,6 +3202,42 @@ const Dashboard = {
           data: [5, 8, 12, 6, 10, 2, 0]
         }]
       });
+    }
+  },
+  watch:{
+    'filtros.autoRefresh'(v){
+      clearInterval(this.autoTimer); this.autoTimer=null;
+      if(v){ this.autoTimer=setInterval(()=>this.loadAtividades(),60000); }
+    },
+    'paginacao.perPage'(){ this.paginacao.page=1; }
+  },
+  computed:{
+    atividadesFiltradas(){
+      const now = new Date();
+      let de=null, ate=null;
+      if(this.filtros.periodo>0){ de=new Date(now); de.setDate(now.getDate()-this.filtros.periodo); }
+      if(this.filtros.periodo===0){ de=this.filtros.de?new Date(this.filtros.de):null; ate=this.filtros.ate?new Date(this.filtros.ate):null; if(ate){ ate.setHours(23,59,59,999);} }
+      const q=(this.filtros.q||'').toLowerCase();
+      const tipo=this.filtros.tipo||'';
+      let arr=this.atividadesRaw.filter(a=>{
+        const dt=new Date(a.created_at);
+        const okDe=!de || dt>=de;
+        const okAte=!ate || dt<=ate;
+        const okQ=!q || (a.descricao||'').toLowerCase().includes(q);
+        const okTipo=!tipo || a.tipo===tipo;
+        return okDe && okAte && okQ && okTipo;
+      });
+      switch(this.filtros.sort){
+        case 'data_asc': arr.sort((x,y)=>new Date(x.created_at)-new Date(y.created_at)); break;
+        case 'tipo_asc': arr.sort((x,y)=>String(x.tipo).localeCompare(String(y.tipo))); break;
+        case 'tipo_desc': arr.sort((x,y)=>String(y.tipo).localeCompare(String(x.tipo))); break;
+        default: arr.sort((x,y)=>new Date(y.created_at)-new Date(x.created_at));
+      }
+      return arr;
+    },
+    totalPaginas(){ return Math.max(1, Math.ceil(this.atividadesFiltradas.length / this.paginacao.perPage)); },
+    paginaAtual(){
+      const start=(this.paginacao.page-1)*this.paginacao.perPage; return this.atividadesFiltradas.slice(start,start+this.paginacao.perPage);
     }
   }
 };
@@ -3060,7 +3348,7 @@ const Relatorios = {
           </div>
 
           <!-- Formulários AEE -->
-          <div v-if="tipoRelatorio === 'formularios'" class="space-y-6">
+          <div v-if="tipoRelatorio === 'formularios' || tipoRelatorio === 'geral'" class="space-y-6">
             <!-- Anamneses/Entrevistas -->
             <div class="bg-white border rounded-lg p-6">
               <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
@@ -3084,21 +3372,78 @@ const Relatorios = {
                       </div>
                     </div>
                     <div v-else class="space-y-3">
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div v-if="anamnese.answers.nome_estudante"><span class="font-medium text-gray-700">Nome do Estudante:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_estudante }}</span></div>
-                        <div v-if="anamnese.answers.data_nascimento"><span class="font-medium text-gray-700">Data de Nascimento:</span> <span class="text-gray-600 ml-1">{{ formatarData(anamnese.answers.data_nascimento) }}</span></div>
-                        <div v-if="anamnese.answers.nome_escola"><span class="font-medium text-gray-700">Escola:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_escola }}</span></div>
-                        <div v-if="anamnese.answers.serie_ano"><span class="font-medium text-gray-700">Série/Ano:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.serie_ano }}</span></div>
-                        <div v-if="anamnese.answers.nome_pai"><span class="font-medium text-gray-700">Nome do Pai:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_pai }}</span></div>
-                        <div v-if="anamnese.answers.nome_mae"><span class="font-medium text-gray-700">Nome da Mãe:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_mae }}</span></div>
+                      <!-- Seção 1: Dados Básicos -->
+                      <div class="bg-blue-50 rounded-lg p-3">
+                        <h5 class="text-xs font-semibold text-blue-900 mb-2 uppercase">Dados Básicos</h5>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                          <div v-if="anamnese.answers.escola"><span class="font-medium text-gray-700">Escola:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.escola }}</span></div>
+                          <div v-if="anamnese.answers.serie"><span class="font-medium text-gray-700">Série/Ano:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.serie }}</span></div>
+                          <div v-if="anamnese.answers.turno"><span class="font-medium text-gray-700">Turno:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.turno }}</span></div>
+                        </div>
                       </div>
-                      <div v-if="anamnese.answers.motivo_entrevista" class="mt-3">
-                        <span class="font-medium text-gray-700">Motivo da Entrevista:</span>
-                        <p class="text-gray-600 mt-1">{{ anamnese.answers.motivo_entrevista }}</p>
+                      
+                      <!-- Seção 2: Responsável -->
+                      <div class="bg-green-50 rounded-lg p-3">
+                        <h5 class="text-xs font-semibold text-green-900 mb-2 uppercase">Dados do Responsável</h5>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                          <div v-if="anamnese.answers.nome_responsavel"><span class="font-medium text-gray-700">Nome:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_responsavel }}</span></div>
+                          <div v-if="anamnese.answers.parentesco"><span class="font-medium text-gray-700">Parentesco:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.parentesco }}</span></div>
+                          <div v-if="anamnese.answers.telefone"><span class="font-medium text-gray-700">Telefone:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.telefone }}</span></div>
+                          <div v-if="anamnese.answers.email"><span class="font-medium text-gray-700">Email:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.email }}</span></div>
+                        </div>
                       </div>
-                      <div v-if="anamnese.answers.informacoes_complementares" class="mt-3">
-                        <span class="font-medium text-gray-700">Informações Complementares:</span>
-                        <p class="text-gray-600 mt-1">{{ anamnese.answers.informacoes_complementares }}</p>
+                      
+                      <!-- Seção 3: Histórico Médico -->
+                      <div v-if="anamnese.answers.diagnostico || anamnese.answers.medicamentos || anamnese.answers.profissionais" class="bg-red-50 rounded-lg p-3">
+                        <h5 class="text-xs font-semibold text-red-900 mb-2 uppercase">Histórico Médico</h5>
+                        <div class="space-y-2 text-sm">
+                          <div v-if="anamnese.answers.diagnostico">
+                            <span class="font-medium text-gray-700">Diagnóstico:</span>
+                            <p class="text-gray-600 mt-1">{{ anamnese.answers.diagnostico }}</p>
+                          </div>
+                          <div v-if="anamnese.answers.medicamentos">
+                            <span class="font-medium text-gray-700">Medicamentos:</span>
+                            <p class="text-gray-600 mt-1">{{ anamnese.answers.medicamentos }}</p>
+                          </div>
+                          <div v-if="anamnese.answers.profissionais">
+                            <span class="font-medium text-gray-700">Profissionais que acompanham:</span>
+                            <p class="text-gray-600 mt-1">{{ anamnese.answers.profissionais }}</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Seção 4: Desenvolvimento e Comportamento -->
+                      <div v-if="anamnese.answers.comportamento_casa || anamnese.answers.dificuldades || anamnese.answers.habilidades" class="bg-purple-50 rounded-lg p-3">
+                        <h5 class="text-xs font-semibold text-purple-900 mb-2 uppercase">Desenvolvimento e Comportamento</h5>
+                        <div class="space-y-2 text-sm">
+                          <div v-if="anamnese.answers.comportamento_casa">
+                            <span class="font-medium text-gray-700">Comportamento em casa:</span>
+                            <p class="text-gray-600 mt-1">{{ anamnese.answers.comportamento_casa }}</p>
+                          </div>
+                          <div v-if="anamnese.answers.dificuldades">
+                            <span class="font-medium text-gray-700">Dificuldades observadas:</span>
+                            <p class="text-gray-600 mt-1">{{ anamnese.answers.dificuldades }}</p>
+                          </div>
+                          <div v-if="anamnese.answers.habilidades">
+                            <span class="font-medium text-gray-700">Habilidades e potencialidades:</span>
+                            <p class="text-gray-600 mt-1">{{ anamnese.answers.habilidades }}</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Seção 5: Expectativas -->
+                      <div v-if="anamnese.answers.expectativas || anamnese.answers.informacoes_adicionais" class="bg-yellow-50 rounded-lg p-3">
+                        <h5 class="text-xs font-semibold text-yellow-900 mb-2 uppercase">Expectativas e Informações Adicionais</h5>
+                        <div class="space-y-2 text-sm">
+                          <div v-if="anamnese.answers.expectativas">
+                            <span class="font-medium text-gray-700">Expectativas:</span>
+                            <p class="text-gray-600 mt-1">{{ anamnese.answers.expectativas }}</p>
+                          </div>
+                          <div v-if="anamnese.answers.informacoes_adicionais">
+                            <span class="font-medium text-gray-700">Informações adicionais:</span>
+                            <p class="text-gray-600 mt-1">{{ anamnese.answers.informacoes_adicionais }}</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -3199,10 +3544,93 @@ const Relatorios = {
         </div>
       </div>
 
-      <!-- Análise IA (pré-visualização do texto gerado) -->
-      <div v-if="analiseIA_resultado" class="bg-white shadow rounded p-6">
-        <h2 class="text-lg font-semibold mb-4 text-purple-800">🤖 Análise com Inteligência Artificial</h2>
-        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4"><p class="text-sm text-purple-700">{{ analiseIA_resultado }}</p></div>
+      <!-- Análise IA (renderização rica) -->
+      <div v-if="analiseIA_resultado" class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-4">
+          <h2 class="text-xl font-bold text-white flex items-center">
+            <i class="fas fa-robot mr-3 text-2xl"></i>
+            Análise com Inteligência Artificial
+          </h2>
+          <p class="text-purple-100 text-sm mt-1">Análise automatizada de {{ analiseIA_resultado.aluno_nome }}</p>
+        </div>
+        
+        <div class="p-6 space-y-6">
+          <!-- Resumo -->
+          <div v-if="analiseIA_resultado.resumo" class="bg-blue-50 border-l-4 border-blue-500 rounded-r-lg p-4">
+            <h3 class="text-base font-semibold text-blue-900 mb-2 flex items-center">
+              <i class="fas fa-info-circle mr-2"></i>
+              Resumo
+            </h3>
+            <p class="text-gray-700 leading-relaxed">{{ analiseIA_resultado.resumo }}</p>
+          </div>
+          
+          <!-- Forças -->
+          <div v-if="analiseIA_resultado.forcas && analiseIA_resultado.forcas.length" class="bg-green-50 border-l-4 border-green-500 rounded-r-lg p-4">
+            <h3 class="text-base font-semibold text-green-900 mb-3 flex items-center">
+              <i class="fas fa-star mr-2"></i>
+              Forças e Potencialidades
+            </h3>
+            <ul class="space-y-2">
+              <li v-for="(forca, index) in analiseIA_resultado.forcas" :key="'f'+index" 
+                  class="flex items-start text-gray-700">
+                <i class="fas fa-check-circle text-green-600 mr-2 mt-1 flex-shrink-0"></i>
+                <span>{{ forca }}</span>
+              </li>
+            </ul>
+          </div>
+          
+          <!-- Desafios -->
+          <div v-if="analiseIA_resultado.desafios && analiseIA_resultado.desafios.length" class="bg-yellow-50 border-l-4 border-yellow-500 rounded-r-lg p-4">
+            <h3 class="text-base font-semibold text-yellow-900 mb-3 flex items-center">
+              <i class="fas fa-exclamation-triangle mr-2"></i>
+              Desafios Identificados
+            </h3>
+            <ul class="space-y-2">
+              <li v-for="(desafio, index) in analiseIA_resultado.desafios" :key="'d'+index" 
+                  class="flex items-start text-gray-700">
+                <i class="fas fa-arrow-right text-yellow-600 mr-2 mt-1 flex-shrink-0"></i>
+                <span>{{ desafio }}</span>
+              </li>
+            </ul>
+          </div>
+          
+          <!-- Objetivos SMART -->
+          <div v-if="analiseIA_resultado.objetivos_smart && analiseIA_resultado.objetivos_smart.length" class="bg-indigo-50 border-l-4 border-indigo-500 rounded-r-lg p-4">
+            <h3 class="text-base font-semibold text-indigo-900 mb-3 flex items-center">
+              <i class="fas fa-bullseye mr-2"></i>
+              Objetivos SMART Recomendados
+            </h3>
+            <ul class="space-y-3">
+              <li v-for="(objetivo, index) in analiseIA_resultado.objetivos_smart" :key="'o'+index" 
+                  class="flex items-start bg-white rounded-lg p-3 shadow-sm">
+                <span class="inline-flex items-center justify-center w-6 h-6 bg-indigo-600 text-white text-xs font-bold rounded-full mr-3 flex-shrink-0 mt-0.5">{{ index + 1 }}</span>
+                <span class="text-gray-700">{{ objetivo }}</span>
+              </li>
+            </ul>
+          </div>
+          
+          <!-- Estratégias Recomendadas -->
+          <div v-if="analiseIA_resultado.estrategias_recomendadas && analiseIA_resultado.estrategias_recomendadas.length" class="bg-purple-50 border-l-4 border-purple-500 rounded-r-lg p-4">
+            <h3 class="text-base font-semibold text-purple-900 mb-3 flex items-center">
+              <i class="fas fa-lightbulb mr-2"></i>
+              Estratégias e Atividades Recomendadas
+            </h3>
+            <ul class="space-y-3">
+              <li v-for="(estrategia, index) in analiseIA_resultado.estrategias_recomendadas" :key="'e'+index" 
+                  class="flex items-start bg-white rounded-lg p-3 shadow-sm">
+                <i class="fas fa-puzzle-piece text-purple-600 mr-3 mt-1 flex-shrink-0"></i>
+                <span class="text-gray-700">{{ estrategia }}</span>
+              </li>
+            </ul>
+          </div>
+          
+          <!-- Mensagem caso não tenha dados -->
+          <div v-if="!analiseIA_resultado.resumo && !analiseIA_resultado.forcas.length && !analiseIA_resultado.desafios.length && !analiseIA_resultado.objetivos_smart.length && !analiseIA_resultado.estrategias_recomendadas.length" 
+               class="text-center py-8 text-gray-500">
+            <i class="fas fa-exclamation-circle text-4xl mb-3"></i>
+            <p>Não foi possível gerar uma análise detalhada no momento.</p>
+          </div>
+        </div>
       </div>
     </div>
   `,
@@ -3331,6 +3759,18 @@ const Relatorios = {
       try {
         const resp = await api.get('/ai/evaluate-student', { params: { student_id: this.alunoId } });
         const r = resp.data?.data || resp.data || {};
+        
+        // Armazenar como objeto estruturado para renderização rica
+        this.analiseIA_resultado = {
+          aluno_nome: this.dadosRelatorio.aluno.name,
+          resumo: r.resumo || null,
+          forcas: Array.isArray(r.forcas) && r.forcas.length ? r.forcas : [],
+          desafios: Array.isArray(r.desafios) && r.desafios.length ? r.desafios : [],
+          objetivos_smart: Array.isArray(r.objetivos_smart) && r.objetivos_smart.length ? r.objetivos_smart : [],
+          estrategias_recomendadas: Array.isArray(r.estrategias_recomendadas) && r.estrategias_recomendadas.length ? r.estrategias_recomendadas : []
+        };
+
+        // Criar versão em texto para salvar como nota
         const linhas = [];
         linhas.push(`Análise automatizada do aluno ${this.dadosRelatorio.aluno.name}:`);
         if (r.resumo) { linhas.push('\n📌 Resumo'); linhas.push(String(r.resumo)); }
@@ -3338,15 +3778,14 @@ const Relatorios = {
         if (Array.isArray(r.desafios) && r.desafios.length) { linhas.push('\n⚠️ Desafios'); r.desafios.forEach(d=>linhas.push(`- ${d}`)); }
         if (Array.isArray(r.objetivos_smart) && r.objetivos_smart.length) { linhas.push('\n🎯 Objetivos SMART'); r.objetivos_smart.forEach(o=>linhas.push(`- ${o}`)); }
         if (Array.isArray(r.estrategias_recomendadas) && r.estrategias_recomendadas.length) { linhas.push('\n🧩 Estratégias e Atividades Recomendadas'); r.estrategias_recomendadas.forEach(e=>linhas.push(`- ${e}`)); }
-        if (!linhas.length) linhas.push('Não foi possível gerar uma análise detalhada no momento.');
-        this.analiseIA_resultado = linhas.join('\n');
+        const textoNota = linhas.join('\n');
 
         // Persistir como nota
         try {
           await api.post('/student-notes/create', {
             student_id: this.alunoId,
             title: `Análise de IA - ${new Date().toLocaleDateString('pt-BR')}`,
-            content: this.analiseIA_resultado,
+            content: textoNota,
             source: 'IA'
           });
           this.$showToast && this.$showToast('Sucesso', 'Análise salva no histórico do aluno.', 'success');
@@ -3490,44 +3929,25 @@ const EntrevistaResponsavel = {
                     <p v-if="validationErrors.student_id" class="mt-2 text-sm text-red-600">{{ validationErrors.student_id }}</p>
                   </div>
 
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Escola <span class="text-red-500">*</span>
-                      </label>
-                      <select v-model="form.escola_id" required 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                        :class="validationErrors.escola ? 'border-red-300 bg-red-50' : ''"
-                        @change="preencherDadosEscolaEntrevista">
-                        <option value="">Selecione uma escola</option>
-                        <option v-for="escola in escolas" :key="escola.id" :value="escola.id">
-                          {{ escola.name }}
-                        </option>
-                      </select>
-                      <p v-if="validationErrors.escola" class="mt-2 text-sm text-red-600">{{ validationErrors.escola }}</p>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Série/Ano <span class="text-red-500">*</span>
-                      </label>
-                      <input v-model="form.serie" type="text" required 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                        :class="validationErrors.serie ? 'border-red-300 bg-red-50' : ''">
-                      <p v-if="validationErrors.serie" class="mt-2 text-sm text-red-600">{{ validationErrors.serie }}</p>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Turno <span class="text-red-500">*</span>
-                      </label>
-                      <select v-model="form.turno" required 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                        :class="validationErrors.turno ? 'border-red-300 bg-red-50' : ''">
-                        <option value="">Selecione</option>
-                        <option value="matutino">Matutino</option>
-                        <option value="vespertino">Vespertino</option>
-                        <option value="noturno">Noturno</option>
-                      </select>
-                      <p v-if="validationErrors.turno" class="mt-2 text-sm text-red-600">{{ validationErrors.turno }}</p>
+                  <!-- Informações preenchidas automaticamente do perfil do aluno -->
+                  <div v-if="form.student_id" class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h3 class="text-sm font-semibold text-blue-900 mb-3 flex items-center">
+                      <i class="fas fa-info-circle mr-2"></i>
+                      Dados do perfil do aluno
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                      <div>
+                        <span class="font-medium text-blue-700">Escola:</span>
+                        <span class="text-blue-600 ml-1">{{ form.escola || 'Não informado' }}</span>
+                      </div>
+                      <div>
+                        <span class="font-medium text-blue-700">Série/Ano:</span>
+                        <span class="text-blue-600 ml-1">{{ form.serie || 'Não informado' }}</span>
+                      </div>
+                      <div>
+                        <span class="font-medium text-blue-700">Turno:</span>
+                        <span class="text-blue-600 ml-1">{{ form.turno || 'Não informado' }}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -3546,48 +3966,49 @@ const EntrevistaResponsavel = {
                 </div>
 
                 <div class="max-w-2xl mx-auto space-y-6">
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Nome completo <span class="text-red-500">*</span>
-                      </label>
-                      <input v-model="form.nome_responsavel" type="text" required 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                        :class="validationErrors.nome_responsavel ? 'border-red-300 bg-red-50' : ''"
-                        maxlength="120">
-                      <p v-if="validationErrors.nome_responsavel" class="mt-2 text-sm text-red-600">{{ validationErrors.nome_responsavel }}</p>
+                  <!-- Dados preenchidos do perfil -->
+                  <div v-if="form.student_id" class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h3 class="text-sm font-semibold text-green-900 mb-3 flex items-center">
+                      <i class="fas fa-info-circle mr-2"></i>
+                      Dados do perfil do aluno
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                      <div>
+                        <span class="font-medium text-green-700">Nome:</span>
+                        <span class="text-green-600 ml-1">{{ form.nome_responsavel || 'Não informado' }}</span>
+                      </div>
+                      <div>
+                        <span class="font-medium text-green-700">Telefone:</span>
+                        <span class="text-green-600 ml-1">{{ form.telefone || 'Não informado' }}</span>
+                      </div>
+                      <div>
+                        <span class="font-medium text-green-700">Email:</span>
+                        <span class="text-green-600 ml-1">{{ form.email || 'Não informado' }}</span>
+                      </div>
                     </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Parentesco <span class="text-red-500">*</span>
-                      </label>
-                      <select v-model="form.parentesco" required 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                        :class="validationErrors.parentesco ? 'border-red-300 bg-red-50' : ''">
-                        <option value="">Selecione</option>
-                        <option value="pai">Pai</option>
-                        <option value="mae">Mãe</option>
-                        <option value="avo">Avô/Avó</option>
-                        <option value="tio">Tio/Tia</option>
-                        <option value="responsavel_legal">Responsável Legal</option>
-                        <option value="outro">Outro</option>
-                      </select>
-                      <p v-if="validationErrors.parentesco" class="mt-2 text-sm text-red-600">{{ validationErrors.parentesco }}</p>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Telefone <span class="text-red-500">*</span>
-                      </label>
-                      <input v-model="form.telefone" type="tel" required 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                        :class="validationErrors.telefone ? 'border-red-300 bg-red-50' : ''">
-                      <p v-if="validationErrors.telefone" class="mt-2 text-sm text-red-600">{{ validationErrors.telefone }}</p>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                      <input v-model="form.email" type="email" 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                    </div>
+                  </div>
+                  
+                  <!-- Campo adicional: apenas o parentesco -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Parentesco <span class="text-red-500">*</span>
+                    </label>
+                    <select v-model="form.parentesco" required 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      :class="validationErrors.parentesco ? 'border-red-300 bg-red-50' : ''">
+                      <option value="">Selecione</option>
+                      <option value="pai">Pai</option>
+                      <option value="mae">Mãe</option>
+                      <option value="avo">Avô/Avó</option>
+                      <option value="tio">Tio/Tia</option>
+                      <option value="responsavel_legal">Responsável Legal</option>
+                      <option value="outro">Outro</option>
+                    </select>
+                    <p v-if="validationErrors.parentesco" class="mt-2 text-sm text-red-600">{{ validationErrors.parentesco }}</p>
+                    <p class="mt-2 text-xs text-gray-500">
+                      <i class="fas fa-lightbulb text-yellow-500 mr-1"></i>
+                      Os dados de nome, telefone e email são preenchidos automaticamente do cadastro do aluno.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -3836,7 +4257,7 @@ const EntrevistaResponsavel = {
       if (this.form.student_id) {
         const aluno = this.alunos.find(a => a.id == this.form.student_id);
         if (aluno) {
-          // Preencher escola se disponível
+          // Preencher dados automaticamente do perfil do aluno
           if (aluno.school_name) {
             this.form.escola = aluno.school_name;
           }
@@ -3849,12 +4270,25 @@ const EntrevistaResponsavel = {
           if (aluno.class_name) {
             this.form.turma = aluno.class_name;
           }
-          // Preencher outros dados se disponíveis
+          // Mapear turno (shift) do aluno
+          if (aluno.shift) {
+            // Mapear enum para valores do formulário
+            const shiftMap = {
+              'manha': 'matutino',
+              'tarde': 'vespertino',
+              'noite': 'noturno'
+            };
+            this.form.turno = shiftMap[aluno.shift] || aluno.shift;
+          }
+          // Preencher dados do responsável
           if (aluno.responsible_name) {
             this.form.nome_responsavel = aluno.responsible_name;
           }
           if (aluno.responsible_phone) {
             this.form.telefone = aluno.responsible_phone;
+          }
+          if (aluno.responsible_email) {
+            this.form.email = aluno.responsible_email;
           }
         }
         // Buscar última entrevista do aluno para edição
@@ -3935,31 +4369,13 @@ const EntrevistaResponsavel = {
           this.validationErrors.student_id = 'Selecione um aluno';
           isValid = false;
         }
-        if (!this.form.escola_id) {
-          this.validationErrors.escola = 'Selecione uma escola';
-          isValid = false;
-        }
-        if (!this.form.serie) {
-          this.validationErrors.serie = 'Informe a série/ano';
-          isValid = false;
-        }
-        if (!this.form.turno) {
-          this.validationErrors.turno = 'Selecione o turno';
-          isValid = false;
-        }
+        // Escola, série e turno são preenchidos automaticamente do perfil
       } else if (this.currentStep === 2) {
-        if (!this.form.nome_responsavel) {
-          this.validationErrors.nome_responsavel = 'Informe o nome do responsável';
-          isValid = false;
-        }
         if (!this.form.parentesco) {
           this.validationErrors.parentesco = 'Selecione o parentesco';
           isValid = false;
         }
-        if (!this.form.telefone) {
-          this.validationErrors.telefone = 'Informe o telefone';
-          isValid = false;
-        }
+        // Nome e telefone do responsável são preenchidos do perfil do aluno
       }
       
       return isValid;
@@ -4141,21 +4557,29 @@ const PDI = {
                     </select>
                   </div>
 
+                  <!-- Dados preenchidos do perfil do aluno -->
+                  <div v-if="form.student_id" class="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-6">
+                    <h3 class="text-sm font-semibold text-emerald-900 mb-3 flex items-center">
+                      <i class="fas fa-info-circle mr-2"></i>
+                      Dados do perfil do aluno
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                      <div>
+                        <span class="font-medium text-emerald-700">Escola:</span>
+                        <span class="text-emerald-600 ml-1">{{ form.escola || 'Não informado' }}</span>
+                      </div>
+                      <div>
+                        <span class="font-medium text-emerald-700">Série/Ano:</span>
+                        <span class="text-emerald-600 ml-1">{{ form.ano_serie || 'Não informado' }}</span>
+                      </div>
+                      <div>
+                        <span class="font-medium text-emerald-700">Turma:</span>
+                        <span class="text-emerald-600 ml-1">{{ form.turma || 'Não informado' }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Escola <span class="text-red-500">*</span></label>
-                      <select v-model="form.escola_id" required 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                        @change="preencherEscolaPDI">
-                        <option value="">Selecione uma escola</option>
-                        <option v-for="escola in escolas" :key="escola.id" :value="escola.id">{{ escola.name }}</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Série/Ano</label>
-                      <input v-model="form.ano_serie" type="text" required 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
-                    </div>
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">Professor AEE</label>
                       <select v-model="form.professor_aee" required
@@ -4165,8 +4589,8 @@ const PDI = {
                       </select>
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Período</label>
-                      <input v-model="form.periodo" type="text" required 
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Período de Vigência</label>
+                      <input v-model="form.periodo" type="text" required placeholder="Ex: 1º Semestre 2025"
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
                     </div>
                   </div>
@@ -4446,18 +4870,18 @@ const PDI = {
     async preencherDadosAluno() {
       const alunoSelecionado = this.alunos.find(aluno => aluno.id == this.form.student_id);
       if (alunoSelecionado) {
-        // Nome do aluno não é mais um campo separado nos formulários
-        // Preenche escola a partir dos dados do aluno (quando houver)
+        // Preenche dados automaticamente do perfil do aluno
         if (alunoSelecionado.school_name) {
           this.form.escola = alunoSelecionado.school_name;
         }
         if (alunoSelecionado.school_id) {
           this.form.escola_id = alunoSelecionado.school_id;
         }
-        if (alunoSelecionado.class_name) {
-          this.form.ano_serie = alunoSelecionado.class_name;
-        } else if (alunoSelecionado.grade) {
+        if (alunoSelecionado.grade) {
           this.form.ano_serie = alunoSelecionado.grade;
+        }
+        if (alunoSelecionado.class_name) {
+          this.form.turma = alunoSelecionado.class_name;
         }
         // Carregar último PDI existente para este aluno (se houver)
         try {
@@ -4669,21 +5093,33 @@ const PlanoAtendimento = {
                     </select>
                   </div>
 
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Matrícula</label>
-                      <input v-model="form.matricula" type="text" required 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                  <!-- Dados preenchidos do perfil do aluno -->
+                  <div v-if="form.student_id" class="bg-violet-50 border border-violet-200 rounded-lg p-4">
+                    <h3 class="text-sm font-semibold text-violet-900 mb-3 flex items-center">
+                      <i class="fas fa-info-circle mr-2"></i>
+                      Dados do perfil do aluno
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                      <div>
+                        <span class="font-medium text-violet-700">Escola:</span>
+                        <span class="text-violet-600 ml-1">{{ form.escola_origem || 'Não informado' }}</span>
+                      </div>
+                      <div>
+                        <span class="font-medium text-violet-700">Série/Ano:</span>
+                        <span class="text-violet-600 ml-1">{{ form.serie || 'Não informado' }}</span>
+                      </div>
+                      <div>
+                        <span class="font-medium text-violet-700">Turma:</span>
+                        <span class="text-violet-600 ml-1">{{ form.turma || 'Não informado' }}</span>
+                      </div>
                     </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Escola de Origem <span class="text-red-500">*</span></label>
-                      <select v-model="form.escola_origem_id" required 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                        @change="preencherEscolaPlano">
-                        <option value="">Selecione uma escola</option>
-                        <option v-for="escola in escolas" :key="escola.id" :value="escola.id">{{ escola.name }}</option>
-                      </select>
-                    </div>
+                  </div>
+                  
+                  <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Matrícula (Opcional)</label>
+                    <input v-model="form.matricula" type="text" 
+                      placeholder="Número de matrícula do aluno"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
                   </div>
                 </div>
               </div>
@@ -4999,15 +5435,18 @@ const PlanoAtendimento = {
     async preencherDadosAlunoPlano() {
       const alunoSelecionado = this.alunos.find(aluno => aluno.id == this.form.student_id);
       if (alunoSelecionado) {
-        // Preenche outros campos se disponíveis
-        if (alunoSelecionado.registration_number) {
-          this.form.matricula = alunoSelecionado.registration_number;
-        }
+        // Preenche dados automaticamente do perfil do aluno
         if (alunoSelecionado.school_name) {
           this.form.escola_origem = alunoSelecionado.school_name;
         }
         if (alunoSelecionado.school_id) {
           this.form.escola_origem_id = alunoSelecionado.school_id;
+        }
+        if (alunoSelecionado.grade) {
+          this.form.serie = alunoSelecionado.grade;
+        }
+        if (alunoSelecionado.class_name) {
+          this.form.turma = alunoSelecionado.class_name;
         }
         // Tentar carregar último Plano de Atendimento deste aluno pelo nome
         try {

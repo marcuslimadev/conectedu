@@ -128,32 +128,21 @@ const AlunosTW = {
     </div>
 
     <!-- Visualização Desktop -->
-    <div class="bg-white shadow rounded overflow-x-auto hidden md:block" role="region" aria-labelledby="alunos-heading">
+    <div class="bg-white shadow rounded-lg overflow-hidden hidden md:block" role="region" aria-labelledby="alunos-heading">
       <table class="min-w-full" role="table" aria-label="Lista de alunos">
-        <thead>
+        <thead class="bg-gray-50">
           <tr class="text-left">
-            <th class="px-3 py-2 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none" 
+            <th class="px-6 py-3 text-gray-700 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none" 
                 @click="sortBy('name')" @keydown.enter="sortBy('name')" @keydown.space="sortBy('name')" tabindex="0"
                 role="columnheader" :aria-sort="sortField === 'name' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
               <div class="flex items-center justify-between">
                 <span>Nome</span>
                 <svg v-if="sortField === 'name'" class="w-4 h-4" :class="sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                   <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Selecionar Aluno <span class="text-red-500">*</span></label>
-                    <input v-model="alunoFiltroPDI" placeholder="Filtrar alunos..." class="mb-2 w-full px-3 py-2 border border-gray-300 rounded" />
-                    <select v-model="form.student_id" required 
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                      @change="preencherDadosAluno">
-                      <option value="">Selecione um aluno</option>
-                      <option v-for="aluno in alunosFiltradosPDI" :key="aluno.id" :value="aluno.id">{{ aluno.name }}</option>
-                    </select>
-                  </div>
-                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
                 </svg>
               </div>
             </th>
-            <th class="px-3 py-2 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none" 
+      <th class="px-6 py-3 text-gray-700 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none" 
                 @click="sortBy('status')" @keydown.enter="sortBy('status')" @keydown.space="sortBy('status')" tabindex="0"
                 role="columnheader" :aria-sort="sortField === 'status' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
               <div class="flex items-center justify-between">
@@ -163,36 +152,38 @@ const AlunosTW = {
                 </svg>
               </div>
             </th>
-            <th class="px-3 py-2" role="columnheader">Vínculo</th>
-            <th class="px-3 py-2 text-right" role="columnheader">Ações</th>
+            <th class="px-6 py-3 text-gray-700" role="columnheader">Vínculo</th>
+            <th class="px-6 py-3 text-right text-gray-700" role="columnheader">Ações</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="s in rows" :key="s.id" class="border-t hover:bg-gray-50">
-            <td class="px-3 py-2 font-medium">{{ s.name || '—' }}</td>
-            <td class="px-3 py-2">
+            <td class="px-6 py-4 font-medium">{{ s.name || '—' }}</td>
+            <td class="px-6 py-4">
               <span class="px-2 py-1 rounded text-xs font-medium uppercase bg-blue-100 text-blue-800">{{ s.modalidade || '—' }}</span>
             </td>
-            <td class="px-3 py-2">
+            <td class="px-6 py-4">
               <span :class="['px-2 py-1 rounded text-xs font-medium', s.status==='ativo'?'bg-green-100 text-green-700':'bg-gray-100 text-gray-600']">{{ s.status || '—' }}</span>
             </td>
-            <td class="px-3 py-2 text-sm text-gray-600">
+            <td class="px-6 py-4 text-sm text-gray-600">
               <span v-if="s.modalidade==='apoio'">Prof #{{ s.support_teacher_id || '-' }}</span>
               <span v-else>SRM #{{ s.srm_room_id || '-' }}</span>
             </td>
-            <td class="px-3 py-2 text-right space-x-2">
-              <button class="px-2 py-1 text-sm border rounded hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-colors" 
+            <td class="px-6 py-4 text-right space-x-2">
+              <button class="inline-flex items-center text-blue-800 hover:text-blue-900 mr-1 px-2 py-1 border border-blue-200 rounded transition-colors" 
                       @click="edit(s)" :aria-label="'Editar aluno ' + s.name">
-                <i class="fas fa-edit mr-1" aria-hidden="true"></i>Editar
+                <i class="fas fa-edit mr-1" aria-hidden="true"></i>
+                <span>Editar</span>
               </button>
-              <button class="px-2 py-1 text-sm border rounded text-red-600 hover:bg-red-50 focus:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 transition-colors" 
+              <button class="inline-flex items-center text-red-800 hover:text-red-900 px-2 py-1 border border-red-200 rounded transition-colors" 
                       @click="del(s)" :aria-label="'Excluir aluno ' + s.name">
-                <i class="fas fa-trash mr-1" aria-hidden="true"></i>Excluir
+                <i class="fas fa-trash mr-1" aria-hidden="true"></i>
+                <span>Excluir</span>
               </button>
             </td>
           </tr>
           <tr v-if="!rows || rows.length===0">
-            <td colspan="5" class="px-3 py-6 text-center text-gray-700">
+            <td colspan="5" class="px-6 py-4 text-center text-gray-700">
               {{ (filters.q || filters.status || filters.modalidade) ? 'Nenhum resultado para os filtros aplicados' : 'Sem registros' }}
             </td>
           </tr>
@@ -319,8 +310,15 @@ const AlunosTW = {
       </div>
     </div>
 
-    <div v-if="editing" class="bg-white shadow rounded-lg p-6 space-y-6" role="dialog" aria-labelledby="form-heading">
-      <h1 id="form-heading" class="text-2xl font-bold text-gray-900">{{ form.id ? 'Editar Aluno' : 'Novo Aluno' }}</h1>
+    <!-- Modal de Criar/Editar Aluno -->
+    <div v-if="editing" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" role="dialog" aria-labelledby="form-heading" aria-modal="true">
+      <div class="bg-gray-50 rounded-lg w-full max-w-4xl h-[90vh] overflow-y-auto shadow-xl p-6 space-y-6 border border-gray-200">
+        <div class="flex items-center justify-between">
+          <h1 id="form-heading" class="text-2xl font-bold text-gray-900">{{ form.id ? 'Editar Aluno' : 'Novo Aluno' }}</h1>
+          <button @click="cancel" class="text-gray-500 hover:text-gray-700" aria-label="Fechar">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
       
       <!-- Barra de Progresso -->
       <div class="mb-8">
@@ -390,7 +388,7 @@ const AlunosTW = {
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-                        <button @click="newEscola" 
+            <label class="block text-sm font-medium text-gray-700 mb-2">
               <i class="fas fa-graduation-cap text-blue-500 mr-1"></i>
               Modalidade AEE *
             </label>
@@ -403,24 +401,31 @@ const AlunosTW = {
             </select>
             <div class="text-xs text-gray-700 mt-1">Escolha o tipo de atendimento AEE</div>
           </div>
-                          class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent flex-1 placeholder-gray-700 text-gray-900">
-              Status
-            </label>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
             <select v-model="form.status" 
                     class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
               <option value="ativo">✅ Ativo</option>
-                          <thead class="bg-gray-50">
+              <option value="inativo">❌ Inativo</option>
             </select>
-                              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Nome</th>
-                              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Endereço</th>
-                              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Cidade</th>
-                              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Telefone</th>
-                              <th class="px-6 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">Ações</th>
+          </div>
+          <!-- Professor responsável (somente admin escolhe) -->
+          <div class="md:col-span-2" v-if="$root.user && $root.user.role === 'admin'">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-user-tie text-blue-500 mr-1"></i>
+              Professor Responsável (obrigatório)
+            </label>
+            <select v-model="form.created_by_teacher_id" class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+              <option disabled value="">Selecione o professor responsável</option>
+              <option v-for="p in professores" :key="'p'+p.id" :value="p.id">{{ p.name }} (#{{ p.id }})</option>
+            </select>
+            <div class="text-xs text-gray-700 mt-1">O professor que ficará responsável por este aluno no sistema.</div>
+          </div>
           <h3 class="text-lg font-medium text-gray-900 mb-4">
             <i class="fas fa-id-card text-blue-500 mr-2"></i>Dados Pessoais Complementares
           </h3>
           
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div v-if="!$isFieldFilledInInterview(form.id, 'data_nascimento')">
               <label class="block text-sm font-medium text-gray-700 mb-2">Data de Nascimento</label>
               <input v-model="form.birth_date" type="date"
@@ -432,13 +437,6 @@ const AlunosTW = {
               <input v-model="form.cpf" type="text" 
                      class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                      placeholder="000.000.000-00">
-            </div>
-            
-            <div v-if="!$isFieldFilledInInterview(form.id, 'rg')">
-              <label class="block text-sm font-medium text-gray-700 mb-2">RG</label>
-              <input v-model="form.rg" type="text"
-                     class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                     placeholder="00.000.000-0">
             </div>
           </div>
           
@@ -636,6 +634,7 @@ const AlunosTW = {
           </button>
         </div>
       </div>
+      </div>
     </div>
   </div>
   `,
@@ -651,10 +650,11 @@ const AlunosTW = {
       { title: 'Atribuições', icon: 'fas fa-chalkboard-teacher' },
       { title: 'Contato', icon: 'fas fa-phone' }
     ],
-    form:{ id:null, name:'', modalidade:'', status:'ativo', school_id:null, _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:'' }, 
-    teachers:[], 
+  form:{ id:null, name:'', modalidade:'', status:'ativo', school_id:null, _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:'', created_by_teacher_id:null }, 
+  teachers:[], 
     rooms:[],
     schools:[],
+  professores:[],
     // Paginação
     currentPage: 1,
     perPage: 10,
@@ -671,13 +671,17 @@ const AlunosTW = {
       const end = Math.min(this.totalPages, this.currentPage + range);
       const pages = [];
       for (let i = start; i <= end; i++) {
+        pages.push(i);
       }
       return pages;
     },
     canProceedAluno() {
       switch (this.currentStepAluno) {
         case 0:
-          return this.form.name && this.form.name.trim().length > 0 && this.form.modalidade && this.form.school_id;
+          // Admin precisa selecionar professor responsável
+          const adminNeedsProfessor = (this.$root?.user?.role === 'admin');
+          const hasProfessor = adminNeedsProfessor ? !!this.form.created_by_teacher_id : true;
+          return this.form.name && this.form.name.trim().length > 0 && this.form.modalidade && this.form.school_id && hasProfessor;
         case 1:
           return true; // Atribuições são opcionais
         case 2:
@@ -714,17 +718,23 @@ const AlunosTW = {
     newAluno(){ 
       this.editing=true; 
       this.currentStepAluno = 0;
-      this.form={ id:null, name:'', modalidade:'', status:'ativo', school_id:null, _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:'' }; 
+      this.form={ id:null, name:'', modalidade:'', status:'ativo', school_id:null, _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:'', created_by_teacher_id:null }; 
+      // Preencher automaticamente para professor não-admin
+      if (this.$root?.user && this.$root.user.role !== 'admin') {
+        this.form.created_by_teacher_id = this.$root.user.id;
+      }
+      this.loadLists();
     },
     edit(s){ 
       this.editing=true; 
       this.currentStepAluno = 0;
-      this.form=Object.assign({_st_name:'', _room_name:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:''}, s); 
+      this.form=Object.assign({_st_name:'', _room_name:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:'', created_by_teacher_id: s.created_by_teacher_id || null}, s); 
+      this.loadLists();
     },
     cancel(){ 
       this.editing=false; 
       this.currentStepAluno = 0;
-      this.form={ id:null, name:'', modalidade:'', status:'ativo', school_id:null, _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:'' }; 
+      this.form={ id:null, name:'', modalidade:'', status:'ativo', school_id:null, _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:'', created_by_teacher_id:null }; 
     },
     async load(){ 
       const params={ 
@@ -772,7 +782,8 @@ const AlunosTW = {
         const results = await Promise.allSettled([
           api.get('/support-teachers'),
           api.get('/srm-rooms'),
-          api.get('/schools')
+          api.get('/schools'),
+          api.get('/professores')
         ]);
         // support-teachers
         if (results[0].status === 'fulfilled') {
@@ -800,10 +811,19 @@ const AlunosTW = {
           console.error('Falha ao carregar escolas:', results[2].reason);
           this.$showToast && this.$showToast('Atenção', 'Não foi possível carregar a lista de escolas agora. Tente novamente mais tarde.', 'info');
         }
+        // professores (usuarios role=professor)
+        if (results[3].status === 'fulfilled') {
+          const p = results[3].value;
+          // endpoint retorna array direto
+          this.professores = (p.data?.data) || (Array.isArray(p.data) ? p.data : []);
+        } else {
+          this.professores = [];
+          console.error('Falha ao carregar professores:', results[3].reason);
+        }
       } catch (err) {
         console.error('Erro inesperado ao carregar listas:', err);
         this.$showToast && this.$showToast('Erro', 'Erro ao carregar listas iniciais (escolas, professores, salas).', 'error');
-        this.teachers = []; this.rooms = []; this.schools = [];
+        this.teachers = []; this.rooms = []; this.schools = []; this.professores = [];
       }
     },
     async save(){ 
@@ -814,7 +834,7 @@ const AlunosTW = {
       const payload=Object.assign({}, this.form); 
       delete payload._st_name; 
       delete payload._room_name; 
-      // Associar aluno ao professor atual
+      // Associar aluno ao professor atual (se não-admin) ou manter seleção do admin
       if(!this.form.id && this.$parent.user && this.$parent.user.role !== 'admin') {
         payload.created_by_teacher_id = this.$parent.user.id;
       }
@@ -829,16 +849,31 @@ const AlunosTW = {
       } 
     },
     async del(s){
-      if (!this._confirmDeleteAluno || this._confirmDeleteAluno !== s.id) {
-        this._confirmDeleteAluno = s.id;
-        this.$showToast('Confirme', `Clique novamente para excluir o aluno "${s.name}"`, 'warning');
-        setTimeout(()=>{ if(this._confirmDeleteAluno===s.id) this._confirmDeleteAluno=null; }, 3000);
-        return;
+      const confirmed = await this.$confirmToast(
+        'Confirmar exclusão',
+        `Deseja realmente excluir o aluno "${s.name}"? Esta ação não pode ser desfeita.`,
+        { confirmText: 'Excluir', cancelText: 'Cancelar', type: 'warning', timeoutMs: 15000 }
+      );
+      if (!confirmed) return;
+      this.deletingStudentId = s.id;
+      try {
+        const r=await api.post('/students/delete', {}, { params:{ id:s.id } });
+        if(r.data?.ok){
+          this.$showToast('Sucesso', 'Aluno excluído', 'success');
+          // Remove localmente
+          this.rows = (this.rows || []).filter(x => x.id !== s.id);
+          await this.load();
+        } else {
+          this.$showToast('Erro', r.data?.error||'Erro ao excluir', 'error');
+        }
+      } catch (e) {
+        const status = e.response?.status;
+        if (status === 403) this.$showToast('Sem permissão', 'Você não tem permissão para excluir este aluno.', 'warning');
+        else if (status === 404) this.$showToast('Não encontrado', 'O aluno já não existe mais.', 'info');
+        else this.$showToast('Erro', 'Erro ao excluir', 'error');
+      } finally {
+        this.deletingStudentId = null;
       }
-      this._confirmDeleteAluno = null;
-      const r=await api.post('/students/delete', {}, { params:{ id:s.id } });
-      if(r.data?.ok){ this.$showToast('Sucesso', 'Aluno excluído', 'success'); this.load(); }
-      else this.$showToast('Erro', r.data?.error||'Erro ao excluir', 'error');
     }
   },
   async mounted(){ await this.loadLists(); await this.load(); }
@@ -995,19 +1030,6 @@ const UsuariosTW = {
         <h1 id="usuarios-heading" class="text-2xl font-bold text-gray-900">Usuários</h1>
       </div>
       <div class="space-x-2">
-        <button @click="loadNotifications" 
-                class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
-                :aria-label="notifications.length > 0 ? 'Ver ' + notifications.length + ' notificações' : 'Ver notificações'">
-          <span v-if="notifications.length > 0" class="inline-flex items-center">
-            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-              <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
-            </svg>
-            Notificações ({{ notifications.length }})
-          </span>
-          <span v-else>
-            <i class="fas fa-bell mr-1" aria-hidden="true"></i>Notificações
-          </span>
-        </button>
         <button @click="novo" 
                 class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
                 aria-label="Adicionar novo usuário">
@@ -1064,51 +1086,26 @@ const UsuariosTW = {
       <button @click="load" class="px-3 py-2 bg-gray-800 text-white rounded">Filtrar</button>
     </div>
 
-    <!-- Notificações -->
-    <div v-if="showNotifications" class="bg-white shadow rounded p-4 space-y-3">
-      <div class="flex items-center justify-between">
-        <h2 class="text-lg font-semibold">Notificações</h2>
-        <button @click="showNotifications = false" class="text-gray-600 hover:text-gray-800">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-          </svg>
-        </button>
-      </div>
-      <div v-if="!notifications || notifications.length === 0" class="text-center text-gray-700 py-4">
-        Nenhuma notificação
-      </div>
-      <div v-else class="space-y-2">
-        <div v-for="n in notifications" :key="n.id" class="border rounded p-3" :class="n.read_at ? 'bg-gray-50' : 'bg-yellow-50 border-yellow-200'">
-          <div class="flex items-start justify-between">
-            <div class="flex-1">
-              <h3 class="font-medium text-sm">{{ n.title }}</h3>
-              <p class="text-sm text-gray-600 mt-1">{{ n.message }}</p>
-              <p class="text-xs text-gray-600 mt-1">{{ formatDate(n.created_at) }}</p>
-            </div>
-            <div class="ml-4 space-x-2">
-              <button @click="markAsRead(n.id)" class="px-2 py-1 text-xs border rounded">Marcar como lida</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    
 
-    <div class="bg-white shadow rounded overflow-x-auto">
+    <div class="bg-white shadow rounded-lg overflow-hidden">
       <table class="min-w-full">
-        <thead>
+        <thead class="bg-gray-50">
           <tr class="text-left">
-            <th class="px-3 py-2">Nome</th>
-            <th class="px-3 py-2">Email</th>
-            <th class="px-3 py-2">Perfil</th>
-            <th class="px-3 py-2">Status</th>
-            <th class="px-3 py-2 text-right">Ações</th>
+            <th class="px-6 py-3 text-left font-semibold text-gray-700">Nome</th>
+            <th class="px-6 py-3 text-left font-semibold text-gray-700">Email</th>
+            <th class="px-6 py-3 text-left font-semibold text-gray-700">Perfil</th>
+            <th class="px-6 py-3 text-left font-semibold text-gray-700">Status</th>
+            <th class="px-6 py-3 text-right font-semibold text-gray-700">Ações</th>
           </tr>
         </thead>
-        <tbody>
-          <tr v-for="u in rows" :key="u.id" class="border-t">
-            <td class="px-3 py-2">{{ u.name || '—' }}</td>
-            <td class="px-3 py-2">{{ u.email || '—' }}</td>
-            <td class="px-3 py-2">
+        <tbody class="divide-y divide-gray-200">
+          <tr v-for="u in rows" :key="u.id" class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="font-medium text-gray-900">{{ u.name || '—' }}</div>
+            </td>
+            <td class="px-6 py-4 text-gray-800">{{ u.email || '—' }}</td>
+            <td class="px-6 py-4">
               <span :class="[
                 'px-2 py-1 rounded text-xs font-medium',
                 u.role === 'admin' ? 'bg-purple-100 text-purple-700' :
@@ -1117,7 +1114,7 @@ const UsuariosTW = {
                 'bg-gray-100 text-gray-600'
               ]">{{ getRoleLabel(u.role) }}</span>
             </td>
-            <td class="px-3 py-2">
+            <td class="px-6 py-4">
               <span :class="[
                 'px-2 py-1 rounded text-xs font-medium',
                 u.status === 'ativo' ? 'bg-green-100 text-green-700' :
@@ -1125,11 +1122,12 @@ const UsuariosTW = {
                 'bg-gray-100 text-gray-600'
               ]">{{ getStatusLabel(u.status) }}</span>
             </td>
-            <td class="px-3 py-2 text-right space-x-2">
-              <button class="px-2 py-1 text-sm border rounded hover:bg-gray-50 transition-colors" @click="edit(u)">
-                Editar
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <button class="inline-flex items-center text-blue-800 hover:text-blue-900 mr-3 px-2 py-1 border border-blue-200 rounded" @click="edit(u)">
+                <i class="fas fa-edit mr-1" aria-hidden="true"></i>
+                <span>Editar</span>
               </button>
-              <button class="px-2 py-1 text-sm border rounded text-red-600 hover:bg-red-50 transition-colors" 
+              <button class="inline-flex items-center text-red-800 hover:text-red-900 px-2 py-1 border border-red-200 rounded" 
                       @click="del(u)" 
                       :disabled="deletingUserId === u.id"
                       :class="deletingUserId === u.id ? 'opacity-50 cursor-not-allowed' : ''">
@@ -1137,12 +1135,15 @@ const UsuariosTW = {
                   <div class="animate-spin -ml-1 mr-1 h-3 w-3 border border-red-600 border-t-transparent rounded-full"></div>
                   Excluindo...
                 </span>
-                <span v-else>Excluir</span>
+                <span v-else>
+                  <i class="fas fa-trash mr-1" aria-hidden="true"></i>
+                  Excluir
+                </span>
               </button>
             </td>
           </tr>
           <tr v-if="!rows || rows.length===0">
-            <td colspan="5" class="px-3 py-6 text-center text-gray-700">
+            <td colspan="5" class="px-6 py-6 text-center text-gray-700">
               {{ (filters.q || filters.role || filters.status) ? 'Nenhum usuário encontrado para os filtros aplicados' : 'Sem usuários' }}
             </td>
           </tr>
@@ -1150,9 +1151,14 @@ const UsuariosTW = {
       </table>
     </div>
 
-    <div v-if="editing" class="bg-white shadow rounded p-4 space-y-3">
-      <h2 class="text-lg font-semibold">{{ form.id ? 'Editar Usuário' : 'Novo Usuário' }}</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+    <!-- Modal de Criar/Editar Usuário -->
+    <div v-if="editing" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div class="bg-gray-50 rounded-lg w-full max-w-4xl h-[90vh] shadow-xl overflow-hidden flex flex-col border border-gray-200">
+        <div class="flex items-center justify-between p-4 border-b">
+          <h2 class="text-lg font-semibold">{{ form.id ? 'Editar Usuário' : 'Novo Usuário' }}</h2>
+          <button @click="cancel" class="text-gray-500 hover:text-gray-700" aria-label="Fechar"><i class="fas fa-times"></i></button>
+        </div>
+      <div class="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-3">
         <div>
           <label class="text-sm font-medium text-gray-700 mb-1 block" for="u-nome">Nome</label>
           <input id="u-nome" v-model="form.name" class="border rounded px-3 py-2 w-full" placeholder="Nome">
@@ -1181,7 +1187,7 @@ const UsuariosTW = {
           <input id="u-pass" v-model="form.password" type="password" class="border rounded px-3 py-2 w-full" :placeholder="form.id ? '••••••' : 'Defina uma senha'">
         </div>
       </div>
-      <div class="flex gap-2">
+      <div class="flex gap-2 justify-end p-4 border-t">
         <button class="px-3 py-2 bg-brand-primary text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
                 @click="save" 
                 :disabled="savingForm">
@@ -1195,6 +1201,7 @@ const UsuariosTW = {
           Cancelar
         </button>
       </div>
+      </div>
     </div>
   </div>
   `,
@@ -1206,8 +1213,6 @@ const UsuariosTW = {
     savingForm: false,
     deletingUserId: null,
     form:{ id:null, name:'', email:'', role:'professor', status:'ativo', password:'' },
-    notifications: [],
-    showNotifications: false,
     successMessage: '',
     errorMessage: ''
   }},
@@ -1308,30 +1313,12 @@ const UsuariosTW = {
         this.errorMessage = '';
       }, 8000);
     },
-    async loadNotifications(){ 
-      try {
-        const r = await api.get('/notifications'); 
-        this.notifications = r.data?.data || []; 
-        this.showNotifications = true; 
-      } catch(e) { 
-        this.$showToast('Erro', 'Erro ao carregar notificações', 'error'); 
-      } 
-    },
-
-    async markAsRead(notificationId) {
-      try {
-        await api.post('/notifications/read', { notification_id: notificationId });
-        this.loadNotifications();
-      } catch(e) {
-        this.$showToast('Erro', 'Erro ao marcar notificação como lida', 'error');
-      }
-    },
     formatDate(dateStr) {
       return new Date(dateStr).toLocaleString('pt-BR');
     }
   },
 
-  async mounted(){ this.load(); this.loadNotifications(); }
+  async mounted(){ this.load(); }
 };
 
 // Componente de Escolas - Recriado seguindo padrão dos outros componentes
@@ -1342,13 +1329,12 @@ const EscolasTW = {
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-bold text-gray-900">Escolas</h1>
-          <p class="mt-1 text-sm text-gray-700">Gerencie as escolas do sistema</p>
         </div>
   <button v-if="canManage" @click="newEscola" 
-    class="px-4 py-2 bg-blue-100 text-blue-900 rounded-lg hover:bg-blue-200 flex items-center space-x-2 border border-blue-300">
-          <i class="fas fa-plus"></i>
+    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2">
+      <i class="fas fa-plus"></i>
     <span>Nova Escola</span>
-        </button>
+    </button>
       </div>
 
       <!-- Filtros -->
@@ -1357,9 +1343,6 @@ const EscolasTW = {
           v-model="searchTerm" 
           placeholder="Buscar escolas..." 
           class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent flex-1 placeholder-gray-700 text-gray-900">
-        <button v-if="canManage" @click="newEscola" class="px-4 py-2 bg-blue-100 text-blue-900 rounded-lg hover:bg-blue-200 transition-colors border border-blue-300">
-          <i class="fas fa-plus mr-2"></i>Nova Escola
-        </button>
       </div>
 
       <!-- Tabela -->
@@ -1367,11 +1350,41 @@ const EscolasTW = {
         <table class="min-w-full">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Endereço</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cidade</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Telefone</th>
-              <th v-if="canManage" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+              <th 
+                class="px-6 py-3 text-left font-semibold text-gray-700 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none"
+                @click="sortBy('name')" @keydown.enter="sortBy('name')" @keydown.space="sortBy('name')" tabindex="0"
+                role="columnheader" :aria-sort="sortField === 'name' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
+                <div class="flex items-center justify-between">
+                  <span>Nome</span>
+                  <svg v-if="sortField === 'name'" class="w-4 h-4" :class="sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                  </svg>
+                </div>
+              </th>
+              <th class="px-6 py-3 text-left font-semibold text-gray-700">Endereço</th>
+              <th 
+                class="px-6 py-3 text-left font-semibold text-gray-700 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none"
+                @click="sortBy('city')" @keydown.enter="sortBy('city')" @keydown.space="sortBy('city')" tabindex="0"
+                role="columnheader" :aria-sort="sortField === 'city' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
+                <div class="flex items-center justify-between">
+                  <span>Cidade</span>
+                  <svg v-if="sortField === 'city'" class="w-4 h-4" :class="sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                  </svg>
+                </div>
+              </th>
+              <th 
+                class="px-6 py-3 text-left font-semibold text-gray-700 cursor-pointer"
+                @click="sortBy('phone')" @keydown.enter="sortBy('phone')" @keydown.space="sortBy('phone')" tabindex="0"
+                role="columnheader" :aria-sort="sortField === 'phone' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
+                <div class="flex items-center justify-between">
+                  <span>Telefone</span>
+                  <svg v-if="sortField === 'phone'" class="w-4 h-4" :class="sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                  </svg>
+                </div>
+              </th>
+              <th v-if="canManage" class="px-6 py-3 text-right font-semibold text-gray-700">Ações</th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
@@ -1387,9 +1400,10 @@ const EscolasTW = {
                   <i class="fas fa-edit mr-1" aria-hidden="true"></i>
                   <span>Editar</span>
                 </button>
-                <button @click="deleteEscola(escola)" class="inline-flex items-center text-red-800 hover:text-red-900 px-2 py-1 border border-red-200 rounded">
+                <button @click="deleteEscola(escola)" :disabled="deletingId === escola.id" class="inline-flex items-center text-red-800 hover:text-red-900 px-2 py-1 border border-red-200 rounded disabled:opacity-60 disabled:cursor-not-allowed">
                   <i class="fas fa-trash mr-1" aria-hidden="true"></i>
-                  <span>Excluir</span>
+                  <span v-if="deletingId === escola.id">Excluindo...</span>
+                  <span v-else>Excluir</span>
                 </button>
               </td>
             </tr>
@@ -1402,27 +1416,30 @@ const EscolasTW = {
         </table>
       </div>
 
-      <!-- Modal de Edição -->
-      <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-          <h2 class="text-lg font-semibold mb-4">{{ editingId ? 'Editar Escola' : 'Nova Escola' }}</h2>
+      <!-- Modal de Edição (padrão unificado) -->
+      <div v-if="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div class="bg-gray-50 rounded-lg w-full max-w-4xl h-[90vh] shadow-xl overflow-hidden flex flex-col border border-gray-200">
+          <div class="flex items-center justify-between p-4 border-b">
+            <h2 class="text-lg font-semibold">{{ editingId ? 'Editar Escola' : 'Nova Escola' }}</h2>
+            <button @click="closeModal" class="text-gray-500 hover:text-gray-700" aria-label="Fechar"><i class="fas fa-times"></i></button>
+          </div>
           
-          <div class="space-y-4">
-            <div>
+          <div class="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="md:col-span-2">
               <label class="block text-sm font-medium text-gray-700 mb-2">Nome *</label>
               <input 
                 v-model="form.name" 
                 type="text" 
                 required
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent">
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </div>
             
-            <div>
+            <div class="md:col-span-2">
               <label class="block text-sm font-medium text-gray-700 mb-2">Endereço</label>
               <textarea 
                 v-model="form.address" 
                 rows="2"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent"></textarea>
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
             </div>
             
             <div>
@@ -1430,7 +1447,7 @@ const EscolasTW = {
               <input 
                 v-model="form.city" 
                 type="text"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent">
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </div>
             
             <div>
@@ -1438,15 +1455,15 @@ const EscolasTW = {
               <input 
                 v-model="form.phone" 
                 type="tel"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent">
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </div>
           </div>
           
-          <div class="flex justify-end space-x-3 mt-6">
-            <button @click="closeModal" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors text-gray-900">
+          <div class="flex justify-end space-x-3 p-4 border-t">
+            <button @click="closeModal" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
               Cancelar
             </button>
-            <button @click="save" :disabled="!form.name" class="px-4 py-2 bg-blue-100 text-blue-900 rounded-lg hover:bg-blue-200 disabled:opacity-50 transition-colors border border-blue-300">
+            <button @click="save" :disabled="!form.name" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors">
               {{ editingId ? 'Atualizar' : 'Salvar' }}
             </button>
           </div>
@@ -1466,26 +1483,51 @@ const EscolasTW = {
         address: '',
         city: '',
         phone: ''
-      }
+      },
+      user: null,
+      deletingId: null,
+      saving: false,
+      sortField: 'name',
+      sortDirection: 'asc'
     };
   },
   
   computed: {
     filteredRows() {
-      if (!this.searchTerm) return this.rows;
-      const term = this.searchTerm.toLowerCase();
-      return this.rows.filter(escola => 
-        escola.name?.toLowerCase().includes(term) ||
-        escola.city?.toLowerCase().includes(term) ||
-        escola.address?.toLowerCase().includes(term)
-      );
+      // Filtra
+      const base = !this.searchTerm ? this.rows : this.rows.filter(escola => {
+        const term = this.searchTerm.toLowerCase();
+        return (
+          (escola.name || '').toLowerCase().includes(term) ||
+          (escola.city || '').toLowerCase().includes(term) ||
+          (escola.address || '').toLowerCase().includes(term)
+        );
+      });
+      // Ordena
+      const dir = this.sortDirection === 'asc' ? 1 : -1;
+      const field = this.sortField;
+      return [...base].sort((a,b)=>{
+        const av = (a?.[field] ?? '').toString().toLowerCase();
+        const bv = (b?.[field] ?? '').toString().toLowerCase();
+        if (av < bv) return -1 * dir;
+        if (av > bv) return 1 * dir;
+        return 0;
+      });
     },
     canManage(){
-      try{ return this.$parent && this.$parent.user && this.$parent.user.role === 'admin'; }catch(e){ return false; }
+      return this.user && this.user.role === 'admin';
     }
   },
   
   methods: {
+    sortBy(field) {
+      if (this.sortField === field) {
+        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.sortField = field;
+        this.sortDirection = 'asc';
+      }
+    },
     async loadEscolas() {
       try {
         console.log('🔄 Carregando escolas...');
@@ -1522,7 +1564,7 @@ const EscolasTW = {
         this.$showToast && this.$showToast('Atenção', 'Nome é obrigatório', 'warning');
         return;
       }
-      
+      this.saving = true;
       try {
         if (this.editingId) {
           const response = await api.post('/schools/update', this.form, { params: { id: this.editingId } });
@@ -1542,17 +1584,19 @@ const EscolasTW = {
       } catch (error) {
         console.error('Erro ao salvar escola:', error);
         this.$showToast && this.$showToast('Erro', 'Erro ao salvar escola', 'error');
+      } finally {
+        this.saving = false;
       }
     },
     
     async deleteEscola(escola) {
-      if (!this._confirmDeleteSchool || this._confirmDeleteSchool !== escola.id) {
-        this._confirmDeleteSchool = escola.id;
-        this.$showToast && this.$showToast('Confirme', `Clique novamente para excluir a escola "${escola.name}"`, 'warning');
-        setTimeout(()=>{ if(this._confirmDeleteSchool===escola.id) this._confirmDeleteSchool=null; }, 3000);
-        return;
-      }
-      this._confirmDeleteSchool = null;
+      const confirmed = await this.$confirmToast(
+        'Confirmar exclusão',
+        `Deseja realmente excluir a escola "${escola.name}"? Esta ação não pode ser desfeita.`,
+        { confirmText: 'Excluir', cancelText: 'Cancelar', type: 'warning', timeoutMs: 15000 }
+      );
+      if (!confirmed) return;
+      this.deletingId = escola.id;
       try {
         const response = await api.post('/schools/delete', {}, { params: { id: escola.id } });
         if (response.data?.ok) {
@@ -1563,13 +1607,26 @@ const EscolasTW = {
         }
       } catch (error) {
         console.error('Erro ao excluir escola:', error);
-        this.$showToast && this.$showToast('Erro', 'Erro ao excluir escola', 'error');
+        const status = error.response?.status;
+        if (status === 403) this.$showToast && this.$showToast('Sem permissão', 'Apenas administradores podem excluir escolas.', 'warning');
+        else if (status === 404) this.$showToast && this.$showToast('Não encontrada', 'Escola não existe mais.', 'info');
+        else this.$showToast && this.$showToast('Erro', 'Erro ao excluir escola', 'error');
+      } finally {
+        this.deletingId = null;
       }
     }
   },
   
   async mounted() {
     console.log('🏫 EscolasTW component mounted!');
+    // Carregar usuário para habilitar ações
+    try {
+      const response = await api.get('/user');
+      this.user = (response.data && response.data.data) ? response.data.data : response.data;
+    } catch (e) {
+      // se falhar, mantém ações invisíveis
+      console.warn('Não foi possível obter o usuário atual.');
+    }
     await this.loadEscolas();
   }
 };
@@ -1594,19 +1651,14 @@ const LegislacoesTW = {
         </button>
       </div>
 
-      <!-- Formulário de Upload (apenas admin) -->
-      <div v-if="showUploadForm && user && user.role === 'admin'" class="bg-white shadow rounded-lg p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold text-gray-900">Nova Legislação</h2>
-          <button @click="cancelUpload" class="text-gray-400 hover:text-gray-600">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
-        </div>
-        
-        <form @submit.prevent="uploadLegislacao" class="space-y-4">
-          <div>
+      <!-- Modal de Upload (apenas admin) -->
+      <div v-if="showUploadForm && user && user.role === 'admin'" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+  <form @submit.prevent="uploadLegislacao" class="bg-gray-50 rounded-lg w-full max-w-4xl h-[90vh] shadow-xl overflow-hidden flex flex-col border border-gray-200">
+          <div class="flex items-center justify-between p-4 border-b">
+            <h2 class="text-lg font-semibold text-gray-900">Nova Legislação</h2>
+            <button type="button" @click="cancelUpload" class="text-gray-500 hover:text-gray-700" aria-label="Fechar"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="flex-1 overflow-y-auto p-6 space-y-4">
             <label class="block text-sm font-medium text-gray-700 mb-2">Título *</label>
             <input 
               v-model="form.titulo" 
@@ -1616,7 +1668,7 @@ const LegislacoesTW = {
               placeholder="Ex: Lei Brasileira de Inclusão da Pessoa com Deficiência">
           </div>
           
-          <div>
+          <div class="px-6">
             <label class="block text-sm font-medium text-gray-700 mb-2">Descrição</label>
             <textarea 
               v-model="form.descricao" 
@@ -1625,7 +1677,7 @@ const LegislacoesTW = {
               placeholder="Breve descrição sobre a legislação..."></textarea>
           </div>
           
-          <div>
+          <div class="px-6">
             <label class="block text-sm font-medium text-gray-700 mb-2">Arquivo PDF *</label>
             <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors">
               <div class="space-y-1 text-center">
@@ -1647,11 +1699,11 @@ const LegislacoesTW = {
             </div>
           </div>
           
-          <div v-if="uploadError" class="bg-red-50 border border-red-200 rounded p-3">
+          <div v-if="uploadError" class="mx-6 bg-red-50 border border-red-200 rounded p-3">
             <p class="text-sm text-red-600">{{ uploadError }}</p>
           </div>
           
-          <div class="flex justify-end space-x-3">
+          <div class="flex justify-end space-x-3 p-4 border-t">
             <button type="button" @click="cancelUpload" class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50">
               Cancelar
             </button>
@@ -1764,11 +1816,19 @@ const LegislacoesTW = {
                 <button 
                   v-if="user && user.role === 'admin'"
                   @click="deleteLegislacao(legislacao)"
-                  class="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                  :disabled="deletingId === legislacao.id"
+                  class="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-60 disabled:cursor-not-allowed">
                   <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                   </svg>
-                  Excluir
+                  <span v-if="deletingId === legislacao.id" class="flex items-center">
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-red-700" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Excluindo...
+                  </span>
+                  <span v-else>Excluir</span>
                 </button>
               </div>
             </div>
@@ -1828,7 +1888,8 @@ const LegislacoesTW = {
         total: 0,
         total_pages: 0
       },
-      user: null
+      user: null,
+      deletingId: null
     }
   },
   async mounted() {
@@ -1848,7 +1909,8 @@ const LegislacoesTW = {
       try {
         const params = {
           page: this.pagination.page,
-          per_page: this.pagination.per_page
+          per_page: this.pagination.per_page,
+          _ts: Date.now()
         };
         
         if (this.searchQuery) {
@@ -1872,7 +1934,7 @@ const LegislacoesTW = {
         this.loading = false;
       }
     },
-    
+
     async search() {
       this.pagination.page = 1;
       await this.loadLegislacoes();
@@ -1884,19 +1946,16 @@ const LegislacoesTW = {
         await this.loadLegislacoes();
       }
     },
-    
+
     getVisiblePages() {
       const current = this.pagination.page;
       const total = this.pagination.total_pages;
       const pages = [];
-      
       const start = Math.max(1, current - 2);
       const end = Math.min(total, current + 2);
-      
       for (let i = start; i <= end; i++) {
         pages.push(i);
       }
-      
       return pages;
     },
     
@@ -1964,24 +2023,51 @@ const LegislacoesTW = {
     },
     
     async deleteLegislacao(legislacao) {
-      if (!this._confirmDeleteLeg || this._confirmDeleteLeg !== legislacao.id) {
-        this._confirmDeleteLeg = legislacao.id;
-        this.$showToast('Confirme', `Clique novamente para excluir a legislação "${legislacao.titulo}"`, 'warning');
-        setTimeout(()=>{ if(this._confirmDeleteLeg===legislacao.id) this._confirmDeleteLeg=null; }, 3000);
-        return;
-      }
-      this._confirmDeleteLeg = null;
+      // Confirmação via toast à direita, com botões
+      const confirmed = await this.$confirmToast(
+        'Confirmar exclusão',
+        `Deseja realmente excluir a legislação "${legislacao.titulo}"? Esta ação não pode ser desfeita.`,
+        { confirmText: 'Excluir', cancelText: 'Cancelar', type: 'warning', timeoutMs: 15000 }
+      );
+      if (!confirmed) return;
+
+      this.deletingId = legislacao.id;
       try {
         const response = await api.delete(`/legislacoes/${legislacao.id}`);
         if (response.data?.ok) {
-          this.$showToast('Sucesso', 'Legislação excluída com sucesso!', 'success');
+          // Detalhes de deleção do backend
+          const info = response.data?.data || {};
+          const hadFile = !!info.had_file;
+          const fileDeleted = !!info.file_deleted;
+          const filename = info.filename || '';
+
+          // Log de diagnóstico no console para ambiente de desenvolvimento
+          try { console.debug('🔧 legislações.delete resp:', { hadFile, fileDeleted, filename }); } catch (e) {}
+
+          // Feedback ao usuário considerando o status do arquivo físico
+          if (hadFile && !fileDeleted) {
+            this.$showToast('Aviso', 'Registro removido, mas o arquivo físico não pôde ser excluído do servidor.', 'warning');
+          } else {
+            this.$showToast('Sucesso', 'Legislação excluída com sucesso!', 'success');
+          }
+          // Remove localmente para resposta imediata
+          this.legislacoes = (this.legislacoes || []).filter(l => l.id !== legislacao.id);
+          // Recarrega do servidor para garantir sincronização
           await this.loadLegislacoes();
         } else {
-          this.$showToast('Erro', response.data?.error || 'Erro ao excluir legislação', 'error');
+          const code = response.data?.error || 'Erro ao excluir legislação';
+          if (code === 'NOT_DELETED') this.$showToast('Aviso', 'Não foi possível remover este documento agora. Tente novamente.', 'warning');
+          else this.$showToast('Erro', code, 'error');
         }
       } catch (error) {
         console.error('Erro ao excluir:', error);
-        this.$showToast('Erro', 'Erro ao excluir legislação', 'error');
+        const status = error.response?.status;
+        if (status === 403) this.$showToast('Sem permissão', 'Apenas administradores podem excluir legislações.', 'warning');
+        else if (status === 404) this.$showToast('Não encontrado', 'Documento não existe mais.', 'info');
+        else if (status === 409) this.$showToast('Aviso', 'Não foi possível remover este documento agora. Tente novamente.', 'warning');
+        else this.$showToast('Erro', 'Erro ao excluir legislação', 'error');
+      } finally {
+        this.deletingId = null;
       }
     },
     
@@ -2146,6 +2232,14 @@ const Layout = {
               </svg>
               Legislações
             </router-link>
+            <button type="button" class="nav-link-tw logout-link w-full text-left" @click.prevent="logout()">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 16l4-4m0 0l-4-4m4 4H7"/>
+                <path d="M7 4h6a2 2 0 012 2v2"/>
+                <path d="M15 16v2a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2"/>
+              </svg>
+              Sair
+            </button>
           </div>
         </nav>
       </aside>
@@ -2153,7 +2247,7 @@ const Layout = {
       <!-- Conteúdo principal -->
       <main class="flex-1 flex flex-col overflow-hidden lg:ml-0">
         <!-- Header melhorado com gradiente e informações úteis -->
-        <header class="flex-shrink-0 bg-gradient-to-r from-blue-600 to-cyan-500  shadow-lg">
+        <header class="flex-shrink-0 bg-blue-600   shadow-lg">
           <div class="px-4 py-3 lg:px-6">
             <div class="flex items-center justify-between">
               <!-- Lado esquerdo: Menu mobile + Info do sistema -->
@@ -2199,13 +2293,6 @@ const Layout = {
               
               <!-- Lado direito: Info do usuário + ações -->
               <div class="flex items-center gap-2 lg:gap-4">
-                <!-- Notificações (se houver) -->
-                <button class="hidden lg:block relative p-2 rounded-md text-white hover:bg-white/10 transition-colors">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5-5v-5a5 5 0 00-10 0v5l-5 5h5m0 0v1a2 2 0 002 2h2a2 2 0 002-2v-1"/>
-                  </svg>
-                </button>
-                
                 <!-- Info do usuário -->
                 <div class="flex items-center gap-2">
                   <div class="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
@@ -2218,15 +2305,13 @@ const Layout = {
                     <p class="text-xs text-white/90 capitalize">{{ user?.role || 'Professor' }}</p>
                   </div>
                 </div>
-                
-                <!-- Botão de logout -->
+                <!-- Botão Sair -->
                 <button 
-                  @click="logout" 
-                  class="px-3 py-2 text-xs lg:text-sm font-medium text-white bg-white/20 backdrop-blur-sm rounded-md hover:bg-white/30 transition-colors border border-white/20">
-                  <svg class="w-4 h-4 lg:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                  </svg>
-                  <span class="hidden lg:inline">Sair</span>
+                  class="px-3 py-1.5 rounded border border-red-200 text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300"
+                  @click="logout" :disabled="loggingOut"
+                  :class="loggingOut ? 'opacity-60 cursor-not-allowed' : ''">
+                  <span v-if="!loggingOut">Sair</span>
+                  <span v-else>Saindo...</span>
                 </button>
               </div>
             </div>
@@ -2244,6 +2329,7 @@ const Layout = {
     return {
       sidebarOpen: window.innerWidth >= 1024, // Aberto em desktop, fechado em mobile
       user: null,
+      loggingOut: false,
       timeInterval: null,
       currentTimeDisplay: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', hour12: false }),
       currentPageTitle: 'ConectAEE',
@@ -2297,13 +2383,40 @@ const Layout = {
       }
     },
     async logout() {
+      if (this.loggingOut) return;
+      this.loggingOut = true;
+      console.log('🔒 Logout iniciado');
       try {
-        await api.post('/logout');
+        // Tenta informar o backend (se o endpoint existir)
+        await api.post('/logout').catch(() => {});
+        console.log('🔒 Logout: backend notificado (se disponível)');
       } catch (error) {
         console.error('Erro no logout:', error);
       } finally {
-        localStorage.removeItem('token');
-        this.$router.push('/login');
+        try {
+          // Fecha a sidebar em mobile para evitar estado inconsistente
+          if (window.innerWidth < 1024) this.sidebarOpen = false;
+          // Limpa token e header Authorization
+          localStorage.removeItem('token');
+          console.log('🔒 Logout: token removido');
+          if (api?.defaults?.headers?.common?.Authorization) delete api.defaults.headers.common['Authorization'];
+          this.user = null;
+          // Feedback visual
+          if (this.$showToast) this.$showToast('Sessão encerrada', 'Você saiu da conta com segurança.', 'success', 3000);
+          // Redireciona via router (suave)
+          if (this.$route.path !== '/login') {
+            await this.$router.push('/login').catch(() => {});
+            console.log('🔒 Logout: navegação para /login');
+          }
+          // Fallback hard caso algo impeça a navegação
+          setTimeout(() => {
+            if (location.hash !== '#/login') location.hash = '#/login';
+            this.loggingOut = false;
+            console.log('🔒 Logout finalizado');
+          }, 50);
+        } catch (e) {
+          this.loggingOut = false;
+        }
       }
     }
   },
@@ -2674,19 +2787,12 @@ const Relatorios = {
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-bold text-gray-900">Relatórios do Sistema</h1>
-          <p class="mt-1 text-sm text-gray-600">Gere relatórios detalhados de alunos, atendimentos e formulários AEE</p>
         </div>
       </div>
 
-      <!-- Etapa 1: Seleção de Aluno -->
+      <!-- Seleção de Aluno e Tipo -->
       <div class="bg-white shadow rounded p-6 space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Buscar Aluno</label>
-            <input v-model="query" @keyup.enter="buscar" 
-                   class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-brand-primary focus:border-transparent" 
-                   placeholder="Digite o nome do aluno..." />
-          </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Selecionar Aluno</label>
             <select v-model="alunoId" @change="carregarDadosAluno"
@@ -2735,61 +2841,37 @@ const Relatorios = {
         </div>
       </div>
 
-      <!-- Resultados do Relatório -->
+      <!-- Resultado do Relatório -->
       <div v-if="dadosRelatorio" class="bg-white shadow rounded overflow-hidden">
         <div class="bg-gray-50 px-6 py-4 border-b">
           <h2 class="text-lg font-semibold text-gray-900">{{ tituloRelatorio }}</h2>
           <p class="text-sm text-gray-600">{{ descricaoRelatorio }}</p>
         </div>
-        
-        <div class="p-6">
-          <!-- Relatório Geral -->
-          <div v-if="tipoRelatorio === 'geral'" class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="space-y-4">
-                <h3 class="font-medium text-gray-900 border-b pb-2">Informações Pessoais</h3>
-                <div class="space-y-2 text-sm">
-                  <p><strong>Nome:</strong> {{ dadosRelatorio.aluno?.name || 'Não informado' }}</p>
-                  <p><strong>Data de Nascimento:</strong> {{ formatarData(dadosRelatorio.aluno?.birthdate) }}</p>
-                  <p><strong>Escola:</strong> {{ dadosRelatorio.aluno?.school || 'Não informada' }}</p>
-                  <p><strong>Série:</strong> {{ dadosRelatorio.aluno?.class || 'Não informada' }}</p>
-                </div>
-              </div>
-              <div class="space-y-4">
-                <h3 class="font-medium text-gray-900 border-b pb-2">Estatísticas</h3>
-                <div class="space-y-2 text-sm">
-                  <p><strong>Total de Atendimentos:</strong> {{ dadosRelatorio.estatisticas?.total_atendimentos || 0 }}</p>
-                  <p><strong>Formulários Preenchidos:</strong> {{ dadosRelatorio.estatisticas?.total_formularios || 0 }}</p>
-                  <p><strong>Último Atendimento:</strong> {{ dadosRelatorio.estatisticas?.ultimo_atendimento }}</p>
-                </div>
+        <div class="p-6 space-y-6">
+          <div class="grid grid-cols-1 md-grid-cols-2 md:grid-cols-2 gap-6">
+            <div class="space-y-4">
+              <h3 class="font-medium text-gray-900 border-b pb-2">Informações Pessoais</h3>
+              <div class="space-y-2 text-sm">
+                <p><strong>Nome:</strong> {{ dadosRelatorio.aluno?.name || 'Não informado' }}</p>
+                <p><strong>Data de Nascimento:</strong> {{ formatarData(dadosRelatorio.aluno?.birthdate) }}</p>
+                <p><strong>Escola:</strong> {{ dadosRelatorio.aluno?.school || 'Não informada' }}</p>
+                <p><strong>Série:</strong> {{ dadosRelatorio.aluno?.class || 'Não informada' }}</p>
               </div>
             </div>
-            <!-- Relatórios de Atendimento incluidos no Geral -->
-            <div class="space-y-3">
-              <h3 class="font-medium text-gray-900 border-b pb-2">Relatórios de Atendimento</h3>
-              <div v-if="dadosRelatorio.atendimentos && dadosRelatorio.atendimentos.length > 0">
-                <div v-for="atendimento in dadosRelatorio.atendimentos" :key="atendimento.id" class="border rounded-lg p-4">
-                  <div class="flex justify-between items-center">
-                    <div class="text-sm text-gray-700">
-                      <span class="font-medium">Data:</span> {{ formatarData(atendimento.data_atendimento || atendimento.date) || '-' }}
-                      <span class="ml-3 font-medium">Período:</span> {{ atendimento.periodo || atendimento.period || '-' }}
-                    </div>
-                    <span class="text-xs px-2 py-1 rounded bg-amber-100 text-amber-700">Atendimento</span>
-                  </div>
-                  <div class="mt-2 text-sm text-gray-700">
-                    <span class="font-medium">Descrição:</span> {{ atendimento.descricao || atendimento.activities || '-' }}
-                  </div>
-                </div>
+            <div class="space-y-4">
+              <h3 class="font-medium text-gray-900 border-b pb-2">Estatísticas</h3>
+              <div class="space-y-2 text-sm">
+                <p><strong>Total de atendimentos:</strong> {{ dadosRelatorio.estatisticas?.total_atendimentos || 0 }}</p>
+                <p><strong>Total de formulários:</strong> {{ dadosRelatorio.estatisticas?.total_formularios || 0 }}</p>
+                <p><strong>PDIs:</strong> {{ dadosRelatorio.estatisticas?.total_pdis || 0 }} — <strong>PAIs:</strong> {{ dadosRelatorio.estatisticas?.total_pais || 0 }}</p>
               </div>
-              <div v-else class="text-gray-500 text-sm">Nenhum relatório de atendimento encontrado.</div>
             </div>
           </div>
 
           <!-- Histórico de Atendimentos -->
           <div v-if="tipoRelatorio === 'atendimentos'" class="space-y-4">
             <div v-if="dadosRelatorio.atendimentos && dadosRelatorio.atendimentos.length > 0">
-              <div v-for="atendimento in dadosRelatorio.atendimentos" :key="atendimento.id" 
-                   class="border rounded-lg p-4 hover:bg-gray-50">
+              <div v-for="atendimento in dadosRelatorio.atendimentos" :key="atendimento.id" class="border rounded-lg p-4 hover:bg-gray-50">
                 <div class="flex justify-between items-start mb-2">
                   <h4 class="font-medium text-gray-900">{{ formatarData(atendimento.data_atendimento) }}</h4>
                   <span class="text-xs text-gray-500">ID: {{ atendimento.id }}</span>
@@ -2799,9 +2881,7 @@ const Relatorios = {
                 <p class="text-sm text-gray-700"><strong>Observações:</strong> {{ atendimento.observacoes || 'Nenhuma observação' }}</p>
               </div>
             </div>
-            <div v-else class="text-center text-gray-500 py-8">
-              Nenhum atendimento registrado para este aluno
-            </div>
+            <div v-else class="text-center text-gray-500 py-8">Nenhum atendimento registrado para este aluno</div>
           </div>
 
           <!-- Formulários AEE -->
@@ -2812,65 +2892,35 @@ const Relatorios = {
                 <i class="fas fa-clipboard-list text-blue-600 mr-2"></i>
                 Anamneses e Entrevistas
               </h3>
-              
               <div v-if="dadosRelatorio.anamneses && dadosRelatorio.anamneses.length > 0">
                 <div class="space-y-4">
-                  <div v-for="anamnese in dadosRelatorio.anamneses" :key="anamnese.id" 
-                       class="border rounded-lg p-4 hover:bg-gray-50">
+                  <div v-for="anamnese in dadosRelatorio.anamneses" :key="anamnese.id" class="border rounded-lg p-4 hover:bg-gray-50">
                     <div class="flex justify-between items-start mb-3">
-                      <h4 class="font-medium text-gray-900">
-                        {{ anamnese.tipo === 'entrevista_responsavel' ? 'Entrevista com Responsável' : 'Anamnese' }}
-                      </h4>
+                      <h4 class="font-medium text-gray-900">{{ anamnese.tipo === 'entrevista_responsavel' ? 'Entrevista com Responsável' : 'Anamnese' }}</h4>
                       <div class="text-xs text-gray-500">
                         {{ formatarData(anamnese.created_at) }}
-                        <span v-if="anamnese.tipo === 'entrevista_responsavel'" class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                          Entrevista
-                        </span>
+                        <span v-if="anamnese.tipo === 'entrevista_responsavel'" class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">Entrevista</span>
                       </div>
                     </div>
-                    
-                    <!-- Conteúdo da Anamnese -->
                     <div v-if="anamnese.tipo !== 'entrevista_responsavel'" class="space-y-2">
                       <div v-for="(value, key) in anamnese.answers" :key="key" class="text-sm">
                         <span class="font-medium text-gray-700">{{ key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) }}:</span>
                         <span class="text-gray-600 ml-1">{{ value }}</span>
                       </div>
                     </div>
-                    
-                    <!-- Conteúdo da Entrevista -->
                     <div v-else class="space-y-3">
                       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div v-if="anamnese.answers.nome_estudante">
-                          <span class="font-medium text-gray-700">Nome do Estudante:</span>
-                          <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_estudante }}</span>
-                        </div>
-                        <div v-if="anamnese.answers.data_nascimento">
-                          <span class="font-medium text-gray-700">Data de Nascimento:</span>
-                          <span class="text-gray-600 ml-1">{{ formatarData(anamnese.answers.data_nascimento) }}</span>
-                        </div>
-                        <div v-if="anamnese.answers.nome_escola">
-                          <span class="font-medium text-gray-700">Escola:</span>
-                          <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_escola }}</span>
-                        </div>
-                        <div v-if="anamnese.answers.serie_ano">
-                          <span class="font-medium text-gray-700">Série/Ano:</span>
-                          <span class="text-gray-600 ml-1">{{ anamnese.answers.serie_ano }}</span>
-                        </div>
-                        <div v-if="anamnese.answers.nome_pai">
-                          <span class="font-medium text-gray-700">Nome do Pai:</span>
-                          <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_pai }}</span>
-                        </div>
-                        <div v-if="anamnese.answers.nome_mae">
-                          <span class="font-medium text-gray-700">Nome da Mãe:</span>
-                          <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_mae }}</span>
-                        </div>
+                        <div v-if="anamnese.answers.nome_estudante"><span class="font-medium text-gray-700">Nome do Estudante:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_estudante }}</span></div>
+                        <div v-if="anamnese.answers.data_nascimento"><span class="font-medium text-gray-700">Data de Nascimento:</span> <span class="text-gray-600 ml-1">{{ formatarData(anamnese.answers.data_nascimento) }}</span></div>
+                        <div v-if="anamnese.answers.nome_escola"><span class="font-medium text-gray-700">Escola:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_escola }}</span></div>
+                        <div v-if="anamnese.answers.serie_ano"><span class="font-medium text-gray-700">Série/Ano:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.serie_ano }}</span></div>
+                        <div v-if="anamnese.answers.nome_pai"><span class="font-medium text-gray-700">Nome do Pai:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_pai }}</span></div>
+                        <div v-if="anamnese.answers.nome_mae"><span class="font-medium text-gray-700">Nome da Mãe:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_mae }}</span></div>
                       </div>
-                      
                       <div v-if="anamnese.answers.motivo_entrevista" class="mt-3">
                         <span class="font-medium text-gray-700">Motivo da Entrevista:</span>
                         <p class="text-gray-600 mt-1">{{ anamnese.answers.motivo_entrevista }}</p>
                       </div>
-                      
                       <div v-if="anamnese.answers.informacoes_complementares" class="mt-3">
                         <span class="font-medium text-gray-700">Informações Complementares:</span>
                         <p class="text-gray-600 mt-1">{{ anamnese.answers.informacoes_complementares }}</p>
@@ -2879,139 +2929,113 @@ const Relatorios = {
                   </div>
                 </div>
               </div>
-              
-              <div v-else class="text-center text-gray-500 py-8">
-                <i class="fas fa-clipboard-list text-3xl mb-2"></i>
-                <p>Nenhuma anamnese ou entrevista registrada para este aluno</p>
-              </div>
+              <div v-else class="text-center text-gray-500 py-8"><i class="fas fa-clipboard-list text-3xl mb-2"></i><p>Nenhuma anamnese ou entrevista registrada para este aluno</p></div>
             </div>
-            
+
             <!-- PDIs -->
             <div class="bg-white border rounded-lg p-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <i class="fas fa-tasks text-green-600 mr-2"></i>
-                Planos de Desenvolvimento Individual (PDIs)
-              </h3>
-              
+              <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center"><i class="fas fa-tasks text-green-600 mr-2"></i>Planos de Desenvolvimento Individual (PDIs)</h3>
               <div v-if="dadosRelatorio.pdis && dadosRelatorio.pdis.length > 0">
                 <div class="space-y-4">
-                  <div v-for="pdi in dadosRelatorio.pdis" :key="pdi.id" 
-                       class="border rounded-lg p-4 hover:bg-gray-50">
+                  <div v-for="pdi in dadosRelatorio.pdis" :key="pdi.id" class="border rounded-lg p-4 hover:bg-gray-50">
                     <div class="flex justify-between items-start mb-3">
                       <h4 class="font-medium text-gray-900">PDI #{{ pdi.id }}</h4>
-                      <div class="text-xs">
-                        <span class="px-2 py-1 rounded-full text-xs" 
-                              :class="pdi.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
-                          {{ pdi.status }}
-                        </span>
-                      </div>
+                      <div class="text-xs"><span class="px-2 py-1 rounded-full text-xs" :class="pdi.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">{{ pdi.status }}</span></div>
                     </div>
-                    
                     <div class="space-y-2 text-sm">
-                      <div v-if="pdi.objectives">
-                        <span class="font-medium text-gray-700">Objetivos:</span>
-                        <p class="text-gray-600 mt-1">{{ pdi.objectives }}</p>
-                      </div>
-                      <div v-if="pdi.strategies">
-                        <span class="font-medium text-gray-700">Estratégias:</span>
-                        <p class="text-gray-600 mt-1">{{ pdi.strategies }}</p>
-                      </div>
+                      <div v-if="pdi.objectives"><span class="font-medium text-gray-700">Objetivos:</span><p class="text-gray-600 mt-1">{{ pdi.objectives }}</p></div>
+                      <div v-if="pdi.strategies"><span class="font-medium text-gray-700">Estratégias:</span><p class="text-gray-600 mt-1">{{ pdi.strategies }}</p></div>
                       <div class="grid grid-cols-2 gap-4 mt-3">
-                        <div v-if="pdi.start_date">
-                          <span class="font-medium text-gray-700">Data Início:</span>
-                          <span class="text-gray-600 ml-1">{{ formatarData(pdi.start_date) }}</span>
-                        </div>
-                        <div v-if="pdi.end_date">
-                          <span class="font-medium text-gray-700">Data Fim:</span>
-                          <span class="text-gray-600 ml-1">{{ formatarData(pdi.end_date) }}</span>
-                        </div>
+                        <div v-if="pdi.start_date"><span class="font-medium text-gray-700">Data Início:</span><span class="text-gray-600 ml-1">{{ formatarData(pdi.start_date) }}</span></div>
+                        <div v-if="pdi.end_date"><span class="font-medium text-gray-700">Data Fim:</span><span class="text-gray-600 ml-1">{{ formatarData(pdi.end_date) }}</span></div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              
-              <div v-else class="text-center text-gray-500 py-8">
-                <i class="fas fa-tasks text-3xl mb-2"></i>
-                <p>Nenhum PDI registrado para este aluno</p>
-              </div>
+              <div v-else class="text-center text-gray-500 py-8"><i class="fas a-tasks text-3xl mb-2"></i><p>Nenhum PDI registrado para este aluno</p></div>
             </div>
-            
-            <!-- Planos de Atendimento Individualizados (PAIs) -->
+
+            <!-- PAIs -->
             <div class="bg-white border rounded-lg p-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <i class="fas fa-file-alt text-purple-600 mr-2"></i>
-                Planos de Atendimento Individualizados (PAIs)
-              </h3>
-              
+              <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center"><i class="fas fa-file-alt text-purple-600 mr-2"></i>Planos de Atendimento Individualizados (PAIs)</h3>
               <div v-if="dadosRelatorio.pais && dadosRelatorio.pais.length > 0">
                 <div class="space-y-4">
-                  <div v-for="pai in dadosRelatorio.pais" :key="pai.id" 
-                       class="border rounded-lg p-4 hover:bg-gray-50">
+                  <div v-for="pai in dadosRelatorio.pais" :key="pai.id" class="border rounded-lg p-4 hover:bg-gray-50">
                     <div class="flex justify-between items-start mb-3">
                       <h4 class="font-medium text-gray-900">PAI #{{ pai.id }}</h4>
-                      <div class="text-xs">
-                        <span class="px-2 py-1 rounded-full text-xs" 
-                              :class="pai.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
-                          {{ pai.status }}
-                        </span>
-                      </div>
+                      <div class="text-xs"><span class="px-2 py-1 rounded-full text-xs" :class="pai.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">{{ pai.status }}</span></div>
                     </div>
-                    
                     <div class="space-y-2 text-sm">
-                      <div v-if="pai.objectives">
-                        <span class="font-medium text-gray-700">Objetivos:</span>
-                        <p class="text-gray-600 mt-1">{{ pai.objectives }}</p>
-                      </div>
-                      <div v-if="pai.strategies">
-                        <span class="font-medium text-gray-700">Estratégias:</span>
-                        <p class="text-gray-600 mt-1">{{ pai.strategies }}</p>
-                      </div>
+                      <div v-if="pai.objectives"><span class="font-medium text-gray-700">Objetivos:</span><p class="text-gray-600 mt-1">{{ pai.objectives }}</p></div>
+                      <div v-if="pai.strategies"><span class="font-medium text-gray-700">Estratégias:</span><p class="text-gray-600 mt-1">{{ pai.strategies }}</p></div>
                       <div class="grid grid-cols-2 gap-4 mt-3">
-                        <div v-if="pai.start_date">
-                          <span class="font-medium text-gray-700">Data Início:</span>
-                          <span class="text-gray-600 ml-1">{{ formatarData(pai.start_date) }}</span>
-                        </div>
-                        <div v-if="pai.end_date">
-                          <span class="font-medium text-gray-700">Data Fim:</span>
-                          <span class="text-gray-600 ml-1">{{ formatarData(pai.end_date) }}</span>
-                        </div>
+                        <div v-if="pai.start_date"><span class="font-medium text-gray-700">Data Início:</span><span class="text-gray-600 ml-1">{{ formatarData(pai.start_date) }}</span></div>
+                        <div v-if="pai.end_date"><span class="font-medium text-gray-700">Data Fim:</span><span class="text-gray-600 ml-1">{{ formatarData(pai.end_date) }}</span></div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              
-              <div v-else class="text-center text-gray-500 py-8">
-                <i class="fas fa-file-alt text-3xl mb-2"></i>
-                <p>Nenhum PAI registrado para este aluno</p>
-              </div>
+              <div v-else class="text-center text-gray-500 py-8"><i class="fas fa-file-alt text-3xl mb-2"></i><p>Nenhum PAI registrado para este aluno</p></div>
             </div>
           </div>
-          
-          <div v-if="tipoRelatorio === 'evolucao'" class="text-center text-gray-700 py-8">
-            Relatório de evolução em desenvolvimento
+
+          <div v-if="tipoRelatorio === 'evolucao'" class="text-center text-gray-700 py-8">Relatório de evolução em desenvolvimento</div>
+
+          <!-- Notas e Análises do Aluno -->
+          <div class="bg-white border rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center"><i class="fas fa-sticky-note text-amber-600 mr-2"></i>Notas e Análises do Aluno</h3>
+            <!-- Nova nota manual -->
+            <div class="mb-4 p-3 border rounded bg-gray-50">
+              <div class="grid grid-cols-1 md:grid-cols-6 gap-2 items-end">
+                <div class="md:col-span-2">
+                  <label class="block text-xs text-gray-600 mb-1">Título (opcional)</label>
+                  <input v-model="novaNota.title" class="w-full border rounded px-3 py-2 text-sm" placeholder="Ex.: Observações de aula">
+                </div>
+                <div class="md:col-span-3">
+                  <label class="block text-xs text-gray-600 mb-1">Conteúdo</label>
+                  <input v-model="novaNota.content" class="w-full border rounded px-3 py-2 text-sm" placeholder="Escreva uma observação rápida">
+                </div>
+                <div class="md:col-span-1 text-right">
+                  <button class="px-3 py-2 bg-amber-600 text-white rounded text-sm w-full md:w-auto" :disabled="!novaNota.content" @click="criarNotaManual">Adicionar</button>
+                </div>
+              </div>
+            </div>
+            <div v-if="dadosRelatorio.notes && dadosRelatorio.notes.length" class="space-y-4">
+              <div v-for="n in dadosRelatorio.notes" :key="n.id" class="border rounded-lg p-4">
+                <div class="flex justify-between items-start mb-2">
+                  <div>
+                    <div class="text-sm text-gray-500">{{ new Date(n.created_at).toLocaleString('pt-BR') }} <span v-if="n.source" class="ml-2 px-2 py-0.5 text-xs rounded bg-gray-100 text-gray-700">{{ n.source }}</span></div>
+                    <div class="font-medium text-gray-900">{{ n.title || 'Nota' }}</div>
+                  </div>
+                  <button class="text-blue-600 text-sm hover:underline" @click="n.__editing = !n.__editing">{{ n.__editing ? 'Cancelar' : 'Editar' }}</button>
+                </div>
+                <div v-if="!n.__editing" class="whitespace-pre-wrap text-gray-800 text-sm">{{ n.content }}</div>
+                <div v-else class="space-y-2">
+                  <input v-model="n.title" class="w-full border rounded px-3 py-2 text-sm" placeholder="Título (opcional)">
+                  <textarea v-model="n.content" rows="6" class="w-full border rounded px-3 py-2 text-sm"></textarea>
+                  <div class="text-right"><button class="px-4 py-2 bg-green-600 text-white rounded text-sm" @click="salvarNota(n)">Salvar</button></div>
+                </div>
+              </div>
+            </div>
+            <div v-else class="text-sm text-gray-500">Nenhuma nota registrada para este aluno.</div>
           </div>
         </div>
       </div>
 
-      <!-- Análise IA -->
+      <!-- Análise IA (pré-visualização do texto gerado) -->
       <div v-if="analiseIA_resultado" class="bg-white shadow rounded p-6">
         <h2 class="text-lg font-semibold mb-4 text-purple-800">🤖 Análise com Inteligência Artificial</h2>
-        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
-          <p class="text-sm text-purple-700">{{ analiseIA_resultado }}</p>
-        </div>
+        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4"><p class="text-sm text-purple-700">{{ analiseIA_resultado }}</p></div>
       </div>
     </div>
   `,
   data(){
     return {
-  query: '',
+      query: '',
       alunos: [],
-  alunoFiltroPDI: '',
-  alunoFiltroPlano: '',
       alunoId: '',
-      alunoSelecionado: null,
       tipoRelatorio: 'geral',
       dadosRelatorio: null,
       carregandoRelatorio: false,
@@ -3019,7 +3043,8 @@ const Relatorios = {
       carregandoIA: false,
       analiseIA_resultado: null,
       erroIA: null,
-      tentouGerar: false
+      tentouGerar: false,
+      novaNota: { title: '', content: '' }
     };
   },
   computed: {
@@ -3037,133 +3062,57 @@ const Relatorios = {
       const aluno = this.dadosRelatorio.aluno;
       return `Relatório detalhado de ${aluno.name} - ${aluno.school || 'Escola não informada'}`;
     },
-    
-    alertaQualidadeDados() {
-      if (!this.dadosRelatorio) return null;
-      
-      const issues = [];
-      const aluno = this.dadosRelatorio.aluno;
-      const stats = this.dadosRelatorio.estatisticas;
-      
-      if (!aluno?.name || aluno.name === 'Não informado') issues.push('nome não informado');
-  if (!aluno?.birthdate) issues.push('data de nascimento não informada');
-      if (!aluno?.school) issues.push('escola não informada');
-      if (!stats?.total_atendimentos || stats.total_atendimentos === 0) issues.push('nenhum atendimento registrado');
-      
-      if (issues.length === 0) return null;
-      
-      return `Este relatório possui dados limitados: ${issues.join(', ')}. Recomenda-se completar as informações do aluno antes de usar este relatório oficialmente.`;
-    },
-    
     podeExportarPDF() {
       if (!this.dadosRelatorio) return false;
       const aluno = this.dadosRelatorio.aluno;
-      const stats = this.dadosRelatorio.estatisticas;
-      
-      // Permite PDF se pelo menos nome e escola estão preenchidos
       return aluno?.name && aluno.name !== 'Não informado' && aluno?.school;
     },
-    
     podeAnalisarIA() {
       if (!this.dadosRelatorio) return false;
       const stats = this.dadosRelatorio.estatisticas;
-      
-      // Permite IA apenas se há pelo menos 1 atendimento
       return stats?.total_atendimentos > 0;
-    }
-  },
-  computed: {
-    progressoPDI(){ return (this.currentStep / (this.totalSteps || 1)) * 100; },
-    alunosFiltradosPDI(){
-      const t=(this.alunoFiltroPDI||'').toLowerCase();
-      if(!t) return this.alunos;
-      return this.alunos.filter(a=> String(a.name||'').toLowerCase().includes(t));
     }
   },
   methods: {
     async buscar(){
-      const params = { q: this.query, per_page: 50 };
-      try { 
-        const r = await api.get('/students', { params }); 
-        this.alunos = (r.data?.data?.rows)||[]; 
+      const params = {};
+      if (this.query) params.q = this.query;
+      params.per_page = 200;
+      try {
+        const r = await api.get('/students', { params });
+        this.alunos = (r.data?.data?.rows) || [];
+      } catch(e){
+        console.error('Erro ao carregar alunos:', e);
+        this.$showToast && this.$showToast('Erro', 'Erro ao carregar alunos', 'error');
       }
-      catch(e){ 
-        console.error('Erro ao buscar alunos:', e);
-        this.$showToast('Erro', 'Erro ao buscar alunos', 'error'); 
-      }
-    },
-    
-    onAlunoSelecionado() {
-      this.tentouGerar = false;
-      this.dadosRelatorio = null;
-      this.analiseIA_resultado = null;
-      
-      if (this.alunoId) {
-        this.alunoSelecionado = this.alunos.find(a => a.id == this.alunoId);
-      } else {
-        this.alunoSelecionado = null;
-      }
-    },
-    
-    onTipoChanged() {
-      // Limpar relatório anterior quando tipo mudar
-      this.dadosRelatorio = null;
-      this.analiseIA_resultado = null;
-    },
-    
-    getDescricaoTipo() {
-      const descricoes = {
-        'geral': 'Informações completas do aluno com estatísticas gerais',
-        'atendimentos': 'Lista detalhada de todos os atendimentos realizados',
-        'formularios': 'Histórico de formulários AEE preenchidos (em desenvolvimento)',
-        'evolucao': 'Análise de progresso e evolução do aluno (em desenvolvimento)'
-      };
-      return descricoes[this.tipoRelatorio] || '';
     },
     async carregarDadosAluno() {
       if (!this.alunoId) {
         this.dadosRelatorio = null;
         return;
       }
-      // Auto-gerar relatório quando aluno for selecionado
       await this.gerarRelatorio();
     },
     async gerarRelatorio(){
-      if(!this.alunoId) {
-        this.tentouGerar = true;
-        return;
-      }
-      
+      if(!this.alunoId) { this.tentouGerar = true; return; }
       this.carregandoRelatorio = true;
       try {
-        // Carregar dados completos do aluno usando a API de relatórios
-        const response = await api.get('/reports/student', { 
-          params: { student_id: this.alunoId } 
-        });
+        const response = await api.get('/reports/student', { params: { student_id: this.alunoId } });
         const reportData = response.data?.data || response.data;
+        if (!reportData) throw new Error('Dados do relatório não encontrados');
 
-        if (!reportData) {
-          throw new Error('Dados do relatório não encontrados');
-        }
-
-        // Carregar atendimentos adicionais se necessário
+        // Atendimentos (opcional)
         let atendimentos = [];
         if (this.tipoRelatorio === 'atendimentos' || this.tipoRelatorio === 'geral') {
           try {
-            const atendimentosResponse = await api.get('/atendimentos', { 
-              params: { aluno_id: this.alunoId } 
-            });
-            atendimentos = atendimentosResponse.data?.data?.rows || [];
-          } catch(e) {
-            console.warn('Erro ao carregar atendimentos:', e);
-          }
+            const at = await api.get('/atendimentos', { params: { aluno_id: this.alunoId } });
+            atendimentos = at.data?.data?.rows || [];
+          } catch(e) { console.warn('Erro ao carregar atendimentos:', e); }
         }
 
-        // Calcular estatísticas baseadas nos dados do relatório
         const estatisticas = {
           total_atendimentos: atendimentos.length,
           total_formularios: (reportData.anamneses?.length || 0) + (reportData.pdis?.length || 0) + (reportData.pais?.length || 0),
-          ultimo_atendimento: reportData.attendance?.length > 0 ? reportData.attendance[0].date : null,
           total_pdis: reportData.pdis?.length || 0,
           total_pais: reportData.pais?.length || 0,
           total_anamneses: reportData.anamneses?.length || 0
@@ -3177,109 +3126,110 @@ const Relatorios = {
           pdis: reportData.pdis || [],
           pais: reportData.pais || [],
           attendance: reportData.attendance || [],
-          weekly_plans: reportData.weekly_plans || []
+          weekly_plans: reportData.weekly_plans || [],
+          notes: reportData.notes || []
         };
-
-        // Mensagens de vazio mais informativas
-        if ((this.tipoRelatorio === 'atendimentos') && atendimentos.length === 0) {
-          this.$showToast && this.$showToast('Informação', 'Nenhum atendimento registrado para este aluno.', 'info');
-        }
-        if (this.tipoRelatorio === 'formularios' && (!this.dadosRelatorio.anamneses.length && !this.dadosRelatorio.pdis.length && !this.dadosRelatorio.pais.length)) {
-          this.$showToast && this.$showToast('Informação', 'Nenhum formulário AEE encontrado para este aluno.', 'info');
-        }
-
-      } catch(e){ 
+      } catch(e){
         console.error('Erro ao gerar relatório:', e);
-        const errorMsg = e.response?.data?.error || e.response?.data?.message || e.message;
-        this.$showToast('Erro', 'Erro ao gerar relatório: ' + errorMsg, 'error'); 
+        const msg = e.response?.data?.error || e.response?.data?.message || e.message;
+        this.$showToast && this.$showToast('Erro', 'Erro ao gerar relatório: ' + msg, 'error');
       } finally {
         this.carregandoRelatorio = false;
       }
     },
     async exportarPDF(){
       if (!this.dadosRelatorio) return;
-      
       this.carregandoPDF = true;
       try {
         const token = localStorage.getItem('token');
-        if (!token) {
-          this.$showToast('Erro', 'Token de autenticação não encontrado. Faça login novamente.', 'error');
-          return;
-        }
+        if (!token) { this.$showToast && this.$showToast('Erro', 'Faça login novamente.', 'error'); return; }
         const url = `${CONFIG.API_BASE}/reports/student/pdf?student_id=${this.alunoId}&tipo=${this.tipoRelatorio}&token=${encodeURIComponent(token)}`;
         window.open(url, '_blank');
       } catch(e) {
-        this.$showToast('Erro', 'Erro ao exportar PDF: ' + e.message, 'error');
-      } finally {
-        this.carregandoPDF = false;
-      }
+        this.$showToast && this.$showToast('Erro', 'Erro ao exportar PDF: ' + e.message, 'error');
+      } finally { this.carregandoPDF = false; }
     },
     async analiseIA(){
       if (!this.dadosRelatorio) return;
-      
-      this.carregandoIA = true; 
-      this.erroIA = null; 
-      this.analiseIA_resultado = null;
-      
+      this.carregandoIA = true; this.erroIA = null; this.analiseIA_resultado = null;
       try {
-        // Simular análise IA (a ser implementado com serviço real)
-        const analiseSimulada = `
-Análise automatizada do aluno ${this.dadosRelatorio.aluno.name}:
+        const resp = await api.get('/ai/evaluate-student', { params: { student_id: this.alunoId } });
+        const r = resp.data?.data || resp.data || {};
+        const linhas = [];
+        linhas.push(`Análise automatizada do aluno ${this.dadosRelatorio.aluno.name}:`);
+        if (r.resumo) { linhas.push('\n📌 Resumo'); linhas.push(String(r.resumo)); }
+        if (Array.isArray(r.forcas) && r.forcas.length) { linhas.push('\n💪 Forças'); r.forcas.forEach(f=>linhas.push(`- ${f}`)); }
+        if (Array.isArray(r.desafios) && r.desafios.length) { linhas.push('\n⚠️ Desafios'); r.desafios.forEach(d=>linhas.push(`- ${d}`)); }
+        if (Array.isArray(r.objetivos_smart) && r.objetivos_smart.length) { linhas.push('\n🎯 Objetivos SMART'); r.objetivos_smart.forEach(o=>linhas.push(`- ${o}`)); }
+        if (Array.isArray(r.estrategias_recomendadas) && r.estrategias_recomendadas.length) { linhas.push('\n🧩 Estratégias e Atividades Recomendadas'); r.estrategias_recomendadas.forEach(e=>linhas.push(`- ${e}`)); }
+        if (!linhas.length) linhas.push('Não foi possível gerar uma análise detalhada no momento.');
+        this.analiseIA_resultado = linhas.join('\n');
 
-📊 RESUMO ESTATÍSTICO:
-- Total de atendimentos registrados: ${this.dadosRelatorio.estatisticas.total_atendimentos}
-- Frequência de atendimentos: ${this.dadosRelatorio.estatisticas.total_atendimentos > 0 ? 'Regular' : 'Irregular'}
-
-📈 PONTOS DE ATENÇÃO:
-${this.dadosRelatorio.estatisticas.total_atendimentos === 0 
-  ? '- Aluno ainda não possui atendimentos registrados. Recomenda-se iniciar acompanhamento.' 
-  : '- Acompanhamento em andamento. Continue monitorando o progresso.'}
-
-🎯 RECOMENDAÇÕES:
-- Manter registro consistente dos atendimentos
-- Avaliar periodicidade dos encontros
-- Documentar evolução do aluno
-
-⚠️ Nota: Esta é uma análise preliminar. Para avaliação completa, consulte um profissional especializado.
-        `;
-        
-        // Simular delay da IA
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        this.analiseIA_resultado = analiseSimulada.trim();
-        
+        // Persistir como nota
+        try {
+          await api.post('/student-notes/create', {
+            student_id: this.alunoId,
+            title: `Análise de IA - ${new Date().toLocaleDateString('pt-BR')}`,
+            content: this.analiseIA_resultado,
+            source: 'IA'
+          });
+          this.$showToast && this.$showToast('Sucesso', 'Análise salva no histórico do aluno.', 'success');
+          await this.gerarRelatorio();
+        } catch (e) {
+          console.warn('Falha ao salvar nota de IA:', e);
+        }
       } catch(err){
         this.erroIA = err?.response?.data?.error || err.message || 'Erro na análise com IA';
-      } finally { 
-        this.carregandoIA = false; 
+        this.$showToast && this.$showToast('Erro', this.erroIA, 'error');
+      } finally { this.carregandoIA = false; }
+    },
+    async salvarNota(nota){
+      if (!nota || !nota.id) return;
+      try {
+        await api.post('/student-notes/update', { id: nota.id, title: nota.title, content: nota.content });
+        nota.__editing = false;
+        this.$showToast && this.$showToast('Sucesso', 'Nota atualizada.', 'success');
+        await this.gerarRelatorio();
+      } catch(e) {
+        console.error('Erro ao atualizar nota:', e);
+        const msg = e.response?.data?.error || e.message;
+        this.$showToast && this.$showToast('Erro', 'Não foi possível salvar a nota: ' + msg, 'error');
+      }
+    },
+    async criarNotaManual(){
+      if (!this.alunoId || !this.novaNota.content) return;
+      try {
+        await api.post('/student-notes/create', {
+          student_id: this.alunoId,
+          title: this.novaNota.title || null,
+          content: this.novaNota.content,
+          source: 'manual'
+        });
+        this.$showToast && this.$showToast('Sucesso', 'Nota adicionada ao histórico do aluno.', 'success');
+        this.novaNota = { title: '', content: '' };
+        await this.gerarRelatorio();
+      } catch (e) {
+        console.error('Erro ao criar nota manual:', e);
+        const msg = e.response?.data?.error || e.message;
+        this.$showToast && this.$showToast('Erro', 'Não foi possível adicionar a nota: ' + msg, 'error');
       }
     },
     formatarData(data) {
       if (!data) return 'Não informado';
-      try {
-        return new Date(data).toLocaleDateString('pt-BR');
-      } catch(e) {
-        return 'Data inválida';
-      }
+      try { return new Date(data).toLocaleDateString('pt-BR'); } catch(e) { return 'Data inválida'; }
     },
-    
-    
     calcularIdade(dataNascimento) {
       if (!dataNascimento) return 0;
       const nascimento = new Date(dataNascimento);
       const hoje = new Date();
       let idade = hoje.getFullYear() - nascimento.getFullYear();
       const mes = hoje.getMonth() - nascimento.getMonth();
-      if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
-        idade--;
-      }
+      if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) idade--;
       return idade;
     },
     pretty(o){ try{ return JSON.stringify(o, null, 2); }catch(e){ return String(o); } }
   },
-  async mounted() {
-    await this.buscar(); // Carregar alunos automaticamente
-  }
+  async mounted(){ await this.buscar(); }
 };
 
 
@@ -3682,11 +3632,7 @@ const EntrevistaResponsavel = {
     progressPercentage() {
       return (this.currentStep / (this.totalSteps || 1)) * 100;
     },
-    alunosFiltradosPlano(){
-      const t = (this.alunoFiltroPlano||'').toLowerCase();
-      if(!t) return this.alunos;
-      return this.alunos.filter(a=> String(a.name||'').toLowerCase().includes(t));
-    }
+    
   },
   
   created() {
@@ -3710,7 +3656,7 @@ const EntrevistaResponsavel = {
       }
     },
     
-    preencherDadosAlunoEntrevista() {
+    async preencherDadosAlunoEntrevista() {
       if (this.form.student_id) {
         const aluno = this.alunos.find(a => a.id == this.form.student_id);
         if (aluno) {
@@ -3735,6 +3681,33 @@ const EntrevistaResponsavel = {
             this.form.telefone = aluno.responsible_phone;
           }
         }
+        // Buscar última entrevista do aluno para edição
+        try {
+          const r = await api.get('/entrevistas-responsavel/list', { params: { student_id: this.form.student_id, per_page: 1 } });
+          const rows = r.data?.data?.rows || r.data?.data || r.data?.rows || [];
+          const ultimo = Array.isArray(rows) && rows.length ? rows[0] : null;
+          if (ultimo) {
+            // Guardar id para update
+            this.form.id = ultimo.id;
+            // Prefill campos básicos se existirem
+            this.form.escola = ultimo.nome_escola || this.form.escola;
+            this.form.serie = ultimo.serie_ano || this.form.serie;
+            this.form.turno = ultimo.turno || this.form.turno;
+            this.form.nome_responsavel = ultimo.nome_responsavel || this.form.nome_responsavel;
+            this.form.telefone = ultimo.telefone || this.form.telefone;
+            this.form.email = ultimo.email || this.form.email;
+            this.form.diagnostico = ultimo.diagnostico || this.form.diagnostico;
+            this.form.medicamentos = ultimo.medicamentos || this.form.medicamentos;
+            this.form.profissionais = ultimo.profissionais || this.form.profissionais;
+            this.form.comportamento_casa = ultimo.comportamento_casa || this.form.comportamento_casa;
+            this.form.dificuldades = ultimo.dificuldades || this.form.dificuldades;
+            this.form.habilidades = ultimo.habilidades || this.form.habilidades;
+            this.form.expectativas = ultimo.expectativas || this.form.expectativas;
+            this.form.informacoes_adicionais = ultimo.informacoes_adicionais || this.form.informacoes_adicionais;
+          }
+        } catch (e) {
+          console.warn('Não foi possível carregar entrevista existente:', e);
+        }
       }
     },
 
@@ -3744,6 +3717,36 @@ const EntrevistaResponsavel = {
         if (escola) {
           this.form.escola = escola.name;
         }
+      }
+    },
+
+    // Navegação entre etapas
+    nextStep() {
+      // Valida a etapa atual antes de avançar
+      if (!this.validateCurrentStep()) return;
+      if (this.currentStep < this.totalSteps) {
+        this.currentStep += 1;
+        // Atualiza o maior passo alcançado para liberar navegação pelos "pills"
+        if (this.currentStep > this.maxCompletedStep) {
+          this.maxCompletedStep = this.currentStep;
+        }
+      }
+      // Move o foco para o topo do card para melhor UX
+      try { document.querySelector('.step-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (_) {}
+    },
+
+    previousStep() {
+      if (this.currentStep > 1) {
+        this.currentStep -= 1;
+      }
+      try { document.querySelector('.step-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (_) {}
+    },
+
+    goToStep(step) {
+      // Permite ir apenas até o maior passo concluído
+      if (step >= 1 && step <= this.maxCompletedStep) {
+        this.currentStep = step;
+        try { document.querySelector('.step-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (_) {}
       }
     },
 
@@ -3832,13 +3835,18 @@ const EntrevistaResponsavel = {
         
         // console.log('Dados sendo enviados:', dadosLimpos);
         
-        const response = await api.post('/entrevistas-responsavel', dadosLimpos);
+        let response;
+        if (this.form.id) {
+          response = await api.post('/entrevistas-responsavel/update', { id: this.form.id, ...dadosLimpos });
+        } else {
+          response = await api.post('/entrevistas-responsavel', dadosLimpos);
+        }
         if (response.data?.ok) {
           // Salvar dados da entrevista no localStorage para evitar duplicação
           const interviewKey = `interview_${this.form.student_id}`;
           localStorage.setItem(interviewKey, JSON.stringify(this.form));
           
-          this.$showToast('Sucesso', 'Entrevista salva com sucesso!', 'success');
+          this.$showToast('Sucesso', this.form.id ? 'Entrevista atualizada com sucesso!' : 'Entrevista salva com sucesso!', 'success');
           this.$router.push('/');
         } else {
           this.$showToast('Erro', 'Erro ao salvar entrevista', 'error');
@@ -3955,8 +3963,7 @@ const PDI = {
                       <option value="">Selecione um aluno</option>
                       <option v-for="aluno in alunos" :key="aluno.id" :value="aluno.id">{{ aluno.name }}</option>
                     </select>
-                      alunos: [],
-                      escolas: [],
+                  </div>
 
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -3969,14 +3976,17 @@ const PDI = {
                       </select>
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Ano/Série</label>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Série/Ano</label>
                       <input v-model="form.ano_serie" type="text" required 
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
                     </div>
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">Professor AEE</label>
-                      <input v-model="form.professor_aee" type="text" required 
+                      <select v-model="form.professor_aee" required
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                        <option value="">Selecione</option>
+                        <option v-for="p in professores" :key="p.id" :value="p.name">{{ p.name }}</option>
+                      </select>
                     </div>
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">Período</label>
@@ -4185,6 +4195,8 @@ const PDI = {
       loading: false,
       validationErrors: {},
       alunos: [],
+  escolas: [],
+      professores: [],
       form: {
         student_id: '',
         escola: '',
@@ -4218,7 +4230,7 @@ const PDI = {
     }
   },
   async mounted() {
-    await Promise.all([this.carregarAlunos(), this.carregarEscolas()]);
+    await Promise.all([this.carregarAlunos(), this.carregarEscolas(), this.carregarProfessores()]);
   },
   methods: {
     async carregarAlunos() {
@@ -4244,8 +4256,18 @@ const PDI = {
         this.escolas = [];
       }
     },
+    async carregarProfessores() {
+      try {
+        const resp = await api.get('/professores');
+        const arr = resp.data?.data;
+        this.professores = Array.isArray(arr) ? arr : [];
+      } catch (e) {
+        console.error('Erro ao carregar professores:', e);
+        this.professores = [];
+      }
+    },
     
-    preencherDadosAluno() {
+    async preencherDadosAluno() {
       const alunoSelecionado = this.alunos.find(aluno => aluno.id == this.form.student_id);
       if (alunoSelecionado) {
         // Nome do aluno não é mais um campo separado nos formulários
@@ -4260,6 +4282,31 @@ const PDI = {
           this.form.ano_serie = alunoSelecionado.class_name;
         } else if (alunoSelecionado.grade) {
           this.form.ano_serie = alunoSelecionado.grade;
+        }
+        // Carregar último PDI existente para este aluno (se houver)
+        try {
+          const r = await api.get('/pdi', { params: { student_id: this.form.student_id } });
+          const lista = Array.isArray(r.data?.data) ? r.data.data : Array.isArray(r.data) ? r.data : [];
+          if (lista.length > 0) {
+            const ultimo = lista[0];
+            this.form.id = ultimo.id;
+            // Preencher a partir de details quando disponível
+            const det = ultimo.details || {};
+            Object.keys(det).forEach(k => {
+              if (k in this.form && det[k] != null) this.form[k] = det[k];
+            });
+            // Mapear campos básicos se disponíveis
+            if (!this.form.escola && det.escola) this.form.escola = det.escola;
+            if (!this.form.escola_id && det.escola_id) this.form.escola_id = det.escola_id;
+            // Objetivos e estratégias do registro base para campos do formulário
+            if (ultimo.objectives) this.form.objetivo_geral = ultimo.objectives;
+            if (ultimo.strategies) this.form.estrategias = ultimo.strategies;
+          } else {
+            // Novo PDI: limpar id
+            delete this.form.id;
+          }
+        } catch (e) {
+          console.warn('Falha ao carregar PDI existente:', e);
         }
       }
     },
@@ -4320,11 +4367,26 @@ const PDI = {
       
       this.loading = true;
       try {
-        // Enviar o form com escola_id incluso
-        const response = await api.post('/pdi', this.form);
+        // Monta payload usando details para manter compatibilidade com backend
+        const details = { ...this.form };
+        // Remover chaves não desejadas nas details
+        delete details.id;
+        const payloadBase = {
+          student_id: this.form.student_id,
+          details,
+          objectives: this.form.objetivo_geral || null,
+          strategies: this.form.estrategias || null,
+          status: 'ativo'
+        };
+        let response;
+        if (this.form.id) {
+          response = await api.post('/pdi/update', { id: this.form.id, ...payloadBase });
+        } else {
+          response = await api.post('/pdi/create', payloadBase);
+        }
         if (response.data?.ok) {
           const nomeAluno = (this.alunos.find(a=>a.id==this.form.student_id)?.name) || 'Aluno';
-          this.$showToast('Sucesso', `PDI de "${nomeAluno}" salvo com sucesso!`, 'success');
+          this.$showToast('Sucesso', this.form.id ? `PDI de "${nomeAluno}" atualizado com sucesso!` : `PDI de "${nomeAluno}" salvo com sucesso!`, 'success');
           this.$router.push('/');
         } else {
           this.$showToast('Erro', 'Erro ao salvar PDI', 'error');
@@ -4424,11 +4486,10 @@ const PlanoAtendimento = {
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                       Selecionar Aluno <span class="text-red-500">*</span>
                     </label>
-                    <input v-model="alunoFiltroPlano" placeholder="Filtrar alunos..." class="mb-2 w-full px-3 py-2 border border-gray-300 rounded" />
                     <select v-model="form.student_id" @change="preencherDadosAlunoPlano" required 
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
                       <option value="">Selecione um aluno</option>
-                      <option v-for="aluno in alunosFiltradosPlano" :key="aluno.id" :value="aluno.id">{{ aluno.name }}</option>
+                      <option v-for="aluno in alunos" :key="aluno.id" :value="aluno.id">{{ aluno.name }}</option>
                     </select>
                   </div>
 
@@ -4759,7 +4820,7 @@ const PlanoAtendimento = {
         this.escolas = [];
       }
     },
-    preencherDadosAlunoPlano() {
+    async preencherDadosAlunoPlano() {
       const alunoSelecionado = this.alunos.find(aluno => aluno.id == this.form.student_id);
       if (alunoSelecionado) {
         // Preenche outros campos se disponíveis
@@ -4771,6 +4832,22 @@ const PlanoAtendimento = {
         }
         if (alunoSelecionado.school_id) {
           this.form.escola_origem_id = alunoSelecionado.school_id;
+        }
+        // Tentar carregar último Plano de Atendimento deste aluno pelo nome
+        try {
+          const r = await api.get('/planos-atendimento/list', { params: { q: alunoSelecionado.name, per_page: 1 } });
+          const rows = r.data?.data?.rows || r.data?.rows || [];
+          const ultimo = Array.isArray(rows) && rows.length ? rows[0] : null;
+          if (ultimo && ultimo.nome_aluno === alunoSelecionado.name) {
+            this.form.id = ultimo.id;
+            // Mapear campos conhecidos existentes no formulário
+            const map = ['matricula','escola_origem','tipo_necessidade','descricao_necessidades','objetivo_geral','objetivos_especificos','atividades','metodologia','recursos_didaticos','frequencia_semanal','duracao_sessao','periodo_atendimento','horarios_especificos','instrumentos_avaliacao','criterios_avaliacao','periodicidade_revisao','observacoes'];
+            map.forEach(k => { if (ultimo[k] != null) this.form[k] = ultimo[k]; });
+          } else {
+            delete this.form.id;
+          }
+        } catch (e) {
+          console.warn('Falha ao carregar Plano de Atendimento existente:', e);
         }
       }
     },
@@ -4846,10 +4923,16 @@ const PlanoAtendimento = {
       
       this.loading = true;
       try {
-        const response = await api.post('/planos-atendimento', this.form);
+        let response;
+        if (this.form.id) {
+          const { id, ...payload } = this.form;
+          response = await api.post('/planos-atendimento/update', { id, ...payload });
+        } else {
+          response = await api.post('/planos-atendimento/create', this.form);
+        }
         if (response.data?.ok) {
           const nomeAlunoPlano = (this.alunos.find(a=>a.id==this.form.student_id)?.name) || 'Aluno';
-          this.$showToast('Sucesso', `Plano de Atendimento de "${nomeAlunoPlano}" salvo com sucesso!`, 'success');
+          this.$showToast('Sucesso', this.form.id ? `Plano de Atendimento de "${nomeAlunoPlano}" atualizado com sucesso!` : `Plano de Atendimento de "${nomeAlunoPlano}" salvo com sucesso!`, 'success');
           this.$router.push('/');
         } else {
           this.$showToast('Erro', 'Erro ao salvar plano', 'error');
@@ -5173,6 +5256,7 @@ const RelatorioAtendimento = {
         { title: 'Finalização', icon: 'fas fa-check-circle' }
       ],
       form: {
+        id: null,
         student_id: '',
         data_atendimento: new Date().toISOString().split('T')[0],
         descricao: '',
@@ -5256,7 +5340,7 @@ const RelatorioAtendimento = {
     async loadRelatorios() {
       try {
         this.loadingRelatorios = true;
-        let params = {};
+        let params = { _ts: Date.now() };
         if (this.$parent.user && this.$parent.user.role !== 'admin') {
           params.teacher_id = this.$parent.user.id;
         }
@@ -5372,14 +5456,20 @@ const RelatorioAtendimento = {
     async save() {
       this.loading = true;
       try {
-        const payload = { ...this.form };
+        const { id, ...rest } = this.form || {};
+        const payload = { ...rest };
         if (this.$parent.user && this.$parent.user.role !== 'admin') {
           payload.teacher_id = this.$parent.user.id;
         }
 
-        const r = await api.post('/atendimentos', payload);
+        let r;
+        if (id) {
+          r = await api.post(`/atendimentos/${id}`, payload);
+        } else {
+          r = await api.post('/atendimentos', payload);
+        }
         if (r.data?.ok) {
-          this.$showToast('Sucesso', 'Relatório salvo com sucesso!', 'success');
+          this.$showToast('Sucesso', id ? 'Relatório atualizado com sucesso!' : 'Relatório salvo com sucesso!', 'success');
           this.cancel();
           await this.loadRelatorios();
         } else {
@@ -5409,6 +5499,7 @@ const RelatorioAtendimento = {
     cancel() {
       this.currentStep = 0;
       this.form = {
+        id: null,
         student_id: '',
         data_atendimento: new Date().toISOString().split('T')[0],
         descricao: '',
@@ -5419,29 +5510,43 @@ const RelatorioAtendimento = {
     },
 
     edit(relatorio) {
-      this.form = { ...relatorio };
+      this.form = { 
+        id: relatorio.id, 
+        student_id: relatorio.student_id, 
+        data_atendimento: relatorio.data_atendimento,
+        descricao: relatorio.descricao || '',
+        objetivos: relatorio.objetivos || '',
+        recursos: relatorio.recursos || '',
+        observacoes: relatorio.observacoes || ''
+      };
+      // Leva o usuário para a primeira etapa para revisar/atualizar
+      this.currentStep = 0;
     },
 
     async deleteRelatorio(relatorio) {
-      if (!this._confirmDeleteRel || this._confirmDeleteRel !== relatorio.id) {
-        this._confirmDeleteRel = relatorio.id;
-        this.$showToast('Confirme', 'Clique novamente para excluir este relatório', 'warning');
-        setTimeout(()=>{ if(this._confirmDeleteRel===relatorio.id) this._confirmDeleteRel=null; }, 3000);
-        return;
-      }
-      this._confirmDeleteRel = null;
+      const confirmed = await this.$confirmToast(
+        'Confirmar exclusão',
+        'Deseja realmente excluir este relatório de atendimento? Esta ação não pode ser desfeita.',
+        { confirmText: 'Excluir', cancelText: 'Cancelar', type: 'warning', timeoutMs: 15000 }
+      );
+      if (!confirmed) return;
       try {
         this.deletingId = relatorio.id;
         const r = await api.delete(`/atendimentos/${relatorio.id}`);
         if (r.data?.ok) {
           this.$showToast('Sucesso', 'Relatório excluído', 'success');
+          // Remover localmente e recarregar
+          this.relatorios = (this.relatorios || []).filter(x => x.id !== relatorio.id);
           await this.loadRelatorios();
         } else {
           this.$showToast('Erro', r.data?.error || 'Erro ao excluir relatório', 'error');
         }
       } catch (e) {
         console.error(e);
-        this.$showToast('Erro', 'Erro ao excluir relatório', 'error');
+        const status = e.response?.status;
+        if (status === 403) this.$showToast('Sem permissão', 'Você não tem permissão para excluir este relatório.', 'warning');
+        else if (status === 404) this.$showToast('Não encontrado', 'O relatório já não existe mais.', 'info');
+        else this.$showToast('Erro', 'Erro ao excluir relatório', 'error');
       } finally {
         this.deletingId = null;
       }
@@ -5538,6 +5643,22 @@ const app = createApp({
                 {{ toast.title }}
               </h4>
               <p class="text-sm text-gray-700 mt-1">{{ toast.message }}</p>
+              <div v-if="toast.actions && toast.actions.length" class="mt-3 flex justify-end space-x-2">
+                <button
+                  v-for="(action, idx) in toast.actions"
+                  :key="idx"
+                  @click="handleToastAction(toast, action)"
+                  class="px-3 py-1.5 rounded text-sm font-medium focus:outline-none"
+                  :class="{
+                    'bg-red-600 text-white hover:bg-red-700': action.style === 'danger',
+                    'bg-blue-600 text-white hover:bg-blue-700': action.style === 'primary',
+                    'bg-gray-100 text-gray-700 hover:bg-gray-200': !action.style || action.style === 'secondary'
+                  }"
+                >
+                  <i v-if="action.icon" :class="[action.icon, 'mr-2']"></i>
+                  {{ action.label }}
+                </button>
+              </div>
             </div>
             <button @click="removeToast(toast.id)" 
                     class="ml-4 text-gray-400 hover:text-gray-600 focus:outline-none">
@@ -5552,18 +5673,31 @@ const app = createApp({
     return {
       loading: true,
       toasts: [],
-      toastIdCounter: 0
+      toastIdCounter: 0,
+      // Voice modal (reutilizável)
+      voiceModal: {
+        open: false,
+        targetSetter: null, // função que recebe o texto transcrito
+        targetEl: null, // textarea/input alvo (DOM)
+        isRecording: false,
+        isProcessing: false,
+        recordingTime: 0,
+        mediaRecorder: null,
+        audioChunks: [],
+        timer: null
+      }
     }
   },
   computed: {},
   methods: {
-    showToast(title, message, type = 'info', duration = 5000) {
+    showToast(title, message, type = 'info', duration = 5000, actions = null) {
       const toast = {
         id: ++this.toastIdCounter,
         title,
         message,
         type,
-        visible: true
+        visible: true,
+        actions
       };
       
       this.toasts.push(toast);
@@ -5574,6 +5708,51 @@ const app = createApp({
           this.removeToast(toast.id);
         }, duration);
       }
+    },
+    handleToastAction(toast, action) {
+      try {
+        if (action && typeof action.onClick === 'function') action.onClick();
+      } finally {
+        // sempre fechar após ação
+        this.removeToast(toast.id);
+      }
+    },
+    // Retorna uma Promise resolvendo true/false
+    confirmToast(title, message, opts = {}) {
+      const {
+        confirmText = 'Confirmar',
+        cancelText = 'Cancelar',
+        type = 'warning',
+        timeoutMs = 10000
+      } = opts;
+
+      return new Promise((resolve) => {
+        const id = ++this.toastIdCounter;
+        const toast = {
+          id,
+          title,
+          message,
+          type,
+          visible: true,
+          actions: [
+            { label: cancelText, style: 'secondary', icon: 'fas fa-times', onClick: () => resolve(false) },
+            { label: confirmText, style: 'danger', icon: 'fas fa-trash', onClick: () => resolve(true) }
+          ]
+        };
+        this.toasts.push(toast);
+
+        // Auto-cancel após timeout
+        if (timeoutMs && timeoutMs > 0) {
+          setTimeout(() => {
+            const idx = this.toasts.findIndex(t => t.id === id);
+            if (idx > -1) {
+              this.toasts[idx].visible = false;
+              setTimeout(() => this.toasts.splice(idx, 1), 300);
+              resolve(false);
+            }
+          }, timeoutMs);
+        }
+      });
     },
     removeToast(id) {
       const index = this.toasts.findIndex(t => t.id === id);
@@ -5620,6 +5799,103 @@ const app = createApp({
         info: 'text-blue-800'
       };
       return colors[type] || colors.info;
+    },
+    // ===== Voice capture (global modal) =====
+    openVoiceModal(setterFn) {
+      this.voiceModal.targetSetter = setterFn;
+      this.voiceModal.targetEl = null;
+      this.voiceModal.open = true;
+      this.voiceModal.isRecording = false;
+      this.voiceModal.isProcessing = false;
+      this.voiceModal.recordingTime = 0;
+      this.voiceModal.audioChunks = [];
+    },
+    openVoiceModalForActive(targetEl = null) {
+      // Abre modal e define o elemento alvo (textarea) para inserir o texto
+      this.voiceModal.targetSetter = null;
+      this.voiceModal.targetEl = targetEl || document.activeElement || null;
+      this.voiceModal.open = true;
+      this.voiceModal.isRecording = false;
+      this.voiceModal.isProcessing = false;
+      this.voiceModal.recordingTime = 0;
+      this.voiceModal.audioChunks = [];
+    },
+    closeVoiceModal() {
+      if (this.voiceModal.isRecording) {
+        try { this.stopVoiceRecording(); } catch (_) {}
+      }
+      this.voiceModal.open = false;
+      this.voiceModal.targetSetter = null;
+      this.voiceModal.targetEl = null;
+    },
+    async toggleVoiceRecording() {
+      if (this.voiceModal.isRecording) return this.stopVoiceRecording();
+      return this.startVoiceRecording();
+    },
+    async startVoiceRecording() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const rec = new MediaRecorder(stream);
+        this.voiceModal.mediaRecorder = rec;
+        this.voiceModal.audioChunks = [];
+        this.voiceModal.recordingTime = 0;
+        rec.ondataavailable = (e) => this.voiceModal.audioChunks.push(e.data);
+        rec.onstop = async () => {
+          const audioBlob = new Blob(this.voiceModal.audioChunks, { type: 'audio/wav' });
+          // parar tracks
+          stream.getTracks().forEach(t => t.stop());
+          await this.processVoiceAudio(audioBlob);
+        };
+        rec.start();
+        this.voiceModal.isRecording = true;
+        this.voiceModal.timer = setInterval(() => { this.voiceModal.recordingTime++; }, 1000);
+      } catch (err) {
+        console.error('Erro ao acessar microfone:', err);
+        this.$showToast('Erro', 'Erro ao acessar o microfone. Verifique permissões.', 'error');
+      }
+    },
+    stopVoiceRecording() {
+      if (!this.voiceModal.mediaRecorder || !this.voiceModal.isRecording) return;
+      if (this.voiceModal.recordingTime < 1) {
+        this.$showToast('Atenção', 'Grave pelo menos 1 segundo.', 'info');
+        return;
+      }
+      this.voiceModal.mediaRecorder.stop();
+      this.voiceModal.isRecording = false;
+      if (this.voiceModal.timer) { clearInterval(this.voiceModal.timer); this.voiceModal.timer = null; }
+    },
+    async processVoiceAudio(audioBlob) {
+      this.voiceModal.isProcessing = true;
+      try {
+        if (audioBlob.size < 1000) throw new Error('Áudio muito curto.');
+        const fd = new FormData();
+        fd.append('audio', audioBlob, 'recording.wav');
+        const { data } = await api.post('/voice/transcribe', fd, { timeout: 120000 });
+        const txt = data?.data?.text || '';
+        if (!txt) throw new Error('Transcrição vazia.');
+        if (typeof this.voiceModal.targetSetter === 'function') {
+          this.voiceModal.targetSetter(txt);
+        } else if (this.voiceModal.targetEl && (this.voiceModal.targetEl.tagName === 'TEXTAREA' || (this.voiceModal.targetEl.tagName === 'INPUT' && this.voiceModal.targetEl.type === 'text'))) {
+          const el = this.voiceModal.targetEl;
+          const start = el.selectionStart ?? el.value.length;
+          const end = el.selectionEnd ?? el.value.length;
+          const before = el.value.slice(0, start);
+          const after = el.value.slice(end);
+          const spacer = before && !before.endsWith(' ') ? ' ' : '';
+          el.value = before + spacer + txt + after;
+          // reposiciona cursor e dispara evento para v-model
+          const pos = (before + spacer + txt).length;
+          try { el.setSelectionRange(pos, pos); } catch (_) {}
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        this.$showToast('Sucesso', 'Áudio transcrito com sucesso!', 'success');
+        this.closeVoiceModal();
+      } catch (e) {
+        console.error('Erro na transcrição:', e);
+        this.$showToast('Erro', e.message || 'Falha ao transcrever.', 'error');
+      } finally {
+        this.voiceModal.isProcessing = false;
+      }
     }
   },
   async mounted() {
@@ -5640,6 +5916,19 @@ const app = createApp({
 // Adicionar método global para toast
 app.config.globalProperties.$showToast = function(title, message, type = 'info', duration = 5000) {
   this.$root.showToast(title, message, type, duration);
+};
+
+// Adicionar método global para confirmação via toast
+app.config.globalProperties.$confirmToast = function(title, message, options = {}) {
+  return this.$root.confirmToast(title, message, options);
+};
+
+// Helper global para abrir o modal de voz e anexar texto ao v-model alvo
+app.config.globalProperties.$voiceToField = function(setterFn) {
+  this.$root.openVoiceModal(setterFn);
+};
+app.config.globalProperties.$voiceToActive = function(targetEl) {
+  this.$root.openVoiceModalForActive(targetEl);
 };
 
 // Método global para verificar se campo foi preenchido na entrevista
@@ -5673,6 +5962,18 @@ style.textContent = `
     font-weight: 500;
     margin-bottom: 0.25rem;
   }
+  
+  /* Variante vermelha para sair */
+  .nav-link-tw.logout-link {
+    color: #b91c1c; /* red-700 */
+    border: 1px solid transparent;
+  }
+  .nav-link-tw.logout-link:hover {
+    background-color: #fee2e2; /* red-100 */
+    color: #991b1b; /* red-800 */
+    transform: translateX(4px);
+  }
+  .nav-link-tw.logout-link svg { color: currentColor; }
   
   .nav-link-tw:hover {
     background-color: #f3f4f6;
@@ -5852,6 +6153,60 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
+// Modal global de voz (injeção no body via portal simples)
+document.body.insertAdjacentHTML('beforeend', `
+  <div id="voice-modal-root"></div>
+`);
+
+// Renderização reativa simples do modal usando Mutation + template inline
+const voiceTpl = document.createElement('template');
+voiceTpl.innerHTML = `
+  <div v-if="$root.voiceModal.open" class="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
+    <div class="bg-gray-50 rounded-lg w-full max-w-md p-5 shadow-xl border border-gray-200">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-semibold text-gray-900">Capturar por voz</h3>
+        <button class="text-gray-500 hover:text-gray-700" @click="$root.closeVoiceModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="space-y-3">
+        <div class="text-sm text-gray-600">Grave sua fala e adicionaremos o texto no campo selecionado.</div>
+        <div class="flex items-center gap-3">
+          <button @click="$root.toggleVoiceRecording()" :disabled="$root.voiceModal.isProcessing"
+                  class="px-3 py-2 rounded-md text-sm font-medium"
+                  :class="$root.voiceModal.isRecording ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'">
+            <i :class="$root.voiceModal.isRecording ? 'fas fa-stop' : 'fas fa-microphone'"></i>
+            <span class="ml-2">{{$root.voiceModal.isRecording ? 'Parar' : 'Gravar'}}</span>
+          </button>
+          <div v-if="$root.voiceModal.isRecording" class="text-red-600 text-sm flex items-center gap-2">
+            <span class="w-2 h-2 bg-red-600 rounded-full animate-pulse"></span>
+            <span>{{ Math.floor($root.voiceModal.recordingTime/60) }}:{{ String($root.voiceModal.recordingTime%60).padStart(2,'0') }}</span>
+          </div>
+        </div>
+        <div v-if="$root.voiceModal.isProcessing" class="bg-yellow-50 border border-yellow-200 rounded p-3">
+          <div class="flex items-center gap-2 text-yellow-800 text-sm">
+            <span class="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-600"></span>
+            Convertendo áudio para texto...
+          </div>
+        </div>
+        <div class="flex justify-end">
+          <button class="px-3 py-2 rounded-md border" @click="$root.closeVoiceModal()">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+`;
+
+// Monta um mini-app Vue para renderizar o modal usando o mesmo root
+const mountVoicePortal = (mainApp) => {
+  const Portal = { template: voiceTpl.innerHTML };
+  const voiceApp = Vue.createApp({ template: '<Portal />', components: { Portal } });
+  voiceApp.config.globalProperties.$root = mainApp._instance.proxy; // compartilhar root
+  voiceApp.mount('#voice-modal-root');
+};
+// será chamado após o app principal montar
+
+// ====== Mic buttons auto-injection for big textareas ======
+// Removido: injeção automática de botões "Falar" ao lado de textareas (requisito do cliente)
+
 // Registrar componente DatePicker
 if (typeof DatePickerComponent !== 'undefined') {
   app.component('DatePicker', DatePickerComponent);
@@ -5860,6 +6215,8 @@ if (typeof DatePickerComponent !== 'undefined') {
 // Usar router e montar aplicação
 app.use(router);
 app.mount('#app');
+// montar portal do modal de voz após app existir
+try { mountVoicePortal(app); } catch (_) {}
 
 // Inicialização completa
 // console.log('ConectEdu v5.0 - Sistema inicializado com Tailwind CSS');

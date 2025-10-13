@@ -23,22 +23,41 @@ O ConectEDU possui um sistema de migração automática do banco de dados que:
 
 #### 2. Upload dos Arquivos
 
+**Opção A: Deploy Automático via cPanel (Git)**
+
+O projeto inclui `.cpanel.yml` configurado para deploy automático:
+
+```yaml
+# Arquivo .cpanel.yml já está pronto
+# Ao fazer push, o cPanel irá automaticamente:
+# - Copiar frontend/* para /frontend
+# - Copiar backend/* para /backend
+```
+
+**Opção B: Upload Manual via FTP**
+
+Estrutura de diretórios no servidor:
+
 ```bash
-# Estrutura de diretórios
-/public_html/
+/public_html/ (ou /home/usuario/dominio/)
 ├── backend/
 │   ├── api.php
 │   ├── functions.php
 │   ├── migrations.php
 │   ├── .htaccess
-│   ├── .env
+│   ├── .env (criar manualmente)
 │   └── uploads/
 └── frontend/
     ├── index.html
     ├── spa-tailwind.js
-    ├── config.js
+    ├── config.js (copiar de config.example.js)
     └── tailwind-local.css
 ```
+
+**IMPORTANTE**: 
+- Não fazer upload de `node_modules/`, `.git/`, `logs/`
+- Criar `backend/.env` manualmente no servidor
+- Criar `frontend/config.js` a partir do `config.example.js`
 
 #### 3. Configurar Banco de Dados
 
@@ -75,19 +94,30 @@ OPENAI_MODEL=gpt-4o-mini
 
 #### 5. Configurar URLs no Frontend
 
+Copie e edite `frontend/config.example.js` para `frontend/config.js`:
+
+```bash
+# Copiar o arquivo de exemplo
+cp frontend/config.example.js frontend/config.js
+```
+
 Edite `frontend/config.js`:
 
 ```javascript
-const CONFIG = {
-  // Produção
-  API_BASE: 'https://seudominio.com.br/backend/api.php',
-  
-  // OU desenvolvimento local
-  // API_BASE: 'http://localhost/conectedu/backend/api.php',
-  
+// Para PRODUÇÃO (arquivos na raiz do domínio)
+window.CONFIG = {
+  API_BASE: '/backend/api.php',
   VERSION: '5.0.1'
 };
+
+// Para DESENVOLVIMENTO LOCAL (XAMPP com subpasta)
+// window.CONFIG = {
+//   API_BASE: '/conectedu/backend/api.php',
+//   VERSION: '5.0.1'
+// };
 ```
+
+**IMPORTANTE**: O arquivo `config.js` não é versionado (está no .gitignore) para permitir configurações diferentes por ambiente.
 
 #### 6. Configurar Permissões
 

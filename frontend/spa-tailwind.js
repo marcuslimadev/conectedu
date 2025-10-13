@@ -2232,7 +2232,7 @@ const Layout = {
               </svg>
               Legislações
             </router-link>
-            <button type="button" class="nav-link-tw logout-link w-full text-left" @click.prevent="logout()">
+            <button type="button" class="nav-link-tw logout-link w-full text-left" @click.prevent="$logout()">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M17 16l4-4m0 0l-4-4m4 4H7"/>
                 <path d="M7 4h6a2 2 0 012 2v2"/>
@@ -2308,7 +2308,7 @@ const Layout = {
                 <!-- Botão Sair -->
                 <button 
                   class="px-3 py-1.5 rounded border border-red-200 text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300"
-                  @click="logout" :disabled="loggingOut"
+                  @click="$logout()" :disabled="loggingOut"
                   :class="loggingOut ? 'opacity-60 cursor-not-allowed' : ''">
                   <span v-if="!loggingOut">Sair</span>
                   <span v-else>Saindo...</span>
@@ -2497,69 +2497,150 @@ const Layout = {
 // Página de Login
 const Login = {
   template: `
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-md w-full space-y-8">
-        <div>
-          <div class="mx-auto h-40 w-40 flex items-center justify-center">
-            <img src="./icons/logo-icon.png" alt="ConectAEE" class="h-36 w-36">
+    <div class="min-h-screen grid grid-cols-1 lg:grid-cols-2">
+      <!-- Painel visual à esquerda (desktop) -->
+      <div class="hidden lg:flex relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white">
+        <div class="absolute inset-0 opacity-20" aria-hidden="true" style="background-image: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.25) 0, transparent 40%), radial-gradient(circle at 80% 30%, rgba(255,255,255,0.2) 0, transparent 45%), radial-gradient(circle at 40% 80%, rgba(255,255,255,0.25) 0, transparent 40%);"></div>
+        <div class="relative z-10 w-full flex flex-col items-center justify-center p-12 text-center">
+          <div class="mb-8 w-28 h-28 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center shadow-lg ring-1 ring-white/20">
+            <img src="./icons/logo-icon.png" alt="ConectAEE" class="w-16 h-16">
           </div>
-          <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            ConectAEE v5.0
-          </h2>
-          <p class="mt-2 text-center text-sm text-gray-600">
-            Sistema de Gestão Educacional
-          </p>
+          <h1 class="text-3xl font-bold tracking-tight">ConectAEE</h1>
+          <p class="mt-2 text-white/90">Sistema de Gestão Educacional AEE</p>
+          <div class="mt-8 grid grid-cols-3 gap-4 w-full max-w-xl">
+            <div class="bg-white/10 rounded-xl p-4 text-left ring-1 ring-white/20">
+              <p class="text-sm text-white/90">Segurança</p>
+              <p class="text-xl font-semibold">Token JWT</p>
+            </div>
+            <div class="bg-white/10 rounded-xl p-4 text-left ring-1 ring-white/20">
+              <p class="text-sm text-white/90">Relatórios</p>
+              <p class="text-xl font-semibold">PDFs nativos</p>
+            </div>
+            <div class="bg-white/10 rounded-xl p-4 text-left ring-1 ring-white/20">
+              <p class="text-sm text-white/90">AEE</p>
+              <p class="text-xl font-semibold">Formulários</p>
+            </div>
+          </div>
         </div>
-        
-        <form class="mt-8 space-y-6" @submit.prevent="login">
-          <div class="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label for="email" class="sr-only">Email</label>
-              <input 
-                id="email" 
-                v-model="email" 
-                type="email" 
-                required 
-                class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-brand-primary focus:border-brand-primary focus:z-10 sm:text-sm" 
-                placeholder="Email">
+      </div>
+
+      <!-- Painel de login à direita -->
+      <div class="relative bg-gray-50 flex items-center justify-center p-6 sm:p-10">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_10%_10%,rgba(99,102,241,0.08),transparent_40%),radial-gradient(circle_at_90%_20%,rgba(59,130,246,0.06),transparent_35%)]"></div>
+        <div class="relative w-full max-w-md">
+          <div class="bg-white/90 backdrop-blur-xl border border-gray-200 shadow-xl rounded-2xl p-6 sm:p-8">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-md">
+                <img src="./icons/logo-icon.png" alt="ConectAEE" class="w-7 h-7">
+              </div>
+              <div>
+                <h2 class="text-xl font-semibold text-gray-900">Bem-vindo(a)</h2>
+                <p class="text-sm text-gray-600">Entre com suas credenciais</p>
+              </div>
             </div>
-            <div>
-              <label for="password" class="sr-only">Senha</label>
-              <input 
-                id="password" 
-                v-model="password" 
-                type="password" 
-                required 
-                class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-brand-primary focus:border-brand-primary focus:z-10 sm:text-sm" 
-                placeholder="Senha">
+
+            <form @submit.prevent="login" class="space-y-5">
+              <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <div class="relative">
+                  <input
+                    id="email"
+                    v-model.trim="email"
+                    type="email"
+                    autocomplete="username"
+                    required
+                    class="w-full rounded-xl border-gray-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 px-3 py-2.5 placeholder-gray-400"
+                    placeholder="seu@email.com"
+                  />
+                  <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true">
+                    <i class="fas fa-envelope"></i>
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                <div class="relative">
+                  <input
+                    :type="showPassword ? 'text' : 'password'"
+                    id="password"
+                    v-model="password"
+                    autocomplete="current-password"
+                    required
+                    class="w-full rounded-xl border-gray-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 px-3 py-2.5 pr-10 placeholder-gray-400"
+                    @keydown="checkCapsLock($event)" @keyup="checkCapsLock($event)" @focus="checkCapsLock($event)" @blur="capsOn=false"
+                    placeholder="••••••••"
+                  />
+                  <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-300" @click="showPassword = !showPassword" :aria-pressed="showPassword.toString()" :aria-label="showPassword ? 'Ocultar senha' : 'Mostrar senha'">
+                    <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                  </button>
+                </div>
+                <p v-if="capsOn" class="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 inline-flex items-center gap-2" role="status" aria-live="polite">
+                  <i class="fas fa-keyboard"></i>
+                  CAPS LOCK está ativo
+                </p>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700 select-none">
+                  <input type="checkbox" v-model="remember" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                  Lembrar meu e-mail
+                </label>
+                <a class="text-sm text-blue-700 hover:text-blue-900" href="#" @click.prevent="$showToast && $showToast('Disponível em breve', 'Recuperação de senha em desenvolvimento.', 'info')">Esqueci minha senha</a>
+              </div>
+
+              <div v-if="error" class="rounded-xl bg-red-50 border border-red-200 p-3 flex items-start gap-3">
+                <i class="fas fa-circle-exclamation text-red-600 mt-0.5"></i>
+                <div class="text-sm text-red-700">{{ error }}</div>
+              </div>
+
+              <button
+                type="submit"
+                :disabled="loading"
+                class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-60 disabled:cursor-not-allowed">
+                <span v-if="loading" class="inline-flex items-center gap-2">
+                  <span class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                  Entrando...
+                </span>
+                <span v-else>
+                  Entrar
+                </span>
+              </button>
+
+              <p class="text-center text-sm text-gray-600">
+                Não tem uma conta?
+                <router-link to="/register" class="font-medium text-blue-700 hover:text-blue-900">Registre-se</router-link>
+              </p>
+              <p class="text-center text-xs text-gray-500 mt-2">
+                <a href="#" @click.prevent="openPrivacy" class="hover:text-gray-700 underline">Políticas de Privacidade</a>
+              </p>
+            </form>
+            
+            <!-- Modal de Privacidade -->
+            <div v-if="privacyOpen" class="fixed inset-0 z-50 flex items-center justify-center">
+              <div class="absolute inset-0 bg-black/50" @click="closePrivacy" aria-hidden="true"></div>
+              <div class="relative bg-white rounded-xl shadow-2xl w-[90%] max-w-xl p-6 border border-gray-200" role="dialog" aria-modal="true" aria-labelledby="privacy-title">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 id="privacy-title" class="text-lg font-semibold text-gray-900">Políticas de Privacidade</h3>
+                  <button class="text-gray-500 hover:text-gray-700" @click="closePrivacy" aria-label="Fechar">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+                <div class="prose prose-sm max-w-none text-gray-700">
+                  <p>Respeitamos sua privacidade. Seus dados são utilizados apenas para autenticação e funcionalidades do sistema AEE.</p>
+                  <ul class="list-disc pl-5">
+                    <li>Armazenamos seu token de sessão localmente.</li>
+                    <li>Suas credenciais são processadas em ambiente seguro.</li>
+                    <li>Você pode solicitar remoção de dados conforme a LGPD.</li>
+                  </ul>
+                </div>
+                <div class="mt-6 text-right">
+                  <button class="px-4 py-2 rounded-lg border text-gray-700 hover:bg-gray-50" @click="closePrivacy">Fechar</button>
+                </div>
+              </div>
             </div>
           </div>
-
-          <div v-if="error" class="rounded-md bg-red-50 p-4">
-            <div class="text-sm text-red-700">{{ error }}</div>
-          </div>
-
-          <div>
-            <button 
-              type="submit" 
-              :disabled="loading"
-              class="group relative w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-primary hover:bg-brand-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary disabled:opacity-50">
-              <span v-if="loading" class="absolute left-0 inset-y-0 flex items-center pl-3">
-                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              </span>
-              Entrar
-            </button>
-          </div>
-
-          <div class="text-center">
-            <p class="text-sm text-gray-600">
-              Não tem uma conta? 
-              <router-link to="/register" class="font-medium text-brand-primary hover:text-brand-primary-dark">
-                Registre-se
-              </router-link>
-            </p>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
   `,
@@ -2567,11 +2648,22 @@ const Login = {
     return {
       email: '',
       password: '',
+      remember: false,
+      showPassword: false,
+      capsOn: false,
+      privacyOpen: false,
       loading: false,
       error: null
     }
   },
   methods: {
+    checkCapsLock(e) {
+      try {
+        this.capsOn = e.getModifierState && e.getModifierState('CapsLock');
+      } catch (_) { this.capsOn = false; }
+    },
+    openPrivacy() { this.privacyOpen = true; },
+    closePrivacy() { this.privacyOpen = false; },
     async login() {
       this.loading = true;
       this.error = null;
@@ -2594,6 +2686,9 @@ const Login = {
         }
         
         localStorage.setItem('token', token);
+        // Lembrar e-mail opcionalmente
+        if (this.remember && this.email) localStorage.setItem('remember_email', this.email);
+        else localStorage.removeItem('remember_email');
         this.$router.push('/');
       } catch (error) {
         this.error = error.response?.data?.message || 'Erro ao fazer login';
@@ -2601,6 +2696,11 @@ const Login = {
         this.loading = false;
       }
     }
+  },
+  mounted() {
+    // Pré-popula e-mail se lembrado
+    const remembered = localStorage.getItem('remember_email');
+    if (remembered) { this.email = remembered; this.remember = true; }
   }
 };
 
@@ -5945,6 +6045,33 @@ app.config.globalProperties.$isFieldFilledInInterview = function(studentId, fiel
     }
   }
   return false;
+};
+
+// Logout global seguro (this.$logout)
+let __logoutLock = false;
+app.config.globalProperties.$logout = async function() {
+  if (__logoutLock) return;
+  __logoutLock = true;
+  try {
+    if (this && typeof this === 'object' && 'loggingOut' in this) this.loggingOut = true;
+    await api.post('/logout').catch(() => {});
+  } catch (e) {
+    console.error('Erro no logout global:', e);
+  } finally {
+    try {
+      if (this && window.innerWidth < 1024 && 'sidebarOpen' in this) this.sidebarOpen = false;
+      localStorage.removeItem('token');
+      if (api?.defaults?.headers?.common?.Authorization) delete api.defaults.headers.common['Authorization'];
+      if (this && this.$showToast) this.$showToast('Sessão encerrada', 'Você saiu da conta com segurança.', 'success', 3000);
+      if (this && this.$route && this.$router && this.$route.path !== '/login') {
+        await this.$router.push('/login').catch(() => {});
+      }
+      setTimeout(() => { if (location.hash !== '#/login') location.hash = '#/login'; }, 80);
+    } finally {
+      if (this && typeof this === 'object' && 'loggingOut' in this) this.loggingOut = false;
+      __logoutLock = false;
+    }
+  }
 };
 
 // Adicionar estilos customizados para navegação

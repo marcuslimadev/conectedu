@@ -3,6 +3,9 @@ deployment:
     # Define caminho base
     - export DEPLOYPATH=/home/mmbsites/conectedu.mmbsites.com.br
 
+    # Copia o index.php da raiz
+    - /bin/cp index.php $DEPLOYPATH/
+
     # Copia o frontend para a pasta /frontend do site
     - /bin/mkdir -p $DEPLOYPATH/frontend
     - /bin/cp -R frontend/* $DEPLOYPATH/frontend

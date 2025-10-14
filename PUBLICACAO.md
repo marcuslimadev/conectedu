@@ -92,32 +92,44 @@ OPENAI_API_KEY=sk-...
 OPENAI_MODEL=gpt-4o-mini
 ```
 
-#### 5. Configurar URLs no Frontend
+#### 5. Configurar URLs no Frontend (OBRIGATÓRIO)
 
-Copie e edite `frontend/config.example.js` para `frontend/config.js`:
+⚠️ **ATENÇÃO**: O arquivo `config.js` NÃO está no repositório e DEVE ser criado manualmente!
 
+**Via linha de comando:**
 ```bash
 # Copiar o arquivo de exemplo
 cp frontend/config.example.js frontend/config.js
+
+# Editar o arquivo (use seu editor preferido)
+nano frontend/config.js
 ```
 
-Edite `frontend/config.js`:
+**Ou via FTP/cPanel:**
+1. Baixe `frontend/config.example.js`
+2. Renomeie para `config.js`
+3. Edite conforme o ambiente
 
+**Conteúdo para PRODUÇÃO:**
 ```javascript
-// Para PRODUÇÃO (arquivos na raiz do domínio)
 window.CONFIG = {
   API_BASE: '/backend/api.php',
   VERSION: '5.0.1'
 };
-
-// Para DESENVOLVIMENTO LOCAL (XAMPP com subpasta)
-// window.CONFIG = {
-//   API_BASE: '/conectedu/backend/api.php',
-//   VERSION: '5.0.1'
-// };
 ```
 
-**IMPORTANTE**: O arquivo `config.js` não é versionado (está no .gitignore) para permitir configurações diferentes por ambiente.
+**Conteúdo para DESENVOLVIMENTO LOCAL:**
+```javascript
+window.CONFIG = {
+  API_BASE: '/conectedu/backend/api.php',
+  VERSION: '5.0.1'
+};
+```
+
+**Por que o config.js não está no Git?**
+- Cada ambiente (produção, desenvolvimento, staging) tem URLs diferentes
+- Evita conflitos e sobrescritas acidentais
+- Segurança: não expor caminhos internos no repositório público
 
 #### 6. Configurar Permissões
 

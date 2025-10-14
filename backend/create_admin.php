@@ -23,15 +23,16 @@ try {
     $passwordHash = password_hash('Teste@123', PASSWORD_BCRYPT);
     
     $stmt = $pdo->prepare('
-        INSERT INTO users (name, email, password, role, created_at) 
-        VALUES (?, ?, ?, ?, NOW())
+        INSERT INTO users (name, email, password_hash, role, status, created_at, updated_at) 
+        VALUES (?, ?, ?, ?, ?, NOW(), NOW())
     ');
     
     $stmt->execute([
         'Administrador',
         'admin@teste.com',
         $passwordHash,
-        'admin'
+        'admin',
+        'ativo'
     ]);
     
     $adminId = $pdo->lastInsertId();

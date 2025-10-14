@@ -29,6 +29,7 @@ $restRoutes = [
     // Auth routes
     // Diagnóstico do sistema (não requer auth)
     'diagnose' => 'diagnose',
+    'create-admin' => 'create-admin',
     
     'auth/login' => 'auth.login',
     'auth/register' => 'auth.register', 
@@ -253,6 +254,51 @@ if ($action === 'diagnose') {
   }
   
   res(true, $diagnostics);
+}
+
+// ---------- CRIAR ADMIN: Criar usuário admin manualmente (sem autenticação) ----------
+if ($action === 'create-admin') {
+  try {
+    $pdo = db();
+    
+    // Verificar se admin já existe
+    $stmt = $pdo->prepare('SELECT id, email FROM users WHERE email = ?');
+    $stmt->execute(['admin@teste.com']);
+    $exists = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if ($exists) {
+      res(true, ['message' => 'Admin já existe', 'admin' => $exists]);
+    }
+    
+    // Criar o usuário admin
+    $passwordHash = password_hash('Teste@123', PASSWORD_BCRYPT);
+    
+    $stmt = $pdo->prepare('
+      INSERT INTO users (name, email, password, role, created_at) 
+      VALUES (?, ?, ?, ?, NOW())
+    ');
+    
+    $stmt->execute([
+      'Administrador',
+      'admin@teste.com',
+      $passwordHash,
+      'admin'
+    ]);
+    
+    $adminId = $pdo->lastInsertId();
+    
+    res(true, [
+      'message' => 'Admin criado com sucesso!',
+      'admin' => [
+        'id' => $adminId,
+        'email' => 'admin@teste.com',
+        'password' => 'Teste@123'
+      ]
+    ]);
+    
+  } catch (Exception $e) {
+    res(false, null, 'CREATE_ADMIN_ERROR: ' . $e->getMessage(), 500);
+  }
 }
 
 // ---------- MIGRATIONS: Executar migrações manualmente ----------

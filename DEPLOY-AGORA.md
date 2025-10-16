@@ -2,26 +2,42 @@
 
 ## ⚡ EXECUTAR AGORA
 
-### 1. Acesse phpMyAdmin no cPanel
+### 1. Deploy do Código via SSH
+⚠️ **O cPanel NÃO faz auto-deploy. Use SSH:**
+
+📖 **Ver guia completo:** `DEPLOY-SSH-CPANEL.md`
+
+**Comando rápido:**
+```bash
+ssh conectaee@conectaee.com.br
+cd /home/conectaee/repositories/conectedu && \
+git pull origin frontvue && \
+cp -r backend/* /home/conectaee/public_html/backend/ && \
+cp -r frontend/* /home/conectaee/public_html/frontend/ && \
+chmod 644 /home/conectaee/public_html/backend/*.php && \
+echo "✅ Deploy completo!"
+```
+
+### 2. Acesse phpMyAdmin no cPanel
 - Login no cPanel
 - Clique em **phpMyAdmin**
 - Selecione banco **conectedu**
 
-### 2. Execute o Script SQL
+### 3. Execute o Script SQL
 1. Clique na aba **SQL**
-2. Abra: **`backend/c`**
+2. Abra: **`backend/FIX-PRODUCAO-MYISAM.sql`**
 3. **Copie TODO o conteúdo**
 4. **Cole** no phpMyAdmin
 5. Clique **Executar**
 
-### 3. Aguarde (~60 segundos)
+### 4. Aguarde (~60 segundos)
 Você verá:
 ```
 ✅ FIX MYISAM COMPLETO!
 total_tabelas_convertidas: 15+
 ```
 
-### 4. Teste
+### 5. Teste
 - Acesse: https://conectaee.com.br
 - Login: admin@teste.com / Teste@123
 - Dashboard deve carregar **sem erro 500**
@@ -30,8 +46,9 @@ total_tabelas_convertidas: 15+
 
 ## 📚 Documentação Completa
 
+- **`DEPLOY-SSH-CPANEL.md`** - Guia completo de deploy via SSH ⭐
 - **`backend/STATUS-PRODUCAO.md`** - Status detalhado e troubleshooting
-- **`backend/GUIA-MYISAM.md`** - Guia passo a passo
+- **`backend/GUIA-MYISAM.md`** - Guia passo a passo SQL
 - **`backend/FIX-PRODUCAO-MYISAM.sql`** - Script SQL para executar
 
 ---
@@ -53,9 +70,9 @@ total_tabelas_convertidas: 15+
 | Item | Status |
 |------|--------|
 | Código Backend | ✅ Corrigido |
-| Deploy cPanel | ✅ Automático |
+| Deploy via SSH | ⚠️ **COPIAR ARQUIVOS** |
 | Tabelas MyISAM | ⚠️ **EXECUTAR SQL** |
 
 ---
 
-**Após executar o SQL → Sistema 100% operacional** 🚀
+**Após deploy SSH + SQL → Sistema 100% operacional** 🚀

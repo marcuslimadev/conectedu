@@ -2463,14 +2463,16 @@ if ($action === 'schools.create') {
     res(false, null, 'SCHOOL_NAME_REQUIRED', 422);
   }
   
-  $stmt = $pdo->prepare('INSERT INTO schools (name, address, city, phone, email, created_by_teacher_id, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())');
+  // Campos da tabela schools: name, code, address, phone, email, type, status
+  $stmt = $pdo->prepare('INSERT INTO schools (name, code, address, phone, email, type, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())');
   if ($stmt->execute([
     $data['name'],
-    $data['address'] ?? '',
-    $data['city'] ?? '',
-    $data['phone'] ?? '',
-    $data['email'] ?? '',
-    $user['id']
+    $data['code'] ?? null,
+    $data['address'] ?? null,
+    $data['phone'] ?? null,
+    $data['email'] ?? null,
+    $data['type'] ?? 'municipal',
+    $data['status'] ?? 'ativo'
   ])) {
     res(true, ['id' => $pdo->lastInsertId()]);
   } else {
@@ -2492,13 +2494,16 @@ if ($action === 'schools.update') {
     res(false, null, 'SCHOOL_NAME_REQUIRED', 422);
   }
   
-  $stmt = $pdo->prepare('UPDATE schools SET name=?, address=?, city=?, phone=?, email=? WHERE id=?');
+  // Campos da tabela schools: name, code, address, phone, email, type, status
+  $stmt = $pdo->prepare('UPDATE schools SET name=?, code=?, address=?, phone=?, email=?, type=?, status=?, updated_at=NOW() WHERE id=?');
   if ($stmt->execute([
     $data['name'],
-    $data['address'] ?? '',
-    $data['city'] ?? '',
-    $data['phone'] ?? '',
-    $data['email'] ?? '',
+    $data['code'] ?? null,
+    $data['address'] ?? null,
+    $data['phone'] ?? null,
+    $data['email'] ?? null,
+    $data['type'] ?? 'municipal',
+    $data['status'] ?? 'ativo',
     $id
   ])) {
     res(true, null);

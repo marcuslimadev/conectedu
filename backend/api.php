@@ -547,7 +547,7 @@ if ($action === 'courses.list') {
     status VARCHAR(20) NOT NULL DEFAULT "ativo",
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL
-  ) DEFAULT CHARSET=utf8mb4');
+  ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $q = trim($_GET['q'] ?? '');
   $status = trim($_GET['status'] ?? '');
   $sql = 'SELECT * FROM courses WHERE 1';
@@ -611,14 +611,14 @@ if ($action === 'courses.create') {
     status VARCHAR(20) NOT NULL DEFAULT "ativo",
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL
-  ) DEFAULT CHARSET=utf8mb4');
+  ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $name = trim($B['name'] ?? '');
   if (!$name) res(false, null, 'INVALID_INPUT', 422);
   $desc = $B['description'] ?? null;
   $status = $B['status'] ?? 'ativo';
   $pdo->prepare('INSERT INTO courses (name,description,status,created_at,updated_at) VALUES (?,?,?,NOW(),NOW())')->execute([$name, $desc, $status]);
   $id = $pdo->lastInsertId();
-  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) DEFAULT CHARSET=utf8mb4');
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute(['Curso: criado #'.$id.' — '.$name]);
   res(true, ['id' => $id]);
 }
@@ -633,7 +633,7 @@ if ($action === 'courses.update') {
   if(!$sets) res(false,null,'EMPTY',422);
   $vals[]=$id;
   $pdo->prepare('UPDATE courses SET '.implode(',', $sets).',updated_at=NOW() WHERE id=?')->execute($vals);
-  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) DEFAULT CHARSET=utf8mb4');
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $name = $B['name'] ?? ($row['name'] ?? '');
   $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute(['Curso: atualizado #'.$id.' — '.$name]);
   res(true, []);
@@ -644,7 +644,7 @@ if ($action === 'courses.delete') {
   if (!$id) res(false, null, 'INVALID_ID', 422);
   $old = $pdo->prepare('SELECT name FROM courses WHERE id=?'); $old->execute([$id]); $row=$old->fetch(PDO::FETCH_ASSOC);
   $pdo->prepare('DELETE FROM courses WHERE id=?')->execute([$id]);
-  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) DEFAULT CHARSET=utf8mb4');
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute(['Curso: excluído #'.$id.' — '.($row['name'] ?? '')]);
   res(true, []);
 }
@@ -740,7 +740,7 @@ if ($action === 'students.create') {
     res(false, null, 'Erro ao criar aluno: ' . $e->getMessage(), 500);
   }
   // log
-  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) DEFAULT CHARSET=utf8mb4');
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $msg = 'Aluno: criado #' . $id . ' — ' . ($f['name'] ?? '');
   $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute([$msg]);
   res(true, ['id' => $id]);
@@ -775,7 +775,7 @@ if ($action === 'students.update') {
   $vals[] = $id;
   $pdo->prepare('UPDATE students SET ' . implode(',', $sets) . ',updated_at=NOW() WHERE id=?')->execute($vals);
   // log
-  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) DEFAULT CHARSET=utf8mb4');
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $nm = $f['name'] ?? ($row0['name'] ?? '');
   $msg = 'Aluno: atualizado #' . $id . ' — ' . $nm;
   $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute([$msg]);
@@ -791,7 +791,7 @@ if ($action === 'students.delete') {
   $row = $old->fetch(PDO::FETCH_ASSOC);
   $pdo->prepare('DELETE FROM students WHERE id=?')->execute([$id]);
   // log
-  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) DEFAULT CHARSET=utf8mb4');
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $msg = 'Aluno: excluído #' . $id . ' — ' . ($row['name'] ?? '');
   $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute([$msg]);
   res(true, []);
@@ -829,7 +829,7 @@ if ($action === 'pdi.create') {
   $pdo->prepare('INSERT INTO pdis (student_id,objectives,strategies,start_date,end_date,status,details,created_at) VALUES (?,?,?,?,?,?,?,NOW())')->execute([$sid, $B['objectives'] ?? null, $B['strategies'] ?? null, $B['start_date'] ?? null, $B['end_date'] ?? null, $B['status'] ?? 'ativo', $details ? json_encode($details, JSON_UNESCAPED_UNICODE) : null]);
   $pid = $pdo->lastInsertId();
   // log
-  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) DEFAULT CHARSET=utf8mb4');
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $msg = 'PDI: criado #' . $pid . ' — Aluno #' . $sid;
   $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute([$msg]);
   res(true, ['id' => $pid]);
@@ -862,7 +862,7 @@ if ($action === 'pdi.update') {
   $sql = 'UPDATE pdis SET ' . implode(',', $sets) . ' WHERE id=?';
   $pdo->prepare($sql)->execute($vals);
   // log
-  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) DEFAULT CHARSET=utf8mb4');
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute(['PDI: atualizado #'.$id]);
   res(true, ['id'=>$id]);
 }
@@ -874,7 +874,7 @@ if ($action === 'pai.create') {
   $pdo->prepare('INSERT INTO pais (student_id,goals,services,start_date,end_date,status,details,created_at) VALUES (?,?,?,?,?,?,?,NOW())')->execute([$sid, $B['goals'] ?? null, $B['services'] ?? null, $B['start_date'] ?? null, $B['end_date'] ?? null, $B['status'] ?? 'ativo', isset($B['details']) ? json_encode($B['details'], JSON_UNESCAPED_UNICODE) : null]);
   $pid = $pdo->lastInsertId();
   // log
-  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) DEFAULT CHARSET=utf8mb4');
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $msg = 'PAI: criado #' . $pid . ' — Aluno #' . $sid;
   $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute([$msg]);
   res(true, ['id' => $pid]);
@@ -903,7 +903,7 @@ if ($action === 'pai.update') {
   $vals[] = $id;
   $sql = 'UPDATE pais SET ' . implode(',', $sets) . ' WHERE id=?';
   $pdo->prepare($sql)->execute($vals);
-  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) DEFAULT CHARSET=utf8mb4');
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute(['PAI: atualizado #'.$id]);
   res(true, ['id'=>$id]);
 }
@@ -928,7 +928,7 @@ if ($action === 'plans.create') {
     $pdo->prepare('INSERT INTO weekly_plan_items (weekly_plan_id,day,time_start,time_end,description,materials,interventions) VALUES (?,?,?,?,?,?,?)')->execute([$pid, $it['day'] ?? 'seg', $it['time_start'] ?? null, $it['time_end'] ?? null, $it['description'] ?? null, $it['materials'] ?? null, $it['interventions'] ?? null]);
   }
   // log
-  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) DEFAULT CHARSET=utf8mb4');
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $msg = 'Plano semanal: criado #' . $pid . ' — Aluno #' . $sid . ' — Semana ' . $week;
   $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute([$msg]);
   res(true, ['id' => $pid]);
@@ -1059,7 +1059,7 @@ if ($action === 'agenda.list') {
     location VARCHAR(200) NULL,
     notes TEXT NULL,
     created_at DATETIME NOT NULL
-  ) DEFAULT CHARSET=utf8mb4');
+  ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $q = trim($_GET['q'] ?? '');
   $start = $_GET['start'] ?? '';
   $end = $_GET['end'] ?? '';
@@ -1083,7 +1083,7 @@ if ($action === 'agenda.create') {
     location VARCHAR(200) NULL,
     notes TEXT NULL,
     created_at DATETIME NOT NULL
-  ) DEFAULT CHARSET=utf8mb4');
+  ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $title = trim($B['title'] ?? '');
   if (!$title) res(false, null, 'INVALID_INPUT', 422);
   $date_start = $B['date_start'] ?? null;
@@ -1094,7 +1094,7 @@ if ($action === 'agenda.create') {
   $stm->execute([$u['id'] ?? null, $title, $date_start, $date_end, $location, $notes]);
   $newId = $pdo->lastInsertId();
   // log
-  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) DEFAULT CHARSET=utf8mb4');
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $msg = 'Agenda: criado evento #' . $newId . ' — ' . $title;
   $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute([$msg]);
   res(true, ['id' => $newId]);
@@ -1115,7 +1115,7 @@ if ($action === 'agenda.update') {
   $vals[] = $id;
   $pdo->prepare('UPDATE agenda SET '.implode(',', $sets).' WHERE id=?')->execute($vals);
   // log
-  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) DEFAULT CHARSET=utf8mb4');
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $msg = 'Agenda: atualizado evento #' . $id . ' — ' . ($f['title'] ?? $row['title']);
   $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute([$msg]);
   res(true, []);
@@ -1130,7 +1130,7 @@ if ($action === 'agenda.delete') {
   $row = $old->fetch(PDO::FETCH_ASSOC);
   $pdo->prepare('DELETE FROM agenda WHERE id=?')->execute([$id]);
   // log
-  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) DEFAULT CHARSET=utf8mb4');
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $msg = 'Agenda: excluído evento #' . $id . ' — ' . ($row['title'] ?? '');
   $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute([$msg]);
   res(true, []);
@@ -1187,9 +1187,14 @@ if ($action === 'stats') {
   $act = (int)$pdo->query('SELECT COUNT(*) FROM students WHERE status="ativo"')->fetchColumn();
   $pdi_conc = (int)$pdo->query('SELECT COUNT(*) FROM pdis WHERE status="concluido"')->fetchColumn();
   $forms_pend = (int)$pdo->query('SELECT COUNT(*) FROM students s LEFT JOIN anamneses a ON a.student_id=s.id GROUP BY s.id HAVING COUNT(a.id)=0')->rowCount();
-  // ensure activity_log table exists before querying
-  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) DEFAULT CHARSET=utf8mb4');
-  $recent = $pdo->query('SELECT id,message,created_at FROM activity_log ORDER BY id DESC LIMIT 10')->fetchAll(PDO::FETCH_ASSOC);
+  
+  // Verificar se activity_log existe
+  $table_exists = $pdo->query("SHOW TABLES LIKE 'activity_log'")->rowCount() > 0;
+  if ($table_exists) {
+    $recent = $pdo->query('SELECT id,action,created_at FROM activity_log ORDER BY id DESC LIMIT 10')->fetchAll(PDO::FETCH_ASSOC);
+  } else {
+    $recent = []; // Tabela não existe ainda
+  }
   $apoio = $pdo->query('SELECT st.id,st.name,st.capacity,(SELECT COUNT(*) FROM students s WHERE s.support_teacher_id=st.id AND s.status="ativo") used FROM support_teachers st')->fetchAll(PDO::FETCH_ASSOC);
   foreach ($apoio as &$r) {
     $r['available'] = max(0, $r['capacity'] - (int)$r['used']);
@@ -1264,7 +1269,7 @@ if ($action === 'reports.student') {
     created_at DATETIME NOT NULL,
     updated_at DATETIME NULL,
     INDEX(student_id)
-  ) DEFAULT CHARSET=utf8mb4');
+  ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $notesQ = $pdo->prepare('SELECT id,student_id,teacher_id,title,content,source,created_at,updated_at FROM student_notes WHERE student_id=? ORDER BY id DESC');
   $notesQ->execute([$sid]);
   $notes = $notesQ->fetchAll(PDO::FETCH_ASSOC);
@@ -1723,7 +1728,7 @@ if ($action === 'student_notes.list') {
     created_at DATETIME NOT NULL,
     updated_at DATETIME NULL,
     INDEX(student_id)
-  ) DEFAULT CHARSET=utf8mb4');
+  ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $sid = (int)($_GET['student_id'] ?? $_GET['aluno_id'] ?? 0);
   if (!$sid) res(false, null, 'MISSING_STUDENT_ID', 422);
   $q = $pdo->prepare('SELECT id,student_id,teacher_id,title,content,source,created_at,updated_at FROM student_notes WHERE student_id=? ORDER BY id DESC');
@@ -1745,7 +1750,7 @@ if ($action === 'student_notes.create') {
     created_at DATETIME NOT NULL,
     updated_at DATETIME NULL,
     INDEX(student_id)
-  ) DEFAULT CHARSET=utf8mb4');
+  ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $B = body();
   $sid = (int)($B['student_id'] ?? 0);
   $title = trim($B['title'] ?? '') ?: null;
@@ -1756,7 +1761,7 @@ if ($action === 'student_notes.create') {
   $stm->execute([$sid, $u['id'] ?? null, $title, $content, $source]);
   $id = $pdo->lastInsertId();
   // log
-  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) DEFAULT CHARSET=utf8mb4');
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute(['Nota aluno: criada #'.$id.' — Aluno #'.$sid]);
   res(true, ['id' => (int)$id]);
 }
@@ -1773,7 +1778,7 @@ if ($action === 'student_notes.update') {
   $stm = $pdo->prepare('UPDATE student_notes SET title=?, content=?, updated_at=NOW() WHERE id=?');
   $stm->execute([$title, $content, $id]);
   // log
-  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) DEFAULT CHARSET=utf8mb4');
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute(['Nota aluno: atualizada #'.$id]);
   res(true, ['id' => $id]);
 }
@@ -1852,7 +1857,7 @@ if ($action === 'entrevistas-responsavel.update') {
   $sql = 'UPDATE entrevistas_responsavel SET ' . implode(',', $sets) . ', updated_at=NOW() WHERE id=?';
   $vals[] = $id;
   $pdo->prepare($sql)->execute($vals);
-  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) DEFAULT CHARSET=utf8mb4');
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute(['Entrevista: atualizada #'.$id]);
   res(true, ['id'=>$id]);
 }
@@ -1977,7 +1982,7 @@ if ($action === 'planos-atendimento.update') {
   $sql = 'UPDATE planos_atendimento SET ' . implode(',', $sets) . ', updated_at=NOW() WHERE id=?';
   $vals[] = $id;
   $pdo->prepare($sql)->execute($vals);
-  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) DEFAULT CHARSET=utf8mb4');
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
   $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute(['Plano Atendimento: atualizado #'.$id]);
   res(true, ['id'=>$id]);
 }
@@ -2520,3 +2525,4 @@ if ($action === 'schools.delete') {
 }
 
 res(false, null, 'NOT_FOUND', 404);
+

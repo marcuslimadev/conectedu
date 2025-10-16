@@ -247,3 +247,4 @@ if (php_sapi_name() === 'cli' || (isset($_GET['run']) && $_GET['run'] === 'migra
     echo json_encode($result);
     exit;
 }
+

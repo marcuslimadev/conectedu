@@ -26,7 +26,7 @@ function run_migrations() {
             migration_name VARCHAR(255) NOT NULL UNIQUE,
             executed_at DATETIME NOT NULL,
             INDEX idx_migration_name (migration_name)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+        ) DEFAULT CHARSET=utf8mb4");
         
         // Lista de migrações a serem aplicadas
         $migrations = [
@@ -103,7 +103,7 @@ function run_migrations() {
                     INDEX idx_name (name),
                     INDEX idx_city (city),
                     FOREIGN KEY (created_by_teacher_id) REFERENCES users(id) ON DELETE SET NULL
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+                ) DEFAULT CHARSET=utf8mb4");
                 
                 log_migration("  ✓ Tabela schools OK");
                 
@@ -142,7 +142,7 @@ function run_migrations() {
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     INDEX idx_student_id (student_id),
                     FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+                ) DEFAULT CHARSET=utf8mb4");
                 
                 log_migration("  ✓ Tabela entrevistas_responsavel OK");
             },
@@ -162,7 +162,7 @@ function run_migrations() {
                     INDEX idx_student_id (student_id),
                     FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
                     FOREIGN KEY (teacher_id) REFERENCES users(id) ON DELETE SET NULL
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+                ) DEFAULT CHARSET=utf8mb4");
                 
                 log_migration("  ✓ Tabela student_notes OK");
             },
@@ -185,7 +185,7 @@ function run_migrations() {
                     INDEX idx_aluno_id (aluno_id),
                     INDEX idx_data (data_atendimento),
                     FOREIGN KEY (aluno_id) REFERENCES students(id) ON DELETE CASCADE
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+                ) DEFAULT CHARSET=utf8mb4");
                 
                 log_migration("  ✓ Tabela atendimentos OK");
             },

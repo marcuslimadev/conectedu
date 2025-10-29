@@ -211,6 +211,13 @@ $restRoutes = [
     'pais/delete' => 'pais.delete',
     'pais/student' => 'pais.student',
     
+    // Documentos Gerados (PDFs)
+    'documentos' => 'documentos.list',
+    'documentos/list' => 'documentos.list',
+    'documentos/download' => 'documentos.download',
+    'documentos/delete' => 'documentos.delete',
+    'documentos/stats' => 'documentos.stats',
+    
     // Health check & Migrations
     'health' => 'health',
     'migrations/run' => 'migrations.run'
@@ -3254,6 +3261,261 @@ if ($action === 'pais.delete') {
   } else {
     res(false, null, 'DELETE_FAILED', 500);
   }
+}
+
+// ==================== DOCUMENTOS GERADOS ====================
+
+/**
+ * Listar documentos gerados (com filtros)
+ * GET /documentos.list
+ * Query params:
+ * - tipo: entrevista|pdi|pai
+ * - student_id: ID do aluno
+ * - data_inicio: YYYY-MM-DD
+ * - data_fim: YYYY-MM-DD
+ * - page: número da página (default 1)
+ * - per_page: items por página (default 20)
+ */
+if ($action === 'documentos.list') {
+  $user = require_auth();
+  
+  // Construir query com filtros
+  $where = [];
+  $params = [];
+  
+  // Teacher-centric: professor só vê seus documentos
+  if ($user['role'] !== 'admin') {
+    $where[] = 'd.teacher_id = :teacher_id';
+    $params[':teacher_id'] = $user['id'];
+  }
+  
+  // Filtro por tipo
+  if (!empty($_GET['tipo'])) {
+    $where[] = 'd.tipo = :tipo';
+    $params[':tipo'] = $_GET['tipo'];
+  }
+  
+  // Filtro por aluno
+  if (!empty($_GET['student_id'])) {
+    $where[] = 'd.student_id = :student_id';
+    $params[':student_id'] = $_GET['student_id'];
+  }
+  
+  // Filtro por data (range)
+  if (!empty($_GET['data_inicio'])) {
+    $where[] = 'DATE(d.created_at) >= :data_inicio';
+    $params[':data_inicio'] = $_GET['data_inicio'];
+  }
+  
+  if (!empty($_GET['data_fim'])) {
+    $where[] = 'DATE(d.created_at) <= :data_fim';
+    $params[':data_fim'] = $_GET['data_fim'];
+  }
+  
+  // Soft delete: não mostrar deletados
+  $where[] = 'd.deleted_at IS NULL';
+  
+  $whereClause = count($where) > 0 ? 'WHERE ' . implode(' AND ', $where) : '';
+  
+  // Paginação
+  $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+  $perPage = isset($_GET['per_page']) ? min(100, max(1, intval($_GET['per_page']))) : 20;
+  $offset = ($page - 1) * $perPage;
+  
+  // Contar total
+  $sqlCount = "SELECT COUNT(*) as total 
+               FROM documentos_gerados d
+               $whereClause";
+  
+  $stmtCount = $pdo->prepare($sqlCount);
+  $stmtCount->execute($params);
+  $total = $stmtCount->fetch(PDO::FETCH_ASSOC)['total'];
+  
+  // Buscar documentos com join em students e users
+  $sql = "SELECT 
+            d.id,
+            d.tipo,
+            d.form_id,
+            d.student_id,
+            d.teacher_id,
+            d.file_name,
+            d.file_size,
+            d.titulo,
+            d.observacoes,
+            d.created_at,
+            d.updated_at,
+            s.name as student_name,
+            u.name as teacher_name
+          FROM documentos_gerados d
+          LEFT JOIN students s ON d.student_id = s.id
+          LEFT JOIN users u ON d.teacher_id = u.id
+          $whereClause
+          ORDER BY d.created_at DESC
+          LIMIT :limit OFFSET :offset";
+  
+  $stmt = $pdo->prepare($sql);
+  
+  // Bind parameters
+  foreach ($params as $key => $value) {
+    $stmt->bindValue($key, $value);
+  }
+  $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+  $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+  
+  $stmt->execute();
+  $documentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  
+  // Formatar tamanho dos arquivos
+  foreach ($documentos as &$doc) {
+    $doc['file_size_formatted'] = formatFileSize($doc['file_size']);
+  }
+  
+  res(true, [
+    'documentos' => $documentos,
+    'pagination' => [
+      'current_page' => $page,
+      'per_page' => $perPage,
+      'total' => $total,
+      'total_pages' => ceil($total / $perPage),
+      'has_next' => $page < ceil($total / $perPage),
+      'has_prev' => $page > 1
+    ]
+  ]);
+}
+
+/**
+ * Download de documento PDF
+ * GET /documentos.download?id={id}
+ */
+if ($action === 'documentos.download') {
+  $user = require_auth();
+  
+  $id = $_GET['id'] ?? null;
+  
+  if (!$id) {
+    res(false, null, 'ID_REQUIRED', 422);
+  }
+  
+  // Buscar documento
+  $stmt = $pdo->prepare('SELECT * FROM documentos_gerados WHERE id = :id AND deleted_at IS NULL');
+  $stmt->execute(['id' => $id]);
+  $documento = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$documento) {
+    res(false, null, 'DOCUMENTO_NAO_ENCONTRADO', 404);
+  }
+  
+  // Validar permissão (teacher-centric)
+  if ($user['role'] !== 'admin' && $documento['teacher_id'] != $user['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  // Verificar se arquivo existe
+  if (!file_exists($documento['file_path'])) {
+    res(false, null, 'ARQUIVO_NAO_ENCONTRADO', 404);
+  }
+  
+  // Retornar arquivo para download
+  header('Content-Type: application/pdf');
+  header('Content-Disposition: attachment; filename="' . $documento['file_name'] . '"');
+  header('Content-Length: ' . $documento['file_size']);
+  header('Cache-Control: no-cache, must-revalidate');
+  header('Pragma: public');
+  
+  readfile($documento['file_path']);
+  exit;
+}
+
+/**
+ * Deletar documento (soft delete)
+ * DELETE /documentos.delete?id={id}
+ */
+if ($action === 'documentos.delete') {
+  $user = require_auth();
+  
+  $id = $_GET['id'] ?? null;
+  
+  if (!$id) {
+    res(false, null, 'ID_REQUIRED', 422);
+  }
+  
+  // Buscar documento
+  $stmt = $pdo->prepare('SELECT * FROM documentos_gerados WHERE id = :id AND deleted_at IS NULL');
+  $stmt->execute(['id' => $id]);
+  $documento = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$documento) {
+    res(false, null, 'DOCUMENTO_NAO_ENCONTRADO', 404);
+  }
+  
+  // Validar permissão (teacher-centric)
+  if ($user['role'] !== 'admin' && $documento['teacher_id'] != $user['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  // Soft delete
+  $stmt = $pdo->prepare('UPDATE documentos_gerados SET deleted_at = NOW() WHERE id = :id');
+  
+  if ($stmt->execute(['id' => $id])) {
+    res(true, ['message' => 'Documento deletado com sucesso']);
+  } else {
+    res(false, null, 'DELETE_FAILED', 500);
+  }
+}
+
+/**
+ * Estatísticas de documentos
+ * GET /documentos.stats
+ */
+if ($action === 'documentos.stats') {
+  $user = require_auth();
+  
+  // Teacher-centric
+  $where = $user['role'] !== 'admin' ? 'WHERE teacher_id = :teacher_id AND deleted_at IS NULL' : 'WHERE deleted_at IS NULL';
+  $params = $user['role'] !== 'admin' ? [':teacher_id' => $user['id']] : [];
+  
+  // Total de documentos
+  $sql = "SELECT COUNT(*) as total FROM documentos_gerados $where";
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+  $total = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+  
+  // Por tipo
+  $sql = "SELECT tipo, COUNT(*) as count FROM documentos_gerados $where GROUP BY tipo";
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+  $porTipo = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  
+  // Tamanho total
+  $sql = "SELECT SUM(file_size) as total_size FROM documentos_gerados $where";
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+  $totalSize = $stmt->fetch(PDO::FETCH_ASSOC)['total_size'] ?? 0;
+  
+  // Últimos 5 documentos
+  $sql = "SELECT 
+            d.id,
+            d.tipo,
+            d.titulo,
+            d.created_at,
+            s.name as student_name
+          FROM documentos_gerados d
+          LEFT JOIN students s ON d.student_id = s.id
+          $where
+          ORDER BY d.created_at DESC
+          LIMIT 5";
+  
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+  $ultimos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  
+  res(true, [
+    'total' => $total,
+    'por_tipo' => $porTipo,
+    'total_size' => $totalSize,
+    'total_size_formatted' => formatFileSize($totalSize),
+    'ultimos' => $ultimos
+  ]);
 }
 
 res(false, null, 'NOT_FOUND', 404);

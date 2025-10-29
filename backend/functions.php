@@ -143,3 +143,21 @@ function openai_tts_binary($text,$voice='alloy',$format='mp3'){
   if($code>=400||!$out) res(false,null,'OPENAI_HTTP_'.$code,500);
   return $out; // binário
 }
+
+/**
+ * Formatar tamanho de arquivo em formato legível
+ * @param int $bytes Tamanho em bytes
+ * @return string Formato legível (KB, MB, GB)
+ */
+function formatFileSize($bytes) {
+  if ($bytes <= 0) return '0 B';
+  
+  $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  $power = floor(log($bytes, 1024));
+  $power = min($power, count($units) - 1);
+  
+  $size = $bytes / pow(1024, $power);
+  
+  return round($size, 2) . ' ' . $units[$power];
+}
+

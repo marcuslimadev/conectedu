@@ -545,6 +545,76 @@ const AlunosTW = {
                       class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Rua, número, bairro, cidade, CEP"></textarea>
           </div>
+          
+          <!-- Upload de Foto do Aluno -->
+          <div class="mt-6 md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-camera text-blue-500 mr-1"></i>
+              Foto do Aluno (opcional)
+            </label>
+            
+            <!-- Preview da foto atual -->
+            <div v-if="form.photo_url && !photoPreview" class="mb-3 flex items-center space-x-3">
+              <img :src="apiBase + '/' + form.photo_url" 
+                   alt="Foto atual"
+                   class="w-24 h-32 object-cover border-2 border-gray-300 rounded-lg shadow-sm">
+              <button @click="removePhoto" 
+                      type="button"
+                      class="px-3 py-1 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors">
+                <i class="fas fa-trash mr-1"></i>
+                Remover foto
+              </button>
+            </div>
+            
+            <!-- Upload / Drag & Drop -->
+            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors cursor-pointer"
+                 @dragover.prevent="dragOver = true"
+                 @dragleave.prevent="dragOver = false"
+                 @drop.prevent="handleDrop"
+                 @click="$refs.photoInput.click()"
+                 :class="{'border-blue-500 bg-blue-50': dragOver}">
+              
+              <input type="file" 
+                     ref="photoInput"
+                     @change="handlePhotoSelect"
+                     accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                     class="hidden">
+              
+              <div v-if="photoPreview">
+                <img :src="photoPreview" 
+                     alt="Preview"
+                     class="w-32 h-40 object-cover mx-auto mb-3 border-2 border-blue-500 rounded-lg shadow">
+                <button @click.stop="cancelPhoto" 
+                        type="button"
+                        class="text-sm text-red-600 hover:text-red-800">
+                  <i class="fas fa-times mr-1"></i>
+                  Cancelar
+                </button>
+              </div>
+              
+              <div v-else>
+                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
+                <p class="text-sm text-gray-600 font-medium">
+                  Clique ou arraste uma imagem aqui
+                </p>
+                <p class="text-xs text-gray-500 mt-1">
+                  JPG, PNG, GIF ou WEBP (máx 2MB)
+                </p>
+              </div>
+            </div>
+            
+            <!-- Mensagem de erro -->
+            <p v-if="photoError" class="mt-2 text-sm text-red-600 flex items-center">
+              <i class="fas fa-exclamation-circle mr-1"></i>
+              {{ photoError }}
+            </p>
+            
+            <!-- Loading durante upload -->
+            <div v-if="uploadingPhoto" class="mt-2 text-sm text-blue-600 flex items-center">
+              <i class="fas fa-spinner fa-spin mr-2"></i>
+              Enviando foto...
+            </div>
+          </div>
         </div>
       </div>
 
@@ -733,11 +803,17 @@ const AlunosTW = {
       { title: 'Atribuições', icon: 'fas fa-chalkboard-teacher' },
       { title: 'Contato', icon: 'fas fa-phone' }
     ],
-  form:{ id:null, name:'', modalidade:'', status:'ativo', school_id:null, _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:'', created_by_teacher_id:null }, 
+  form:{ id:null, name:'', modalidade:'', status:'ativo', school_id:null, _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:'', created_by_teacher_id:null, photo_url:null }, 
   teachers:[], 
     rooms:[],
     schools:[],
   professores:[],
+    // Upload de foto
+    photoFile: null,
+    photoPreview: null,
+    photoError: null,
+    dragOver: false,
+    uploadingPhoto: false,
     // Paginação
     currentPage: 1,
     perPage: 10,
@@ -748,6 +824,9 @@ const AlunosTW = {
     sortDirection: 'asc'
   }},
   computed: {
+    apiBase() {
+      return CONFIG.API_BASE.replace(/\/api\.php$/, '');
+    },
     visiblePages() {
       const range = 2;
       const start = Math.max(1, this.currentPage - range);
@@ -909,6 +988,99 @@ const AlunosTW = {
         this.teachers = []; this.rooms = []; this.schools = []; this.professores = [];
       }
     },
+    
+    // ==================== MÉTODOS DE UPLOAD DE FOTO ====================
+    handlePhotoSelect(e) {
+      const file = e.target.files[0];
+      this.validateAndSetPhoto(file);
+    },
+    
+    handleDrop(e) {
+      this.dragOver = false;
+      const file = e.dataTransfer.files[0];
+      this.validateAndSetPhoto(file);
+    },
+    
+    validateAndSetPhoto(file) {
+      this.photoError = null;
+      
+      if (!file) return;
+      
+      // Validar tipo
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        this.photoError = 'Apenas imagens são permitidas (JPG, PNG, GIF, WEBP)';
+        return;
+      }
+      
+      // Validar tamanho (2MB)
+      const maxSize = 2 * 1024 * 1024;
+      if (file.size > maxSize) {
+        this.photoError = 'Arquivo muito grande. Máximo: 2MB';
+        return;
+      }
+      
+      this.photoFile = file;
+      
+      // Preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.photoPreview = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    },
+    
+    cancelPhoto() {
+      this.photoFile = null;
+      this.photoPreview = null;
+      this.photoError = null;
+      if (this.$refs.photoInput) {
+        this.$refs.photoInput.value = '';
+      }
+    },
+    
+    removePhoto() {
+      if (confirm('Deseja remover a foto atual?')) {
+        this.form.photo_url = null;
+        this.cancelPhoto();
+      }
+    },
+    
+    async uploadPhoto(studentId) {
+      if (!this.photoFile) return true;
+      
+      this.uploadingPhoto = true;
+      const formData = new FormData();
+      formData.append('student_id', studentId);
+      formData.append('photo', this.photoFile);
+      
+      try {
+        const res = await api.post('/students/upload-photo', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        
+        if (res.data.ok) {
+          this.form.photo_url = res.data.data.photo_url;
+          this.cancelPhoto();
+          this.$showToast && this.$showToast('Sucesso', 'Foto enviada com sucesso!', 'success');
+          return true;
+        } else {
+          this.photoError = res.data.error || 'Erro ao enviar foto';
+          this.$showToast && this.$showToast('Erro', this.photoError, 'error');
+          return false;
+        }
+      } catch (err) {
+        console.error('Erro ao enviar foto:', err);
+        this.photoError = 'Erro de conexão ao enviar foto';
+        this.$showToast && this.$showToast('Erro', this.photoError, 'error');
+        return false;
+      } finally {
+        this.uploadingPhoto = false;
+      }
+    },
+    
     async save(){ 
       if(!this.form.name || !this.form.modalidade || !this.form.school_id){ 
         this.$showToast('Atenção', 'Preencha nome, modalidade e escola', 'warning'); 
@@ -921,14 +1093,34 @@ const AlunosTW = {
       if(!this.form.id && this.$parent.user && this.$parent.user.role !== 'admin') {
         payload.created_by_teacher_id = this.$parent.user.id;
       }
+      
+      let studentId = this.form.id;
+      
       if(!this.form.id){ 
         const r=await api.post('/students/create', payload); 
-        if(r.data?.ok){ await this.load(); this.cancel(); } 
-        else this.$showToast('Erro', r.data?.error||'Erro ao criar', 'error'); 
+        if(r.data?.ok){ 
+          studentId = r.data.data.id;
+          // Upload de foto (se houver)
+          if (this.photoFile) {
+            await this.uploadPhoto(studentId);
+          }
+          await this.load(); 
+          this.cancel(); 
+        } else {
+          this.$showToast('Erro', r.data?.error||'Erro ao criar', 'error'); 
+        }
       } else { 
         const r=await api.put('/students/update', payload, { params:{ id:this.form.id } }); 
-        if(r.data?.ok){ await this.load(); this.cancel(); } 
-        else this.$showToast('Erro', r.data?.error||'Erro ao atualizar', 'error'); 
+        if(r.data?.ok){ 
+          // Upload de foto (se houver)
+          if (this.photoFile) {
+            await this.uploadPhoto(studentId);
+          }
+          await this.load(); 
+          this.cancel(); 
+        } else {
+          this.$showToast('Erro', r.data?.error||'Erro ao atualizar', 'error'); 
+        }
       } 
     },
     async del(s){

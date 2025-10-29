@@ -56,6 +56,7 @@ $restRoutes = [
     'students/create' => 'students.create',
     'students/update' => 'students.update',
     'students/delete' => 'students.delete',
+    'students/upload-photo' => 'students.upload-photo',
     'alunos' => 'students.list',
     
     // Schools routes
@@ -3261,6 +3262,105 @@ if ($action === 'pais.delete') {
   } else {
     res(false, null, 'DELETE_FAILED', 500);
   }
+}
+
+/**
+ * Upload de foto do aluno
+ * POST /students/upload-photo
+ * Multipart form-data com campos: student_id, photo
+ */
+if ($action === 'students.upload-photo') {
+  $user = require_auth();
+  
+  $studentId = $_POST['student_id'] ?? null;
+  
+  if (!$studentId) {
+    res(false, null, 'STUDENT_ID_REQUIRED', 422);
+  }
+  
+  // Verificar se aluno existe e se professor tem permissão
+  $stmt = $pdo->prepare('SELECT id, name, created_by_teacher_id FROM students WHERE id = :id');
+  $stmt->execute(['id' => $studentId]);
+  $student = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$student) {
+    res(false, null, 'STUDENT_NOT_FOUND', 404);
+  }
+  
+  // Teacher-centric: apenas criador ou admin pode alterar
+  if ($user['role'] !== 'admin' && $student['created_by_teacher_id'] != $user['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  // Validar arquivo
+  if (!isset($_FILES['photo']) || $_FILES['photo']['error'] !== UPLOAD_ERR_OK) {
+    res(false, null, 'NO_FILE_UPLOADED', 422);
+  }
+  
+  $file = $_FILES['photo'];
+  
+  // Validar tipo de arquivo (apenas imagens)
+  $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+  $finfo = finfo_open(FILEINFO_MIME_TYPE);
+  $mimeType = finfo_file($finfo, $file['tmp_name']);
+  finfo_close($finfo);
+  
+  if (!in_array($mimeType, $allowedTypes)) {
+    res(false, null, 'INVALID_FILE_TYPE - Apenas imagens são permitidas (JPG, PNG, GIF, WEBP)', 422);
+  }
+  
+  // Validar tamanho (máx 2MB)
+  $maxSize = 2 * 1024 * 1024; // 2MB
+  if ($file['size'] > $maxSize) {
+    res(false, null, 'FILE_TOO_LARGE - Tamanho máximo: 2MB', 422);
+  }
+  
+  // Gerar nome único para arquivo
+  $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+  $filename = 'student_' . $studentId . '_' . time() . '.' . $extension;
+  $uploadDir = __DIR__ . '/uploads/students/';
+  $uploadPath = $uploadDir . $filename;
+  
+  // Criar diretório se não existir
+  if (!is_dir($uploadDir)) {
+    mkdir($uploadDir, 0755, true);
+  }
+  
+  // Deletar foto antiga se existir
+  $stmt = $pdo->prepare('SELECT photo_url FROM students WHERE id = :id');
+  $stmt->execute(['id' => $studentId]);
+  $oldPhoto = $stmt->fetch(PDO::FETCH_ASSOC)['photo_url'] ?? null;
+  
+  if ($oldPhoto) {
+    $oldPhotoPath = $uploadDir . basename($oldPhoto);
+    if (file_exists($oldPhotoPath)) {
+      @unlink($oldPhotoPath);
+    }
+  }
+  
+  // Mover arquivo
+  if (!move_uploaded_file($file['tmp_name'], $uploadPath)) {
+    res(false, null, 'UPLOAD_FAILED', 500);
+  }
+  
+  // Atualizar banco de dados
+  $photoUrl = 'uploads/students/' . $filename; // Path relativo
+  $stmt = $pdo->prepare('UPDATE students SET photo_url = :photo_url, updated_at = NOW() WHERE id = :id');
+  $stmt->execute([
+    'photo_url' => $photoUrl,
+    'id' => $studentId
+  ]);
+  
+  // Log
+  $pdo->exec('CREATE TABLE IF NOT EXISTS activity_log (id INT AUTO_INCREMENT PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4');
+  $msg = 'Aluno: foto atualizada #' . $studentId . ' — ' . $student['name'];
+  $pdo->prepare('INSERT INTO activity_log (message,created_at) VALUES (?,NOW())')->execute([$msg]);
+  
+  res(true, [
+    'photo_url' => $photoUrl,
+    'filename' => $filename,
+    'message' => 'Foto enviada com sucesso'
+  ]);
 }
 
 // ==================== DOCUMENTOS GERADOS ====================

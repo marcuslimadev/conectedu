@@ -1,4 +1,8 @@
 # DESABILITAR CACHE COMPLETAMENTE - MODO DESENVOLVIMENTO
+
+# Definir index.html como página padrão
+DirectoryIndex index.html
+
 <IfModule mod_headers.c>
     # Desabilitar cache para TODOS os arquivos web
     <FilesMatch "\.(js|css|html|json|php)$">

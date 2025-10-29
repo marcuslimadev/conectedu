@@ -184,6 +184,33 @@ $restRoutes = [
   'voice/transcribe' => 'voice.transcribe',
   'voice/tts' => 'voice.tts',
     
+    // Formulários AEE Completos
+    'entrevistas' => 'entrevistas.list',
+    'entrevistas/list' => 'entrevistas.list',
+    'entrevistas/create' => 'entrevistas.create',
+    'entrevistas/get' => 'entrevistas.get',
+    'entrevistas/update' => 'entrevistas.update',
+    'entrevistas/delete' => 'entrevistas.delete',
+    'entrevistas/student' => 'entrevistas.student',
+    
+    // PDI Completo
+    'pdis' => 'pdis.list',
+    'pdis/list' => 'pdis.list',
+    'pdis/create' => 'pdis.create',
+    'pdis/get' => 'pdis.get',
+    'pdis/update' => 'pdis.update',
+    'pdis/delete' => 'pdis.delete',
+    'pdis/student' => 'pdis.student',
+    
+    // PAI Completo
+    'pais' => 'pais.list',
+    'pais/list' => 'pais.list',
+    'pais/create' => 'pais.create',
+    'pais/get' => 'pais.get',
+    'pais/update' => 'pais.update',
+    'pais/delete' => 'pais.delete',
+    'pais/student' => 'pais.student',
+    
     // Health check & Migrations
     'health' => 'health',
     'migrations/run' => 'migrations.run'
@@ -319,6 +346,13 @@ if ($action === 'migrations.run') {
   }
   
   res($result['success'], $result, $result['message']);
+}
+
+// ---------- USER: Get current user info ----------
+if ($action === 'user') {
+  $u = require_auth();
+  // Retornar dados do usuário logado
+  res(true, $u);
 }
 
 // ---------- VOICE: Speech-to-Text (Transcrição) ----------
@@ -2457,7 +2491,7 @@ if ($action === 'schools.list') {
 // Criar escola
 if ($action === 'schools.create') {
   $user = require_admin();
-  $data = body();
+  $data = $B;
   
   if (empty($data['name'])) {
     res(false, null, 'SCHOOL_NAME_REQUIRED', 422);
@@ -2483,7 +2517,7 @@ if ($action === 'schools.create') {
 // Atualizar escola
 if ($action === 'schools.update') {
   $user = require_admin();
-  $data = body();
+  $data = $B;
   $id = (int)($_GET['id'] ?? 0);
   
   if (!$id) {
@@ -2524,6 +2558,699 @@ if ($action === 'schools.delete') {
   $stmt = $pdo->prepare('DELETE FROM schools WHERE id=?');
   if ($stmt->execute([$id])) {
     res(true, null);
+  } else {
+    res(false, null, 'DELETE_FAILED', 500);
+  }
+}
+
+// ========================================
+// ENTREVISTAS COM RESPONSÁVEL
+// ========================================
+
+if ($action === 'entrevistas.create') {
+  error_log("=== ENTROU EM entrevistas.create ===");
+  $user = require_auth();
+  error_log("=== AUTH OK === User: " . json_encode($user));
+  $data = $B;
+  
+  // DEBUG
+  error_log("DEBUG: \$B = " . json_encode($B));
+  error_log("DEBUG: \$data = " . json_encode($data));
+  error_log("DEBUG: student_id = " . ($data['student_id'] ?? 'EMPTY'));
+  
+  // Campos obrigatórios
+  if (empty($data['student_id'])) {
+    error_log("=== ERRO: STUDENT_ID_REQUIRED ===");
+    res(false, null, 'STUDENT_ID_REQUIRED', 422);
+  }
+  
+  // Preparar todos os campos da entrevista
+  $fields = [
+    'student_id', 'teacher_id',
+    // Identificação
+    'data_entrevista', 'entrevistador', 'nome_aluno', 'data_nascimento', 'idade',
+    'sexo', 'deficiencia', 'codigo_aluno', 'endereco', 'bairro', 'cidade', 'estado',
+    'cep', 'telefone_residencial', 'telefone_celular', 'nome_escola', 'ano_escolar',
+    'turma', 'turno', 'nome_professor',
+    // Família
+    'nome_responsavel', 'parentesco', 'idade_responsavel', 'escolaridade_responsavel',
+    'profissao_responsavel', 'renda_familiar', 'qtd_pessoas_familia', 'tipo_moradia',
+    'condicoes_moradia', 'observacoes_familia',
+    // Gestação e Nascimento
+    'gravidez_planejada', 'tipo_parto', 'intercorrencias_gravidez', 'uso_medicamentos_gravidez',
+    'uso_alcool_drogas', 'peso_nascimento', 'estatura_nascimento', 'apgar',
+    'chorou_ao_nascer', 'mamou_bem', 'teve_ictericia', 'teve_convulsoes',
+    'internacao_pos_parto', 'tempo_internacao', 'motivo_internacao',
+    'prematuridade', 'pos_maturidade', 'anoxia_perinatal', 'forceps',
+    'cesariana_emergencia', 'outras_intercorrencias',
+    // Alimentação
+    'tipo_alimentacao', 'idade_desmame', 'aceitacao_alimentar', 'preferencias_alimentares',
+    'restricoes_alimentares',
+    // Saúde
+    'doencas_cronicas', 'medicamentos_uso_continuo', 'alergias', 'cirurgias_realizadas',
+    'internacoes_previas', 'acompanhamento_medico', 'especialidades_medicas',
+    'uso_oculos', 'uso_aparelho_auditivo', 'usa_cadeira_rodas', 'usa_andador',
+    'outras_tecnologias_assistivas', 'vacinacao_em_dia', 'doencas_infancia',
+    'hospitalizacoes', 'tratamentos_atuais', 'nivel_independencia_avds',
+    'necessita_cuidador', 'observacoes_saude',
+    // Desenvolvimento Pregresso
+    'idade_sustentou_cabeca', 'idade_sentou', 'idade_engatinhou', 'idade_andou',
+    'idade_primeiras_palavras', 'idade_frases', 'idade_controle_esfincteriano',
+    'desenvolvimento_motor', 'desenvolvimento_linguagem',
+    // Desenvolvimento Atual - Comunicação
+    'como_comunica', 'compreende_ordens_simples', 'compreende_ordens_complexas',
+    'vocabulario', 'estrutura_frases', 'usa_comunicacao_alternativa',
+    'tipo_caa', 'comunicacao_efetiva', 'intencao_comunicativa',
+    'inicia_dialogo', 'mantem_dialogo', 'observacoes_comunicacao',
+    // AVDs
+    'alimenta_sozinho', 'controla_esfincters', 'higiene_pessoal', 'veste_se_sozinho',
+    'calca_sapatos', 'toma_banho_sozinho', 'escova_dentes', 'autonomia_geral',
+    'necessita_adaptacoes', 'observacoes_avds',
+    // Sexualidade
+    'demonstra_curiosidade_sexual', 'recebeu_orientacao_sexual', 'comportamento_adequado',
+    'necessita_orientacao', 'autocuidado_menstruacao', 'compreende_privacidade',
+    'situacoes_vulnerabilidade', 'observacoes_sexualidade',
+    // Socialização
+    'brinca_com_outras_criancas', 'prefere_brincar_sozinho', 'compartilha_brinquedos',
+    'respeita_regras', 'relaciona_bem_adultos', 'relaciona_bem_criancas',
+    'tem_amigos', 'participa_atividades_grupo', 'aceita_perder_jogos',
+    'demonstra_empatia', 'reconhece_emocoes', 'expressa_emocoes',
+    'frequenta_ambientes_sociais', 'observacoes_socializacao',
+    // Comportamento
+    'comportamento_agitado', 'comportamento_apatico', 'comportamento_agressivo',
+    'comportamento_opositor', 'comportamento_colaborativo', 'comportamento_dependente',
+    'comportamento_autonomo', 'apresenta_medos', 'quais_medos', 'apresenta_manias',
+    'quais_manias', 'apresenta_estereotipias', 'quais_estereotipias',
+    'tolerancia_frustracao', 'controle_impulsos', 'atencao_concentracao',
+    'tempo_atencao', 'facilmente_distraido', 'observacoes_comportamento',
+    // Vida Escolar
+    'idade_ingresso_escolar', 'escolas_anteriores', 'repetencias', 'quais_anos_repetiu',
+    'motivo_repetencias', 'adaptacao_escolar', 'relacionamento_professores',
+    'relacionamento_colegas', 'participacao_atividades', 'interesse_aprendizagem',
+    'areas_maior_dificuldade', 'areas_maior_facilidade', 'faz_temas_casa',
+    'precisa_ajuda_temas', 'observacoes_vida_escolar',
+    // Sala de Recursos
+    'frequenta_sala_recursos', 'frequencia_atendimentos', 'gosta_atendimento',
+    'atividades_preferidas', 'observacoes_sala_recursos',
+    // Controle
+    'responsavel_preenchimento', 'assinatura_responsavel', 'assinatura_professor',
+    'assinatura_coordenador', 'data_preenchimento'
+  ];
+  
+  // Pegar valores do input
+  $values = [];
+  $placeholders = [];
+  $insertFields = [];
+  
+  // teacher_id sempre vem do usuário logado
+  $data['teacher_id'] = $user['id'];
+  
+  foreach ($fields as $field) {
+    if (isset($data[$field]) && $data[$field] !== '') {
+      $insertFields[] = $field;
+      $placeholders[] = ':' . $field;
+      $values[':' . $field] = $data[$field];
+    }
+  }
+  
+  // created_at
+  $insertFields[] = 'created_at';
+  $placeholders[] = 'NOW()';
+  
+  $sql = 'INSERT INTO entrevistas_responsavel (' . implode(', ', $insertFields) . ') 
+          VALUES (' . implode(', ', $placeholders) . ')';
+  
+  $stmt = $pdo->prepare($sql);
+  
+  if ($stmt->execute($values)) {
+    $id = $pdo->lastInsertId();
+    res(true, ['id' => $id, 'message' => 'Entrevista criada com sucesso']);
+  } else {
+    res(false, null, 'CREATE_FAILED', 500);
+  }
+}
+
+if ($action === 'entrevistas.list') {
+  $user = require_auth();
+  
+  // Admin vê todas, professor vê apenas as suas
+  if ($user['role'] === 'admin') {
+    $stmt = $pdo->query('SELECT e.*, s.name as student_name 
+                         FROM entrevistas_responsavel e 
+                         LEFT JOIN students s ON e.student_id = s.id 
+                         ORDER BY e.created_at DESC');
+    $entrevistas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  } else {
+    $stmt = $pdo->prepare('SELECT e.*, s.name as student_name 
+                           FROM entrevistas_responsavel e 
+                           LEFT JOIN students s ON e.student_id = s.id 
+                           WHERE e.teacher_id = :teacher_id 
+                           ORDER BY e.created_at DESC');
+    $stmt->execute(['teacher_id' => $user['id']]);
+    $entrevistas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
+  
+  res(true, $entrevistas);
+}
+
+if ($action === 'entrevistas.get') {
+  $user = require_auth();
+  $id = $_GET['id'] ?? null;
+  
+  if (!$id) {
+    res(false, null, 'ID_REQUIRED', 422);
+  }
+  
+  $stmt = $pdo->prepare('SELECT e.*, s.name as student_name 
+                         FROM entrevistas_responsavel e 
+                         LEFT JOIN students s ON e.student_id = s.id 
+                         WHERE e.id = :id');
+  $stmt->execute(['id' => $id]);
+  $entrevista = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$entrevista) {
+    res(false, null, 'NOT_FOUND', 404);
+  }
+  
+  // Verificar permissão
+  if ($user['role'] !== 'admin' && $entrevista['teacher_id'] != $user['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  res(true, $entrevista);
+}
+
+if ($action === 'entrevistas.update') {
+  $user = require_auth();
+  $id = $_GET['id'] ?? null;
+  $data = $B;
+  
+  if (!$id) {
+    res(false, null, 'ID_REQUIRED', 422);
+  }
+  
+  // Verificar se existe e se tem permissão
+  $stmt = $pdo->prepare('SELECT teacher_id FROM entrevistas_responsavel WHERE id = :id');
+  $stmt->execute(['id' => $id]);
+  $entrevista = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$entrevista) {
+    res(false, null, 'NOT_FOUND', 404);
+  }
+  
+  if ($user['role'] !== 'admin' && $entrevista['teacher_id'] != $user['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  // Preparar campos para update (aceita qualquer campo enviado, exceto id, created_at)
+  $updates = [];
+  $values = [];
+  
+  $protectedFields = ['id', 'created_at', 'teacher_id']; // Campos que não podem ser alterados
+  
+  foreach ($data as $field => $value) {
+    if (!in_array($field, $protectedFields)) {
+      $updates[] = "`$field` = :$field";
+      $values[':' . $field] = $value;
+    }
+  }
+  
+  if (empty($updates)) {
+    res(false, null, 'NO_FIELDS_TO_UPDATE', 422);
+  }
+  
+  // Adicionar updated_at
+  $updates[] = 'updated_at = NOW()';
+  
+  $values[':id'] = $id;
+  $sql = 'UPDATE entrevistas_responsavel SET ' . implode(', ', $updates) . ' WHERE id = :id';
+  
+  $stmt = $pdo->prepare($sql);
+  
+  if ($stmt->execute($values)) {
+    res(true, ['message' => 'Entrevista atualizada com sucesso']);
+  } else {
+    res(false, null, 'UPDATE_FAILED', 500);
+  }
+}
+
+if ($action === 'entrevistas.student') {
+  $user = require_auth();
+  $studentId = $_GET['student_id'] ?? null;
+  
+  if (!$studentId) {
+    res(false, null, 'STUDENT_ID_REQUIRED', 422);
+  }
+  
+  // Verificar se o professor tem permissão para ver esse aluno
+  if ($user['role'] !== 'admin') {
+    $stmt = $pdo->prepare('SELECT id FROM students WHERE id = :id AND created_by_teacher_id = :teacher_id');
+    $stmt->execute(['id' => $studentId, 'teacher_id' => $user['id']]);
+    if (!$stmt->fetch()) {
+      res(false, null, 'FORBIDDEN', 403);
+    }
+  }
+  
+  $stmt = $pdo->prepare('SELECT * FROM entrevistas_responsavel 
+                         WHERE student_id = :student_id 
+                         ORDER BY created_at DESC');
+  $stmt->execute(['student_id' => $studentId]);
+  $entrevistas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  
+  res(true, $entrevistas);
+}
+
+if ($action === 'entrevistas.delete') {
+  $user = require_auth();
+  $id = $_GET['id'] ?? null;
+  
+  if (!$id) {
+    res(false, null, 'ID_REQUIRED', 422);
+  }
+  
+  // Verificar permissão
+  $stmt = $pdo->prepare('SELECT teacher_id FROM entrevistas_responsavel WHERE id = :id');
+  $stmt->execute(['id' => $id]);
+  $entrevista = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$entrevista) {
+    res(false, null, 'NOT_FOUND', 404);
+  }
+  
+  if ($user['role'] !== 'admin' && $entrevista['teacher_id'] != $user['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  $stmt = $pdo->prepare('DELETE FROM entrevistas_responsavel WHERE id = :id');
+  
+  if ($stmt->execute(['id' => $id])) {
+    res(true, ['message' => 'Entrevista deletada com sucesso']);
+  } else {
+    res(false, null, 'DELETE_FAILED', 500);
+  }
+}
+
+// ========================================
+// PDI (PLANO DE DESENVOLVIMENTO INDIVIDUAL)
+// ========================================
+
+if ($action === 'pdis.create') {
+  $user = require_auth();
+  $data = $B;
+  
+  // Campos obrigatórios
+  if (empty($data['student_id'])) {
+    res(false, null, 'STUDENT_ID_REQUIRED', 422);
+  }
+  
+  // teacher_id sempre vem do usuário logado
+  $data['teacher_id'] = $user['id'];
+  
+  // Preparar INSERT dinâmico (aceita qualquer campo exceto id, created_at)
+  $protectedFields = ['id', 'created_at', 'updated_at'];
+  $insertFields = [];
+  $placeholders = [];
+  $values = [];
+  
+  foreach ($data as $field => $value) {
+    if (!in_array($field, $protectedFields)) {
+      $insertFields[] = "`$field`";
+      $placeholders[] = ":$field";
+      $values[":$field"] = $value;
+    }
+  }
+  
+  $sql = 'INSERT INTO pdis (' . implode(', ', $insertFields) . ', created_at) 
+          VALUES (' . implode(', ', $placeholders) . ', NOW())';
+  
+  $stmt = $pdo->prepare($sql);
+  
+  if ($stmt->execute($values)) {
+    $id = $pdo->lastInsertId();
+    res(true, ['id' => $id, 'message' => 'PDI criado com sucesso']);
+  } else {
+    res(false, null, 'CREATE_FAILED', 500);
+  }
+}
+
+if ($action === 'pdis.list') {
+  $user = require_auth();
+  
+  // Admin vê todos, professor vê apenas os seus
+  if ($user['role'] === 'admin') {
+    $stmt = $pdo->query('SELECT p.*, s.name as student_name 
+                         FROM pdis p 
+                         LEFT JOIN students s ON p.student_id = s.id 
+                         ORDER BY p.created_at DESC');
+    $pdis = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  } else {
+    $stmt = $pdo->prepare('SELECT p.*, s.name as student_name 
+                           FROM pdis p 
+                           LEFT JOIN students s ON p.student_id = s.id 
+                           WHERE p.teacher_id = :teacher_id 
+                           ORDER BY p.created_at DESC');
+    $stmt->execute(['teacher_id' => $user['id']]);
+    $pdis = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
+  
+  res(true, $pdis);
+}
+
+if ($action === 'pdis.get') {
+  $user = require_auth();
+  $id = $_GET['id'] ?? null;
+  
+  if (!$id) {
+    res(false, null, 'ID_REQUIRED', 422);
+  }
+  
+  $stmt = $pdo->prepare('SELECT p.*, s.name as student_name 
+                         FROM pdis p 
+                         LEFT JOIN students s ON p.student_id = s.id 
+                         WHERE p.id = :id');
+  $stmt->execute(['id' => $id]);
+  $pdi = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$pdi) {
+    res(false, null, 'NOT_FOUND', 404);
+  }
+  
+  // Verificar permissão
+  if ($user['role'] !== 'admin' && $pdi['teacher_id'] != $user['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  res(true, $pdi);
+}
+
+if ($action === 'pdis.update') {
+  $user = require_auth();
+  $id = $_GET['id'] ?? null;
+  $data = $B;
+  
+  if (!$id) {
+    res(false, null, 'ID_REQUIRED', 422);
+  }
+  
+  // Verificar se existe e se tem permissão
+  $stmt = $pdo->prepare('SELECT teacher_id FROM pdis WHERE id = :id');
+  $stmt->execute(['id' => $id]);
+  $pdi = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$pdi) {
+    res(false, null, 'NOT_FOUND', 404);
+  }
+  
+  if ($user['role'] !== 'admin' && $pdi['teacher_id'] != $user['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  // Preparar campos para update (aceita qualquer campo enviado, exceto id, created_at, teacher_id)
+  $updates = [];
+  $values = [];
+  
+  $protectedFields = ['id', 'created_at', 'teacher_id'];
+  
+  foreach ($data as $field => $value) {
+    if (!in_array($field, $protectedFields)) {
+      $updates[] = "`$field` = :$field";
+      $values[':' . $field] = $value;
+    }
+  }
+  
+  if (empty($updates)) {
+    res(false, null, 'NO_FIELDS_TO_UPDATE', 422);
+  }
+  
+  // Adicionar updated_at
+  $updates[] = 'updated_at = NOW()';
+  
+  $values[':id'] = $id;
+  $sql = 'UPDATE pdis SET ' . implode(', ', $updates) . ' WHERE id = :id';
+  
+  $stmt = $pdo->prepare($sql);
+  
+  if ($stmt->execute($values)) {
+    res(true, ['message' => 'PDI atualizado com sucesso']);
+  } else {
+    res(false, null, 'UPDATE_FAILED', 500);
+  }
+}
+
+if ($action === 'pdis.student') {
+  $user = require_auth();
+  $studentId = $_GET['student_id'] ?? null;
+  
+  if (!$studentId) {
+    res(false, null, 'STUDENT_ID_REQUIRED', 422);
+  }
+  
+  // Verificar se o professor tem permissão para ver esse aluno
+  if ($user['role'] !== 'admin') {
+    $stmt = $pdo->prepare('SELECT id FROM students WHERE id = :id AND created_by_teacher_id = :teacher_id');
+    $stmt->execute(['id' => $studentId, 'teacher_id' => $user['id']]);
+    if (!$stmt->fetch()) {
+      res(false, null, 'FORBIDDEN', 403);
+    }
+  }
+  
+  $stmt = $pdo->prepare('SELECT * FROM pdis 
+                         WHERE student_id = :student_id 
+                         ORDER BY created_at DESC');
+  $stmt->execute(['student_id' => $studentId]);
+  $pdis = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  
+  res(true, $pdis);
+}
+
+if ($action === 'pdis.delete') {
+  $user = require_auth();
+  $id = $_GET['id'] ?? null;
+  
+  if (!$id) {
+    res(false, null, 'ID_REQUIRED', 422);
+  }
+  
+  // Verificar permissão
+  $stmt = $pdo->prepare('SELECT teacher_id FROM pdis WHERE id = :id');
+  $stmt->execute(['id' => $id]);
+  $pdi = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$pdi) {
+    res(false, null, 'NOT_FOUND', 404);
+  }
+  
+  if ($user['role'] !== 'admin' && $pdi['teacher_id'] != $user['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  $stmt = $pdo->prepare('DELETE FROM pdis WHERE id = :id');
+  
+  if ($stmt->execute(['id' => $id])) {
+    res(true, ['message' => 'PDI deletado com sucesso']);
+  } else {
+    res(false, null, 'DELETE_FAILED', 500);
+  }
+}
+
+// ========================================
+// PAI (PLANO DE ATENDIMENTO INDIVIDUAL)
+// ========================================
+
+if ($action === 'pais.create') {
+  $user = require_auth();
+  $data = $B;
+  
+  // Campos obrigatórios
+  if (empty($data['student_id'])) {
+    res(false, null, 'STUDENT_ID_REQUIRED', 422);
+  }
+  
+  // teacher_id sempre vem do usuário logado
+  $data['teacher_id'] = $user['id'];
+  
+  // Preparar INSERT dinâmico
+  $protectedFields = ['id', 'created_at', 'updated_at'];
+  $insertFields = [];
+  $placeholders = [];
+  $values = [];
+  
+  foreach ($data as $field => $value) {
+    if (!in_array($field, $protectedFields)) {
+      $insertFields[] = "`$field`";
+      $placeholders[] = ":$field";
+      $values[":$field"] = $value;
+    }
+  }
+  
+  $sql = 'INSERT INTO pais (' . implode(', ', $insertFields) . ', created_at) 
+          VALUES (' . implode(', ', $placeholders) . ', NOW())';
+  
+  $stmt = $pdo->prepare($sql);
+  
+  if ($stmt->execute($values)) {
+    $id = $pdo->lastInsertId();
+    res(true, ['id' => $id, 'message' => 'PAI criado com sucesso']);
+  } else {
+    res(false, null, 'CREATE_FAILED', 500);
+  }
+}
+
+if ($action === 'pais.list') {
+  $user = require_auth();
+  
+  // Admin vê todos, professor vê apenas os seus
+  if ($user['role'] === 'admin') {
+    $stmt = $pdo->query('SELECT p.*, s.name as student_name 
+                         FROM pais p 
+                         LEFT JOIN students s ON p.student_id = s.id 
+                         ORDER BY p.created_at DESC');
+    $pais = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  } else {
+    $stmt = $pdo->prepare('SELECT p.*, s.name as student_name 
+                           FROM pais p 
+                           LEFT JOIN students s ON p.student_id = s.id 
+                           WHERE p.teacher_id = :teacher_id 
+                           ORDER BY p.created_at DESC');
+    $stmt->execute(['teacher_id' => $user['id']]);
+    $pais = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
+  
+  res(true, $pais);
+}
+
+if ($action === 'pais.get') {
+  $user = require_auth();
+  $id = $_GET['id'] ?? null;
+  
+  if (!$id) {
+    res(false, null, 'ID_REQUIRED', 422);
+  }
+  
+  $stmt = $pdo->prepare('SELECT p.*, s.name as student_name 
+                         FROM pais p 
+                         LEFT JOIN students s ON p.student_id = s.id 
+                         WHERE p.id = :id');
+  $stmt->execute(['id' => $id]);
+  $pai = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$pai) {
+    res(false, null, 'NOT_FOUND', 404);
+  }
+  
+  // Verificar permissão
+  if ($user['role'] !== 'admin' && $pai['teacher_id'] != $user['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  res(true, $pai);
+}
+
+if ($action === 'pais.update') {
+  $user = require_auth();
+  $id = $_GET['id'] ?? null;
+  $data = $B;
+  
+  if (!$id) {
+    res(false, null, 'ID_REQUIRED', 422);
+  }
+  
+  // Verificar se existe e se tem permissão
+  $stmt = $pdo->prepare('SELECT teacher_id FROM pais WHERE id = :id');
+  $stmt->execute(['id' => $id]);
+  $pai = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$pai) {
+    res(false, null, 'NOT_FOUND', 404);
+  }
+  
+  if ($user['role'] !== 'admin' && $pai['teacher_id'] != $user['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  // Preparar campos para update
+  $updates = [];
+  $values = [];
+  
+  $protectedFields = ['id', 'created_at', 'teacher_id'];
+  
+  foreach ($data as $field => $value) {
+    if (!in_array($field, $protectedFields)) {
+      $updates[] = "`$field` = :$field";
+      $values[':' . $field] = $value;
+    }
+  }
+  
+  if (empty($updates)) {
+    res(false, null, 'NO_FIELDS_TO_UPDATE', 422);
+  }
+  
+  // Adicionar updated_at
+  $updates[] = 'updated_at = NOW()';
+  
+  $values[':id'] = $id;
+  $sql = 'UPDATE pais SET ' . implode(', ', $updates) . ' WHERE id = :id';
+  
+  $stmt = $pdo->prepare($sql);
+  
+  if ($stmt->execute($values)) {
+    res(true, ['message' => 'PAI atualizado com sucesso']);
+  } else {
+    res(false, null, 'UPDATE_FAILED', 500);
+  }
+}
+
+if ($action === 'pais.student') {
+  $user = require_auth();
+  $studentId = $_GET['student_id'] ?? null;
+  
+  if (!$studentId) {
+    res(false, null, 'STUDENT_ID_REQUIRED', 422);
+  }
+  
+  // Verificar se o professor tem permissão para ver esse aluno
+  if ($user['role'] !== 'admin') {
+    $stmt = $pdo->prepare('SELECT id FROM students WHERE id = :id AND created_by_teacher_id = :teacher_id');
+    $stmt->execute(['id' => $studentId, 'teacher_id' => $user['id']]);
+    if (!$stmt->fetch()) {
+      res(false, null, 'FORBIDDEN', 403);
+    }
+  }
+  
+  $stmt = $pdo->prepare('SELECT * FROM pais 
+                         WHERE student_id = :student_id 
+                         ORDER BY created_at DESC');
+  $stmt->execute(['student_id' => $studentId]);
+  $pais = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  
+  res(true, $pais);
+}
+
+if ($action === 'pais.delete') {
+  $user = require_auth();
+  $id = $_GET['id'] ?? null;
+  
+  if (!$id) {
+    res(false, null, 'ID_REQUIRED', 422);
+  }
+  
+  // Verificar permissão
+  $stmt = $pdo->prepare('SELECT teacher_id FROM pais WHERE id = :id');
+  $stmt->execute(['id' => $id]);
+  $pai = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$pai) {
+    res(false, null, 'NOT_FOUND', 404);
+  }
+  
+  if ($user['role'] !== 'admin' && $pai['teacher_id'] != $user['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  $stmt = $pdo->prepare('DELETE FROM pais WHERE id = :id');
+  
+  if ($stmt->execute(['id' => $id])) {
+    res(true, ['message' => 'PAI deletado com sucesso']);
   } else {
     res(false, null, 'DELETE_FAILED', 500);
   }

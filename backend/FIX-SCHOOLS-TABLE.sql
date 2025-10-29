@@ -1,122 +1,37 @@
 -- =========================================================
 -- CONECTEDU - FIX PONTUAL: Tabela SCHOOLS
--- Correção rápida para executar direto no phpMyAdmin
+-- Versão SIMPLIFICADA (sem PREPARE - funciona em hospedagem compartilhada)
 -- 
 -- Problema: Campo 'city' não existe na tabela schools
--- Solução: Garantir estrutura correta da tabela
+-- Solução: Recriar tabela com estrutura correta
+-- 
+-- ⚠️ ATENÇÃO: Execute os comandos UM POR VEZ se der erro!
 -- 
 -- INSTRUÇÕES:
 -- 1. Acesse phpMyAdmin
 -- 2. Selecione banco 'conectedu'
 -- 3. Aba SQL
--- 4. Cole TODO este script
+-- 4. Cole os comandos abaixo
 -- 5. Clique Executar
 -- =========================================================
 
-USE conectedu;
-
 -- =========================================================
--- OPÇÃO 1: Se a tabela JÁ EXISTE (ajustar campos)
+-- MÉTODO 1: RECRIAR TABELA (SE PUDER PERDER DADOS)
 -- =========================================================
 
--- Verificar e remover campo 'city' se existir
-SET @col_exists = 0;
-SELECT COUNT(*) INTO @col_exists 
-FROM INFORMATION_SCHEMA.COLUMNS 
-WHERE TABLE_SCHEMA = DATABASE()
-  AND TABLE_NAME = 'schools' 
-  AND COLUMN_NAME = 'city';
-
-SET @sql = IF(@col_exists > 0, 
-  'ALTER TABLE schools DROP COLUMN city',
-  'SELECT "✓ Campo city não existe (OK)" AS info');
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
--- Verificar e remover campo 'created_by_teacher_id' se existir
-SET @col_exists = 0;
-SELECT COUNT(*) INTO @col_exists 
-FROM INFORMATION_SCHEMA.COLUMNS 
-WHERE TABLE_SCHEMA = DATABASE()
-  AND TABLE_NAME = 'schools' 
-  AND COLUMN_NAME = 'created_by_teacher_id';
-
-SET @sql = IF(@col_exists > 0, 
-  'ALTER TABLE schools DROP COLUMN created_by_teacher_id',
-  'SELECT "✓ Campo created_by_teacher_id não existe (OK)" AS info');
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
--- Adicionar campo 'code' se não existir
-SET @col_exists = 0;
-SELECT COUNT(*) INTO @col_exists 
-FROM INFORMATION_SCHEMA.COLUMNS 
-WHERE TABLE_SCHEMA = DATABASE()
-  AND TABLE_NAME = 'schools' 
-  AND COLUMN_NAME = 'code';
-
-SET @sql = IF(@col_exists = 0, 
-  'ALTER TABLE schools ADD COLUMN code varchar(50) DEFAULT NULL AFTER name, ADD KEY idx_schools_code (code)',
-  'SELECT "✓ Campo code já existe (OK)" AS info');
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
--- Adicionar campo 'type' se não existir
-SET @col_exists = 0;
-SELECT COUNT(*) INTO @col_exists 
-FROM INFORMATION_SCHEMA.COLUMNS 
-WHERE TABLE_SCHEMA = DATABASE()
-  AND TABLE_NAME = 'schools' 
-  AND COLUMN_NAME = 'type';
-
-SET @sql = IF(@col_exists = 0, 
-  "ALTER TABLE schools ADD COLUMN type enum('municipal','estadual','federal','particular') DEFAULT 'municipal' AFTER email",
-  'SELECT "✓ Campo type já existe (OK)" AS info');
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
--- Adicionar campo 'status' se não existir
-SET @col_exists = 0;
-SELECT COUNT(*) INTO @col_exists 
-FROM INFORMATION_SCHEMA.COLUMNS 
-WHERE TABLE_SCHEMA = DATABASE()
-  AND TABLE_NAME = 'schools' 
-  AND COLUMN_NAME = 'status';
-
-SET @sql = IF(@col_exists = 0, 
-  "ALTER TABLE schools ADD COLUMN status enum('ativo','inativo') DEFAULT 'ativo' AFTER type, ADD KEY idx_schools_status (status)",
-  'SELECT "✓ Campo status já existe (OK)" AS info');
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
--- Garantir campo 'updated_at' existe
-SET @col_exists = 0;
-SELECT COUNT(*) INTO @col_exists 
-FROM INFORMATION_SCHEMA.COLUMNS 
-WHERE TABLE_SCHEMA = DATABASE()
-  AND TABLE_NAME = 'schools' 
-  AND COLUMN_NAME = 'updated_at';
-
-SET @sql = IF(@col_exists = 0, 
-  'ALTER TABLE schools ADD COLUMN updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
-  'SELECT "✓ Campo updated_at já existe (OK)" AS info');
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
--- Converter para MyISAM (se ainda não for)
-ALTER TABLE schools ENGINE=MyISAM;
-
--- Otimizar tabela
-OPTIMIZE TABLE schools;
+-- Apagar tabela antiga (CUIDADO: perde dados!)
+-- DROP TABLE IF EXISTS schools;
 
 -- =========================================================
--- OPÇÃO 2: Se a tabela NÃO EXISTE (criar do zero)
+-- MÉTODO 2: AJUSTAR TABELA EXISTENTE (PRESERVA DADOS)
+-- =========================================================
+
+-- Remover campos incorretos (execute um por vez se der erro)
+-- ALTER TABLE schools DROP COLUMN IF EXISTS city;
+-- ALTER TABLE schools DROP COLUMN IF EXISTS created_by_teacher_id;
+
+-- =========================================================
+-- MÉTODO 3: CRIAR/RECRIAR COM ESTRUTURA CORRETA
 -- =========================================================
 
 CREATE TABLE IF NOT EXISTS `schools` (
@@ -136,21 +51,29 @@ CREATE TABLE IF NOT EXISTS `schools` (
   KEY `idx_schools_status` (`status`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- Converter para MyISAM
+ALTER TABLE schools ENGINE=MyISAM;
+
+-- Otimizar
+OPTIMIZE TABLE schools;
+
+-- Converter para MyISAM
+ALTER TABLE schools ENGINE=MyISAM;
+
+-- Otimizar
+OPTIMIZE TABLE schools;
+
 -- =========================================================
 -- VERIFICAÇÃO FINAL
 -- =========================================================
 
-SELECT '✅ TABELA SCHOOLS CORRIGIDA!' AS status;
-
 -- Mostrar estrutura atual
-DESCRIBE schools;
+SHOW CREATE TABLE schools;
 
--- Mostrar dados existentes (se houver)
+-- Contar registros
 SELECT 
-  COUNT(*) AS total_escolas,
-  COUNT(CASE WHEN status = 'ativo' THEN 1 END) AS ativas,
-  COUNT(CASE WHEN status = 'inativo' THEN 1 END) AS inativas
+  COUNT(*) AS total_escolas
 FROM schools;
 
-SELECT '📊 Estrutura esperada da tabela schools:' AS info;
-SELECT 'id, name, code, address, phone, email, type, status, created_at, updated_at' AS campos_corretos;
+-- ✅ Estrutura correta: id, name, code, address, phone, email, type, status, created_at, updated_at
+

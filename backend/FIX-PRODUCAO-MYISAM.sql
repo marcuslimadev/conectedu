@@ -22,7 +22,7 @@ SET time_zone = '+00:00';
 -- Tabela de migrations (controle de versão)
 CREATE TABLE IF NOT EXISTS `migrations` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `migration_name` varchar(255) NOT NULL,
+  `migration_namhttps://conectaee.com.br/backend/api.php/statse` varchar(255) NOT NULL,
   `executed_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `migration_name` (`migration_name`)

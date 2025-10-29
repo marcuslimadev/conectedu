@@ -2391,6 +2391,7 @@ const Layout = {
             <h6 class="mb-2 text-xs font-semibold text-gray-700 uppercase tracking-wider">
               Formulários AEE
             </h6>
+            <!-- FORMULÁRIO ANTIGO - OCULTO
             <router-link to="entrevista-responsavel" class="nav-link-tw" @click="closeMobileSidebar">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4.586a1 1 0 01-.707-.293l-5.414-5.414a1 1 0 01-.293-.707V2z"/>
@@ -2401,17 +2402,34 @@ const Layout = {
               </svg>
               Entrevista com Responsável
             </router-link>
+            -->
+            <router-link to="entrevista-completa" class="nav-link-tw bg-indigo-50 border-l-4 border-indigo-600" @click="closeMobileSidebar" title="Formulário completo com 180+ campos">
+              <i class="fas fa-comments w-5 text-indigo-600"></i>
+              Entrevista com Responsável
+            </router-link>
+            <!-- FORMULÁRIO ANTIGO - OCULTO
             <router-link to="pdi" class="nav-link-tw" @click="closeMobileSidebar">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
               </svg>
               PDI - ConectAEE
             </router-link>
+            -->
+            <router-link to="pdi-completo" class="nav-link-tw bg-emerald-50 border-l-4 border-emerald-600" @click="closeMobileSidebar" title="Formulário completo com 250+ campos">
+              <i class="fas fa-file-medical w-5 text-emerald-600"></i>
+              PDI - Plano de Desenvolvimento Individual
+            </router-link>
+            <!-- FORMULÁRIO ANTIGO - OCULTO
             <router-link to="plano-atendimento" class="nav-link-tw" @click="closeMobileSidebar">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/>
               </svg>
               Plano de Atendimento Individual
+            </router-link>
+            -->
+            <router-link to="pai-completo" class="nav-link-tw bg-purple-50 border-l-4 border-purple-600" @click="closeMobileSidebar" title="Formulário completo com 80+ campos">
+              <i class="fas fa-tasks w-5 text-purple-600"></i>
+              PAI - Plano de Atendimento Individual
             </router-link>
             <router-link to="relatorio-atendimento" class="nav-link-tw" @click="closeMobileSidebar">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -2643,11 +2661,24 @@ const Layout = {
     }
   },
   async mounted() {
+    console.log('🏢 [Layout] Mounted - iniciando carregamento do user');
+    console.log('🏢 [Layout] Token:', localStorage.getItem('token') ? 'EXISTS' : 'MISSING');
     try {
+      console.log('🏢 [Layout] Chamando /user...');
       const response = await api.get('/user');
+      console.log('🏢 [Layout] Resposta /user:', response);
       this.user = (response.data && response.data.data) ? response.data.data : response.data;
+      
+      // CRÍTICO: Atualizar $root.user para todos os componentes filhos acessarem
+      if (this.$root) {
+        this.$root.user = this.user;
+        console.log('✅ [Layout] $root.user atualizado:', this.$root.user);
+      }
+      
+      console.log('✅ [Layout] User carregado:', this.user);
     } catch (error) {
-      console.error('Erro ao carregar dados do usuário:', error);
+      console.error('❌ [Layout] Erro ao carregar dados do usuário:', error);
+      console.error('❌ [Layout] Response:', error.response);
     }
     
     // Atualizar o relógio a cada minuto
@@ -2931,164 +2962,106 @@ const Login = {
 // Dashboard principal
 const Dashboard = {
   template: `
-    <div class="space-y-6">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p class="mt-1 text-sm text-gray-600">Visão geral do sistema educacional</p>
-      </div>
-      
-      <!-- Cards de estatísticas (removidos Cursos e Agenda) -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-        <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
-          <div class="p-5">
-            <div class="flex items-center">
-              <div class="flex-shrink-0">
-                <svg class="h-8 w-8 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <!-- Chapéu de formatura (aluno) -->
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
-                </svg>
-              </div>
-              <div class="ml-5 w-0 flex-1">
-                <dl>
-                  <dt class="text-sm font-medium text-gray-500 truncate">Total de Alunos</dt>
-                  <dd class="text-lg font-medium text-gray-900">{{ stats.alunos }}</dd>
-                </dl>
-              </div>
-            </div>
+    <div class="p-6 space-y-6">
+      <!-- Header com Busca -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-800">Visão Geral dos Alunos</h1>
+            <p class="text-sm text-gray-600 mt-1">Acompanhe o progresso dos formulários AEE</p>
           </div>
-        </div>
-
-        <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
-          <div class="p-5">
-            <div class="flex items-center">
-              <div class="flex-shrink-0">
-                <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-              </div>
-              <div class="ml-5 w-0 flex-1">
-                <dl>
-                  <dt class="text-sm font-medium text-gray-500 truncate">Formulários AEE</dt>
-                  <dd class="text-lg font-medium text-gray-900">{{ stats.formularios }}</dd>
-                </dl>
-              </div>
-            </div>
+          <div class="flex gap-3 w-full md:w-auto">
+            <input 
+              v-model="filtros.busca" 
+              type="text" 
+              :placeholder="isAdmin ? 'Buscar por professor...' : 'Buscar por aluno...'" 
+              class="flex-1 md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+            <select 
+              v-if="isAdmin && professores" 
+              v-model="filtros.professorId" 
+              class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
+            >
+              <option value="">Todos os professores</option>
+              <option v-for="prof in professores" :key="prof.id" :value="prof.id">{{ prof.name }}</option>
+            </select>
           </div>
         </div>
       </div>
-      
-      <!-- Gráfico de atividades recentes -->
-      <div class="bg-white shadow rounded-lg">
-        <div class="px-4 py-5 sm:p-6">
-          <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
-            Atividades Recentes
-          </h3>
-          <div id="chart-container" style="height: 300px;"></div>
-        </div>
-      </div>
-      
-      <!-- Lista de atividades recentes com filtros e ações -->
-      <div class="bg-white shadow rounded-lg">
-        <div class="px-4 py-5 sm:p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg leading-6 font-medium text-gray-900">Últimas Atividades</h3>
-            <div class="flex items-center gap-2">
-              <button @click="refreshAtividades" class="inline-flex items-center px-3 py-1.5 rounded-md border text-sm text-gray-700 hover:bg-gray-50">
-                <svg class="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6h6M20 20v-6h-6M5 19A9 9 0 0119 5"/></svg>
-                Atualizar
-              </button>
-              <label class="inline-flex items-center text-sm text-gray-600 select-none">
-                <input type="checkbox" v-model="filtros.autoRefresh" class="h-4 w-4 text-brand-primary border-gray-300 rounded mr-2">
-                Auto
-              </label>
-              <button @click="exportCSV" class="inline-flex items-center px-3 py-1.5 rounded-md border text-sm text-gray-700 hover:bg-gray-50">
-                <svg class="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3h8v4M12 12v9m0 0l-3-3m3 3l3-3M5 21h14a2 2 0 002-2v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7a2 2 0 002 2z"/></svg>
-                CSV
-              </button>
-            </div>
-          </div>
 
-          <!-- Barra de filtros -->
-          <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4">
-            <div class="md:col-span-2">
-              <div class="relative">
-                <span class="absolute left-3 top-2.5 text-gray-400">
-                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                </span>
-                <input v-model.trim="filtros.q" type="text" placeholder="Buscar descrição..." class="w-full pl-9 pr-3 py-2 rounded-md border border-gray-300 focus:ring-brand-primary focus:border-brand-primary text-sm"/>
+      <!-- Gráfico de Estatísticas -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-bold mb-6 text-gray-800">Estatísticas de Conclusão</h2>
+        <div id="chart-container" style="width:100%; height:350px;"></div>
+      </div>
+
+      <!-- Grid de Cards de Alunos -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-bold mb-6 text-gray-800">
+          Alunos 
+          <span v-if="alunos && alunos.length" class="text-sm font-normal text-gray-500">({{ alunos.length }} total)</span>
+        </h2>
+
+        <div v-if="loading" class="text-center py-12">
+          <svg class="animate-spin h-12 w-12 text-blue-500 mx-auto" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p class="mt-4 text-gray-600">Carregando alunos...</p>
+        </div>
+
+        <div v-else-if="!alunos || alunos.length === 0" class="text-center py-12 text-gray-500">
+          <svg class="w-20 h-20 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+          <p class="text-lg font-medium">Nenhum aluno encontrado</p>
+          <p class="text-sm mt-1">{{ filtros.busca ? 'Tente ajustar sua busca' : 'Comece cadastrando novos alunos' }}</p>
+        </div>
+
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div v-for="aluno in alunos" :key="aluno.id" class="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+            <div class="flex items-center gap-4 mb-4 pb-4 border-b border-gray-200">
+              <div class="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-md">{{ getInitials(aluno.name || '') }}</div>
+              <div class="flex-1 min-w-0">
+                <h3 class="font-semibold text-gray-800 truncate text-base">{{ aluno.name || 'Sem nome' }}</h3>
+                <p class="text-xs text-gray-500 truncate">{{ aluno.school_name || 'Escola não informada' }}</p>
+                <p v-if="isAdmin && aluno.professor_nome" class="text-xs text-blue-600 truncate mt-0.5">Prof: {{ aluno.professor_nome }}</p>
               </div>
             </div>
-            <div>
-              <select v-model="filtros.tipo" class="w-full py-2 px-3 rounded-md border border-gray-300 text-sm focus:ring-brand-primary focus:border-brand-primary">
-                <option value="">Todos os tipos</option>
-                <option v-for="t in tiposDisponiveis" :key="t" :value="t">{{ t }}</option>
-              </select>
-            </div>
-            <div>
-              <select v-model.number="filtros.periodo" class="w-full py-2 px-3 rounded-md border border-gray-300 text-sm focus:ring-brand-primary focus:border-brand-primary">
-                <option :value="7">Últimos 7 dias</option>
-                <option :value="30">Últimos 30 dias</option>
-                <option :value="90">Últimos 90 dias</option>
-                <option :value="0">Personalizado...</option>
-              </select>
-            </div>
-            <div class="flex gap-2" v-if="filtros.periodo===0">
-              <input type="date" v-model="filtros.de" class="flex-1 py-2 px-3 rounded-md border border-gray-300 text-sm focus:ring-brand-primary focus:border-brand-primary"/>
-              <input type="date" v-model="filtros.ate" class="flex-1 py-2 px-3 rounded-md border border-gray-300 text-sm focus:ring-brand-primary focus:border-brand-primary"/>
-            </div>
-            <div class="md:col-span-1 flex gap-2">
-              <select v-model="filtros.sort" class="flex-1 py-2 px-3 rounded-md border border-gray-300 text-sm focus:ring-brand-primary focus:border-brand-primary">
-                <option value="data_desc">Mais recentes</option>
-                <option value="data_asc">Mais antigas</option>
-                <option value="tipo_asc">Tipo A→Z</option>
-                <option value="tipo_desc">Tipo Z→A</option>
-              </select>
-              <select v-model.number="paginacao.perPage" class="w-24 py-2 px-3 rounded-md border border-gray-300 text-sm focus:ring-brand-primary focus:border-brand-primary">
-                <option :value="10">10</option>
-                <option :value="20">20</option>
-                <option :value="50">50</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Lista / Skeleton / Vazio -->
-          <div v-if="loadingAtividades" class="space-y-3">
-            <div v-for="i in 5" :key="i" class="animate-pulse h-10 bg-gray-100 rounded"></div>
-          </div>
-          <div v-else-if="atividadesFiltradas.length===0" class="text-sm text-gray-500">
-            Nenhuma atividade encontrada para os filtros atuais.
-          </div>
-          <div v-else class="flow-root">
-            <ul class="divide-y divide-gray-100">
-              <li v-for="a in paginaAtual" :key="a.id" class="py-3 flex items-start gap-3">
-                <span class="inline-flex items-center justify-center h-8 w-8 rounded-full" :class="badgeBg(a.tipo)">
-                  <svg class="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5"/>
-                  </svg>
-                </span>
-                <div class="flex-1 min-w-0">
-                  <div class="flex items-center justify-between">
-                    <p class="text-sm text-gray-800">{{ a.descricao }}</p>
-                    <span class="text-xs text-gray-500 whitespace-nowrap">{{ a.data }}</span>
-                  </div>
-                  <div class="mt-1">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" :class="chipBg(a.tipo)">{{ a.tipo || 'Geral' }}</span>
-                  </div>
+            <div class="space-y-3">
+              <div>
+                <div class="flex items-center justify-between text-xs mb-1">
+                  <span class="font-medium text-gray-700">Entrevista</span>
+                  <span class="font-bold" :class="getPercentColor(aluno.entrevista_percent)">{{ aluno.entrevista_percent || 0 }}%</span>
                 </div>
-              </li>
-            </ul>
-          </div>
-
-          <!-- Paginação -->
-          <div v-if="totalPaginas>1" class="mt-4 flex items-center justify-between text-sm text-gray-600">
-            <div>
-              Página {{ paginacao.page }} de {{ totalPaginas }} — {{ atividadesFiltradas.length }} atividades
+                <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                  <div class="h-2 rounded-full transition-all duration-500 bg-gradient-to-r from-indigo-400 to-indigo-600" :style="{width: (aluno.entrevista_percent || 0) + '%'}"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex items-center justify-between text-xs mb-1">
+                  <span class="font-medium text-gray-700">PDI</span>
+                  <span class="font-bold" :class="getPercentColor(aluno.pdi_percent)">{{ aluno.pdi_percent || 0 }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                  <div class="h-2 rounded-full transition-all duration-500 bg-gradient-to-r from-emerald-400 to-emerald-600" :style="{width: (aluno.pdi_percent || 0) + '%'}"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex items-center justify-between text-xs mb-1">
+                  <span class="font-medium text-gray-700">PAI</span>
+                  <span class="font-bold" :class="getPercentColor(aluno.pai_percent)">{{ aluno.pai_percent || 0 }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                  <div class="h-2 rounded-full transition-all duration-500 bg-gradient-to-r from-purple-400 to-purple-600" :style="{width: (aluno.pai_percent || 0) + '%'}"></div>
+                </div>
+              </div>
             </div>
-            <div class="flex gap-2">
-              <button :disabled="paginacao.page===1" @click="paginacao.page=1" class="px-2 py-1 rounded border disabled:opacity-40">«</button>
-              <button :disabled="paginacao.page===1" @click="paginacao.page--" class="px-2 py-1 rounded border disabled:opacity-40">‹</button>
-              <button :disabled="paginacao.page===totalPaginas" @click="paginacao.page++" class="px-2 py-1 rounded border disabled:opacity-40">›</button>
-              <button :disabled="paginacao.page===totalPaginas" @click="paginacao.page=totalPaginas" class="px-2 py-1 rounded border disabled:opacity-40">»</button>
+            <div class="mt-4 pt-4 border-t border-gray-200">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-700">Média Geral</span>
+                <span class="text-lg font-bold" :class="getPercentColor(aluno.media_percent)">{{ aluno.media_percent || 0 }}%</span>
+              </div>
             </div>
           </div>
         </div>
@@ -3097,119 +3070,296 @@ const Dashboard = {
   `,
   data() {
     return {
-      stats: {
-        alunos: 0,
-        formularios: 0
-      },
-      atividadesRaw: [],
-      filtros: { q: '', tipo: '', periodo: 7, de: '', ate: '', sort: 'data_desc', autoRefresh: false },
-      tiposDisponiveis: ['Aluno','Usuário','Escola','Formulário','PDI','PAI','Plano','Atendimento','Curso'],
-      paginacao: { page: 1, perPage: 10 },
-      loadingAtividades: false,
-      autoTimer: null
+      alunos: [],
+      professores: [],
+      filtros: { busca: '', professorId: '' },
+      loading: false
+    }
+  },
+  computed: {
+    isAdmin() { 
+      const result = this.$root && this.$root.user && this.$root.user.role === 'admin';
+      console.log('🔑 [Dashboard] isAdmin:', result, 'User:', this.$root?.user);
+      return result;
+    },
+    alunosFiltrados() {
+      if (!Array.isArray(this.alunos)) {
+        console.warn('⚠️ [Dashboard] this.alunos não é array:', this.alunos);
+        return [];
+      }
+      
+      console.log('🔍 [Dashboard] Filtrando alunos. Total:', this.alunos.length);
+      console.log('🔍 [Dashboard] isAdmin:', this.isAdmin);
+      console.log('🔍 [Dashboard] User role:', this.$root?.user?.role);
+      let resultado = [...this.alunos];
+      
+      if (this.isAdmin && this.filtros.professorId) {
+        console.log('🔍 [Dashboard] Filtro por professor:', this.filtros.professorId);
+        resultado = resultado.filter(a => String(a.created_by_teacher_id) === String(this.filtros.professorId));
+        console.log('🔍 [Dashboard] Após filtro professor:', resultado.length);
+      }
+      
+      const busca = (this.filtros.busca || '').toLowerCase().trim();
+      if (busca) {
+        console.log('🔍 [Dashboard] Filtro por busca:', busca);
+        resultado = resultado.filter(a => {
+          if (this.isAdmin) {
+            return (a.professor_nome || '').toLowerCase().includes(busca);
+          } else {
+            return (a.name || '').toLowerCase().includes(busca);
+          }
+        });
+        console.log('🔍 [Dashboard] Após filtro busca:', resultado.length);
+      }
+      
+      console.log('✅ [Dashboard] Total filtrado:', resultado.length);
+      return resultado;
     }
   },
   async mounted() {
-    await this.loadStats();
-    await this.loadAtividades();
-    this.renderChart();
-  },
-  beforeUnmount(){
-    try { clearInterval(this.autoTimer); } catch(e){}
-  },
-  methods: {
-    async loadStats() {
-      try {
-        const response = await api.get('/stats');
-        const d = response.data?.data || {};
-        const cards = d.cards || {};
-        this.stats = {
-          alunos: Number(cards.total_students || 0),
-          formularios: Number(cards.formularios_pendentes || 0)
-        };
-      } catch (error) {
-        console.error('Erro ao carregar estatísticas:', error);
-      }
-    },
-    async loadAtividades() {
-      try {
-        this.loadingAtividades = true;
-        const response = await api.get('/stats');
-        const recent = response.data?.data?.recent || [];
-        this.atividadesRaw = recent.map((r, idx) => ({
-          id: r.id || idx,
-          descricao: r.message,
-          created_at: r.created_at,
-          data: new Date(r.created_at).toLocaleString('pt-BR'),
-          tipo: this.inferTipo(r.message)
-        }));
-        this.paginacao.page = 1;
-      } catch (error) {
-        console.error('Erro ao carregar atividades:', error);
-      } finally {
-        this.loadingAtividades = false;
-      }
-    },
-    inferTipo(msg=''){
-      const m = (msg||'').toLowerCase();
-      if (m.includes('aluno') || m.includes('students')) return 'Aluno';
-      if (m.includes('usuário') || m.includes('users')) return 'Usuário';
-      if (m.includes('escola') || m.includes('schools')) return 'Escola';
-      if (m.includes('anamnese') || m.includes('formulário')) return 'Formulário';
-      if (m.includes('pdi')) return 'PDI';
-      if (m.includes('pai')) return 'PAI';
-      if (m.includes('plano de atendimento') || m.includes('plano')) return 'Plano';
-      if (m.includes('atendimento')) return 'Atendimento';
-      if (m.includes('curso') || m.includes('courses')) return 'Curso';
-      return 'Geral';
-    },
-    badgeBg(tipo){
-      const map={Aluno:'bg-blue-500',Usuário:'bg-amber-500',Escola:'bg-emerald-500',Formulário:'bg-cyan-600',PDI:'bg-purple-600',PAI:'bg-pink-600',Plano:'bg-indigo-600',Atendimento:'bg-teal-600',Curso:'bg-orange-500',Geral:'bg-gray-400'}; return map[tipo]||map.Geral;
-    },
-    chipBg(tipo){
-      const map={Aluno:'bg-blue-50 text-blue-700',Usuário:'bg-amber-50 text-amber-700',Escola:'bg-emerald-50 text-emerald-700',Formulário:'bg-cyan-50 text-cyan-700',PDI:'bg-purple-50 text-purple-700',PAI:'bg-pink-50 text-pink-700',Plano:'bg-indigo-50 text-indigo-700',Atendimento:'bg-teal-50 text-teal-700',Curso:'bg-orange-50 text-orange-700',Geral:'bg-gray-100 text-gray-700'}; return map[tipo]||map.Geral;
-    },
-    refreshAtividades(){ this.loadAtividades(); },
-    exportCSV(){
-      const rows = this.atividadesFiltradas.map(a=>({data:a.data,tipo:a.tipo,descricao:a.descricao}));
-      const header = 'data;tipo;descricao\n';
-      const body = rows.map(r=>`${r.data};${r.tipo};"${(r.descricao||'').replace(/"/g,'""')}"`).join('\n');
-      const blob = new Blob([header+body],{type:'text/csv;charset=utf-8;'});
-      const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='atividades.csv'; a.click(); URL.revokeObjectURL(url);
-    },
-    renderChart() {
-      // Implementação do gráfico com Highcharts
-      Highcharts.chart('chart-container', {
-        chart: {
-          type: 'line'
-        },
-        title: {
-          text: 'Atividades por Dia'
-        },
-        xAxis: {
-          categories: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
-        },
-        yAxis: {
-          title: {
-            text: 'Número de Atividades'
-          }
-        },
-        series: [{
-          name: 'Esta Semana',
-          data: [7, 12, 16, 8, 15, 3, 1]
-        }, {
-          name: 'Semana Anterior',
-          data: [5, 8, 12, 6, 10, 2, 0]
-        }]
-      });
+    console.log('='.repeat(80));
+    console.log('🚀🚀🚀 DASHBOARD MOUNTED - INICIANDO 🚀🚀🚀');
+    console.log('='.repeat(80));
+    console.log('🔄 [Dashboard] Montando componente...');
+    
+    // Esperar o user estar disponível (max 5 segundos)
+    let attempts = 0;
+    while (!this.$root?.user && attempts < 50) {
+      console.log('⏳ [Dashboard] Aguardando user... tentativa', attempts + 1);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      attempts++;
+    }
+    
+    if (!this.$root?.user) {
+      console.error('❌ [Dashboard] User não carregado após 5 segundos!');
+      this.loading = false;
+      return;
+    }
+    
+    console.log('✅ [Dashboard] User carregado:', this.$root.user);
+    
+    try {
+      await this.loadData();
+      this.renderChart();
+    } catch (error) {
+      console.error('❌ [Dashboard] Erro no mounted:', error);
+      this.loading = false;
     }
   },
-  watch:{
-    'filtros.autoRefresh'(v){
-      clearInterval(this.autoTimer); this.autoTimer=null;
-      if(v){ this.autoTimer=setInterval(()=>this.loadAtividades(),60000); }
+  methods: {
+    async loadData() {
+      this.loading = true;
+      console.log('📥 [Dashboard] Iniciando carregamento de dados...');
+      console.log('👤 [Dashboard] User:', this.$root?.user);
+      
+      try {
+        // Verificar se é admin AGORA (não usar this.isAdmin que pode estar desatualizado)
+        const isAdminNow = this.$root?.user?.role === 'admin';
+        console.log('🔑 [Dashboard] isAdmin NOW:', isAdminNow, 'Role:', this.$root?.user?.role);
+        
+        // Carregar professores se admin
+        if (isAdminNow) {
+          console.log('👨‍🏫 [Dashboard] Carregando professores (admin)...');
+          const profRes = await api.get('/users');
+          this.professores = (profRes.data?.data?.rows || profRes.data?.data || []).filter(u => u.role !== 'admin');
+          console.log('✅ [Dashboard] Professores carregados:', this.professores.length);
+        }
+        
+        // Carregar alunos
+        let params = {};
+        if (!isAdminNow && this.$root && this.$root.user) {
+          params.teacher_id = this.$root.user.id;
+          console.log('🔐 [Dashboard] Filtrando por professor:', this.$root.user.id);
+        } else {
+          console.log('👑 [Dashboard] Admin - carregando TODOS os alunos (sem filtro)');
+        }
+        
+        console.log('📚 [Dashboard] Buscando alunos...');
+        console.log('📚 [Dashboard] Params:', params);
+        const alunosRes = await api.get('/students', { params });
+        console.log('📚 [Dashboard] Resposta completa:', alunosRes);
+        console.log('📚 [Dashboard] Data:', alunosRes.data);
+        
+        // Tentar diferentes formatos de resposta da API
+        let alunosData = [];
+        if (alunosRes.data?.data?.rows) {
+          alunosData = alunosRes.data.data.rows;
+          console.log('📚 [Dashboard] Formato: data.rows');
+        } else if (Array.isArray(alunosRes.data?.data)) {
+          alunosData = alunosRes.data.data;
+          console.log('📚 [Dashboard] Formato: data (array)');
+        } else if (Array.isArray(alunosRes.data)) {
+          alunosData = alunosRes.data;
+          console.log('📚 [Dashboard] Formato: root (array)');
+        } else {
+          console.warn('⚠️ [Dashboard] Formato de resposta desconhecido!');
+        }
+        
+        console.log('✅ [Dashboard] Alunos recebidos:', alunosData.length);
+        console.log('✅ [Dashboard] Primeiro aluno:', alunosData[0]);
+        
+        // Inicializar alunos com percentuais zerados
+        this.alunos = alunosData.map(aluno => {
+          let professorNome = '';
+          if (this.isAdmin && aluno.created_by_teacher_id) {
+            const prof = this.professores.find(p => p.id === aluno.created_by_teacher_id);
+            professorNome = prof ? prof.name : '';
+          }
+          return {
+            ...aluno,
+            professor_nome: professorNome,
+            entrevista_percent: 0,
+            pdi_percent: 0,
+            pai_percent: 0,
+            media_percent: 0
+          };
+        });
+        
+        console.log('💾 [Dashboard] this.alunos definido:', this.alunos.length, 'alunos');
+        console.log('💾 [Dashboard] Primeiro aluno em this.alunos:', this.alunos[0]);
+        
+        this.loading = false;
+        console.log('📊 [Dashboard] Alunos exibidos:', this.alunos.length);
+        console.log('📊 [Dashboard] Loading:', this.loading);
+        
+        // Carregar percentuais em background
+        this.carregarPercentuais();
+        
+      } catch (error) {
+        console.error('❌ Erro ao carregar dados do dashboard:', error);
+        this.loading = false;
+      }
     },
-    'paginacao.perPage'(){ this.paginacao.page=1; }
+    async carregarPercentuais() {
+      console.log('📊 [Dashboard] Calculando percentuais em background...');
+      for (let i = 0; i < this.alunos.length; i++) {
+        const aluno = this.alunos[i];
+        try {
+          const percentuais = await this.calcularPercentuais(aluno.id);
+          aluno.entrevista_percent = percentuais.entrevista;
+          aluno.pdi_percent = percentuais.pdi;
+          aluno.pai_percent = percentuais.pai;
+          aluno.media_percent = Math.round((percentuais.entrevista + percentuais.pdi + percentuais.pai) / 3);
+          console.log(`✅ Aluno ${aluno.name}: E=${percentuais.entrevista}% P=${percentuais.pdi}% PAI=${percentuais.pai}%`);
+        } catch (error) {
+          console.error(`❌ Erro ao calcular percentuais do aluno ${aluno.name}:`, error);
+        }
+      }
+      this.renderChart();
+    },
+    async calcularPercentuais(studentId) {
+      const percentuais = { entrevista: 0, pdi: 0, pai: 0 };
+      try {
+        // Entrevista
+        try {
+          const entrevistaRes = await api.get('/entrevistas-responsavel/list', { params: { student_id: studentId } });
+          const entrevistaData = entrevistaRes.data?.data?.rows || entrevistaRes.data?.data || [];
+          if (entrevistaData.length > 0) {
+            percentuais.entrevista = this.calcularPreenchimento(entrevistaData[0], 180);
+          }
+        } catch (e) {
+          console.warn(`Entrevista não encontrada para aluno ${studentId}`);
+        }
+        
+        // PDI
+        try {
+          const pdiRes = await api.get('/pdi-conectaee/list', { params: { student_id: studentId } });
+          const pdiData = pdiRes.data?.data?.rows || pdiRes.data?.data || [];
+          if (pdiData.length > 0) {
+            percentuais.pdi = this.calcularPreenchimento(pdiData[0], 74);
+          }
+        } catch (e) {
+          console.warn(`PDI não encontrado para aluno ${studentId}`);
+        }
+        
+        // PAI
+        try {
+          const paiRes = await api.get('/pai', { params: { student_id: studentId } });
+          const paiData = paiRes.data?.data?.rows || paiRes.data?.data || [];
+          if (paiData.length > 0) {
+            percentuais.pai = this.calcularPreenchimento(paiData[0], 46);
+          }
+        } catch (e) {
+          console.warn(`PAI não encontrado para aluno ${studentId}`);
+        }
+      } catch (error) {
+        console.error(`Erro ao calcular percentuais para aluno ${studentId}:`, error);
+      }
+      return percentuais;
+    },
+    calcularPreenchimento(formData, totalCampos) {
+      if (!formData) return 0;
+      let camposPreenchidos = 0;
+      for (const key in formData) {
+        if (key !== 'id' && key !== 'student_id' && key !== 'created_at' && key !== 'updated_at') {
+          const valor = formData[key];
+          if (valor !== null && valor !== undefined && valor !== '') {
+            camposPreenchidos++;
+          }
+        }
+      }
+      return Math.round((camposPreenchidos / totalCampos) * 100);
+    },
+    getInitials(name) {
+      if (!name) return '?';
+      const parts = name.trim().split(' ');
+      if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+      return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    },
+    getPercentColor(percent) {
+      const p = percent || 0;
+      if (p >= 70) return 'text-green-600';
+      if (p >= 40) return 'text-yellow-600';
+      return 'text-red-600';
+    },
+    renderChart() {
+      setTimeout(() => {
+        if (!this.alunos || this.alunos.length === 0) {
+          console.log('⚠️ [Dashboard] Sem dados para gráfico');
+          return;
+        }
+        
+        const container = document.getElementById('chart-container');
+        if (!container) {
+          console.warn('⚠️ [Dashboard] Container não encontrado');
+          return;
+        }
+        
+        const totalAlunos = this.alunos.length;
+        const mediaEntrevista = Math.round(this.alunos.reduce((sum, a) => sum + (a.entrevista_percent || 0), 0) / totalAlunos);
+        const mediaPDI = Math.round(this.alunos.reduce((sum, a) => sum + (a.pdi_percent || 0), 0) / totalAlunos);
+        const mediaPAI = Math.round(this.alunos.reduce((sum, a) => sum + (a.pai_percent || 0), 0) / totalAlunos);
+        
+        console.log('📈 [Dashboard] Gráfico:', { mediaEntrevista, mediaPDI, mediaPAI });
+        
+        Highcharts.chart('chart-container', {
+          chart: { type: 'column' },
+          title: { text: 'Média de Conclusão por Formulário' },
+          xAxis: { categories: ['Entrevista', 'PDI', 'PAI'], crosshair: true },
+          yAxis: { min: 0, max: 100, title: { text: 'Percentual de Conclusão (%)' } },
+          tooltip: { valueSuffix: '%' },
+          plotOptions: {
+            column: {
+              pointPadding: 0.2,
+              borderWidth: 0,
+              dataLabels: { enabled: true, format: '{y}%' }
+            }
+          },
+          series: [{
+            name: 'Conclusão Média',
+            data: [mediaEntrevista, mediaPDI, mediaPAI],
+            colorByPoint: true,
+            colors: ['#6366f1', '#10b981', '#a855f7']
+          }],
+          credits: { enabled: false }
+        });
+      }, 500);
+    }
+  },
+  watch: {
+    alunosFiltrados() {
+      this.renderChart();
+    }
   },
   computed:{
     atividadesFiltradas(){
@@ -3236,7 +3386,7 @@ const Dashboard = {
       return arr;
     },
     totalPaginas(){ return Math.max(1, Math.ceil(this.atividadesFiltradas.length / this.paginacao.perPage)); },
-    paginaAtual(){
+    atividadesPaginadas(){
       const start=(this.paginacao.page-1)*this.paginacao.perPage; return this.atividadesFiltradas.slice(start,start+this.paginacao.perPage);
     }
   }
@@ -6209,8 +6359,11 @@ const routes = [
       { path: 'escolas', component: EscolasTW },
       { path: 'relatorio-atendimento', component: RelatorioAtendimento },
       { path: 'entrevista-responsavel', component: EntrevistaResponsavel },
+      { path: 'entrevista-completa', component: window.EntrevistaResponsavelCompleta || EntrevistaResponsavel },
       { path: 'pdi', component: PDI },
+      { path: 'pdi-completo', component: window.PDICompleto || PDI },
       { path: 'plano-atendimento', component: PlanoAtendimento },
+      { path: 'pai-completo', component: window.PAICompleto || PlanoAtendimento },
       { path: 'relatorios', component: Relatorios },
       { path: 'legislacoes', component: LegislacoesTW }
     ]
@@ -6234,6 +6387,10 @@ router.beforeEach((to, from, next) => {
 
 // Configuração da aplicação Vue
 const { createApp } = Vue;
+
+console.log('='.repeat(100));
+console.log('🎯 INICIANDO APLICAÇÃO VUE - spa-tailwind.js');
+console.log('='.repeat(100));
 
 const app = createApp({
   components: {
@@ -6286,6 +6443,7 @@ const app = createApp({
   `,
   data() {
     return {
+      user: null, // User global - será preenchido pelo Layout
       loading: true,
       toasts: [],
       toastIdCounter: 0,
@@ -6852,11 +7010,15 @@ const mountVoicePortal = (mainApp) => {
 // Registrar componente DatePicker
 if (typeof DatePickerComponent !== 'undefined') {
   app.component('DatePicker', DatePickerComponent);
+  console.log('✅ DatePicker registrado');
 }
 
 // Usar router e montar aplicação
+console.log('🔧 Usando router...');
 app.use(router);
+console.log('🚀 Montando app no #app...');
 app.mount('#app');
+console.log('✅ APP MONTADO COM SUCESSO!');
 // montar portal do modal de voz após app existir
 try { mountVoicePortal(app); } catch (_) {}
 

@@ -2664,6 +2664,14 @@ const Layout = {
               </svg>
               Legislações
             </router-link>
+            <router-link to="documentos" class="nav-link-tw" @click="closeMobileSidebar">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14,2 14,8 20,8"/>
+                <circle cx="12" cy="15" r="3"/>
+              </svg>
+              Documentos Gerados
+            </router-link>
             <button type="button" class="nav-link-tw logout-link w-full text-left" @click.prevent="$logout()">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M17 16l4-4m0 0l-4-4m4 4H7"/>
@@ -6750,6 +6758,387 @@ const RelatorioAtendimento = {
   }
 };
 
+// Componente Documentos Gerados
+const DocumentosGerados = {
+  template: `
+  <div class="space-y-6">
+    <!-- Cabeçalho -->
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-bold text-gray-900">
+        📄 Documentos Gerados
+      </h1>
+      <button @click="refreshStats" 
+              class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+        <i class="fas fa-sync-alt" :class="{'fa-spin': loading}"></i>
+        Atualizar
+      </button>
+    </div>
+    
+    <!-- Estatísticas -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="bg-white p-4 rounded-lg shadow">
+        <div class="text-sm text-gray-600">Total de Documentos</div>
+        <div class="text-2xl font-bold text-gray-900">{{ stats.total || 0 }}</div>
+      </div>
+      <div class="bg-blue-50 p-4 rounded-lg shadow">
+        <div class="text-sm text-blue-600">Entrevistas</div>
+        <div class="text-2xl font-bold text-blue-900">
+          {{ getCountByType('entrevista') }}
+        </div>
+      </div>
+      <div class="bg-green-50 p-4 rounded-lg shadow">
+        <div class="text-sm text-green-600">PDIs</div>
+        <div class="text-2xl font-bold text-green-900">
+          {{ getCountByType('pdi') }}
+        </div>
+      </div>
+      <div class="bg-purple-50 p-4 rounded-lg shadow">
+        <div class="text-sm text-purple-600">PAIs</div>
+        <div class="text-2xl font-bold text-purple-900">
+          {{ getCountByType('pai') }}
+        </div>
+      </div>
+    </div>
+    
+    <!-- Filtros -->
+    <div class="bg-white p-4 rounded-lg shadow">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Tipo de Documento
+          </label>
+          <select v-model="filters.tipo" 
+                  class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+            <option value="">Todos</option>
+            <option value="entrevista">📋 Entrevista</option>
+            <option value="pdi">📊 PDI</option>
+            <option value="pai">📝 PAI</option>
+          </select>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Aluno
+          </label>
+          <select v-model="filters.student_id" 
+                  class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+            <option value="">Todos os alunos</option>
+            <option v-for="s in students" :key="s.id" :value="s.id">
+              {{ s.name }}
+            </option>
+          </select>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Data Início
+          </label>
+          <input type="date" 
+                 v-model="filters.data_inicio"
+                 class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Data Fim
+          </label>
+          <input type="date" 
+                 v-model="filters.data_fim"
+                 class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+      
+      <div class="mt-4 flex space-x-2">
+        <button @click="loadDocuments" 
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+          🔍 Filtrar
+        </button>
+        <button @click="clearFilters" 
+                class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors">
+          🗑️ Limpar
+        </button>
+      </div>
+    </div>
+    
+    <!-- Grid de Documentos -->
+    <div v-if="loading" class="text-center py-12">
+      <i class="fas fa-spinner fa-spin text-4xl text-gray-400"></i>
+      <p class="mt-4 text-gray-600">Carregando documentos...</p>
+    </div>
+    
+    <div v-else-if="documents.length === 0" class="text-center py-12">
+      <i class="fas fa-file-alt text-6xl text-gray-300"></i>
+      <p class="mt-4 text-gray-600">Nenhum documento encontrado</p>
+      <p class="text-sm text-gray-500">
+        {{ hasFilters ? 'Tente ajustar os filtros' : 'Gere documentos nos formulários de Entrevista, PDI ou PAI' }}
+      </p>
+    </div>
+    
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div v-for="doc in documents" 
+           :key="doc.id"
+           class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-4">
+        
+        <!-- Ícone do tipo -->
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex items-center space-x-3">
+            <div class="text-3xl">
+              <i v-if="doc.tipo === 'entrevista'" class="fas fa-file-alt text-blue-500"></i>
+              <i v-else-if="doc.tipo === 'pdi'" class="fas fa-chart-line text-green-500"></i>
+              <i v-else class="fas fa-file-contract text-purple-500"></i>
+            </div>
+            <div>
+              <span class="px-2 py-1 rounded text-xs font-medium uppercase"
+                    :class="getTipoBadgeClass(doc.tipo)">
+                {{ getTipoLabel(doc.tipo) }}
+              </span>
+            </div>
+          </div>
+          
+          <button @click="deleteDocument(doc)" 
+                  class="text-red-600 hover:text-red-800 transition-colors">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+        
+        <!-- Informações -->
+        <h3 class="font-bold text-gray-900 mb-2">
+          {{ doc.titulo || 'Sem título' }}
+        </h3>
+        
+        <div class="space-y-1 text-sm text-gray-600 mb-4">
+          <div class="flex items-center">
+            <i class="fas fa-user w-5"></i>
+            <span>{{ doc.student_name || 'N/A' }}</span>
+          </div>
+          <div class="flex items-center">
+            <i class="fas fa-user-tie w-5"></i>
+            <span>{{ doc.teacher_name || 'N/A' }}</span>
+          </div>
+          <div class="flex items-center">
+            <i class="fas fa-calendar w-5"></i>
+            <span>{{ formatDate(doc.created_at) }}</span>
+          </div>
+          <div class="flex items-center">
+            <i class="fas fa-file w-5"></i>
+            <span>{{ doc.file_size_formatted }}</span>
+          </div>
+        </div>
+        
+        <!-- Ações -->
+        <button @click="downloadDocument(doc)" 
+                class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center justify-center space-x-2 transition-colors">
+          <i class="fas fa-download"></i>
+          <span>Baixar PDF</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Paginação -->
+    <div v-if="pagination.total_pages > 1" 
+         class="flex items-center justify-center space-x-2">
+      <button @click="goToPage(pagination.current_page - 1)"
+              :disabled="!pagination.has_prev"
+              class="px-3 py-2 border rounded disabled:opacity-50 disabled:cursor-not-allowed">
+        ← Anterior
+      </button>
+      
+      <span class="text-sm text-gray-600">
+        Página {{ pagination.current_page }} de {{ pagination.total_pages }}
+      </span>
+      
+      <button @click="goToPage(pagination.current_page + 1)"
+              :disabled="!pagination.has_next"
+              class="px-3 py-2 border rounded disabled:opacity-50 disabled:cursor-not-allowed">
+        Próxima →
+      </button>
+    </div>
+  </div>
+  `,
+  
+  data() {
+    return {
+      documents: [],
+      students: [],
+      stats: {},
+      filters: {
+        tipo: '',
+        student_id: '',
+        data_inicio: '',
+        data_fim: ''
+      },
+      pagination: {
+        current_page: 1,
+        per_page: 12,
+        total: 0,
+        total_pages: 0,
+        has_next: false,
+        has_prev: false
+      },
+      loading: false
+    }
+  },
+  
+  computed: {
+    hasFilters() {
+      return this.filters.tipo || this.filters.student_id || 
+             this.filters.data_inicio || this.filters.data_fim;
+    }
+  },
+  
+  mounted() {
+    this.loadDocuments();
+    this.loadStudents();
+    this.loadStats();
+  },
+  
+  methods: {
+    async loadDocuments() {
+      this.loading = true;
+      
+      try {
+        const params = new URLSearchParams({
+          page: this.pagination.current_page,
+          per_page: this.pagination.per_page
+        });
+        
+        if (this.filters.tipo) params.append('tipo', this.filters.tipo);
+        if (this.filters.student_id) params.append('student_id', this.filters.student_id);
+        if (this.filters.data_inicio) params.append('data_inicio', this.filters.data_inicio);
+        if (this.filters.data_fim) params.append('data_fim', this.filters.data_fim);
+        
+        const res = await api.get(`/documentos/list?${params}`);
+        
+        if (res.data.ok) {
+          this.documents = res.data.data.documentos;
+          this.pagination = res.data.data.pagination;
+        }
+      } catch (err) {
+        console.error('Erro ao carregar documentos:', err);
+        this.$showToast && this.$showToast('Erro', 'Erro ao carregar documentos', 'error');
+      } finally {
+        this.loading = false;
+      }
+    },
+    
+    async loadStudents() {
+      try {
+        const res = await api.get('/students/list');
+        if (res.data.ok) {
+          this.students = res.data.data;
+        }
+      } catch (err) {
+        console.error('Erro ao carregar alunos:', err);
+      }
+    },
+    
+    async loadStats() {
+      try {
+        const res = await api.get('/documentos/stats');
+        if (res.data.ok) {
+          this.stats = res.data.data;
+        }
+      } catch (err) {
+        console.error('Erro ao carregar estatísticas:', err);
+      }
+    },
+    
+    async downloadDocument(doc) {
+      try {
+        const baseURL = CONFIG.API_BASE.replace(/\/api\.php$/, '');
+        const res = await fetch(`${baseURL}/api.php?action=documentos.download&id=${doc.id}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        if (!res.ok) throw new Error('Erro ao baixar documento');
+        
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = doc.file_name;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+      } catch (err) {
+        console.error('Erro ao baixar:', err);
+        this.$showToast && this.$showToast('Erro', 'Erro ao baixar documento', 'error');
+      }
+    },
+    
+    async deleteDocument(doc) {
+      if (!confirm(`Deseja deletar o documento "${doc.titulo}"?`)) return;
+      
+      try {
+        const res = await api.delete(`/documentos/delete?id=${doc.id}`);
+        
+        if (res.data.ok) {
+          this.$showToast && this.$showToast('Sucesso', 'Documento deletado com sucesso', 'success');
+          this.loadDocuments();
+          this.loadStats();
+        }
+      } catch (err) {
+        console.error('Erro ao deletar:', err);
+        this.$showToast && this.$showToast('Erro', 'Erro ao deletar documento', 'error');
+      }
+    },
+    
+    clearFilters() {
+      this.filters = {
+        tipo: '',
+        student_id: '',
+        data_inicio: '',
+        data_fim: ''
+      };
+      this.pagination.current_page = 1;
+      this.loadDocuments();
+    },
+    
+    goToPage(page) {
+      this.pagination.current_page = page;
+      this.loadDocuments();
+    },
+    
+    refreshStats() {
+      this.loadStats();
+      this.loadDocuments();
+    },
+    
+    getCountByType(tipo) {
+      const item = this.stats.por_tipo?.find(t => t.tipo === tipo);
+      return item ? item.count : 0;
+    },
+    
+    getTipoLabel(tipo) {
+      const labels = {
+        entrevista: 'Entrevista',
+        pdi: 'PDI',
+        pai: 'PAI'
+      };
+      return labels[tipo] || tipo;
+    },
+    
+    getTipoBadgeClass(tipo) {
+      const classes = {
+        entrevista: 'bg-blue-100 text-blue-800',
+        pdi: 'bg-green-100 text-green-800',
+        pai: 'bg-purple-100 text-purple-800'
+      };
+      return classes[tipo] || 'bg-gray-100 text-gray-800';
+    },
+    
+    formatDate(dateString) {
+      if (!dateString) return 'N/A';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
+    }
+  }
+};
+
 
 // Configuração das rotas
 const routes = [
@@ -6773,7 +7162,8 @@ const routes = [
       { path: 'plano-atendimento', component: PlanoAtendimento },
       { path: 'pai-completo', component: window.PAICompleto || PlanoAtendimento },
       { path: 'relatorios', component: Relatorios },
-      { path: 'legislacoes', component: LegislacoesTW }
+      { path: 'legislacoes', component: LegislacoesTW },
+      { path: 'documentos', component: DocumentosGerados }
     ]
   }
 ];

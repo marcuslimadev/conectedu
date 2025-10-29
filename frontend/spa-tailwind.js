@@ -4196,9 +4196,23 @@ const EntrevistaResponsavel = {
     <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
       <div class="max-w-4xl mx-auto px-4">
         <!-- Header -->
-        <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">Entrevista com Responsável</h1>
-          <p class="text-gray-600">Complete as informações em etapas organizadas</p>
+        <div class="mb-8">
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 class="text-3xl font-bold text-gray-900 mb-2">Entrevista com Responsável</h1>
+              <p class="text-gray-600">Complete as informações em etapas organizadas</p>
+            </div>
+            
+            <!-- Botão Gerar PDF -->
+            <button v-if="form.id" 
+                    @click="generatePDF"
+                    :disabled="generatingPDF"
+                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md">
+              <i v-if="!generatingPDF" class="fas fa-file-pdf"></i>
+              <i v-else class="fas fa-spinner fa-spin"></i>
+              <span>{{ generatingPDF ? 'Gerando...' : 'Gerar PDF' }}</span>
+            </button>
+          </div>
         </div>
 
         <!-- DEBUG: Banner temporário para confirmação de carregamento -->
@@ -4534,6 +4548,7 @@ const EntrevistaResponsavel = {
       totalSteps: 5,
       maxCompletedStep: 1,
       loading: false,
+      generatingPDF: false,
       validationErrors: {},
       alunos: [],
       escolas: [],
@@ -4793,6 +4808,63 @@ const EntrevistaResponsavel = {
       }
     },
     
+    async generatePDF() {
+      if (!this.form.id) {
+        this.$showToast('Atenção', 'Salve a entrevista antes de gerar o PDF.', 'info');
+        return;
+      }
+      
+      this.generatingPDF = true;
+      
+      try {
+        const baseURL = CONFIG.API_BASE.replace(/\/api\.php$/, '');
+        const endpoint = '/generate-pdf-entrevista.php';
+        
+        const res = await fetch(`${baseURL}${endpoint}?id=${this.form.id}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        if (!res.ok) {
+          let errorMsg = 'Erro ao gerar PDF';
+          try {
+            const error = await res.json();
+            errorMsg = error.error || errorMsg;
+          } catch (e) {
+            // Response não é JSON
+          }
+          throw new Error(errorMsg);
+        }
+        
+        // Download automático
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = this.getPDFFilename();
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        this.$showToast('Sucesso', '✅ PDF gerado com sucesso!', 'success');
+        
+      } catch (err) {
+        console.error('Erro ao gerar PDF:', err);
+        this.$showToast('Erro', '❌ ' + err.message, 'error');
+      } finally {
+        this.generatingPDF = false;
+      }
+    },
+    
+    getPDFFilename() {
+      const alunoNome = this.alunos.find(a => a.id == this.form.student_id)?.name || 'Aluno';
+      const date = new Date().toISOString().split('T')[0];
+      return `Entrevista_${alunoNome.replace(/\s+/g, '_')}_${date}.pdf`;
+    },
+    
     exportarPDF() {
       if (!this.form.student_id) {
         this.$showToast('Atenção', 'Selecione um aluno primeiro para gerar o PDF.', 'info');
@@ -4832,9 +4904,23 @@ const PDI = {
     <div class="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 py-8">
       <div class="max-w-4xl mx-auto px-4">
         <!-- Header -->
-        <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">PDI - Plano de Desenvolvimento Individual</h1>
-          <p class="text-gray-600">ConectAEE - Complete as informações em etapas organizadas</p>
+        <div class="mb-8">
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 class="text-3xl font-bold text-gray-900 mb-2">PDI - Plano de Desenvolvimento Individual</h1>
+              <p class="text-gray-600">ConectAEE - Complete as informações em etapas organizadas</p>
+            </div>
+            
+            <!-- Botão Gerar PDF -->
+            <button v-if="form.id" 
+                    @click="generatePDF"
+                    :disabled="generatingPDF"
+                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md">
+              <i v-if="!generatingPDF" class="fas fa-file-pdf"></i>
+              <i v-else class="fas fa-spinner fa-spin"></i>
+              <span>{{ generatingPDF ? 'Gerando...' : 'Gerar PDF' }}</span>
+            </button>
+          </div>
         </div>
 
         <!-- Progress Bar -->
@@ -5135,6 +5221,7 @@ const PDI = {
       totalSteps: 4,
       maxCompletedStep: 1,
       loading: false,
+      generatingPDF: false,
       validationErrors: {},
       alunos: [],
   escolas: [],
@@ -5340,6 +5427,63 @@ const PDI = {
       }
     },
     
+    async generatePDF() {
+      if (!this.form.id) {
+        this.$showToast('Atenção', 'Salve o PDI antes de gerar o PDF.', 'info');
+        return;
+      }
+      
+      this.generatingPDF = true;
+      
+      try {
+        const baseURL = CONFIG.API_BASE.replace(/\/api\.php$/, '');
+        const endpoint = '/generate-pdf-pdi.php';
+        
+        const res = await fetch(`${baseURL}${endpoint}?id=${this.form.id}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        if (!res.ok) {
+          let errorMsg = 'Erro ao gerar PDF';
+          try {
+            const error = await res.json();
+            errorMsg = error.error || errorMsg;
+          } catch (e) {
+            // Response não é JSON
+          }
+          throw new Error(errorMsg);
+        }
+        
+        // Download automático
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = this.getPDFFilename();
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        this.$showToast('Sucesso', '✅ PDF gerado com sucesso!', 'success');
+        
+      } catch (err) {
+        console.error('Erro ao gerar PDF:', err);
+        this.$showToast('Erro', '❌ ' + err.message, 'error');
+      } finally {
+        this.generatingPDF = false;
+      }
+    },
+    
+    getPDFFilename() {
+      const alunoNome = this.alunos.find(a => a.id == this.form.student_id)?.name || 'Aluno';
+      const date = new Date().toISOString().split('T')[0];
+      return `PDI_${alunoNome.replace(/\s+/g, '_')}_${date}.pdf`;
+    },
+    
     exportarPDF() {
       if (!this.form.student_id) {
         this.$showToast('Atenção', 'Selecione um aluno primeiro para gerar o PDF.', 'info');
@@ -5368,9 +5512,23 @@ const PlanoAtendimento = {
     <div class="min-h-screen bg-gradient-to-br from-purple-50 to-violet-100 py-8">
       <div class="max-w-4xl mx-auto px-4">
         <!-- Header -->
-        <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">Plano de Atendimento Individual</h1>
-          <p class="text-gray-600">Planejamento detalhado do atendimento educacional especializado</p>
+        <div class="mb-8">
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 class="text-3xl font-bold text-gray-900 mb-2">Plano de Atendimento Individual</h1>
+              <p class="text-gray-600">Planejamento detalhado do atendimento educacional especializado</p>
+            </div>
+            
+            <!-- Botão Gerar PDF -->
+            <button v-if="form.id" 
+                    @click="generatePDF"
+                    :disabled="generatingPDF"
+                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md">
+              <i v-if="!generatingPDF" class="fas fa-file-pdf"></i>
+              <i v-else class="fas fa-spinner fa-spin"></i>
+              <span>{{ generatingPDF ? 'Gerando...' : 'Gerar PDF' }}</span>
+            </button>
+          </div>
         </div>
 
         <!-- Progress Bar -->
@@ -5709,6 +5867,7 @@ const PlanoAtendimento = {
       totalSteps: 4,
       maxCompletedStep: 1,
       loading: false,
+      generatingPDF: false,
       validationErrors: {},
       alunos: [],
       escolas: [],
@@ -5899,6 +6058,63 @@ const PlanoAtendimento = {
       } finally {
         this.loading = false;
       }
+    },
+    
+    async generatePDF() {
+      if (!this.form.id) {
+        this.$showToast('Atenção', 'Salve o plano antes de gerar o PDF.', 'info');
+        return;
+      }
+      
+      this.generatingPDF = true;
+      
+      try {
+        const baseURL = CONFIG.API_BASE.replace(/\/api\.php$/, '');
+        const endpoint = '/generate-pdf-pai.php';
+        
+        const res = await fetch(`${baseURL}${endpoint}?id=${this.form.id}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        if (!res.ok) {
+          let errorMsg = 'Erro ao gerar PDF';
+          try {
+            const error = await res.json();
+            errorMsg = error.error || errorMsg;
+          } catch (e) {
+            // Response não é JSON
+          }
+          throw new Error(errorMsg);
+        }
+        
+        // Download automático
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = this.getPDFFilename();
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        this.$showToast('Sucesso', '✅ PDF gerado com sucesso!', 'success');
+        
+      } catch (err) {
+        console.error('Erro ao gerar PDF:', err);
+        this.$showToast('Erro', '❌ ' + err.message, 'error');
+      } finally {
+        this.generatingPDF = false;
+      }
+    },
+    
+    getPDFFilename() {
+      const alunoNome = this.alunos.find(a => a.id == this.form.student_id)?.name || 'Aluno';
+      const date = new Date().toISOString().split('T')[0];
+      return `PAI_${alunoNome.replace(/\s+/g, '_')}_${date}.pdf`;
     },
     
     getMaxDate() {

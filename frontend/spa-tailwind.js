@@ -2633,12 +2633,21 @@ const FloatingMicrophone = {
       
       this.recognition.onerror = (event) => {
         console.error('❌ Erro no reconhecimento de voz:', event.error);
-        this.isRecording = false;
         
         if (event.error === 'no-speech') {
-          this.$showToast && this.$showToast('Atenção', 'Nenhuma fala detectada. Tente novamente.', 'warning');
+          // Silenciosamente reinicia sem mostrar toast (normal em pausas longas)
+          console.log('⏸️ Pausa detectada, aguardando fala...');
+          return; // Deixa o onend fazer o restart
         } else if (event.error === 'not-allowed') {
-          this.$showToast && this.$showToast('Erro', 'Permissão de microfone negada.', 'error');
+          this.isRecording = false;
+          this.manualStopRequested = true;
+          this.$showToast && this.$showToast('Erro', 'Permissão de microfone negada. Permita o acesso nas configurações do navegador.', 'error');
+        } else if (event.error === 'aborted') {
+          console.log('⏹️ Gravação abortada pelo usuário');
+          this.isRecording = false;
+        } else {
+          this.isRecording = false;
+          console.warn('⚠️ Erro inesperado:', event.error);
         }
       };
       

@@ -1132,17 +1132,17 @@ const EntrevistaResponsavelCompleta = {
 
     async loadAlunos() {
       try {
-        // Filtrar alunos por professor (teacher-centric)
+        // Usar endpoint de seleção dinâmica com filtros
         let params = {};
         if (this.$root.user && this.$root.user.role !== 'admin') {
           params.teacher_id = this.$root.user.id;
         }
         
-        const response = await api.get('/students', { params });
-        console.log('📚 Entrevista - Alunos carregados:', response.data);
+        const response = await api.get('/students/options', { params });
+        console.log('📚 Entrevista - Alunos carregados (dinâmico):', response.data);
         
         if (response.data.ok && response.data.data) {
-          this.alunos = response.data.data.rows || response.data.data;
+          this.alunos = response.data.data;
         } else if (Array.isArray(response.data)) {
           this.alunos = response.data;
         } else {
@@ -2172,17 +2172,17 @@ const PDICompleto = {
 
     async loadAlunos() {
       try {
-        // Filtrar alunos por professor (teacher-centric)
+        // Usar endpoint de seleção dinâmica com filtros
         let params = {};
         if (this.$root.user && this.$root.user.role !== 'admin') {
           params.teacher_id = this.$root.user.id;
         }
         
-        const response = await api.get('/students', { params });
-        console.log('📚 PDI - Alunos carregados:', response.data);
+        const response = await api.get('/students/options', { params });
+        console.log('📚 PDI - Alunos carregados (dinâmico):', response.data);
         
         if (response.data.ok && response.data.data) {
-          this.alunos = response.data.data.rows || response.data.data;
+          this.alunos = response.data.data;
         } else if (Array.isArray(response.data)) {
           this.alunos = response.data;
         } else {
@@ -2984,17 +2984,17 @@ const PAICompleto = {
 
     async loadAlunos() {
       try {
-        // Filtrar alunos por professor (teacher-centric)
+        // Usar endpoint de seleção dinâmica com filtros
         let params = {};
         if (this.$root.user && this.$root.user.role !== 'admin') {
           params.teacher_id = this.$root.user.id;
         }
         
-        const response = await api.get('/students', { params });
-        console.log('📚 PAI - Alunos carregados:', response.data);
+        const response = await api.get('/students/options', { params });
+        console.log('📚 PAI - Alunos carregados (dinâmico):', response.data);
         
         if (response.data.ok && response.data.data) {
-          this.alunos = response.data.data.rows || response.data.data;
+          this.alunos = response.data.data;
         } else if (Array.isArray(response.data)) {
           this.alunos = response.data;
         } else {

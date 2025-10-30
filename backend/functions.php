@@ -9,7 +9,7 @@ header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 if (($_SERVER['REQUEST_METHOD'] ?? '')==='OPTIONS'){ http_response_code(204); exit; }
 
 function env($k,$d=null){ static $e=null; if($e===null){ $e=[]; $p=__DIR__.'/.env'; if(file_exists($p)){ foreach(file($p,FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES) as $l){ if(strpos($l,'=')!==false && strpos(ltrim($l),'#')!==0){ [$a,$b]=explode('=',$l,2); $e[trim($a)] = trim($b); } } } } return $e[$k]??getenv($k)??$d; }
-function res($ok,$data=null,$error=null,$code=200){ header('Content-Type: application/json; charset=utf-8'); http_response_code($code); echo json_encode(['ok'=>$ok,'data'=>$data,'error'=>$error],JSON_UNESCAPED_UNICODE); exit; }
+function res($ok,$data=null,$error=null,$code=200,$extra=null){ header('Content-Type: application/json; charset=utf-8'); http_response_code($code); $response=['ok'=>$ok,'data'=>$data,'error'=>$error]; if($extra) $response['extra']=$extra; echo json_encode($response,JSON_UNESCAPED_UNICODE); exit; }
 function db(){ static $pdo=null; if($pdo) return $pdo; try{ $dsn='mysql:host='.env('DB_HOST','127.0.0.1').';port='.env('DB_PORT','3306').';dbname='.env('DB_NAME','conectedu').';charset=utf8mb4'; $pdo=new PDO($dsn,env('DB_USER','root'),env('DB_PASS',''),[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]);
   // Garantir collation/charset mesmo se o servidor estiver com defaults diferentes
   try {

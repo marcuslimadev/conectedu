@@ -2514,30 +2514,15 @@ const FloatingMicrophone = {
   template: `
     <teleport to="body">
     <div style="position: fixed; bottom: 24px; right: 24px; z-index: 9999;">
-      <div v-if="isRecording || transcript" 
-           style="position: absolute; bottom: 88px; right: 0; background: white; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); padding: 16px; width: 320px; border: 2px solid;"
-           :style="{ borderColor: isRecording ? '#ef4444' : '#e5e7eb' }">
+      <div v-if="isRecording" 
+           style="position: absolute; bottom: 88px; right: 0; background: white; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); padding: 16px; width: 320px; border: 2px solid #ef4444;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
           <span style="font-size: 14px; font-weight: 600; color: #374151;">
-            {{ isRecording ? '🎤 Ouvindo...' : '✅ Texto capturado' }}
+            🎤 Ouvindo... Clique para parar
           </span>
-          <button @click="closeTranscript" 
-                  style="color: #9ca3af; cursor: pointer; background: none; border: none; font-size: 16px;">
-            ✕
-          </button>
         </div>
-        <p v-if="transcript" style="font-size: 14px; color: #4b5563; margin-bottom: 8px;">{{ transcript }}</p>
-        <p v-if="!transcript && isRecording" style="font-size: 12px; color: #6b7280; font-style: italic;">Fale agora...</p>
-        <div v-if="!isRecording && transcript" style="display: flex; gap: 8px; margin-top: 12px;">
-          <button @click="insertTranscript" 
-                  style="flex: 1; padding: 8px 12px; background: #16a34a; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer;">
-            ✓ Inserir
-          </button>
-          <button @click="closeTranscript" 
-                  style="padding: 8px 12px; background: #e5e7eb; color: #374151; border: none; border-radius: 6px; font-size: 14px; cursor: pointer;">
-            Cancelar
-          </button>
-        </div>
+        <p v-if="displayTranscript" style="font-size: 14px; color: #4b5563; margin-bottom: 8px; max-height: 120px; overflow-y: auto;">{{ displayTranscript }}</p>
+        <p v-else style="font-size: 12px; color: #6b7280; font-style: italic;">Fale agora...</p>
       </div>
       
       <button @click="toggleRecording" 
@@ -2629,6 +2614,9 @@ const FloatingMicrophone = {
         }
         this.interimTranscript = interim.trim();
         console.log('📝 Transcrição parcial:', this.displayTranscript);
+        
+        // Inserir em tempo real no campo ativo
+        this.updateFieldInRealTime();
       };
       
       this.recognition.onerror = (event) => {
@@ -2672,75 +2660,61 @@ const FloatingMicrophone = {
       };
     },
     
+    updateFieldInRealTime() {
+      const target = this.lastActiveElement;
+      console.log('🔄 updateFieldInRealTime - target:', target);
+      console.log('🔄 lastActiveElement:', this.lastActiveElement);
+      console.log('🔄 isTextInput?', this.isTextInput(target));
+      console.log('🔄 document.contains?', target ? document.contains(target) : 'null');
+      
+      if (!this.isTextInput(target) || !document.contains(target)) {
+        console.warn('⚠️ Campo não válido ou não existe no DOM');
+        return;
+      }
+      
+      const fullText = this.displayTranscript;
+      console.log('📝 Texto para inserir:', fullText);
+      if (!fullText) return;
+      
+      if (Object.prototype.hasOwnProperty.call(target, 'value')) {
+        console.log('✅ Inserindo em campo input/textarea');
+        target.value = fullText;
+        if (typeof target.setSelectionRange === 'function') {
+          const end = target.value.length;
+          target.setSelectionRange(end, end);
+        }
+        target.dispatchEvent(new Event('input', { bubbles: true }));
+      } else if (target.isContentEditable) {
+        console.log('✅ Inserindo em contentEditable');
+        target.innerText = fullText;
+        target.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    },
+
     toggleRecording() {
       if (!this.isSupported) return;
-      
+
       if (this.isRecording) {
         this.manualStopRequested = true;
         this.recognition.stop();
       } else {
         // Guardar último campo de texto focado antes de gravar
         const candidate = this.lastFocusedElement || document.activeElement;
+        console.log('🎯 Candidato para target:', candidate);
+        console.log('🎯 lastFocusedElement:', this.lastFocusedElement);
+        console.log('🎯 document.activeElement:', document.activeElement);
+        console.log('🎯 isTextInput(candidate)?', this.isTextInput(candidate));
+        
         this.lastActiveElement = this.isTextInput(candidate) ? candidate : null;
+        console.log('✅ lastActiveElement definido como:', this.lastActiveElement);
+        
         this.transcript = '';
         this.interimTranscript = '';
         this.manualStopRequested = false;
         this.recognition.start();
         this.isRecording = true;
       }
-    },
-    
-    insertTranscript() {
-      const fullTranscript = this.displayTranscript;
-      if (!fullTranscript) return;
-
-      if (this.isRecording) {
-        this.manualStopRequested = true;
-        this.recognition.stop();
-        this.isRecording = false;
-      }
-      
-      // Tentar inserir no campo anteriormente ativo
-      const target = this.lastActiveElement && document.contains(this.lastActiveElement)
-        ? this.lastActiveElement
-        : (this.isTextInput(document.activeElement) ? document.activeElement : null);
-
-      if (this.isTextInput(target)) {
-        if (typeof target.focus === 'function') target.focus({ preventScroll: false });
-
-        const appendToValue = (currentValue = '', newText = '') => {
-          if (!newText) return currentValue || '';
-          const needsSpace = currentValue.trim().length && !currentValue.endsWith(' ');
-          const separator = needsSpace ? ' ' : '';
-          return (currentValue || '') + separator + newText;
-        };
-
-        if (Object.prototype.hasOwnProperty.call(target, 'value')) {
-          target.value = appendToValue(target.value || '', fullTranscript);
-          if (typeof target.setSelectionRange === 'function') {
-            const end = target.value.length;
-            target.setSelectionRange(end, end);
-          }
-        } else if (target.isContentEditable) {
-          const currentText = target.innerText || '';
-          target.innerText = appendToValue(currentText, fullTranscript);
-        }
-        
-        // Disparar eventos para Vue.js detectar mudança
-        target.dispatchEvent(new Event('input', { bubbles: true }));
-        target.dispatchEvent(new Event('change', { bubbles: true }));
-        
-        // Feedback
-        this.$showToast && this.$showToast('Sucesso', '✅ Texto inserido no campo!', 'success');
-        
-        // Limpar
-        this.closeTranscript();
-      } else {
-        this.$showToast && this.$showToast('Atenção', 'Clique em um campo de texto antes de gravar.', 'warning');
-      }
-    },
-    
-    closeTranscript() {
+    },    closeTranscript() {
       if (this.isRecording) {
         this.manualStopRequested = true;
         this.recognition.stop();
@@ -4646,6 +4620,18 @@ const EntrevistaResponsavel = {
                       Os dados de nome, telefone e email são preenchidos automaticamente do cadastro do aluno.
                     </p>
                   </div>
+                  
+                  <!-- Campo obrigatório: Nome do responsável -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Nome do Responsável <span class="text-red-500">*</span>
+                    </label>
+                    <input v-model="form.nome_responsavel" type="text" required 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      :class="validationErrors.nome_responsavel ? 'border-red-300 bg-red-50' : ''"
+                      placeholder="Digite o nome completo do responsável">
+                    <p v-if="validationErrors.nome_responsavel" class="mt-2 text-sm text-red-600">{{ validationErrors.nome_responsavel }}</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -4881,7 +4867,11 @@ const EntrevistaResponsavel = {
     async carregarAlunos() {
       try {
         console.log('🔄 [Entrevista] Carregando alunos...');
-        const response = await api.get('/students');
+        let params = {};
+        if (this.$parent.user && this.$parent.user.role !== 'admin') {
+          params.teacher_id = this.$parent.user.id;
+        }
+        const response = await api.get('/students/options', { params });
         this.alunos = response.data?.data?.rows || [];
         console.log('✅ [Entrevista] Alunos carregados:', this.alunos.length);
       } catch (error) {
@@ -5012,7 +5002,16 @@ const EntrevistaResponsavel = {
           this.validationErrors.parentesco = 'Selecione o parentesco';
           isValid = false;
         }
-        // Nome e telefone do responsável são preenchidos do perfil do aluno
+        // Validar e-mail se fornecido
+        if (this.form.email && !this.isValidEmail(this.form.email)) {
+          this.validationErrors.email = 'E-mail inválido';
+          isValid = false;
+        }
+        // Nome do responsável é obrigatório se não preenchido no perfil
+        if (!this.form.nome_responsavel || this.form.nome_responsavel.trim().length < 2) {
+          this.validationErrors.nome_responsavel = 'Nome do responsável é obrigatório (mín. 2 caracteres)';
+          isValid = false;
+        }
       }
       
       return isValid;
@@ -5033,6 +5032,43 @@ const EntrevistaResponsavel = {
         idade--;
       }
       return idade;
+    },
+    
+    // Validações de dados
+    isValidEmail(email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    },
+    
+    isValidCPF(cpf) {
+      if (!cpf) return true; // CPF opcional
+      cpf = cpf.replace(/[^\d]/g, '');
+      if (cpf.length !== 11) return false;
+      if (/^(\d)\1+$/.test(cpf)) return false; // CPF com todos dígitos iguais
+      
+      let sum = 0;
+      for (let i = 0; i < 9; i++) {
+        sum += parseInt(cpf.charAt(i)) * (10 - i);
+      }
+      let remainder = (sum * 10) % 11;
+      if (remainder === 10 || remainder === 11) remainder = 0;
+      if (remainder !== parseInt(cpf.charAt(9))) return false;
+      
+      sum = 0;
+      for (let i = 0; i < 10; i++) {
+        sum += parseInt(cpf.charAt(i)) * (11 - i);
+      }
+      remainder = (sum * 10) % 11;
+      if (remainder === 10 || remainder === 11) remainder = 0;
+      return remainder === parseInt(cpf.charAt(10));
+    },
+    
+    isValidDate(dateStr) {
+      if (!dateStr) return true;
+      const date = new Date(dateStr);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return date <= today;
     },
     
     async salvarEntrevista() {
@@ -5309,7 +5345,7 @@ const PDI = {
                   
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Professor AEE</label>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Professor AEE <span class="text-red-500">*</span></label>
                       <select v-model="form.professor_aee" required
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
                         <option value="">Selecione</option>
@@ -5317,7 +5353,7 @@ const PDI = {
                       </select>
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Período de Vigência</label>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Período de Vigência <span class="text-red-500">*</span></label>
                       <input v-model="form.periodo" type="text" required placeholder="Ex: 1º Semestre 2025"
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
                     </div>
@@ -5383,14 +5419,14 @@ const PDI = {
 
                 <div class="max-w-2xl mx-auto space-y-6">
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Objetivo Geral</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Objetivo Geral <span class="text-red-500">*</span></label>
                     <textarea v-model="form.objetivo_geral" rows="4" 
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                       placeholder="Descreva o objetivo principal do PDI..."></textarea>
                   </div>
                   
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Objetivos Específicos</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Objetivos Específicos <span class="text-red-500">*</span></label>
                     <textarea v-model="form.objetivos_especificos" rows="6" 
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                       placeholder="Liste os objetivos específicos a serem alcançados..."></textarea>
@@ -5412,14 +5448,14 @@ const PDI = {
 
                 <div class="max-w-2xl mx-auto space-y-6">
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Estratégias Pedagógicas</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Estratégias Pedagógicas <span class="text-red-500">*</span></label>
                     <textarea v-model="form.estrategias" rows="4" 
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                       placeholder="Descreva as estratégias pedagógicas a serem utilizadas..."></textarea>
                   </div>
                   
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Recursos Necessários</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Recursos Necessários <span class="text-red-500">*</span></label>
                     <textarea v-model="form.recursos" rows="4" 
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                       placeholder="Liste os recursos pedagógicos necessários..."></textarea>
@@ -5433,14 +5469,14 @@ const PDI = {
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Critérios de Avaliação</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Critérios de Avaliação <span class="text-red-500">*</span></label>
                     <textarea v-model="form.criterios_avaliacao" rows="4" 
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                       placeholder="Defina como será avaliado o progresso do aluno..."></textarea>
                   </div>
                   
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Periodicidade de Revisão</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Periodicidade de Revisão <span class="text-red-500">*</span></label>
                     <select v-model="form.periodicidade_revisao" 
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
                       <option value="">Selecione</option>
@@ -5564,7 +5600,11 @@ const PDI = {
   methods: {
     async carregarAlunos() {
       try {
-        const response = await api.get('/students');
+        let params = {};
+        if (this.$parent.user && this.$parent.user.role !== 'admin') {
+          params.teacher_id = this.$parent.user.id;
+        }
+        const response = await api.get('/students/options', { params });
         this.alunos = response.data?.data?.rows || [];
       } catch (error) {
         console.error('Erro ao carregar alunos:', error);
@@ -5676,13 +5716,39 @@ const PDI = {
           this.validationErrors.student_id = 'Selecione um aluno';
           isValid = false;
         }
-        if (!this.form.escola_id) {
-          this.validationErrors.escola_id = 'Selecione a escola';
+        if (!this.form.professor_aee) {
+          this.validationErrors.professor_aee = 'Selecione o professor AEE';
           isValid = false;
         }
+        if (!this.form.periodo || String(this.form.periodo).trim().length < 3) {
+          this.validationErrors.periodo = 'Informe o período de vigência (mín. 3 caracteres)';
+          isValid = false;
+        }
+      } else if (this.currentStep === 3) {
         if (!this.form.objetivo_geral || String(this.form.objetivo_geral).trim().length < 5) {
-          // feedback imediato para objetivo geral ainda na etapa 1 se estiver visível em layouts simplificados
-          this.$showToast('Atenção', 'Informe o objetivo geral do PDI (mín. 5 caracteres)', 'warning');
+          this.validationErrors.objetivo_geral = 'Informe o objetivo geral (mín. 5 caracteres)';
+          isValid = false;
+        }
+        if (!this.form.objetivos_especificos || String(this.form.objetivos_especificos).trim().length < 10) {
+          this.validationErrors.objetivos_especificos = 'Informe os objetivos específicos (mín. 10 caracteres)';
+          isValid = false;
+        }
+      } else if (this.currentStep === 4) {
+        if (!this.form.estrategias || String(this.form.estrategias).trim().length < 10) {
+          this.validationErrors.estrategias = 'Descreva as estratégias pedagógicas (mín. 10 caracteres)';
+          isValid = false;
+        }
+        if (!this.form.recursos || String(this.form.recursos).trim().length < 5) {
+          this.validationErrors.recursos = 'Liste os recursos necessários (mín. 5 caracteres)';
+          isValid = false;
+        }
+        if (!this.form.criterios_avaliacao || String(this.form.criterios_avaliacao).trim().length < 10) {
+          this.validationErrors.criterios_avaliacao = 'Defina os critérios de avaliação (mín. 10 caracteres)';
+          isValid = false;
+        }
+        if (!this.form.periodicidade_revisao) {
+          this.validationErrors.periodicidade_revisao = 'Selecione a periodicidade de revisão';
+          isValid = false;
         }
       }
       
@@ -5916,7 +5982,7 @@ const PlanoAtendimento = {
                   </div>
                   
                   <div class="mt-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Matrícula (Opcional)</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Matrícula <span class="text-red-500">*</span></label>
                     <input v-model="form.matricula" type="text" 
                       placeholder="Número de matrícula do aluno"
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
@@ -5938,7 +6004,7 @@ const PlanoAtendimento = {
 
                 <div class="max-w-2xl mx-auto space-y-6">
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Deficiência/Transtorno</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Deficiência/Transtorno <span class="text-red-500">*</span></label>
                     <select v-model="form.tipo_necessidade" required 
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
                       <option value="">Selecione</option>
@@ -5961,14 +6027,14 @@ const PlanoAtendimento = {
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Objetivo Geral</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Objetivo Geral <span class="text-red-500">*</span></label>
                     <textarea v-model="form.objetivo_geral" rows="3" 
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                       placeholder="Defina o objetivo principal do atendimento..."></textarea>
                   </div>
                   
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Objetivos Específicos</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Objetivos Específicos <span class="text-red-500">*</span></label>
                     <textarea v-model="form.objetivos_especificos" rows="5" 
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                       placeholder="Liste os objetivos específicos, um por linha..."></textarea>
@@ -5990,21 +6056,21 @@ const PlanoAtendimento = {
 
                 <div class="max-w-2xl mx-auto space-y-6">
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Atividades Propostas</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Atividades Propostas <span class="text-red-500">*</span></label>
                     <textarea v-model="form.atividades" rows="5" 
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                       placeholder="Descreva as atividades que serão desenvolvidas com o aluno..."></textarea>
                   </div>
                   
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Metodologia de Ensino</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Metodologia de Ensino <span class="text-red-500">*</span></label>
                     <textarea v-model="form.metodologia" rows="4" 
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                       placeholder="Explique a metodologia e estratégias pedagógicas..."></textarea>
                   </div>
                   
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Recursos Didáticos</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Recursos Didáticos <span class="text-red-500">*</span></label>
                     <textarea v-model="form.recursos_didaticos" rows="3" 
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                       placeholder="Liste os recursos didáticos e materiais necessários..."></textarea>
@@ -6027,7 +6093,7 @@ const PlanoAtendimento = {
                 <div class="max-w-2xl mx-auto space-y-6">
                   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Frequência Semanal</label>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Frequência Semanal <span class="text-red-500">*</span></label>
                       <select v-model="form.frequencia_semanal" required 
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
                         <option value="">Selecione</option>
@@ -6039,7 +6105,7 @@ const PlanoAtendimento = {
                       </select>
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Duração da Sessão</label>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Duração da Sessão <span class="text-red-500">*</span></label>
                       <select v-model="form.duracao_sessao" required 
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
                         <option value="">Selecione</option>
@@ -6050,7 +6116,7 @@ const PlanoAtendimento = {
                       </select>
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Período</label>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Período <span class="text-red-500">*</span></label>
                       <select v-model="form.periodo_atendimento" required 
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
                         <option value="">Selecione</option>
@@ -6212,7 +6278,11 @@ const PlanoAtendimento = {
   methods: {
     async carregarAlunos() {
       try {
-        const response = await api.get('/students');
+        let params = {};
+        if (this.$parent.user && this.$parent.user.role !== 'admin') {
+          params.teacher_id = this.$parent.user.id;
+        }
+        const response = await api.get('/students/options', { params });
         this.alunos = response.data?.data?.rows || [];
       } catch (error) {
         console.error('Erro ao carregar alunos:', error);
@@ -6304,16 +6374,37 @@ const PlanoAtendimento = {
           this.validationErrors.student_id = 'Selecione um aluno';
           isValid = false;
         }
-        if (!this.form.escola_origem_id) {
-          this.validationErrors.escola_origem_id = 'Selecione a escola de origem';
+        if (!this.form.matricula || String(this.form.matricula).trim().length < 2) {
+          this.validationErrors.matricula = 'Informe a matrícula (mín. 2 caracteres)';
           isValid = false;
         }
-        if (!this.form.matricula) {
-          this.validationErrors.matricula = 'Informe a matrícula';
+      } else if (this.currentStep === 2) {
+        if (!this.form.tipo_necessidade) {
+          this.validationErrors.tipo_necessidade = 'Selecione o tipo de necessidade';
           isValid = false;
         }
-      }
-      if (this.currentStep === 4) {
+        if (!this.form.objetivo_geral || String(this.form.objetivo_geral).trim().length < 5) {
+          this.validationErrors.objetivo_geral = 'Defina o objetivo geral (mín. 5 caracteres)';
+          isValid = false;
+        }
+        if (!this.form.objetivos_especificos || String(this.form.objetivos_especificos).trim().length < 10) {
+          this.validationErrors.objetivos_especificos = 'Liste os objetivos específicos (mín. 10 caracteres)';
+          isValid = false;
+        }
+      } else if (this.currentStep === 3) {
+        if (!this.form.atividades || String(this.form.atividades).trim().length < 10) {
+          this.validationErrors.atividades = 'Descreva as atividades propostas (mín. 10 caracteres)';
+          isValid = false;
+        }
+        if (!this.form.metodologia || String(this.form.metodologia).trim().length < 10) {
+          this.validationErrors.metodologia = 'Explique a metodologia (mín. 10 caracteres)';
+          isValid = false;
+        }
+        if (!this.form.recursos_didaticos || String(this.form.recursos_didaticos).trim().length < 5) {
+          this.validationErrors.recursos_didaticos = 'Liste os recursos didáticos (mín. 5 caracteres)';
+          isValid = false;
+        }
+      } else if (this.currentStep === 4) {
         if (!this.form.frequencia_semanal) {
           this.validationErrors.frequencia_semanal = 'Selecione a frequência semanal';
           isValid = false;
@@ -6801,8 +6892,8 @@ const RelatorioAtendimento = {
         if (this.$parent.user && this.$parent.user.role !== 'admin') {
           params.teacher_id = this.$parent.user.id;
         }
-        const r = await api.get('/students', { params });
-        this.alunos = (r.data?.data?.rows) || [];
+        const r = await api.get('/students/options', { params });
+        this.alunos = (r.data?.data) || [];
       } catch (e) {
         console.error('Erro ao carregar alunos:', e);
       } finally {
@@ -7315,10 +7406,12 @@ const DocumentosGerados = {
     
     async loadStudents() {
       try {
-        const res = await api.get('/students/list');
-        if (res.data.ok) {
-          this.students = res.data.data;
+        let params = {};
+        if (this.$parent.user && this.$parent.user.role !== 'admin') {
+          params.teacher_id = this.$parent.user.id;
         }
+        const res = await api.get('/students/options', { params });
+        this.students = res.data?.data || [];
       } catch (err) {
         console.error('Erro ao carregar alunos:', err);
       }

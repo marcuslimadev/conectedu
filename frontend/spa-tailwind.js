@@ -963,11 +963,19 @@ const AlunosTW = {
           this.rooms = [];
           console.error('Falha ao carregar salas SRM:', results[1].reason);
         }
-        // schools com fallback de parsing
+        // schools com fallback de parsing + filtro teacher-centric
         if (results[2].status === 'fulfilled') {
           const s = results[2].value;
           const d = s.data;
-          this.schools = (d?.data?.rows) || (Array.isArray(d?.data) ? d.data : (Array.isArray(d) ? d : []));
+          let allSchools = (d?.data?.rows) || (Array.isArray(d?.data) ? d.data : (Array.isArray(d) ? d : []));
+          
+          // Filtrar escolas do professor atual (se não for admin)
+          const currentUser = this.$parent?.user || this.$root?.user;
+          if (currentUser && currentUser.role !== 'admin') {
+            this.schools = allSchools.filter(school => school.created_by_teacher_id === currentUser.id);
+          } else {
+            this.schools = allSchools;
+          }
         } else {
           this.schools = [];
           console.error('Falha ao carregar escolas:', results[2].reason);
@@ -2501,6 +2509,174 @@ const LegislacoesTW = {
   }
 };
 
+// Componente de Microfone Flutuante Global para Input por Voz
+const FloatingMicrophone = {
+  template: `
+    <div class="fixed bottom-6 right-6 z-[9999]">
+      <div v-if="isRecording || transcript" 
+           class="absolute bottom-20 right-0 bg-white rounded-lg shadow-lg p-4 mb-2 w-80 border-2"
+           :class="isRecording ? 'border-red-500' : 'border-gray-200'">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-semibold text-gray-700">
+            {{ isRecording ? '🎤 Ouvindo...' : '✅ Texto capturado' }}
+          </span>
+          <button @click="closeTranscript" 
+                  class="text-gray-400 hover:text-gray-600">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <p v-if="transcript" class="text-sm text-gray-600 mb-2">{{ transcript }}</p>
+        <p v-if="!transcript && isRecording" class="text-xs text-gray-500 italic">Fale agora...</p>
+        <div v-if="!isRecording && transcript" class="flex space-x-2 mt-3">
+          <button @click="insertTranscript" 
+                  class="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm font-medium">
+            ✓ Inserir
+          </button>
+          <button @click="closeTranscript" 
+                  class="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded text-sm">
+            Cancelar
+          </button>
+        </div>
+      </div>
+      
+      <button @click="toggleRecording" 
+              :disabled="!isSupported"
+              :title="getTooltip"
+              class="w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              :class="[
+                isRecording 
+                  ? 'bg-red-600 hover:bg-red-700 animate-pulse' 
+                  : 'bg-gradient-to-br from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
+              ]">
+        <i class="fas text-2xl text-white"
+           :class="isRecording ? 'fa-stop' : 'fa-microphone'"></i>
+      </button>
+      
+      <div v-if="!isSupported" 
+           class="absolute bottom-20 right-0 bg-yellow-100 border border-yellow-400 rounded-lg p-3 mb-2 w-64 text-xs">
+        <p class="text-yellow-800 font-semibold mb-1">⚠️ Navegador não suportado</p>
+        <p class="text-yellow-700">Web Speech API não disponível. Use Chrome, Edge ou Safari.</p>
+      </div>
+    </div>
+  `,
+  
+  data() {
+    return {
+      isRecording: false,
+      isSupported: false,
+      recognition: null,
+      transcript: '',
+      lastActiveElement: null
+    };
+  },
+  
+  computed: {
+    getTooltip() {
+      if (!this.isSupported) return 'Navegador não suportado';
+      return this.isRecording ? 'Parar gravação' : 'Gravar áudio para preencher campo';
+    }
+  },
+  
+  methods: {
+    initSpeechRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      
+      if (!SpeechRecognition) {
+        console.warn('🎤 Web Speech API não suportada');
+        this.isSupported = false;
+        return;
+      }
+      
+      this.isSupported = true;
+      this.recognition = new SpeechRecognition();
+      this.recognition.lang = 'pt-BR';
+      this.recognition.continuous = false;
+      this.recognition.interimResults = false;
+      this.recognition.maxAlternatives = 1;
+      
+      this.recognition.onstart = () => {
+        console.log('🎤 Gravação iniciada');
+        this.transcript = '';
+      };
+      
+      this.recognition.onresult = (event) => {
+        this.transcript = event.results[0][0].transcript;
+        console.log('📝 Transcrição:', this.transcript);
+      };
+      
+      this.recognition.onerror = (event) => {
+        console.error('❌ Erro no reconhecimento de voz:', event.error);
+        this.isRecording = false;
+        
+        if (event.error === 'no-speech') {
+          this.$showToast && this.$showToast('Atenção', 'Nenhuma fala detectada. Tente novamente.', 'warning');
+        } else if (event.error === 'not-allowed') {
+          this.$showToast && this.$showToast('Erro', 'Permissão de microfone negada.', 'error');
+        }
+      };
+      
+      this.recognition.onend = () => {
+        console.log('🎤 Gravação finalizada');
+        this.isRecording = false;
+      };
+    },
+    
+    toggleRecording() {
+      if (!this.isSupported) return;
+      
+      if (this.isRecording) {
+        this.recognition.stop();
+      } else {
+        // Guardar elemento ativo antes de gravar
+        this.lastActiveElement = document.activeElement;
+        this.transcript = '';
+        this.recognition.start();
+        this.isRecording = true;
+      }
+    },
+    
+    insertTranscript() {
+      if (!this.transcript) return;
+      
+      // Tentar inserir no campo anteriormente ativo
+      const target = this.lastActiveElement || document.activeElement;
+      
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
+        // Preencher o campo
+        target.value = this.transcript;
+        
+        // Disparar eventos para Vue.js detectar mudança
+        target.dispatchEvent(new Event('input', { bubbles: true }));
+        target.dispatchEvent(new Event('change', { bubbles: true }));
+        
+        // Feedback
+        this.$showToast && this.$showToast('Sucesso', '✅ Texto inserido no campo!', 'success');
+        
+        // Limpar
+        this.closeTranscript();
+      } else {
+        this.$showToast && this.$showToast('Atenção', 'Clique em um campo de texto antes de gravar.', 'warning');
+      }
+    },
+    
+    closeTranscript() {
+      this.transcript = '';
+      this.lastActiveElement = null;
+    }
+  },
+  
+  mounted() {
+    this.initSpeechRecognition();
+    console.log('🎤 FloatingMicrophone montado');
+  },
+  
+  beforeUnmount() {
+    if (this.recognition) {
+      this.recognition.stop();
+    }
+  }
+};
+
 // Layout principal com sidebar moderna usando Tailwind
 const Layout = {
   template: `
@@ -2763,6 +2939,9 @@ const Layout = {
           <router-view></router-view>
         </div>
       </main>
+      
+      <!-- Microfone Flutuante Global -->
+      <floating-microphone></floating-microphone>
     </div>
   `,
   data() {
@@ -4770,16 +4949,29 @@ const EntrevistaResponsavel = {
       
       this.loading = true;
       try {
-        // Mapear os campos do formulário para os campos esperados pela API
+        // Mapear TODOS os campos do formulário para os campos esperados pela API
         const dadosParaSalvar = {
           student_id: this.form.student_id,
           nome_escola: this.form.escola,
           serie_ano: this.form.serie,
           turno: this.form.turno,
           telefone: this.form.telefone,
-          // Adicionar outros campos conforme disponíveis no formulário
           data_entrevista: new Date().toISOString().split('T')[0], // Data atual
-          tipo_entrevista: 'inicial' // Valor padrão
+          tipo_entrevista: 'inicial', // Valor padrão
+          // Campos do responsável
+          nome_responsavel: this.form.nome_responsavel,
+          parentesco: this.form.parentesco,
+          email: this.form.email,
+          // Campos médicos/diagnóstico
+          diagnostico: this.form.diagnostico,
+          medicamentos: this.form.medicamentos,
+          profissionais: this.form.profissionais,
+          // Campos de desenvolvimento
+          comportamento_casa: this.form.comportamento_casa,
+          dificuldades: this.form.dificuldades,
+          habilidades: this.form.habilidades,
+          expectativas: this.form.expectativas,
+          informacoes_adicionais: this.form.informacoes_adicionais
         };
         
         // Filtrar apenas campos que têm valor
@@ -4790,27 +4982,34 @@ const EntrevistaResponsavel = {
           }
         });
         
-        // console.log('Dados sendo enviados:', dadosLimpos);
+        console.log('📤 Dados sendo enviados:', dadosLimpos);
         
         let response;
         if (this.form.id) {
           response = await api.post('/entrevistas-responsavel/update', { id: this.form.id, ...dadosLimpos });
         } else {
-          response = await api.post('/entrevistas-responsavel', dadosLimpos);
+          response = await api.post('/entrevistas-responsavel/create', dadosLimpos);
         }
+        
         if (response.data?.ok) {
+          // Guardar o ID retornado para permitir gerar PDF
+          if (response.data.data?.id) {
+            this.form.id = response.data.data.id;
+          }
+          
           // Salvar dados da entrevista no localStorage para evitar duplicação
           const interviewKey = `interview_${this.form.student_id}`;
           localStorage.setItem(interviewKey, JSON.stringify(this.form));
           
           this.$showToast('Sucesso', this.form.id ? 'Entrevista atualizada com sucesso!' : 'Entrevista salva com sucesso!', 'success');
-          this.$router.push('/');
+          // Não redirecionar automaticamente para permitir gerar PDF
+          // this.$router.push('/');
         } else {
-          this.$showToast('Erro', 'Erro ao salvar entrevista', 'error');
+          this.$showToast('Erro', response.data?.error || 'Erro ao salvar entrevista', 'error');
         }
       } catch (error) {
-        console.error('Erro completo:', error);
-        this.$showToast('Erro', 'Erro ao salvar entrevista: ' + (error.response?.data?.message || error.message), 'error');
+        console.error('❌ Erro completo:', error);
+        this.$showToast('Erro', 'Erro ao salvar entrevista: ' + (error.response?.data?.error || error.response?.data?.message || error.message), 'error');
       } finally {
         this.loading = false;
       }
@@ -7810,6 +8009,10 @@ if (typeof DatePickerComponent !== 'undefined') {
   app.component('DatePicker', DatePickerComponent);
   console.log('✅ DatePicker registrado');
 }
+
+// Registrar FloatingMicrophone globalmente
+app.component('FloatingMicrophone', FloatingMicrophone);
+console.log('✅ FloatingMicrophone registrado');
 
 // Usar router e montar aplicação
 console.log('🔧 Usando router...');

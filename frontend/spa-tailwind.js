@@ -2512,28 +2512,29 @@ const LegislacoesTW = {
 // Componente de Microfone Flutuante Global para Input por Voz
 const FloatingMicrophone = {
   template: `
-    <div class="fixed bottom-6 right-6 z-[9999]">
+    <teleport to="body">
+    <div style="position: fixed; bottom: 24px; right: 24px; z-index: 9999;">
       <div v-if="isRecording || transcript" 
-           class="absolute bottom-20 right-0 bg-white rounded-lg shadow-lg p-4 mb-2 w-80 border-2"
-           :class="isRecording ? 'border-red-500' : 'border-gray-200'">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-semibold text-gray-700">
+           style="position: absolute; bottom: 88px; right: 0; background: white; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); padding: 16px; width: 320px; border: 2px solid;"
+           :style="{ borderColor: isRecording ? '#ef4444' : '#e5e7eb' }">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+          <span style="font-size: 14px; font-weight: 600; color: #374151;">
             {{ isRecording ? '🎤 Ouvindo...' : '✅ Texto capturado' }}
           </span>
           <button @click="closeTranscript" 
-                  class="text-gray-400 hover:text-gray-600">
-            <i class="fas fa-times"></i>
+                  style="color: #9ca3af; cursor: pointer; background: none; border: none; font-size: 16px;">
+            ✕
           </button>
         </div>
-        <p v-if="transcript" class="text-sm text-gray-600 mb-2">{{ transcript }}</p>
-        <p v-if="!transcript && isRecording" class="text-xs text-gray-500 italic">Fale agora...</p>
-        <div v-if="!isRecording && transcript" class="flex space-x-2 mt-3">
+        <p v-if="transcript" style="font-size: 14px; color: #4b5563; margin-bottom: 8px;">{{ transcript }}</p>
+        <p v-if="!transcript && isRecording" style="font-size: 12px; color: #6b7280; font-style: italic;">Fale agora...</p>
+        <div v-if="!isRecording && transcript" style="display: flex; gap: 8px; margin-top: 12px;">
           <button @click="insertTranscript" 
-                  class="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm font-medium">
+                  style="flex: 1; padding: 8px 12px; background: #16a34a; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer;">
             ✓ Inserir
           </button>
           <button @click="closeTranscript" 
-                  class="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded text-sm">
+                  style="padding: 8px 12px; background: #e5e7eb; color: #374151; border: none; border-radius: 6px; font-size: 14px; cursor: pointer;">
             Cancelar
           </button>
         </div>
@@ -2542,22 +2543,24 @@ const FloatingMicrophone = {
       <button @click="toggleRecording" 
               :disabled="!isSupported"
               :title="getTooltip"
-              class="w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-              :class="[
-                isRecording 
-                  ? 'bg-red-600 hover:bg-red-700 animate-pulse' 
-                  : 'bg-gradient-to-br from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
-              ]">
-        <i class="fas text-2xl text-white"
-           :class="isRecording ? 'fa-stop' : 'fa-microphone'"></i>
+              style="width: 64px; height: 64px; border-radius: 50%; box-shadow: 0 10px 25px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; transition: all 0.3s;"
+              :style="{ 
+                background: isRecording ? '#dc2626' : 'linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)',
+                opacity: isSupported ? 1 : 0.5,
+                cursor: isSupported ? 'pointer' : 'not-allowed'
+              }">
+        <span style="font-size: 24px; color: white;">
+          {{ isRecording ? '⏹' : '🎤' }}
+        </span>
       </button>
       
       <div v-if="!isSupported" 
-           class="absolute bottom-20 right-0 bg-yellow-100 border border-yellow-400 rounded-lg p-3 mb-2 w-64 text-xs">
-        <p class="text-yellow-800 font-semibold mb-1">⚠️ Navegador não suportado</p>
-        <p class="text-yellow-700">Web Speech API não disponível. Use Chrome, Edge ou Safari.</p>
+           style="position: absolute; bottom: 88px; right: 0; background: #fef3c7; border: 1px solid #fbbf24; border-radius: 8px; padding: 12px; width: 256px; font-size: 12px;">
+        <p style="color: #92400e; font-weight: 600; margin-bottom: 4px;">⚠️ Navegador não suportado</p>
+        <p style="color: #b45309;">Web Speech API não disponível. Use Chrome, Edge ou Safari.</p>
       </div>
     </div>
+    </teleport>
   `,
   
   data() {
@@ -2566,7 +2569,11 @@ const FloatingMicrophone = {
       isSupported: false,
       recognition: null,
       transcript: '',
-      lastActiveElement: null
+      lastActiveElement: null,
+      lastFocusedElement: null,
+      interimTranscript: '',
+      manualStopRequested: false,
+      handleFocusIn: null
     };
   },
   
@@ -2574,10 +2581,19 @@ const FloatingMicrophone = {
     getTooltip() {
       if (!this.isSupported) return 'Navegador não suportado';
       return this.isRecording ? 'Parar gravação' : 'Gravar áudio para preencher campo';
+    },
+    displayTranscript() {
+      return `${this.transcript} ${this.interimTranscript}`.trim();
     }
   },
   
   methods: {
+    isTextInput(el) {
+      if (!el) return false;
+      const tag = el.tagName?.toLowerCase();
+      return tag === 'input' || tag === 'textarea' || el.isContentEditable;
+    },
+
     initSpeechRecognition() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       
@@ -2590,18 +2606,29 @@ const FloatingMicrophone = {
       this.isSupported = true;
       this.recognition = new SpeechRecognition();
       this.recognition.lang = 'pt-BR';
-      this.recognition.continuous = false;
-      this.recognition.interimResults = false;
+      this.recognition.continuous = true;
+      this.recognition.interimResults = true;
       this.recognition.maxAlternatives = 1;
       
       this.recognition.onstart = () => {
         console.log('🎤 Gravação iniciada');
-        this.transcript = '';
+        this.isRecording = true;
       };
       
       this.recognition.onresult = (event) => {
-        this.transcript = event.results[0][0].transcript;
-        console.log('📝 Transcrição:', this.transcript);
+        let interim = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const result = event.results[i];
+          const text = result[0].transcript.trim();
+          if (!text) continue;
+          if (result.isFinal) {
+            this.transcript = (this.transcript ? `${this.transcript} ` : '') + text;
+          } else {
+            interim = `${interim} ${text}`.trim();
+          }
+        }
+        this.interimTranscript = interim.trim();
+        console.log('📝 Transcrição parcial:', this.displayTranscript);
       };
       
       this.recognition.onerror = (event) => {
@@ -2617,7 +2644,22 @@ const FloatingMicrophone = {
       
       this.recognition.onend = () => {
         console.log('🎤 Gravação finalizada');
-        this.isRecording = false;
+        if (this.manualStopRequested) {
+          this.manualStopRequested = false;
+          this.isRecording = false;
+          return;
+        }
+        if (this.isRecording) {
+          console.log('🔁 Reiniciando reconhecimento por inatividade');
+          setTimeout(() => {
+            try {
+              this.recognition?.start();
+            } catch (err) {
+              console.warn('⚠️ Falha ao reiniciar reconhecimento:', err);
+              this.isRecording = false;
+            }
+          }, 400);
+        }
       };
     },
     
@@ -2625,25 +2667,55 @@ const FloatingMicrophone = {
       if (!this.isSupported) return;
       
       if (this.isRecording) {
+        this.manualStopRequested = true;
         this.recognition.stop();
       } else {
-        // Guardar elemento ativo antes de gravar
-        this.lastActiveElement = document.activeElement;
+        // Guardar último campo de texto focado antes de gravar
+        const candidate = this.lastFocusedElement || document.activeElement;
+        this.lastActiveElement = this.isTextInput(candidate) ? candidate : null;
         this.transcript = '';
+        this.interimTranscript = '';
+        this.manualStopRequested = false;
         this.recognition.start();
         this.isRecording = true;
       }
     },
     
     insertTranscript() {
-      if (!this.transcript) return;
+      const fullTranscript = this.displayTranscript;
+      if (!fullTranscript) return;
+
+      if (this.isRecording) {
+        this.manualStopRequested = true;
+        this.recognition.stop();
+        this.isRecording = false;
+      }
       
       // Tentar inserir no campo anteriormente ativo
-      const target = this.lastActiveElement || document.activeElement;
-      
-      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
-        // Preencher o campo
-        target.value = this.transcript;
+      const target = this.lastActiveElement && document.contains(this.lastActiveElement)
+        ? this.lastActiveElement
+        : (this.isTextInput(document.activeElement) ? document.activeElement : null);
+
+      if (this.isTextInput(target)) {
+        if (typeof target.focus === 'function') target.focus({ preventScroll: false });
+
+        const appendToValue = (currentValue = '', newText = '') => {
+          if (!newText) return currentValue || '';
+          const needsSpace = currentValue.trim().length && !currentValue.endsWith(' ');
+          const separator = needsSpace ? ' ' : '';
+          return (currentValue || '') + separator + newText;
+        };
+
+        if (Object.prototype.hasOwnProperty.call(target, 'value')) {
+          target.value = appendToValue(target.value || '', fullTranscript);
+          if (typeof target.setSelectionRange === 'function') {
+            const end = target.value.length;
+            target.setSelectionRange(end, end);
+          }
+        } else if (target.isContentEditable) {
+          const currentText = target.innerText || '';
+          target.innerText = appendToValue(currentText, fullTranscript);
+        }
         
         // Disparar eventos para Vue.js detectar mudança
         target.dispatchEvent(new Event('input', { bubbles: true }));
@@ -2660,20 +2732,35 @@ const FloatingMicrophone = {
     },
     
     closeTranscript() {
+      if (this.isRecording) {
+        this.manualStopRequested = true;
+        this.recognition.stop();
+        this.isRecording = false;
+      }
       this.transcript = '';
+      this.interimTranscript = '';
       this.lastActiveElement = null;
     }
   },
   
   mounted() {
+    console.log('🎤 FloatingMicrophone mounted - INICIANDO');
+    console.log('🎤 Elemento:', this.$el);
     this.initSpeechRecognition();
-    console.log('🎤 FloatingMicrophone montado');
+    console.log('🎤 isSupported:', this.isSupported);
+    this.handleFocusIn = (event) => {
+      if (this.isTextInput(event.target)) {
+        this.lastFocusedElement = event.target;
+      }
+    };
+    document.addEventListener('focusin', this.handleFocusIn, true);
   },
   
   beforeUnmount() {
     if (this.recognition) {
       this.recognition.stop();
     }
+    document.removeEventListener('focusin', this.handleFocusIn, true);
   }
 };
 
@@ -7435,7 +7522,7 @@ const app = createApp({
       </div>
       
       <!-- Microfone Flutuante Global -->
-      <floating-microphone v-if="$route.path !== '/login' && $route.path !== '/register'"></floating-microphone>
+      <FloatingMicrophone></FloatingMicrophone>
     </div>
   `,
   data() {

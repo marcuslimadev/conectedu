@@ -2939,9 +2939,6 @@ const Layout = {
           <router-view></router-view>
         </div>
       </main>
-      
-      <!-- Microfone Flutuante Global -->
-      <floating-microphone></floating-microphone>
     </div>
   `,
   data() {
@@ -7436,6 +7433,9 @@ const app = createApp({
           </div>
         </div>
       </div>
+      
+      <!-- Microfone Flutuante Global -->
+      <floating-microphone v-if="$route.path !== '/login' && $route.path !== '/register'"></floating-microphone>
     </div>
   `,
   data() {

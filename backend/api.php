@@ -757,22 +757,34 @@ if ($action === 'schools.options') {
   $q = trim($_GET['q'] ?? '');
   $limit = min(200, max(1, (int)($_GET['limit'] ?? 50)));
   
-  $sql = 'SELECT id, name, city, address FROM schools WHERE status="ativo"';
+  // Verificar se a coluna status existe
+  $checkStatus = $pdo->query("SHOW COLUMNS FROM schools LIKE 'status'");
+  $hasStatus = $checkStatus->rowCount() > 0;
+  
+  $sql = 'SELECT id, name, city, address FROM schools';
+  $whereClause = [];
   $params = [];
+  
+  if ($hasStatus) {
+    $whereClause[] = 'status="ativo"';
+  }
   
   // Teacher-centric: professor vê todas as escolas (elas são públicas)
   // mas pode filtrar por aquelas que ele criou se necessário
   // if ($u['role'] !== 'admin') {
-  //   $sql .= ' AND created_by_teacher_id = ?';
+  //   $whereClause[] = 'created_by_teacher_id = ?';
   //   $params[] = $u['id'];
   // }
   
   // Filtro de busca
   if ($q) {
-    $sql .= ' AND (name LIKE ? OR city LIKE ?)';
-
+    $whereClause[] = '(name LIKE ? OR city LIKE ?)';
     $params[] = '%' . $q . '%';
     $params[] = '%' . $q . '%';
+  }
+  
+  if (!empty($whereClause)) {
+    $sql .= ' WHERE ' . implode(' AND ', $whereClause);
   }
   
   $sql .= ' ORDER BY name ASC LIMIT ' . $limit;
@@ -845,14 +857,23 @@ if ($action === 'schools.list') {
   $u = require_auth();
   
   try {
-    $sql = 'SELECT id, name, address, city, phone, status, created_at, updated_at FROM schools WHERE status="ativo" ORDER BY name ASC';
+    // Verificar se a coluna status existe
+    $checkStatus = $pdo->query("SHOW COLUMNS FROM schools LIKE 'status'");
+    $hasStatus = $checkStatus->rowCount() > 0;
+    
+    if ($hasStatus) {
+      $sql = 'SELECT id, name, address, city, phone, status, created_at, updated_at FROM schools WHERE status="ativo" ORDER BY name ASC';
+    } else {
+      $sql = 'SELECT id, name, address, city, phone, created_at, updated_at FROM schools ORDER BY name ASC';
+    }
+    
     $stmt = $pdo->query($sql);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     res(true, ['rows' => $rows, 'total' => count($rows)]);
   } catch (PDOException $e) {
     error_log("Erro ao listar escolas: " . $e->getMessage());
-    res(false, null, 'DATABASE_ERROR', 500);
+    res(false, null, 'DATABASE_ERROR: ' . $e->getMessage(), 500);
   }
 }
 
@@ -870,17 +891,28 @@ if ($action === 'schools.create') {
   }
   
   try {
-    $sql = 'INSERT INTO schools (name, address, city, phone, status, created_by_user_id, created_at, updated_at) 
-            VALUES (?, ?, ?, ?, "ativo", ?, NOW(), NOW())';
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([$name, $address, $city, $phone, $u['id']]);
+    // Verificar se a coluna status existe
+    $checkStatus = $pdo->query("SHOW COLUMNS FROM schools LIKE 'status'");
+    $hasStatus = $checkStatus->rowCount() > 0;
+    
+    if ($hasStatus) {
+      $sql = 'INSERT INTO schools (name, address, city, phone, status, created_by_teacher_id, created_at, updated_at) 
+              VALUES (?, ?, ?, ?, "ativo", ?, NOW(), NOW())';
+      $stmt = $pdo->prepare($sql);
+      $stmt->execute([$name, $address, $city, $phone, $u['id']]);
+    } else {
+      $sql = 'INSERT INTO schools (name, address, city, phone, created_by_teacher_id, created_at, updated_at) 
+              VALUES (?, ?, ?, ?, ?, NOW(), NOW())';
+      $stmt = $pdo->prepare($sql);
+      $stmt->execute([$name, $address, $city, $phone, $u['id']]);
+    }
     
     $newId = $pdo->lastInsertId();
     
     res(true, ['id' => $newId, 'message' => 'Escola criada com sucesso']);
   } catch (PDOException $e) {
     error_log("Erro ao criar escola: " . $e->getMessage());
-    res(false, null, 'DATABASE_ERROR', 500);
+    res(false, null, 'DATABASE_ERROR: ' . $e->getMessage(), 500);
   }
 }
 
@@ -910,7 +942,7 @@ if ($action === 'schools.update') {
   }
 }
 
-// DELETE /schools/delete - Excluir escola (soft delete)
+// DELETE /schools/delete - Excluir escola (soft delete ou hard delete)
 if ($action === 'schools.delete') {
   $u = require_auth();
   
@@ -921,15 +953,25 @@ if ($action === 'schools.delete') {
   }
   
   try {
-    // Soft delete - marca como inativo ao invés de deletar
-    $sql = 'UPDATE schools SET status="inativo", updated_at=NOW() WHERE id=?';
+    // Verificar se a coluna status existe
+    $checkStatus = $pdo->query("SHOW COLUMNS FROM schools LIKE 'status'");
+    $hasStatus = $checkStatus->rowCount() > 0;
+    
+    if ($hasStatus) {
+      // Soft delete - marca como inativo
+      $sql = 'UPDATE schools SET status="inativo", updated_at=NOW() WHERE id=?';
+    } else {
+      // Hard delete - remove definitivamente
+      $sql = 'DELETE FROM schools WHERE id=?';
+    }
+    
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$id]);
     
     res(true, ['message' => 'Escola excluída com sucesso']);
   } catch (PDOException $e) {
     error_log("Erro ao excluir escola: " . $e->getMessage());
-    res(false, null, 'DATABASE_ERROR', 500);
+    res(false, null, 'DATABASE_ERROR: ' . $e->getMessage(), 500);
   }
 }
 

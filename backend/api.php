@@ -769,12 +769,11 @@ if ($action === 'schools.options') {
     $whereClause[] = 'status="ativo"';
   }
   
-  // Teacher-centric: professor vê todas as escolas (elas são públicas)
-  // mas pode filtrar por aquelas que ele criou se necessário
-  // if ($u['role'] !== 'admin') {
-  //   $whereClause[] = 'created_by_teacher_id = ?';
-  //   $params[] = $u['id'];
-  // }
+  // Teacher-centric: professor só vê suas escolas
+  if ($u['role'] !== 'admin') {
+    $whereClause[] = 'created_by_teacher_id = ?';
+    $params[] = $u['id'];
+  }
   
   // Filtro de busca
   if ($q) {
@@ -852,7 +851,7 @@ if ($action === 'professores.options') {
  * CRUD de Escolas
  */
 
-// GET /schools - Listar todas as escolas
+// GET /schools - Listar escolas do professor (ou todas se admin)
 if ($action === 'schools.list') {
   $u = require_auth();
   
@@ -861,13 +860,31 @@ if ($action === 'schools.list') {
     $checkStatus = $pdo->query("SHOW COLUMNS FROM schools LIKE 'status'");
     $hasStatus = $checkStatus->rowCount() > 0;
     
-    if ($hasStatus) {
-      $sql = 'SELECT id, name, address, city, phone, status, created_at, updated_at FROM schools WHERE status="ativo" ORDER BY name ASC';
-    } else {
-      $sql = 'SELECT id, name, address, city, phone, created_at, updated_at FROM schools ORDER BY name ASC';
+    // Construir WHERE clause baseado em role e status
+    $where = [];
+    $params = [];
+    
+    // Filtrar por professor (exceto admin)
+    if ($u['role'] !== 'admin') {
+      $where[] = 'created_by_teacher_id = ?';
+      $params[] = $u['id'];
     }
     
-    $stmt = $pdo->query($sql);
+    // Filtrar por status ativo se coluna existir
+    if ($hasStatus) {
+      $where[] = 'status = "ativo"';
+    }
+    
+    $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
+    
+    $fields = $hasStatus 
+      ? 'id, name, address, city, phone, status, created_at, updated_at'
+      : 'id, name, address, city, phone, created_at, updated_at';
+    
+    $sql = "SELECT $fields FROM schools $whereClause ORDER BY name ASC";
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     res(true, ['rows' => $rows, 'total' => count($rows)]);
@@ -931,6 +948,15 @@ if ($action === 'schools.update') {
   }
   
   try {
+    // Verificar propriedade (professor só atualiza suas escolas)
+    if ($u['role'] !== 'admin') {
+      $checkStmt = $pdo->prepare('SELECT id FROM schools WHERE id=? AND created_by_teacher_id=?');
+      $checkStmt->execute([$id, $u['id']]);
+      if (!$checkStmt->fetch()) {
+        res(false, null, 'FORBIDDEN', 403);
+      }
+    }
+    
     $sql = 'UPDATE schools SET name=?, address=?, city=?, phone=?, updated_at=NOW() WHERE id=?';
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$name, $address, $city, $phone, $id]);
@@ -953,6 +979,15 @@ if ($action === 'schools.delete') {
   }
   
   try {
+    // Verificar propriedade (professor só exclui suas escolas)
+    if ($u['role'] !== 'admin') {
+      $checkStmt = $pdo->prepare('SELECT id FROM schools WHERE id=? AND created_by_teacher_id=?');
+      $checkStmt->execute([$id, $u['id']]);
+      if (!$checkStmt->fetch()) {
+        res(false, null, 'FORBIDDEN', 403);
+      }
+    }
+    
     // Verificar se a coluna status existe
     $checkStatus = $pdo->query("SHOW COLUMNS FROM schools LIKE 'status'");
     $hasStatus = $checkStatus->rowCount() > 0;

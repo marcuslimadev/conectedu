@@ -2248,7 +2248,7 @@ const SupervisaoTW = {
   methods: {
     async loadProfessores() {
       try {
-        const response = await api.get('/users/list?role=professor');
+        const response = await api.get('/users?role=professor');
         if (response.data?.ok) {
           this.professores = response.data.rows || [];
         }
@@ -3143,46 +3143,19 @@ const Layout = {
             </router-link>
           </div>
           
-          <div>
+          <!-- Formulários AEE - Apenas para professores -->
+          <div v-if="user && user.role === 'professor'">
             <h6 class="mb-2 text-xs font-semibold text-gray-700 uppercase tracking-wider">
               Formulários AEE
             </h6>
-            <!-- FORMULÁRIO ANTIGO - OCULTO
-            <router-link to="entrevista-responsavel" class="nav-link-tw" @click="closeMobileSidebar">
-              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4.586a1 1 0 01-.707-.293l-5.414-5.414a1 1 0 01-.293-.707V2z"/>
-                <polyline points="14,2 14,8 20,8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-                <polyline points="10,9 9,9 8,9"/>
-              </svg>
-              Entrevista com Responsável
-            </router-link>
-            -->
             <router-link to="entrevista-completa" class="nav-link-tw bg-indigo-50 border-l-4 border-indigo-600" @click="closeMobileSidebar" title="Formulário completo com 180+ campos">
               <i class="fas fa-comments w-5 text-indigo-600"></i>
               Entrevista com Responsável
             </router-link>
-            <!-- FORMULÁRIO ANTIGO - OCULTO
-            <router-link to="pdi" class="nav-link-tw" @click="closeMobileSidebar">
-              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-              </svg>
-              PDI - ConectAEE
-            </router-link>
-            -->
             <router-link to="pdi-completo" class="nav-link-tw bg-emerald-50 border-l-4 border-emerald-600" @click="closeMobileSidebar" title="Formulário completo com 250+ campos">
               <i class="fas fa-file-medical w-5 text-emerald-600"></i>
               PDI - Plano de Desenvolvimento Individual
             </router-link>
-            <!-- FORMULÁRIO ANTIGO - OCULTO
-            <router-link to="plano-atendimento" class="nav-link-tw" @click="closeMobileSidebar">
-              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/>
-              </svg>
-              Plano de Atendimento Individual
-            </router-link>
-            -->
             <router-link to="pai-completo" class="nav-link-tw bg-purple-50 border-l-4 border-purple-600" @click="closeMobileSidebar" title="Formulário completo com 80+ campos">
               <i class="fas fa-tasks w-5 text-purple-600"></i>
               PAI - Plano de Atendimento Individual

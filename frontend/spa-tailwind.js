@@ -1986,11 +1986,14 @@ const EscolasTW = {
       this.saving = true;
       try {
         if (this.editingId) {
-          const response = await api.post('/schools/update', this.form, { params: { id: this.editingId } });
+          const payload = { ...this.form, id: this.editingId };
+          const response = await api.post('/schools/update', payload);
           if (response.data?.ok) {
             this.$showToast && this.$showToast('Sucesso', `Escola "${this.form.name}" atualizada com sucesso!`, 'success');
             this.closeModal();
             await this.loadEscolas();
+          } else {
+            this.$showToast && this.$showToast('Erro', response.data?.error || 'Erro ao atualizar escola', 'error');
           }
         } else {
           const response = await api.post('/schools/create', this.form);
@@ -1998,11 +2001,14 @@ const EscolasTW = {
             this.$showToast && this.$showToast('Sucesso', `Escola "${this.form.name}" criada com sucesso!`, 'success');
             this.closeModal();
             await this.loadEscolas();
+          } else {
+            this.$showToast && this.$showToast('Erro', response.data?.error || 'Erro ao criar escola', 'error');
           }
         }
       } catch (error) {
         console.error('Erro ao salvar escola:', error);
-        this.$showToast && this.$showToast('Erro', 'Erro ao salvar escola', 'error');
+        const errorMsg = error.response?.data?.error || error.message || 'Erro ao salvar escola';
+        this.$showToast && this.$showToast('Erro', errorMsg, 'error');
       } finally {
         this.saving = false;
       }
@@ -2017,7 +2023,7 @@ const EscolasTW = {
       if (!confirmed) return;
       this.deletingId = escola.id;
       try {
-        const response = await api.post('/schools/delete', {}, { params: { id: escola.id } });
+        const response = await api.delete(`/schools/delete?id=${escola.id}`);
         if (response.data?.ok) {
           this.$showToast && this.$showToast('Sucesso', `Escola "${escola.name}" excluída com sucesso!`, 'success');
           await this.loadEscolas();
@@ -2027,9 +2033,10 @@ const EscolasTW = {
       } catch (error) {
         console.error('Erro ao excluir escola:', error);
         const status = error.response?.status;
+        const errorMsg = error.response?.data?.error || error.message;
         if (status === 403) this.$showToast && this.$showToast('Sem permissão', 'Apenas administradores podem excluir escolas.', 'warning');
         else if (status === 404) this.$showToast && this.$showToast('Não encontrada', 'Escola não existe mais.', 'info');
-        else this.$showToast && this.$showToast('Erro', 'Erro ao excluir escola', 'error');
+        else this.$showToast && this.$showToast('Erro', errorMsg || 'Erro ao excluir escola', 'error');
       } finally {
         this.deletingId = null;
       }

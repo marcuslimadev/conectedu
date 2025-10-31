@@ -836,3 +836,100 @@ if ($action === 'professores.options') {
   res(true, ['options' => $options]);
 }
 
+/**
+ * CRUD de Escolas
+ */
+
+// GET /schools - Listar todas as escolas
+if ($action === 'schools.list') {
+  $u = require_auth();
+  
+  try {
+    $sql = 'SELECT id, name, address, city, phone, status, created_at, updated_at FROM schools WHERE status="ativo" ORDER BY name ASC';
+    $stmt = $pdo->query($sql);
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    res(true, ['rows' => $rows, 'total' => count($rows)]);
+  } catch (PDOException $e) {
+    error_log("Erro ao listar escolas: " . $e->getMessage());
+    res(false, null, 'DATABASE_ERROR', 500);
+  }
+}
+
+// POST /schools/create - Criar nova escola
+if ($action === 'schools.create') {
+  $u = require_auth();
+  
+  $name = trim($B['name'] ?? '');
+  $address = trim($B['address'] ?? '');
+  $city = trim($B['city'] ?? '');
+  $phone = trim($B['phone'] ?? '');
+  
+  if (!$name) {
+    res(false, null, 'MISSING_NAME', 400);
+  }
+  
+  try {
+    $sql = 'INSERT INTO schools (name, address, city, phone, status, created_by_user_id, created_at, updated_at) 
+            VALUES (?, ?, ?, ?, "ativo", ?, NOW(), NOW())';
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$name, $address, $city, $phone, $u['id']]);
+    
+    $newId = $pdo->lastInsertId();
+    
+    res(true, ['id' => $newId, 'message' => 'Escola criada com sucesso']);
+  } catch (PDOException $e) {
+    error_log("Erro ao criar escola: " . $e->getMessage());
+    res(false, null, 'DATABASE_ERROR', 500);
+  }
+}
+
+// POST /schools/update - Atualizar escola existente
+if ($action === 'schools.update') {
+  $u = require_auth();
+  
+  $id = (int)($B['id'] ?? 0);
+  $name = trim($B['name'] ?? '');
+  $address = trim($B['address'] ?? '');
+  $city = trim($B['city'] ?? '');
+  $phone = trim($B['phone'] ?? '');
+  
+  if (!$id || !$name) {
+    res(false, null, 'MISSING_DATA', 400);
+  }
+  
+  try {
+    $sql = 'UPDATE schools SET name=?, address=?, city=?, phone=?, updated_at=NOW() WHERE id=?';
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$name, $address, $city, $phone, $id]);
+    
+    res(true, ['message' => 'Escola atualizada com sucesso']);
+  } catch (PDOException $e) {
+    error_log("Erro ao atualizar escola: " . $e->getMessage());
+    res(false, null, 'DATABASE_ERROR', 500);
+  }
+}
+
+// DELETE /schools/delete - Excluir escola (soft delete)
+if ($action === 'schools.delete') {
+  $u = require_auth();
+  
+  $id = (int)($_GET['id'] ?? $B['id'] ?? 0);
+  
+  if (!$id) {
+    res(false, null, 'MISSING_ID', 400);
+  }
+  
+  try {
+    // Soft delete - marca como inativo ao invés de deletar
+    $sql = 'UPDATE schools SET status="inativo", updated_at=NOW() WHERE id=?';
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$id]);
+    
+    res(true, ['message' => 'Escola excluída com sucesso']);
+  } catch (PDOException $e) {
+    error_log("Erro ao excluir escola: " . $e->getMessage());
+    res(false, null, 'DATABASE_ERROR', 500);
+  }
+}
+

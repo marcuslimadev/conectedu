@@ -2064,6 +2064,304 @@ const EscolasTW = {
   }
 };
 
+// Componente de Supervisão de Professores (Admin apenas)
+const SupervisaoTW = {
+  template: `
+    <div class="space-y-6" role="main">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Supervisão de Professores</h1>
+        <p class="mt-1 text-sm text-gray-600">Acompanhe as atividades e formulários dos professores</p>
+      </div>
+
+      <!-- Seletor de Professor -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <div class="max-w-md">
+          <label for="professor-select" class="block text-sm font-medium text-gray-700 mb-2">
+            Selecionar Professor
+          </label>
+          <select 
+            id="professor-select" 
+            v-model="selectedProfessorId" 
+            @change="loadProfessorData"
+            class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <option value="">-- Selecione um professor --</option>
+            <option v-for="prof in professores" :key="prof.id" :value="prof.id">
+              {{ prof.name }} {{ prof.email ? '(' + prof.email + ')' : '' }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Dados do Professor -->
+      <div v-if="selectedProfessorId && professorInfo" class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div class="flex items-center space-x-4">
+          <div class="flex-shrink-0">
+            <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900">{{ professorInfo.name }}</h3>
+            <p class="text-sm text-gray-600">{{ professorInfo.email }}</p>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-1">
+              {{ professorInfo.role === 'admin' ? 'Administrador' : 'Professor' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de Alunos do Professor -->
+      <div v-if="selectedProfessorId" class="bg-white shadow rounded-lg overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-900">
+            Alunos do Professor ({{ alunos.length }})
+          </h2>
+        </div>
+
+        <div v-if="loading" class="p-6 text-center">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <p class="mt-2 text-gray-600">Carregando...</p>
+        </div>
+
+        <div v-else-if="alunos.length === 0" class="p-6 text-center text-gray-500">
+          Este professor ainda não possui alunos cadastrados.
+        </div>
+
+        <div v-else class="divide-y divide-gray-200">
+          <div v-for="aluno in alunos" :key="aluno.id" 
+               class="p-6 hover:bg-gray-50 transition-colors">
+            <div class="flex items-center justify-between">
+              <div class="flex-1">
+                <h3 class="text-lg font-medium text-gray-900">{{ aluno.name }}</h3>
+                <div class="mt-1 flex flex-wrap gap-3 text-sm text-gray-600">
+                  <span v-if="aluno.school_name">
+                    <i class="fas fa-school mr-1"></i>{{ aluno.school_name }}
+                  </span>
+                  <span v-if="aluno.date_of_birth">
+                    <i class="fas fa-birthday-cake mr-1"></i>{{ formatDate(aluno.date_of_birth) }}
+                  </span>
+                  <span v-if="aluno.grade">
+                    <i class="fas fa-graduation-cap mr-1"></i>{{ aluno.grade }}
+                  </span>
+                </div>
+              </div>
+              <div class="flex gap-2">
+                <button @click="viewFormularios(aluno)" 
+                        class="inline-flex items-center px-3 py-2 border border-blue-300 rounded-lg text-sm font-medium text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <i class="fas fa-file-alt mr-2"></i>
+                  Ver Formulários
+                </button>
+              </div>
+            </div>
+
+            <!-- Formulários do Aluno (expandível) -->
+            <div v-if="expandedAlunoId === aluno.id" class="mt-4 pt-4 border-t border-gray-200">
+              <h4 class="text-sm font-semibold text-gray-700 mb-3">Formulários AEE</h4>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <!-- Entrevista com Responsável -->
+                <div class="border border-gray-200 rounded-lg p-4 hover:border-indigo-300 hover:bg-indigo-50 transition-colors">
+                  <div class="flex items-center justify-between mb-2">
+                    <h5 class="font-medium text-gray-900 text-sm">Entrevista</h5>
+                    <span class="px-2 py-1 text-xs rounded-full" 
+                          :class="aluno.has_entrevista ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'">
+                      {{ aluno.has_entrevista ? 'Preenchido' : 'Pendente' }}
+                    </span>
+                  </div>
+                  <button v-if="aluno.has_entrevista" 
+                          @click="viewEntrevista(aluno.id)" 
+                          class="w-full text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+                    Ver Entrevista →
+                  </button>
+                </div>
+
+                <!-- PDI -->
+                <div class="border border-gray-200 rounded-lg p-4 hover:border-emerald-300 hover:bg-emerald-50 transition-colors">
+                  <div class="flex items-center justify-between mb-2">
+                    <h5 class="font-medium text-gray-900 text-sm">PDI</h5>
+                    <span class="px-2 py-1 text-xs rounded-full" 
+                          :class="aluno.has_pdi ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'">
+                      {{ aluno.has_pdi ? 'Preenchido' : 'Pendente' }}
+                    </span>
+                  </div>
+                  <button v-if="aluno.has_pdi" 
+                          @click="viewPDI(aluno.id)" 
+                          class="w-full text-sm text-emerald-600 hover:text-emerald-800 font-medium">
+                    Ver PDI →
+                  </button>
+                </div>
+
+                <!-- PAI -->
+                <div class="border border-gray-200 rounded-lg p-4 hover:border-purple-300 hover:bg-purple-50 transition-colors">
+                  <div class="flex items-center justify-between mb-2">
+                    <h5 class="font-medium text-gray-900 text-sm">PAI</h5>
+                    <span class="px-2 py-1 text-xs rounded-full" 
+                          :class="aluno.has_pai ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'">
+                      {{ aluno.has_pai ? 'Preenchido' : 'Pendente' }}
+                    </span>
+                  </div>
+                  <button v-if="aluno.has_pai" 
+                          @click="viewPAI(aluno.id)" 
+                          class="w-full text-sm text-purple-600 hover:text-purple-800 font-medium">
+                    Ver PAI →
+                  </button>
+                </div>
+              </div>
+
+              <!-- Relatórios de Atendimento -->
+              <div v-if="aluno.relatorios && aluno.relatorios.length > 0" class="mt-4">
+                <h5 class="text-sm font-semibold text-gray-700 mb-2">
+                  Relatórios de Atendimento ({{ aluno.relatorios.length }})
+                </h5>
+                <div class="space-y-2">
+                  <div v-for="rel in aluno.relatorios" :key="rel.id" 
+                       class="flex items-center justify-between p-3 bg-gray-50 rounded border border-gray-200">
+                    <div>
+                      <span class="text-sm font-medium text-gray-900">{{ formatDate(rel.date) }}</span>
+                      <p class="text-xs text-gray-600 mt-1">{{ rel.activities || 'Sem descrição' }}</p>
+                    </div>
+                    <button @click="viewRelatorio(rel.id)" 
+                            class="text-sm text-blue-600 hover:text-blue-800">
+                      Ver →
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+  
+  data() {
+    return {
+      professores: [],
+      selectedProfessorId: '',
+      professorInfo: null,
+      alunos: [],
+      expandedAlunoId: null,
+      loading: false
+    };
+  },
+  
+  methods: {
+    async loadProfessores() {
+      try {
+        const response = await api.get('/users/list?role=professor');
+        if (response.data?.ok) {
+          this.professores = response.data.rows || [];
+        }
+      } catch (error) {
+        console.error('Erro ao carregar professores:', error);
+        this.$showToast && this.$showToast('Erro', 'Não foi possível carregar a lista de professores', 'error');
+      }
+    },
+    
+    async loadProfessorData() {
+      if (!this.selectedProfessorId) {
+        this.professorInfo = null;
+        this.alunos = [];
+        this.expandedAlunoId = null;
+        return;
+      }
+      
+      this.loading = true;
+      this.expandedAlunoId = null;
+      
+      try {
+        // Buscar info do professor
+        const profResponse = await api.get(`/users/${this.selectedProfessorId}`);
+        if (profResponse.data?.ok) {
+          this.professorInfo = profResponse.data.data;
+        }
+        
+        // Buscar alunos do professor
+        const alunosResponse = await api.get(`/students?teacher_id=${this.selectedProfessorId}`);
+        if (alunosResponse.data?.ok) {
+          this.alunos = alunosResponse.data.data || [];
+          
+          // Buscar status dos formulários para cada aluno
+          await this.loadFormulariosStatus();
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados do professor:', error);
+        this.$showToast && this.$showToast('Erro', 'Não foi possível carregar os dados', 'error');
+      } finally {
+        this.loading = false;
+      }
+    },
+    
+    async loadFormulariosStatus() {
+      // Buscar status de formulários para todos os alunos
+      for (const aluno of this.alunos) {
+        try {
+          // Verificar Entrevista
+          const entrevistaResp = await api.get(`/entrevista-completa/student/${aluno.id}`);
+          aluno.has_entrevista = entrevistaResp.data?.ok && entrevistaResp.data.data?.length > 0;
+          
+          // Verificar PDI
+          const pdiResp = await api.get(`/pdi-completo/student/${aluno.id}`);
+          aluno.has_pdi = pdiResp.data?.ok && pdiResp.data.data?.length > 0;
+          
+          // Verificar PAI
+          const paiResp = await api.get(`/pai-completo/student/${aluno.id}`);
+          aluno.has_pai = paiResp.data?.ok && paiResp.data.data?.length > 0;
+          
+          // Buscar relatórios
+          const relatoriosResp = await api.get(`/relatorios-atendimento?student_id=${aluno.id}`);
+          aluno.relatorios = (relatoriosResp.data?.ok ? relatoriosResp.data.data : []) || [];
+        } catch (error) {
+          console.error(`Erro ao carregar formulários do aluno ${aluno.id}:`, error);
+          aluno.has_entrevista = false;
+          aluno.has_pdi = false;
+          aluno.has_pai = false;
+          aluno.relatorios = [];
+        }
+      }
+    },
+    
+    viewFormularios(aluno) {
+      if (this.expandedAlunoId === aluno.id) {
+        this.expandedAlunoId = null;
+      } else {
+        this.expandedAlunoId = aluno.id;
+      }
+    },
+    
+    viewEntrevista(studentId) {
+      this.$router.push(`/entrevista-completa?student_id=${studentId}&readonly=1`);
+    },
+    
+    viewPDI(studentId) {
+      this.$router.push(`/pdi-completo?student_id=${studentId}&readonly=1`);
+    },
+    
+    viewPAI(studentId) {
+      this.$router.push(`/pai-completo?student_id=${studentId}&readonly=1`);
+    },
+    
+    viewRelatorio(relatorioId) {
+      this.$router.push(`/relatorio-atendimento?id=${relatorioId}&readonly=1`);
+    },
+    
+    formatDate(dateStr) {
+      if (!dateStr) return '';
+      try {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('pt-BR');
+      } catch (e) {
+        return dateStr;
+      }
+    }
+  },
+  
+  async mounted() {
+    console.log('👁️ SupervisaoTW component mounted!');
+    await this.loadProfessores();
+  }
+};
+
 // Componente de Legislações
 const LegislacoesTW = {
   template: `
@@ -2836,6 +3134,13 @@ const Layout = {
               </svg>
               Escolas
             </router-link>
+            <router-link v-if="user && user.role === 'admin'" to="supervisao" class="nav-link-tw" @click="closeMobileSidebar">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+              </svg>
+              Supervisão de Professores
+            </router-link>
           </div>
           
           <div>
@@ -3171,6 +3476,7 @@ const Layout = {
         '/usuarios': 'Gestão de Usuários',
         '/escolas': 'Gestão de Escolas', // compat: caso navegue diretamente
         '/escolas/': 'Gestão de Escolas',
+        '/supervisao': 'Supervisão de Professores',
         '/entrevista-responsavel': 'Entrevista com Responsável',
         '/pdi-conectaee': 'PDI ConectAEE',
         '/planos-atendimento': 'Planos de Atendimento',
@@ -7552,6 +7858,7 @@ const routes = [
       { path: 'usuarios', component: UsuariosTW },
       // Mantém rota dentro do layout para usuários logados também
       { path: 'escolas', component: EscolasTW },
+      { path: 'supervisao', component: SupervisaoTW },
       { path: 'relatorio-atendimento', component: RelatorioAtendimento },
       { path: 'entrevista-responsavel', component: EntrevistaResponsavel },
       { path: 'entrevista-completa', component: window.EntrevistaResponsavelCompleta || EntrevistaResponsavel },

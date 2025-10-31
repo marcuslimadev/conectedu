@@ -1432,7 +1432,7 @@ const UsuariosTW = {
               ]">{{ u.status || '—' }}</span>
             </td>
             <td class="px-6 py-4 text-right space-x-2">
-              <button class="inline-flex items-center text-blue-800 hover:text-blue-900 mr-1 px-2 py-1 border border-blue-200 rounded transition-colors" 
+              <button class="inline-flex items-center text-blue-800 hover:text-blue-900 px-2 py-1 border border-blue-200 rounded transition-colors" 
                       @click="edit(u)" :aria-label="'Editar usuário ' + u.name">
                 <i class="fas fa-edit mr-1" aria-hidden="true"></i>
                 <span>Editar</span>
@@ -1768,7 +1768,7 @@ const EscolasTW = {
               <td class="px-6 py-4">{{ escola.city || '—' }}</td>
               <td class="px-6 py-4 text-sm text-gray-600">{{ escola.phone || '—' }}</td>
               <td class="px-6 py-4 text-right space-x-2">
-                <button class="inline-flex items-center text-blue-800 hover:text-blue-900 mr-1 px-2 py-1 border border-blue-200 rounded transition-colors" 
+                <button class="inline-flex items-center text-blue-800 hover:text-blue-900 px-2 py-1 border border-blue-200 rounded transition-colors" 
                         @click="edit(escola)" :aria-label="'Editar escola ' + escola.name">
                   <i class="fas fa-edit mr-1" aria-hidden="true"></i>
                   <span>Editar</span>

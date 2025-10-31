@@ -243,7 +243,11 @@ if (!$action && $pathInfo && isset($restRoutes[$pathInfo])) {
   $action = $restRoutes[$pathInfo];
 }
 
-
+// Rotas dinâmicas com ID: /users/123
+if (!$action && $pathInfo && preg_match('#^users/(\d+)$#', $pathInfo, $matches)) {
+  $action = 'users.get';
+  $_GET['id'] = $matches[1];
+}
 
 $B = body();
 
@@ -511,6 +515,16 @@ if ($action === 'users.list') {
   $rows = $stm->fetchAll(PDO::FETCH_ASSOC);
   res(true, ['rows' => $rows, 'page' => $page, 'per_page' => $per]);
 }
+if ($action === 'users.get') {
+  $u = require_admin();
+  $id = (int)($_GET['id'] ?? 0);
+  if (!$id) res(false, null, 'INVALID_ID', 422);
+  $stmt = $pdo->prepare('SELECT id,name,email,role,status,created_at FROM users WHERE id=?');
+  $stmt->execute([$id]);
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+  if (!$row) res(false, null, 'NOT_FOUND', 404);
+  res(true, ['ok' => true, 'data' => $row]);
+}
 if ($action === 'users.create') {
   $u = require_admin();
   $name = trim($B['name'] ?? '');
@@ -692,6 +706,48 @@ if ($action === 'courses.delete') {
 }
 
 // ==================== SELEÇÕES DINÂMICAS PARA FORMULÁRIOS ====================
+
+/**
+ * Lista completa de estudantes
+ * GET /students
+ * Query params:
+ * - teacher_id: filtrar por professor específico (admin apenas)
+ * - q: busca por nome
+ */
+if ($action === 'students.list') {
+  $u = require_auth();
+  
+  $teacher_id = isset($_GET['teacher_id']) ? (int)$_GET['teacher_id'] : null;
+  $q = trim($_GET['q'] ?? '');
+  
+  $sql = 'SELECT s.*, sc.name as school_name FROM students s LEFT JOIN schools sc ON s.school_id = sc.id WHERE s.status="ativo"';
+  $params = [];
+  
+  // Admin pode filtrar por professor específico
+  if ($teacher_id && $u['role'] === 'admin') {
+    $sql .= ' AND s.created_by_teacher_id = ?';
+    $params[] = $teacher_id;
+  }
+  // Professor só vê seus próprios alunos
+  else if ($u['role'] !== 'admin') {
+    $sql .= ' AND s.created_by_teacher_id = ?';
+    $params[] = $u['id'];
+  }
+  
+  // Filtro de busca
+  if ($q) {
+    $sql .= ' AND s.name LIKE ?';
+    $params[] = '%' . $q . '%';
+  }
+  
+  $sql .= ' ORDER BY s.name ASC';
+  
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+  $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  
+  res(true, ['ok' => true, 'data' => $rows]);
+}
 
 /**
  * Lista de alunos para dropdowns (filtrada por professor)

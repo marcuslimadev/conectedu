@@ -1703,9 +1703,11 @@ const EscolasTW = {
     <div class="space-y-4" role="main">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold text-gray-900" id="escolas-heading">Escolas</h1>
-        <button v-if="canManage" @click="newEscola" 
+        <button @click="newEscola" 
                 class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
-                aria-label="Adicionar nova escola">Nova Escola</button>
+                aria-label="Adicionar nova escola">
+          <i class="fas fa-plus mr-2"></i>Nova Escola
+        </button>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -1756,7 +1758,7 @@ const EscolasTW = {
                 </div>
               </th>
               <th class="px-6 py-3 text-gray-700" role="columnheader">Telefone</th>
-              <th v-if="canManage" class="px-6 py-3 text-right text-gray-700" role="columnheader">Ações</th>
+              <th class="px-6 py-3 text-right text-gray-700" role="columnheader">Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -1765,7 +1767,7 @@ const EscolasTW = {
               <td class="px-6 py-4">{{ escola.address || '—' }}</td>
               <td class="px-6 py-4">{{ escola.city || '—' }}</td>
               <td class="px-6 py-4 text-sm text-gray-600">{{ escola.phone || '—' }}</td>
-              <td v-if="canManage" class="px-6 py-4 text-right space-x-2">
+              <td class="px-6 py-4 text-right space-x-2">
                 <button class="inline-flex items-center text-blue-800 hover:text-blue-900 mr-1 px-2 py-1 border border-blue-200 rounded transition-colors" 
                         @click="edit(escola)" :aria-label="'Editar escola ' + escola.name">
                   <i class="fas fa-edit mr-1" aria-hidden="true"></i>
@@ -1786,7 +1788,7 @@ const EscolasTW = {
               </td>
             </tr>
             <tr v-if="!rows || rows.length===0">
-              <td :colspan="canManage ? 5 : 4" class="px-6 py-4 text-center text-gray-700">
+              <td colspan="5" class="px-6 py-4 text-center text-gray-700">
                 {{ (searchTerm || cityFilter) ? 'Nenhum resultado para os filtros aplicados' : 'Sem registros' }}
               </td>
             </tr>

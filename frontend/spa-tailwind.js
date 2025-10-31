@@ -1431,24 +1431,26 @@ const UsuariosTW = {
                 'bg-gray-100 text-gray-600'
               ]">{{ u.status || '—' }}</span>
             </td>
-            <td class="px-6 py-4 text-right space-x-2">
-              <button class="inline-flex items-center text-blue-800 hover:text-blue-900 px-2 py-1 border border-blue-200 rounded transition-colors" 
-                      @click="edit(u)" :aria-label="'Editar usuário ' + u.name">
-                <i class="fas fa-edit mr-1" aria-hidden="true"></i>
-                <span>Editar</span>
-              </button>
-              <button class="inline-flex items-center text-red-800 hover:text-red-900 px-2 py-1 border border-red-200 rounded transition-colors" 
-                      @click="del(u)" :aria-label="'Excluir usuário ' + u.name"
-                      :disabled="deletingUserId === u.id">
-                <span v-if="deletingUserId === u.id">
-                  <div class="animate-spin -ml-1 mr-1 h-3 w-3 border border-red-600 border-t-transparent rounded-full inline-block"></div>
-                  Excluindo...
-                </span>
-                <span v-else>
-                  <i class="fas fa-trash mr-1" aria-hidden="true"></i>
-                  Excluir
-                </span>
-              </button>
+            <td class="px-6 py-4">
+              <div class="flex items-center justify-end gap-2">
+                <button class="inline-flex items-center text-blue-800 hover:text-blue-900 px-2 py-1 border border-blue-200 rounded transition-colors" 
+                        @click="edit(u)" :aria-label="'Editar usuário ' + u.name">
+                  <i class="fas fa-edit mr-1" aria-hidden="true"></i>
+                  <span>Editar</span>
+                </button>
+                <button class="inline-flex items-center text-red-800 hover:text-red-900 px-2 py-1 border border-red-200 rounded transition-colors" 
+                        @click="del(u)" :aria-label="'Excluir usuário ' + u.name"
+                        :disabled="deletingUserId === u.id">
+                  <span v-if="deletingUserId === u.id">
+                    <div class="animate-spin -ml-1 mr-1 h-3 w-3 border border-red-600 border-t-transparent rounded-full inline-block"></div>
+                    Excluindo...
+                  </span>
+                  <span v-else>
+                    <i class="fas fa-trash mr-1" aria-hidden="true"></i>
+                    Excluir
+                  </span>
+                </button>
+              </div>
             </td>
           </tr>
           <tr v-if="!rows || rows.length===0">
@@ -1767,24 +1769,26 @@ const EscolasTW = {
               <td class="px-6 py-4">{{ escola.address || '—' }}</td>
               <td class="px-6 py-4">{{ escola.city || '—' }}</td>
               <td class="px-6 py-4 text-sm text-gray-600">{{ escola.phone || '—' }}</td>
-              <td class="px-6 py-4 text-right space-x-2">
-                <button class="inline-flex items-center text-blue-800 hover:text-blue-900 px-2 py-1 border border-blue-200 rounded transition-colors" 
-                        @click="edit(escola)" :aria-label="'Editar escola ' + escola.name">
-                  <i class="fas fa-edit mr-1" aria-hidden="true"></i>
-                  <span>Editar</span>
-                </button>
-                <button class="inline-flex items-center text-red-800 hover:text-red-900 px-2 py-1 border border-red-200 rounded transition-colors" 
-                        @click="deleteEscola(escola)" :aria-label="'Excluir escola ' + escola.name"
-                        :disabled="deletingId === escola.id">
-                  <span v-if="deletingId === escola.id">
-                    <div class="animate-spin -ml-1 mr-1 h-3 w-3 border border-red-600 border-t-transparent rounded-full inline-block"></div>
-                    Excluindo...
-                  </span>
-                  <span v-else>
-                    <i class="fas fa-trash mr-1" aria-hidden="true"></i>
-                    Excluir
-                  </span>
-                </button>
+              <td class="px-6 py-4">
+                <div class="flex items-center justify-end gap-2">
+                  <button class="inline-flex items-center text-blue-800 hover:text-blue-900 px-2 py-1 border border-blue-200 rounded transition-colors" 
+                          @click="edit(escola)" :aria-label="'Editar escola ' + escola.name">
+                    <i class="fas fa-edit mr-1" aria-hidden="true"></i>
+                    <span>Editar</span>
+                  </button>
+                  <button class="inline-flex items-center text-red-800 hover:text-red-900 px-2 py-1 border border-red-200 rounded transition-colors" 
+                          @click="deleteEscola(escola)" :aria-label="'Excluir escola ' + escola.name"
+                          :disabled="deletingId === escola.id">
+                    <span v-if="deletingId === escola.id">
+                      <div class="animate-spin -ml-1 mr-1 h-3 w-3 border border-red-600 border-t-transparent rounded-full inline-block"></div>
+                      Excluindo...
+                    </span>
+                    <span v-else>
+                      <i class="fas fa-trash mr-1" aria-hidden="true"></i>
+                      Excluir
+                    </span>
+                  </button>
+                </div>
               </td>
             </tr>
             <tr v-if="!rows || rows.length===0">

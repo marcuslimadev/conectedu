@@ -1287,19 +1287,37 @@ if ($action === 'entrevistas-responsavel.create') {
     }
   }
   
-  $sql = 'INSERT INTO entrevista_forms (student_id, created_by_teacher_id, form_data, status, created_at, updated_at) 
-          VALUES (?, ?, ?, ?, NOW(), NOW())';
+  // LÓGICA 1:1 - Verificar se já existe entrevista para este aluno
+  $checkExisting = $pdo->prepare('SELECT id FROM entrevista_forms WHERE student_id = ?');
+  $checkExisting->execute([$student_id]);
+  $existing = $checkExisting->fetch(PDO::FETCH_ASSOC);
   
-  $stmt = $pdo->prepare($sql);
-  $stmt->execute([
-    $student_id,
-    $u['id'],
-    json_encode($form_data, JSON_UNESCAPED_UNICODE),
-    $B['status'] ?? 'rascunho'
-  ]);
-  
-  $id = $pdo->lastInsertId();
-  res(true, ['id' => $id, 'message' => 'Entrevista criada com sucesso']);
+  if ($existing) {
+    // Se já existe, fazer UPDATE ao invés de INSERT
+    $sql = 'UPDATE entrevista_forms SET form_data = ?, status = ?, updated_at = NOW() WHERE id = ?';
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+      json_encode($form_data, JSON_UNESCAPED_UNICODE),
+      $B['status'] ?? 'rascunho',
+      $existing['id']
+    ]);
+    res(true, ['id' => $existing['id'], 'message' => 'Entrevista atualizada com sucesso', 'action' => 'updated']);
+  } else {
+    // Se não existe, criar nova
+    $sql = 'INSERT INTO entrevista_forms (student_id, created_by_teacher_id, form_data, status, created_at, updated_at) 
+            VALUES (?, ?, ?, ?, NOW(), NOW())';
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+      $student_id,
+      $u['id'],
+      json_encode($form_data, JSON_UNESCAPED_UNICODE),
+      $B['status'] ?? 'rascunho'
+    ]);
+    
+    $id = $pdo->lastInsertId();
+    res(true, ['id' => $id, 'message' => 'Entrevista criada com sucesso', 'action' => 'created']);
+  }
 }
 
 // GET /entrevistas-responsavel/list - Listar entrevistas
@@ -1436,21 +1454,41 @@ if ($action === 'pdi.create') {
     }
   }
   
-  $sql = 'INSERT INTO pdi_forms (student_id, created_by_teacher_id, form_data, data_inicio, data_fim, status, created_at, updated_at) 
-          VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())';
+  // LÓGICA 1:1 - Verificar se já existe PDI para este aluno
+  $checkExisting = $pdo->prepare('SELECT id FROM pdi_forms WHERE student_id = ?');
+  $checkExisting->execute([$student_id]);
+  $existing = $checkExisting->fetch(PDO::FETCH_ASSOC);
   
-  $stmt = $pdo->prepare($sql);
-  $stmt->execute([
-    $student_id,
-    $u['id'],
-    json_encode($form_data, JSON_UNESCAPED_UNICODE),
-    $B['data_inicio'] ?? null,
-    $B['data_fim'] ?? null,
-    $B['status'] ?? 'rascunho'
-  ]);
-  
-  $id = $pdo->lastInsertId();
-  res(true, ['id' => $id, 'message' => 'PDI criado com sucesso']);
+  if ($existing) {
+    // Se já existe, fazer UPDATE
+    $sql = 'UPDATE pdi_forms SET form_data = ?, data_inicio = ?, data_fim = ?, status = ?, updated_at = NOW() WHERE id = ?';
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+      json_encode($form_data, JSON_UNESCAPED_UNICODE),
+      $B['data_inicio'] ?? null,
+      $B['data_fim'] ?? null,
+      $B['status'] ?? 'rascunho',
+      $existing['id']
+    ]);
+    res(true, ['id' => $existing['id'], 'message' => 'PDI atualizado com sucesso', 'action' => 'updated']);
+  } else {
+    // Se não existe, criar novo
+    $sql = 'INSERT INTO pdi_forms (student_id, created_by_teacher_id, form_data, data_inicio, data_fim, status, created_at, updated_at) 
+            VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())';
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+      $student_id,
+      $u['id'],
+      json_encode($form_data, JSON_UNESCAPED_UNICODE),
+      $B['data_inicio'] ?? null,
+      $B['data_fim'] ?? null,
+      $B['status'] ?? 'rascunho'
+    ]);
+    
+    $id = $pdo->lastInsertId();
+    res(true, ['id' => $id, 'message' => 'PDI criado com sucesso', 'action' => 'created']);
+  }
 }
 
 // GET /pdi - Listar PDIs
@@ -1564,22 +1602,43 @@ if ($action === 'plano-atendimento.create') {
     }
   }
   
-  $sql = 'INSERT INTO plano_atendimento_forms (student_id, created_by_teacher_id, pdi_id, form_data, data_inicio, data_fim, status, created_at, updated_at) 
-          VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())';
+  // LÓGICA 1:1 - Verificar se já existe PAI para este aluno
+  $checkExisting = $pdo->prepare('SELECT id FROM plano_atendimento_forms WHERE student_id = ?');
+  $checkExisting->execute([$student_id]);
+  $existing = $checkExisting->fetch(PDO::FETCH_ASSOC);
   
-  $stmt = $pdo->prepare($sql);
-  $stmt->execute([
-    $student_id,
-    $u['id'],
-    $B['pdi_id'] ?? null,
-    json_encode($form_data, JSON_UNESCAPED_UNICODE),
-    $B['data_inicio'] ?? null,
-    $B['data_fim'] ?? null,
-    $B['status'] ?? 'rascunho'
-  ]);
-  
-  $id = $pdo->lastInsertId();
-  res(true, ['id' => $id, 'message' => 'Plano de Atendimento criado com sucesso']);
+  if ($existing) {
+    // Se já existe, fazer UPDATE
+    $sql = 'UPDATE plano_atendimento_forms SET pdi_id = ?, form_data = ?, data_inicio = ?, data_fim = ?, status = ?, updated_at = NOW() WHERE id = ?';
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+      $B['pdi_id'] ?? null,
+      json_encode($form_data, JSON_UNESCAPED_UNICODE),
+      $B['data_inicio'] ?? null,
+      $B['data_fim'] ?? null,
+      $B['status'] ?? 'rascunho',
+      $existing['id']
+    ]);
+    res(true, ['id' => $existing['id'], 'message' => 'Plano de Atendimento atualizado com sucesso', 'action' => 'updated']);
+  } else {
+    // Se não existe, criar novo
+    $sql = 'INSERT INTO plano_atendimento_forms (student_id, created_by_teacher_id, pdi_id, form_data, data_inicio, data_fim, status, created_at, updated_at) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())';
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+      $student_id,
+      $u['id'],
+      $B['pdi_id'] ?? null,
+      json_encode($form_data, JSON_UNESCAPED_UNICODE),
+      $B['data_inicio'] ?? null,
+      $B['data_fim'] ?? null,
+      $B['status'] ?? 'rascunho'
+    ]);
+    
+    $id = $pdo->lastInsertId();
+    res(true, ['id' => $id, 'message' => 'Plano de Atendimento criado com sucesso', 'action' => 'created']);
+  }
 }
 
 // GET /plano-atendimento/list - Listar Planos de Atendimento
@@ -2385,7 +2444,7 @@ if ($action === 'forms.anamnese.pdf') {
     res(false, null, 'STUDENT_ID_REQUIRED', 400);
   }
   
-  // Buscar entrevista mais completa (com mais dados preenchidos)
+  // Buscar a única entrevista do aluno (1:1 com student)
   $sql = 'SELECT id FROM entrevista_forms WHERE student_id = ?';
   $params = [$student_id];
   
@@ -2395,8 +2454,7 @@ if ($action === 'forms.anamnese.pdf') {
     $params[] = $u['id'];
   }
   
-  // Ordena pelo tamanho do form_data (entrevista mais completa) e depois pela mais recente
-  $sql .= ' ORDER BY LENGTH(form_data) DESC, created_at DESC LIMIT 1';
+  $sql .= ' LIMIT 1';
   error_log('[PDF-Entrevista] SQL=' . $sql);
   $stmt = $pdo->prepare($sql);
   $stmt->execute($params);
@@ -2431,7 +2489,7 @@ if ($action === 'pdi.pdf') {
     res(false, null, 'STUDENT_ID_REQUIRED', 400);
   }
   
-  // Buscar último PDI do aluno (tabela nova)
+  // Buscar o único PDI do aluno (1:1 com student)
   $sql = 'SELECT id FROM pdi_forms WHERE student_id = ?';
   $params = [$student_id];
   
@@ -2441,7 +2499,7 @@ if ($action === 'pdi.pdf') {
     $params[] = $u['id'];
   }
   
-  $sql .= ' ORDER BY created_at DESC LIMIT 1';
+  $sql .= ' LIMIT 1';
   error_log('[PDF-PDI] SQL=' . $sql);
   $stmt = $pdo->prepare($sql);
   $stmt->execute($params);
@@ -2475,7 +2533,7 @@ if ($action === 'pai.pdf') {
     res(false, null, 'STUDENT_ID_REQUIRED', 400);
   }
   
-  // Buscar último PAI do aluno (tabela nova)
+  // Buscar o único PAI do aluno (1:1 com student)
   $sql = 'SELECT id FROM plano_atendimento_forms WHERE student_id = ?';
   $params = [$student_id];
   
@@ -2485,7 +2543,7 @@ if ($action === 'pai.pdf') {
     $params[] = $u['id'];
   }
   
-  $sql .= ' ORDER BY created_at DESC LIMIT 1';
+  $sql .= ' LIMIT 1';
   error_log('[PDF-PAI] SQL=' . $sql);
   $stmt = $pdo->prepare($sql);
   $stmt->execute($params);

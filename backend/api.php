@@ -104,8 +104,11 @@ $restRoutes = [
     // Planos de Atendimento Individual (formulário separado)
     'planos-atendimento' => 'planos-atendimento.create',
     'planos-atendimento/create' => 'planos-atendimento.create',
-  'planos-atendimento/list' => 'planos-atendimento.list',
-  'planos-atendimento/update' => 'planos-atendimento.update',
+    'planos-atendimento/list' => 'planos-atendimento.list',
+    'planos-atendimento/update' => 'planos-atendimento.update',
+    'plano-atendimento/create' => 'plano-atendimento.create',
+    'plano-atendimento/list' => 'plano-atendimento.list',
+    'plano-atendimento/update' => 'plano-atendimento.update',
     
     // Plans routes
     'plans' => 'plans.list',
@@ -134,6 +137,15 @@ $restRoutes = [
     'attendance/mark' => 'attendance.mark',
     'attendance/list' => 'attendance.list',
     'attendance/class' => 'attendance.class',
+    
+    // Relatórios de Atendimento
+    'relatorios' => 'relatorios.list',
+    'relatorios/create' => 'relatorios.create',
+    'relatorios/list' => 'relatorios.list',
+    'relatorios/get' => 'relatorios.get',
+    'relatorios/update' => 'relatorios.update',
+    'relatorios/upload-audio' => 'relatorios.upload-audio',
+    'relatorios/transcribe' => 'relatorios.transcribe',
 
     // Classes (turmas)
     'classes' => 'classes.list',
@@ -719,9 +731,29 @@ if ($action === 'students.list') {
   
   $teacher_id = isset($_GET['teacher_id']) ? (int)$_GET['teacher_id'] : null;
   $q = trim($_GET['q'] ?? '');
+  $status = trim($_GET['status'] ?? '');
+  $modalidade = trim($_GET['modalidade'] ?? '');
   
-  $sql = 'SELECT s.*, sc.name as school_name FROM students s LEFT JOIN schools sc ON s.school_id = sc.id WHERE s.status="ativo"';
+  // Paginação
+  $page = max(1, (int)($_GET['page'] ?? 1));
+  $per_page = min(100, max(1, (int)($_GET['per_page'] ?? 50)));
+  $offset = ($page - 1) * $per_page;
+  
+  // Ordenação
+  $sort_by = $_GET['sort_by'] ?? 'name';
+  $sort_direction = strtoupper($_GET['sort_direction'] ?? 'ASC');
+  if (!in_array($sort_direction, ['ASC', 'DESC'])) $sort_direction = 'ASC';
+  $allowed_sort = ['name', 'status', 'modalidade', 'grade', 'class_name', 'created_at'];
+  if (!in_array($sort_by, $allowed_sort)) $sort_by = 'name';
+  
+  $sql = 'SELECT s.*, sc.name as school_name FROM students s LEFT JOIN schools sc ON s.school_id = sc.id WHERE 1=1';
   $params = [];
+  
+  // Filtro de status
+  if ($status) {
+    $sql .= ' AND s.status = ?';
+    $params[] = $status;
+  }
   
   // Admin pode filtrar por professor específico
   if ($teacher_id && $u['role'] === 'admin') {
@@ -740,13 +772,32 @@ if ($action === 'students.list') {
     $params[] = '%' . $q . '%';
   }
   
-  $sql .= ' ORDER BY s.name ASC';
+  // Filtro de modalidade
+  if ($modalidade) {
+    $sql .= ' AND s.modalidade = ?';
+    $params[] = $modalidade;
+  }
+  
+  // Count total
+  $count_sql = preg_replace('/^SELECT s\.\*, sc\.name as school_name/', 'SELECT COUNT(*)', $sql);
+  $count_stmt = $pdo->prepare($count_sql);
+  $count_stmt->execute($params);
+  $total = $count_stmt->fetchColumn();
+  
+  // Ordenação e paginação
+  $sql .= " ORDER BY s.$sort_by $sort_direction LIMIT $per_page OFFSET $offset";
   
   $stmt = $pdo->prepare($sql);
   $stmt->execute($params);
   $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
   
-  res(true, ['ok' => true, 'data' => $rows]);
+  res(true, [
+    'rows' => $rows,
+    'total' => $total,
+    'page' => $page,
+    'per_page' => $per_page,
+    'total_pages' => ceil($total / $per_page)
+  ]);
 }
 
 /**
@@ -798,6 +849,139 @@ if ($action === 'students.options') {
   }, $students);
   
   res(true, ['options' => $options]);
+}
+
+/**
+ * Criar aluno
+ * POST /students/create
+ */
+if ($action === 'students.create') {
+  $u = require_auth();
+  
+  // Validar dados recebidos
+  $validation = validateStudent($B, false);
+  if (!$validation['valid']) {
+    res(false, null, json_encode($validation['errors']), 422);
+  }
+  
+  $name = trim($B['name'] ?? '');
+  $school_id = (int)($B['school_id'] ?? 0);
+  $modalidade = $B['modalidade'] ?? '';
+  
+  if (!$name || !$school_id || !$modalidade) {
+    res(false, null, 'MISSING_FIELDS - Nome, escola e modalidade são obrigatórios', 422);
+  }
+  
+  // Determinar created_by_teacher_id
+  $created_by = $B['created_by_teacher_id'] ?? $u['id'];
+  if ($u['role'] !== 'admin') {
+    $created_by = $u['id']; // Professor só cria para si mesmo
+  }
+  
+  $sql = 'INSERT INTO students (
+    name, school_id, modalidade, birth_date, cpf, grade, class_name,
+    address, responsible_name, responsible_phone, status,
+    created_by_teacher_id, support_teacher_id, srm_room_id,
+    photo_url, created_at, updated_at
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())';
+  
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([
+    $name,
+    $school_id,
+    $modalidade,
+    $B['birth_date'] ?? null,
+    $B['cpf'] ?? null,
+    $B['grade'] ?? null,
+    $B['class_name'] ?? null,
+    $B['address'] ?? null,
+    $B['responsible_name'] ?? null,
+    $B['responsible_phone'] ?? null,
+    $B['status'] ?? 'ativo',
+    $created_by,
+    $B['support_teacher_id'] ?? null,
+    $B['srm_room_id'] ?? null,
+    $B['photo_url'] ?? null
+  ]);
+  
+  $id = $pdo->lastInsertId();
+  res(true, ['id' => $id, 'message' => 'Aluno criado com sucesso']);
+}
+
+/**
+ * Atualizar aluno
+ * PUT /students/update?id=X
+ */
+if ($action === 'students.update') {
+  $u = require_auth();
+  $id = (int)($_GET['id'] ?? 0);
+  
+  if (!$id) res(false, null, 'INVALID_ID', 422);
+  
+  // Validar dados recebidos (update permite campos parciais)
+  $validation = validateStudent($B, true);
+  if (!$validation['valid']) {
+    res(false, null, json_encode($validation['errors']), 422);
+  }
+  
+  // Verificar permissão
+  $check = $pdo->prepare('SELECT created_by_teacher_id FROM students WHERE id = ?');
+  $check->execute([$id]);
+  $student = $check->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$student) res(false, null, 'NOT_FOUND', 404);
+  if ($u['role'] !== 'admin' && $student['created_by_teacher_id'] != $u['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  $fields = [];
+  $values = [];
+  
+  $allowed = ['name', 'school_id', 'modalidade', 'birth_date', 'cpf', 'grade', 'class_name',
+              'address', 'responsible_name', 'responsible_phone', 'status',
+              'support_teacher_id', 'srm_room_id', 'photo_url'];
+  
+  foreach ($allowed as $field) {
+    if (isset($B[$field])) {
+      $fields[] = "$field = ?";
+      $values[] = $B[$field];
+    }
+  }
+  
+  if (empty($fields)) res(false, null, 'NO_FIELDS_TO_UPDATE', 422);
+  
+  $fields[] = 'updated_at = NOW()';
+  $values[] = $id;
+  
+  $sql = 'UPDATE students SET ' . implode(', ', $fields) . ' WHERE id = ?';
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($values);
+  
+  res(true, ['message' => 'Aluno atualizado com sucesso']);
+}
+
+/**
+ * Excluir aluno
+ * POST /students/delete?id=X
+ */
+if ($action === 'students.delete') {
+  $u = require_auth();
+  $id = (int)($_GET['id'] ?? $B['id'] ?? 0);
+  
+  if (!$id) res(false, null, 'INVALID_ID', 422);
+  
+  // Verificar permissão
+  $check = $pdo->prepare('SELECT created_by_teacher_id, name FROM students WHERE id = ?');
+  $check->execute([$id]);
+  $student = $check->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$student) res(false, null, 'NOT_FOUND', 404);
+  if ($u['role'] !== 'admin' && $student['created_by_teacher_id'] != $u['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  $pdo->prepare('DELETE FROM students WHERE id = ?')->execute([$id]);
+  res(true, ['message' => 'Aluno excluído com sucesso']);
 }
 
 /**
@@ -1065,4 +1249,1256 @@ if ($action === 'schools.delete') {
     res(false, null, 'DATABASE_ERROR: ' . $e->getMessage(), 500);
   }
 }
+
+// ========================================
+// ENDPOINTS FORMULÁRIOS AEE
+// ========================================
+
+// POST /entrevistas-responsavel/create - Criar entrevista
+if ($action === 'entrevistas-responsavel.create') {
+  $u = require_auth();
+  
+  $student_id = (int)($B['student_id'] ?? 0);
+  $form_data = $B['form_data'] ?? [];
+  
+  if (!$student_id || empty($form_data)) {
+    res(false, null, 'MISSING_REQUIRED_FIELDS - student_id e form_data são obrigatórios', 422);
+  }
+  
+  // Verificar se aluno pertence ao professor
+  if ($u['role'] !== 'admin') {
+    $check = $pdo->prepare('SELECT id FROM students WHERE id=? AND created_by_teacher_id=?');
+    $check->execute([$student_id, $u['id']]);
+    if (!$check->fetch()) {
+      res(false, null, 'FORBIDDEN - Aluno não pertence a este professor', 403);
+    }
+  }
+  
+  $sql = 'INSERT INTO entrevista_forms (student_id, created_by_teacher_id, form_data, status, created_at, updated_at) 
+          VALUES (?, ?, ?, ?, NOW(), NOW())';
+  
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([
+    $student_id,
+    $u['id'],
+    json_encode($form_data, JSON_UNESCAPED_UNICODE),
+    $B['status'] ?? 'rascunho'
+  ]);
+  
+  $id = $pdo->lastInsertId();
+  res(true, ['id' => $id, 'message' => 'Entrevista criada com sucesso']);
+}
+
+// GET /entrevistas-responsavel/list - Listar entrevistas
+if ($action === 'entrevistas-responsavel.list') {
+  $u = require_auth();
+  
+  $sql = 'SELECT e.*, s.name as student_name, s.modalidade 
+          FROM entrevista_forms e 
+          LEFT JOIN students s ON e.student_id = s.id 
+          WHERE 1=1';
+  
+  $params = [];
+  
+  // Professor só vê suas próprias entrevistas
+  if ($u['role'] !== 'admin') {
+    $sql .= ' AND e.created_by_teacher_id = ?';
+    $params[] = $u['id'];
+  }
+  
+  // Filtros
+  if (isset($_GET['student_id'])) {
+    $sql .= ' AND e.student_id = ?';
+    $params[] = (int)$_GET['student_id'];
+  }
+  
+  if (isset($_GET['status'])) {
+    $sql .= ' AND e.status = ?';
+    $params[] = $_GET['status'];
+  }
+  
+  $sql .= ' ORDER BY e.created_at DESC';
+  
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+  $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  
+  // Decodificar JSON
+  foreach ($rows as &$row) {
+    $row['form_data'] = json_decode($row['form_data'], true);
+  }
+  
+  res(true, ['data' => $rows]);
+}
+
+// GET /entrevistas-responsavel/get?id=X - Obter entrevista específica
+if ($action === 'entrevistas-responsavel.get') {
+  $u = require_auth();
+  $id = (int)($_GET['id'] ?? 0);
+  
+  if (!$id) res(false, null, 'MISSING_ID', 422);
+  
+  $sql = 'SELECT e.*, s.name as student_name, s.modalidade 
+          FROM entrevista_forms e 
+          LEFT JOIN students s ON e.student_id = s.id 
+          WHERE e.id = ?';
+  
+  $params = [$id];
+  
+  if ($u['role'] !== 'admin') {
+    $sql .= ' AND e.created_by_teacher_id = ?';
+    $params[] = $u['id'];
+  }
+  
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$row) res(false, null, 'NOT_FOUND', 404);
+  
+  $row['form_data'] = json_decode($row['form_data'], true);
+  res(true, ['data' => $row]);
+}
+
+// PUT /entrevistas-responsavel/update?id=X - Atualizar entrevista
+if ($action === 'entrevistas-responsavel.update') {
+  $u = require_auth();
+  $id = (int)($_GET['id'] ?? 0);
+  
+  if (!$id) res(false, null, 'MISSING_ID', 422);
+  
+  // Verificar permissão
+  $check = $pdo->prepare('SELECT created_by_teacher_id FROM entrevista_forms WHERE id=?');
+  $check->execute([$id]);
+  $entrevista = $check->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$entrevista) res(false, null, 'NOT_FOUND', 404);
+  if ($u['role'] !== 'admin' && $entrevista['created_by_teacher_id'] != $u['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  $fields = [];
+  $values = [];
+  
+  if (isset($B['form_data'])) {
+    $fields[] = 'form_data = ?';
+    $values[] = json_encode($B['form_data'], JSON_UNESCAPED_UNICODE);
+  }
+  
+  if (isset($B['status'])) {
+    $fields[] = 'status = ?';
+    $values[] = $B['status'];
+  }
+  
+  if (empty($fields)) res(false, null, 'NO_FIELDS_TO_UPDATE', 422);
+  
+  $fields[] = 'updated_at = NOW()';
+  $values[] = $id;
+  
+  $sql = 'UPDATE entrevista_forms SET ' . implode(', ', $fields) . ' WHERE id = ?';
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($values);
+  
+  res(true, ['message' => 'Entrevista atualizada com sucesso']);
+}
+
+// ========== PDI ENDPOINTS ==========
+
+// POST /pdi/create - Criar PDI
+if ($action === 'pdi.create') {
+  $u = require_auth();
+  
+  $student_id = (int)($B['student_id'] ?? 0);
+  $form_data = $B['form_data'] ?? [];
+  
+  if (!$student_id || empty($form_data)) {
+    res(false, null, 'MISSING_REQUIRED_FIELDS', 422);
+  }
+  
+  if ($u['role'] !== 'admin') {
+    $check = $pdo->prepare('SELECT id FROM students WHERE id=? AND created_by_teacher_id=?');
+    $check->execute([$student_id, $u['id']]);
+    if (!$check->fetch()) {
+      res(false, null, 'FORBIDDEN', 403);
+    }
+  }
+  
+  $sql = 'INSERT INTO pdi_forms (student_id, created_by_teacher_id, form_data, data_inicio, data_fim, status, created_at, updated_at) 
+          VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())';
+  
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([
+    $student_id,
+    $u['id'],
+    json_encode($form_data, JSON_UNESCAPED_UNICODE),
+    $B['data_inicio'] ?? null,
+    $B['data_fim'] ?? null,
+    $B['status'] ?? 'rascunho'
+  ]);
+  
+  $id = $pdo->lastInsertId();
+  res(true, ['id' => $id, 'message' => 'PDI criado com sucesso']);
+}
+
+// GET /pdi - Listar PDIs
+if ($action === 'pdi.list') {
+  $u = require_auth();
+  
+  $sql = 'SELECT p.*, s.name as student_name, s.modalidade 
+          FROM pdi_forms p 
+          LEFT JOIN students s ON p.student_id = s.id 
+          WHERE 1=1';
+  
+  $params = [];
+  
+  if ($u['role'] !== 'admin') {
+    $sql .= ' AND p.created_by_teacher_id = ?';
+    $params[] = $u['id'];
+  }
+  
+  if (isset($_GET['student_id'])) {
+    $sql .= ' AND p.student_id = ?';
+    $params[] = (int)$_GET['student_id'];
+  }
+  
+  if (isset($_GET['status'])) {
+    $sql .= ' AND p.status = ?';
+    $params[] = $_GET['status'];
+  }
+  
+  $sql .= ' ORDER BY p.created_at DESC';
+  
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+  $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  
+  foreach ($rows as &$row) {
+    $row['form_data'] = json_decode($row['form_data'], true);
+  }
+  
+  res(true, ['data' => $rows]);
+}
+
+// PUT /pdi/update?id=X - Atualizar PDI
+if ($action === 'pdi.update') {
+  $u = require_auth();
+  $id = (int)($_GET['id'] ?? 0);
+  
+  if (!$id) res(false, null, 'MISSING_ID', 422);
+  
+  $check = $pdo->prepare('SELECT created_by_teacher_id FROM pdi_forms WHERE id=?');
+  $check->execute([$id]);
+  $pdi = $check->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$pdi) res(false, null, 'NOT_FOUND', 404);
+  if ($u['role'] !== 'admin' && $pdi['created_by_teacher_id'] != $u['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  $fields = [];
+  $values = [];
+  
+  if (isset($B['form_data'])) {
+    $fields[] = 'form_data = ?';
+    $values[] = json_encode($B['form_data'], JSON_UNESCAPED_UNICODE);
+  }
+  
+  if (isset($B['status'])) {
+    $fields[] = 'status = ?';
+    $values[] = $B['status'];
+  }
+  
+  if (isset($B['data_inicio'])) {
+    $fields[] = 'data_inicio = ?';
+    $values[] = $B['data_inicio'];
+  }
+  
+  if (isset($B['data_fim'])) {
+    $fields[] = 'data_fim = ?';
+    $values[] = $B['data_fim'];
+  }
+  
+  if (empty($fields)) res(false, null, 'NO_FIELDS_TO_UPDATE', 422);
+  
+  $fields[] = 'updated_at = NOW()';
+  $values[] = $id;
+  
+  $sql = 'UPDATE pdi_forms SET ' . implode(', ', $fields) . ' WHERE id = ?';
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($values);
+  
+  res(true, ['message' => 'PDI atualizado com sucesso']);
+}
+
+// ========== PLANO DE ATENDIMENTO ENDPOINTS ==========
+
+// POST /plano-atendimento/create - Criar Plano de Atendimento
+if ($action === 'plano-atendimento.create') {
+  $u = require_auth();
+  
+  $student_id = (int)($B['student_id'] ?? 0);
+  $form_data = $B['form_data'] ?? [];
+  
+  if (!$student_id || empty($form_data)) {
+    res(false, null, 'MISSING_REQUIRED_FIELDS', 422);
+  }
+  
+  if ($u['role'] !== 'admin') {
+    $check = $pdo->prepare('SELECT id FROM students WHERE id=? AND created_by_teacher_id=?');
+    $check->execute([$student_id, $u['id']]);
+    if (!$check->fetch()) {
+      res(false, null, 'FORBIDDEN', 403);
+    }
+  }
+  
+  $sql = 'INSERT INTO plano_atendimento_forms (student_id, created_by_teacher_id, pdi_id, form_data, data_inicio, data_fim, status, created_at, updated_at) 
+          VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())';
+  
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([
+    $student_id,
+    $u['id'],
+    $B['pdi_id'] ?? null,
+    json_encode($form_data, JSON_UNESCAPED_UNICODE),
+    $B['data_inicio'] ?? null,
+    $B['data_fim'] ?? null,
+    $B['status'] ?? 'rascunho'
+  ]);
+  
+  $id = $pdo->lastInsertId();
+  res(true, ['id' => $id, 'message' => 'Plano de Atendimento criado com sucesso']);
+}
+
+// GET /plano-atendimento/list - Listar Planos de Atendimento
+if ($action === 'plano-atendimento.list') {
+  $u = require_auth();
+  
+  $sql = 'SELECT pa.*, s.name as student_name, s.modalidade 
+          FROM plano_atendimento_forms pa 
+          LEFT JOIN students s ON pa.student_id = s.id 
+          WHERE 1=1';
+  
+  $params = [];
+  
+  if ($u['role'] !== 'admin') {
+    $sql .= ' AND pa.created_by_teacher_id = ?';
+    $params[] = $u['id'];
+  }
+  
+  if (isset($_GET['student_id'])) {
+    $sql .= ' AND pa.student_id = ?';
+    $params[] = (int)$_GET['student_id'];
+  }
+  
+  if (isset($_GET['pdi_id'])) {
+    $sql .= ' AND pa.pdi_id = ?';
+    $params[] = (int)$_GET['pdi_id'];
+  }
+  
+  if (isset($_GET['status'])) {
+    $sql .= ' AND pa.status = ?';
+    $params[] = $_GET['status'];
+  }
+  
+  $sql .= ' ORDER BY pa.created_at DESC';
+  
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+  $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  
+  foreach ($rows as &$row) {
+    $row['form_data'] = json_decode($row['form_data'], true);
+  }
+  
+  res(true, ['data' => $rows]);
+}
+
+// PUT /plano-atendimento/update?id=X - Atualizar Plano de Atendimento
+if ($action === 'plano-atendimento.update') {
+  $u = require_auth();
+  $id = (int)($_GET['id'] ?? 0);
+  
+  if (!$id) res(false, null, 'MISSING_ID', 422);
+  
+  $check = $pdo->prepare('SELECT created_by_teacher_id FROM plano_atendimento_forms WHERE id=?');
+  $check->execute([$id]);
+  $pa = $check->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$pa) res(false, null, 'NOT_FOUND', 404);
+  if ($u['role'] !== 'admin' && $pa['created_by_teacher_id'] != $u['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  $fields = [];
+  $values = [];
+  
+  if (isset($B['form_data'])) {
+    $fields[] = 'form_data = ?';
+    $values[] = json_encode($B['form_data'], JSON_UNESCAPED_UNICODE);
+  }
+  
+  if (isset($B['status'])) {
+    $fields[] = 'status = ?';
+    $values[] = $B['status'];
+  }
+  
+  if (isset($B['pdi_id'])) {
+    $fields[] = 'pdi_id = ?';
+    $values[] = $B['pdi_id'];
+  }
+  
+  if (isset($B['data_inicio'])) {
+    $fields[] = 'data_inicio = ?';
+    $values[] = $B['data_inicio'];
+  }
+  
+  if (isset($B['data_fim'])) {
+    $fields[] = 'data_fim = ?';
+    $values[] = $B['data_fim'];
+  }
+  
+  if (empty($fields)) res(false, null, 'NO_FIELDS_TO_UPDATE', 422);
+  
+  $fields[] = 'updated_at = NOW()';
+  $values[] = $id;
+  
+  $sql = 'UPDATE plano_atendimento_forms SET ' . implode(', ', $fields) . ' WHERE id = ?';
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($values);
+  
+  res(true, ['message' => 'Plano de Atendimento atualizado com sucesso']);
+}
+
+// ========================================
+// UPLOAD DE FOTOS DE ALUNOS
+// ========================================
+
+// POST /students/upload-photo?id=X - Upload de foto do aluno
+if ($action === 'students.upload-photo') {
+  $u = require_auth();
+  $student_id = (int)($_GET['id'] ?? $_POST['student_id'] ?? 0);
+  
+  if (!$student_id) {
+    res(false, null, 'MISSING_STUDENT_ID', 422);
+  }
+  
+  // Verificar se o aluno existe e pertence ao professor
+  $check = $pdo->prepare('SELECT id, created_by_teacher_id FROM students WHERE id=?');
+  $check->execute([$student_id]);
+  $student = $check->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$student) {
+    res(false, null, 'STUDENT_NOT_FOUND', 404);
+  }
+  
+  if ($u['role'] !== 'admin' && $student['created_by_teacher_id'] != $u['id']) {
+    res(false, null, 'FORBIDDEN - Aluno não pertence a este professor', 403);
+  }
+  
+  // Validar arquivo enviado
+  if (!isset($_FILES['photo']) || $_FILES['photo']['error'] !== UPLOAD_ERR_OK) {
+    res(false, null, 'NO_FILE_UPLOADED - Envie uma foto válida', 422);
+  }
+  
+  // Validar se é imagem
+  if (!validateImage($_FILES['photo'])) {
+    res(false, null, 'INVALID_IMAGE - Envie uma imagem válida (JPG, PNG ou WEBP)', 422);
+  }
+  
+  // Verificar tamanho (máximo 5MB)
+  if ($_FILES['photo']['size'] > 5 * 1024 * 1024) {
+    res(false, null, 'FILE_TOO_LARGE - Tamanho máximo: 5MB', 422);
+  }
+  
+  // Criar diretório de uploads se não existir
+  $uploadDir = __DIR__ . '/uploads/students/photos';
+  if (!is_dir($uploadDir)) {
+    mkdir($uploadDir, 0755, true);
+  }
+  
+  // Gerar nome único para o arquivo
+  $ext = pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION);
+  $filename = 'student_' . $student_id . '_' . time() . '.' . $ext;
+  $tempPath = $_FILES['photo']['tmp_name'];
+  $finalPath = $uploadDir . '/' . $filename;
+  
+  // Redimensionar e salvar imagem (max 800x800)
+  if (!resizeImage($tempPath, $finalPath, 800, 800)) {
+    res(false, null, 'IMAGE_PROCESSING_FAILED - Erro ao processar imagem', 500);
+  }
+  
+  // Atualizar banco de dados
+  $photoUrl = '/backend/uploads/students/photos/' . $filename;
+  $updateStmt = $pdo->prepare('UPDATE students SET photo_url = ?, updated_at = NOW() WHERE id = ?');
+  $updateStmt->execute([$photoUrl, $student_id]);
+  
+  res(true, [
+    'message' => 'Foto enviada com sucesso',
+    'photo_url' => $photoUrl,
+    'filename' => $filename
+  ]);
+}
+
+// ========================================
+// RELATÓRIOS DE ATENDIMENTO COM ÁUDIO/IA
+// ========================================
+
+// POST /relatorios/create - Criar relatório
+if ($action === 'relatorios.create') {
+  $u = require_auth();
+  
+  $student_id = (int)($B['student_id'] ?? 0);
+  $data_atendimento = $B['data_atendimento'] ?? null;
+  $descricao = trim($B['descricao'] ?? '');
+  
+  if (!$student_id || !$data_atendimento || !$descricao) {
+    res(false, null, 'MISSING_REQUIRED_FIELDS - student_id, data_atendimento e descricao são obrigatórios', 422);
+  }
+  
+  // Verificar se aluno pertence ao professor
+  if ($u['role'] !== 'admin') {
+    $check = $pdo->prepare('SELECT id FROM students WHERE id=? AND created_by_teacher_id=?');
+    $check->execute([$student_id, $u['id']]);
+    if (!$check->fetch()) {
+      res(false, null, 'FORBIDDEN - Aluno não pertence a este professor', 403);
+    }
+  }
+  
+  $sql = 'INSERT INTO relatorios_atendimento (
+    student_id, teacher_id, data_atendimento, duracao_minutos, tipo, local,
+    descricao, objetivos, atividades, recursos, observacoes,
+    progresso, proximos_passos, status, created_at, updated_at
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())';
+  
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([
+    $student_id,
+    $u['id'],
+    $data_atendimento,
+    $B['duracao_minutos'] ?? null,
+    $B['tipo'] ?? 'individual',
+    $B['local'] ?? null,
+    $descricao,
+    $B['objetivos'] ?? null,
+    $B['atividades'] ?? null,
+    $B['recursos'] ?? null,
+    $B['observacoes'] ?? null,
+    $B['progresso'] ?? null,
+    $B['proximos_passos'] ?? null,
+    $B['status'] ?? 'rascunho'
+  ]);
+  
+  $id = $pdo->lastInsertId();
+  res(true, ['id' => $id, 'message' => 'Relatório criado com sucesso']);
+}
+
+// GET /relatorios/list - Listar relatórios
+if ($action === 'relatorios.list') {
+  $u = require_auth();
+  
+  $sql = 'SELECT r.*, s.name as student_name, s.modalidade, u.name as teacher_name
+          FROM relatorios_atendimento r
+          LEFT JOIN students s ON r.student_id = s.id
+          LEFT JOIN users u ON r.teacher_id = u.id
+          WHERE 1=1';
+  
+  $params = [];
+  
+  // Professor só vê seus próprios relatórios
+  if ($u['role'] !== 'admin') {
+    $sql .= ' AND r.teacher_id = ?';
+    $params[] = $u['id'];
+  }
+  
+  // Filtros
+  if (isset($_GET['student_id'])) {
+    $sql .= ' AND r.student_id = ?';
+    $params[] = (int)$_GET['student_id'];
+  }
+  
+  if (isset($_GET['tipo'])) {
+    $sql .= ' AND r.tipo = ?';
+    $params[] = $_GET['tipo'];
+  }
+  
+  if (isset($_GET['status'])) {
+    $sql .= ' AND r.status = ?';
+    $params[] = $_GET['status'];
+  }
+  
+  if (isset($_GET['data_inicio']) && isset($_GET['data_fim'])) {
+    $sql .= ' AND r.data_atendimento BETWEEN ? AND ?';
+    $params[] = $_GET['data_inicio'];
+    $params[] = $_GET['data_fim'];
+  }
+  
+  // Paginação
+  $page = max(1, (int)($_GET['page'] ?? 1));
+  $per_page = min(100, max(1, (int)($_GET['per_page'] ?? 50)));
+  $offset = ($page - 1) * $per_page;
+  
+  // Count total
+  $count_sql = preg_replace('/^SELECT r\.\*, s\.name as student_name.*/', 'SELECT COUNT(*)', $sql);
+  $count_stmt = $pdo->prepare($count_sql);
+  $count_stmt->execute($params);
+  $total = $count_stmt->fetchColumn();
+  
+  $sql .= " ORDER BY r.data_atendimento DESC, r.created_at DESC LIMIT $per_page OFFSET $offset";
+  
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+  $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  
+  res(true, [
+    'data' => $rows,
+    'total' => $total,
+    'page' => $page,
+    'per_page' => $per_page,
+    'total_pages' => ceil($total / $per_page)
+  ]);
+}
+
+// GET /relatorios/get?id=X - Obter relatório específico
+if ($action === 'relatorios.get') {
+  $u = require_auth();
+  $id = (int)($_GET['id'] ?? 0);
+  
+  if (!$id) res(false, null, 'MISSING_ID', 422);
+  
+  $sql = 'SELECT r.*, s.name as student_name, s.modalidade, u.name as teacher_name
+          FROM relatorios_atendimento r
+          LEFT JOIN students s ON r.student_id = s.id
+          LEFT JOIN users u ON r.teacher_id = u.id
+          WHERE r.id = ?';
+  
+  $params = [$id];
+  
+  if ($u['role'] !== 'admin') {
+    $sql .= ' AND r.teacher_id = ?';
+    $params[] = $u['id'];
+  }
+  
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$row) res(false, null, 'NOT_FOUND', 404);
+  
+  res(true, ['data' => $row]);
+}
+
+// PUT /relatorios/update?id=X - Atualizar relatório
+if ($action === 'relatorios.update') {
+  $u = require_auth();
+  $id = (int)($_GET['id'] ?? 0);
+  
+  if (!$id) res(false, null, 'MISSING_ID', 422);
+  
+  // Verificar permissão
+  $check = $pdo->prepare('SELECT teacher_id FROM relatorios_atendimento WHERE id=?');
+  $check->execute([$id]);
+  $relatorio = $check->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$relatorio) res(false, null, 'NOT_FOUND', 404);
+  if ($u['role'] !== 'admin' && $relatorio['teacher_id'] != $u['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  $fields = [];
+  $values = [];
+  
+  $allowed = ['data_atendimento', 'duracao_minutos', 'tipo', 'local', 'descricao',
+              'objetivos', 'atividades', 'recursos', 'observacoes', 'progresso',
+              'proximos_passos', 'status'];
+  
+  foreach ($allowed as $field) {
+    if (isset($B[$field])) {
+      $fields[] = "$field = ?";
+      $values[] = $B[$field];
+    }
+  }
+  
+  if (empty($fields)) res(false, null, 'NO_FIELDS_TO_UPDATE', 422);
+  
+  $fields[] = 'updated_at = NOW()';
+  $values[] = $id;
+  
+  $sql = 'UPDATE relatorios_atendimento SET ' . implode(', ', $fields) . ' WHERE id = ?';
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($values);
+  
+  res(true, ['message' => 'Relatório atualizado com sucesso']);
+}
+
+// POST /relatorios/upload-audio?id=X - Upload de áudio para relatório
+if ($action === 'relatorios.upload-audio') {
+  $u = require_auth();
+  $relatorio_id = (int)($_GET['id'] ?? $_POST['relatorio_id'] ?? 0);
+  
+  if (!$relatorio_id) {
+    res(false, null, 'MISSING_RELATORIO_ID', 422);
+  }
+  
+  // Verificar permissão
+  $check = $pdo->prepare('SELECT teacher_id FROM relatorios_atendimento WHERE id=?');
+  $check->execute([$relatorio_id]);
+  $relatorio = $check->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$relatorio) {
+    res(false, null, 'RELATORIO_NOT_FOUND', 404);
+  }
+  
+  if ($u['role'] !== 'admin' && $relatorio['teacher_id'] != $u['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  // Validar arquivo enviado
+  if (!isset($_FILES['audio']) || $_FILES['audio']['error'] !== UPLOAD_ERR_OK) {
+    res(false, null, 'NO_FILE_UPLOADED - Envie um arquivo de áudio', 422);
+  }
+  
+  // Validar se é áudio
+  if (!validateAudio($_FILES['audio'])) {
+    res(false, null, 'INVALID_AUDIO - Envie um arquivo de áudio válido (MP3, WAV, WEBM, OGG)', 422);
+  }
+  
+  // Verificar tamanho (máximo 25MB - limite OpenAI Whisper)
+  if ($_FILES['audio']['size'] > 25 * 1024 * 1024) {
+    res(false, null, 'FILE_TOO_LARGE - Tamanho máximo: 25MB', 422);
+  }
+  
+  // Criar diretório de uploads se não existir
+  $uploadDir = __DIR__ . '/uploads/relatorios/audio';
+  if (!is_dir($uploadDir)) {
+    mkdir($uploadDir, 0755, true);
+  }
+  
+  // Gerar nome único para o arquivo
+  $ext = pathinfo($_FILES['audio']['name'], PATHINFO_EXTENSION);
+  $filename = 'relatorio_' . $relatorio_id . '_' . time() . '.' . $ext;
+  $tempPath = $_FILES['audio']['tmp_name'];
+  $finalPath = $uploadDir . '/' . $filename;
+  
+  // Mover arquivo
+  if (!move_uploaded_file($tempPath, $finalPath)) {
+    res(false, null, 'UPLOAD_FAILED - Erro ao salvar arquivo', 500);
+  }
+  
+  // Atualizar banco de dados
+  $audioUrl = '/backend/uploads/relatorios/audio/' . $filename;
+  $updateStmt = $pdo->prepare('UPDATE relatorios_atendimento 
+    SET audio_path = ?, transcricao_status = ?, updated_at = NOW() 
+    WHERE id = ?');
+  $updateStmt->execute([$audioUrl, 'pendente', $relatorio_id]);
+  
+  res(true, [
+    'message' => 'Áudio enviado com sucesso',
+    'audio_path' => $audioUrl,
+    'filename' => $filename,
+    'note' => 'Use o endpoint /relatorios/transcribe para transcrever o áudio'
+  ]);
+}
+
+// POST /relatorios/transcribe?id=X - Transcrever áudio do relatório com OpenAI Whisper
+if ($action === 'relatorios.transcribe') {
+  $u = require_auth();
+  $relatorio_id = (int)($_GET['id'] ?? 0);
+  
+  if (!$relatorio_id) {
+    res(false, null, 'MISSING_RELATORIO_ID', 422);
+  }
+  
+  // Buscar relatório
+  $check = $pdo->prepare('SELECT teacher_id, audio_path, transcricao_status FROM relatorios_atendimento WHERE id=?');
+  $check->execute([$relatorio_id]);
+  $relatorio = $check->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$relatorio) {
+    res(false, null, 'RELATORIO_NOT_FOUND', 404);
+  }
+  
+  if ($u['role'] !== 'admin' && $relatorio['teacher_id'] != $u['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  if (!$relatorio['audio_path']) {
+    res(false, null, 'NO_AUDIO_FILE - Faça upload de um áudio primeiro', 422);
+  }
+  
+  if ($relatorio['transcricao_status'] === 'processando') {
+    res(false, null, 'ALREADY_PROCESSING - Transcrição já em andamento', 409);
+  }
+  
+  // Marcar como processando
+  $updateStmt = $pdo->prepare('UPDATE relatorios_atendimento SET transcricao_status = ? WHERE id = ?');
+  $updateStmt->execute(['processando', $relatorio_id]);
+  
+  // Caminho do arquivo
+  $audioPath = __DIR__ . str_replace('/backend', '', $relatorio['audio_path']);
+  
+  if (!file_exists($audioPath)) {
+    $updateStmt->execute(['erro', $relatorio_id]);
+    res(false, null, 'AUDIO_FILE_NOT_FOUND - Arquivo de áudio não encontrado', 404);
+  }
+  
+  try {
+    // Transcrever com OpenAI Whisper
+    $transcricao = openai_transcribe($audioPath, basename($audioPath));
+    
+    // Salvar transcrição
+    $updateStmt = $pdo->prepare('UPDATE relatorios_atendimento 
+      SET transcricao = ?, transcricao_status = ?, updated_at = NOW() 
+      WHERE id = ?');
+    $updateStmt->execute([$transcricao, 'concluida', $relatorio_id]);
+    
+    res(true, [
+      'message' => 'Transcrição concluída com sucesso',
+      'transcricao' => $transcricao,
+      'caracteres' => mb_strlen($transcricao)
+    ]);
+    
+  } catch (Exception $e) {
+    // Marcar como erro
+    $updateStmt->execute(['erro', $relatorio_id]);
+    res(false, null, 'TRANSCRIPTION_FAILED - ' . $e->getMessage(), 500);
+  }
+}
+
+// ========================================
+// NOTAS DO ALUNO (student_notes)
+// ========================================
+
+// GET /student-notes?student_id=X
+if ($action === 'student_notes.list') {
+  $u = require_auth();
+  $student_id = (int)($_GET['student_id'] ?? 0);
+  if (!$student_id) res(false, null, 'MISSING_STUDENT_ID', 422);
+
+  ensure_student_access($pdo, $u, $student_id);
+
+  $sql = 'SELECT n.id, n.student_id, n.teacher_id, n.title, n.content, n.source, n.created_at, n.updated_at, u.name AS teacher_name
+          FROM student_notes n
+          LEFT JOIN users u ON n.teacher_id = u.id
+          WHERE n.student_id = ?';
+  $params = [$student_id];
+
+  if ($u['role'] !== 'admin') {
+    $sql .= ' AND (n.teacher_id = ? OR n.teacher_id IS NULL)';
+    $params[] = $u['id'];
+  }
+
+  $sql .= ' ORDER BY n.created_at DESC';
+
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+  $notes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+  res(true, ['notes' => $notes]);
+}
+
+// POST /student-notes/create
+if ($action === 'student_notes.create') {
+  $u = require_auth();
+  $student_id = (int)($B['student_id'] ?? 0);
+  $content = trim($B['content'] ?? '');
+  $title = trim($B['title'] ?? '');
+  $source = $B['source'] ?? null;
+
+  if (!$student_id || !$content) res(false, null, 'MISSING_FIELDS', 422);
+
+  ensure_student_access($pdo, $u, $student_id);
+
+  $teacher_id = $u['role'] === 'admin' ? ($B['teacher_id'] ?? $u['id']) : $u['id'];
+
+  $stmt = $pdo->prepare('INSERT INTO student_notes (student_id, teacher_id, title, content, source, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())');
+  $stmt->execute([$student_id, $teacher_id, $title ?: null, $content, $source ?: null]);
+  $id = $pdo->lastInsertId();
+
+  $noteStmt = $pdo->prepare('SELECT n.id, n.student_id, n.teacher_id, n.title, n.content, n.source, n.created_at, n.updated_at, u.name AS teacher_name FROM student_notes n LEFT JOIN users u ON n.teacher_id = u.id WHERE n.id = ?');
+  $noteStmt->execute([$id]);
+  $note = $noteStmt->fetch(PDO::FETCH_ASSOC);
+
+  res(true, ['note' => $note]);
+}
+
+// POST /student-notes/update
+if ($action === 'student_notes.update') {
+  $u = require_auth();
+  $id = (int)($B['id'] ?? 0);
+  if (!$id) res(false, null, 'MISSING_ID', 422);
+
+  $stmt = $pdo->prepare('SELECT * FROM student_notes WHERE id = ?');
+  $stmt->execute([$id]);
+  $note = $stmt->fetch(PDO::FETCH_ASSOC);
+  if (!$note) res(false, null, 'NOT_FOUND', 404);
+
+  ensure_student_access($pdo, $u, (int)$note['student_id']);
+
+  if ($u['role'] !== 'admin' && $note['teacher_id'] && (int)$note['teacher_id'] !== (int)$u['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+
+  $fields = [];
+  $values = [];
+
+  if (array_key_exists('title', $B)) {
+    $fields[] = 'title = ?';
+    $values[] = trim($B['title'] ?? '') ?: null;
+  }
+  if (array_key_exists('content', $B)) {
+    $content = trim($B['content'] ?? '');
+    if (!$content) res(false, null, 'CONTENT_REQUIRED', 422);
+    $fields[] = 'content = ?';
+    $values[] = $content;
+  }
+  if (array_key_exists('source', $B)) {
+    $fields[] = 'source = ?';
+    $values[] = $B['source'] ?: null;
+  }
+
+  if (!$fields) res(false, null, 'NO_FIELDS_TO_UPDATE', 422);
+
+  $fields[] = 'updated_at = NOW()';
+  $values[] = $id;
+
+  $sql = 'UPDATE student_notes SET ' . implode(', ', $fields) . ' WHERE id = ?';
+  $upd = $pdo->prepare($sql);
+  $upd->execute($values);
+
+  res(true, ['message' => 'Nota atualizada com sucesso']);
+}
+
+// ========================================
+// RELATÓRIO DO ALUNO (dashboard)
+// ========================================
+
+// GET /reports/student?student_id=X
+if ($action === 'reports.student') {
+  $u = require_auth();
+  $student_id = (int)($_GET['student_id'] ?? 0);
+  if (!$student_id) res(false, null, 'MISSING_STUDENT_ID', 422);
+
+  $student = ensure_student_access($pdo, $u, $student_id);
+
+  // Dados básicos do aluno
+  $report = [
+    'student' => [
+      'id' => (int)$student['id'],
+      'name' => $student['name'],
+      'school' => $student['school_name'],
+      'school_city' => $student['school_city'],
+      'school_address' => $student['school_address'],
+      'status' => $student['status'],
+      'modalidade' => $student['modalidade'],
+      'grade' => $student['grade'],
+      'class_name' => $student['class_name'],
+      'responsible_name' => $student['responsible_name'],
+      'responsible_phone' => $student['responsible_phone'],
+      'created_at' => $student['created_at'],
+      'updated_at' => $student['updated_at']
+    ],
+    'anamneses' => [],
+    'pdis' => [],
+    'pais' => [],
+    'attendance' => [],
+    'weekly_plans' => [],
+    'notes' => []
+  ];
+
+  // Entrevistas/Anamneses (formulários longos)
+  $anamneses = [];
+
+  // Tabela antiga de anamneses
+  $stmt = $pdo->prepare('SELECT id, student_id, answers, created_at FROM anamneses WHERE student_id = ? ORDER BY created_at DESC');
+  $stmt->execute([$student_id]);
+  foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+    $row['answers'] = $row['answers'] ? json_decode($row['answers'], true) : [];
+    $row['source'] = 'anamnese';
+    $anamneses[] = $row;
+  }
+
+  // Entrevista forms
+  $sql = 'SELECT id, student_id, status, form_data, created_at, updated_at FROM entrevista_forms WHERE student_id = ?';
+  $params = [$student_id];
+  if ($u['role'] !== 'admin') {
+    $sql .= ' AND created_by_teacher_id = ?';
+    $params[] = $u['id'];
+  }
+  $sql .= ' ORDER BY updated_at DESC';
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+  foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+    $answers = $row['form_data'] ? json_decode($row['form_data'], true) : [];
+    $anamneses[] = [
+      'id' => $row['id'],
+      'student_id' => $row['student_id'],
+      'answers' => $answers,
+      'status' => $row['status'],
+      'created_at' => $row['created_at'],
+      'updated_at' => $row['updated_at'],
+      'source' => 'entrevista'
+    ];
+  }
+
+  $report['anamneses'] = $anamneses;
+
+  // PDIs
+  $sql = 'SELECT id, student_id, created_by_teacher_id, status, form_data, data_inicio, data_fim, created_at, updated_at
+          FROM pdi_forms WHERE student_id = ?';
+  $params = [$student_id];
+  if ($u['role'] !== 'admin') {
+    $sql .= ' AND created_by_teacher_id = ?';
+    $params[] = $u['id'];
+  }
+  $sql .= ' ORDER BY updated_at DESC';
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+  $pdis = [];
+  foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+    $data = $row['form_data'] ? json_decode($row['form_data'], true) : [];
+    $row['form_data'] = $data;
+    $row['objectives'] = $data['objetivo_geral'] ?? ($data['objetivos'] ?? null);
+    $row['strategies'] = $data['estrategias'] ?? null;
+    $row['start_date'] = $row['data_inicio'];
+    $row['end_date'] = $row['data_fim'];
+    unset($row['data_inicio'], $row['data_fim']);
+    $pdis[] = $row;
+  }
+  $report['pdis'] = $pdis;
+
+  // PAIs
+  $sql = 'SELECT id, student_id, created_by_teacher_id, status, form_data, data_inicio, data_fim, created_at, updated_at
+          FROM plano_atendimento_forms WHERE student_id = ?';
+  $params = [$student_id];
+  if ($u['role'] !== 'admin') {
+    $sql .= ' AND created_by_teacher_id = ?';
+    $params[] = $u['id'];
+  }
+  $sql .= ' ORDER BY updated_at DESC';
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+  $pais = [];
+  foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+    $data = $row['form_data'] ? json_decode($row['form_data'], true) : [];
+    $row['form_data'] = $data;
+    $row['objectives'] = $data['objetivos'] ?? ($data['objetivo_geral'] ?? null);
+    $row['strategies'] = $data['estrategias'] ?? null;
+    $row['start_date'] = $row['data_inicio'];
+    $row['end_date'] = $row['data_fim'];
+    unset($row['data_inicio'], $row['data_fim']);
+    $pais[] = $row;
+  }
+  $report['pais'] = $pais;
+
+  // Frequência
+  $stmt = $pdo->prepare('SELECT id, student_id, date, period, present, notes, created_at FROM attendance WHERE student_id = ? ORDER BY date DESC LIMIT 100');
+  $stmt->execute([$student_id]);
+  $report['attendance'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+  // Planos semanais
+  $sql = 'SELECT id, student_id, support_teacher_id, week_start, objectives, notes, created_at FROM weekly_plans WHERE student_id = ?';
+  $params = [$student_id];
+  if ($u['role'] !== 'admin') {
+    $sql .= ' AND (support_teacher_id IS NULL OR support_teacher_id = ?)';
+    $params[] = $u['id'];
+  }
+  $sql .= ' ORDER BY week_start DESC';
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+  $report['weekly_plans'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+  // Notas
+  $sql = 'SELECT n.id, n.student_id, n.teacher_id, n.title, n.content, n.source, n.created_at, n.updated_at, u.name AS teacher_name
+          FROM student_notes n
+          LEFT JOIN users u ON n.teacher_id = u.id
+          WHERE n.student_id = ?';
+  $params = [$student_id];
+  if ($u['role'] !== 'admin') {
+    $sql .= ' AND (n.teacher_id = ? OR n.teacher_id IS NULL)';
+    $params[] = $u['id'];
+  }
+  $sql .= ' ORDER BY n.created_at DESC';
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+  $report['notes'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+  res(true, $report);
+}
+
+// GET /reports/student/pdf?student_id=X
+if ($action === 'reports.student.pdf') {
+  $u = require_auth();
+  res(false, null, 'REPORT_PDF_NOT_IMPLEMENTED', 501);
+}
+
+// ========================================
+// DOCUMENTOS GERADOS (PDFs)
+// ========================================
+
+if ($action === 'documentos.list') {
+  $u = require_auth();
+
+  $page = max(1, (int)($_GET['page'] ?? 1));
+  $per_page = min(50, max(1, (int)($_GET['per_page'] ?? 12)));
+  $offset = ($page - 1) * $per_page;
+
+  $baseSql = ' FROM documentos_gerados d LEFT JOIN students s ON d.student_id = s.id LEFT JOIN users us ON d.teacher_id = us.id WHERE d.deleted_at IS NULL';
+  $params = [];
+
+  if ($u['role'] !== 'admin') {
+    $baseSql .= ' AND d.teacher_id = ?';
+    $params[] = $u['id'];
+  }
+
+  if (!empty($_GET['tipo'])) {
+    $baseSql .= ' AND d.tipo = ?';
+    $params[] = $_GET['tipo'];
+  }
+
+  if (!empty($_GET['student_id'])) {
+    $baseSql .= ' AND d.student_id = ?';
+    $params[] = (int)$_GET['student_id'];
+  }
+
+  if (!empty($_GET['data_inicio'])) {
+    $baseSql .= ' AND d.created_at >= ?';
+    $params[] = $_GET['data_inicio'] . ' 00:00:00';
+  }
+
+  if (!empty($_GET['data_fim'])) {
+    $baseSql .= ' AND d.created_at <= ?';
+    $params[] = $_GET['data_fim'] . ' 23:59:59';
+  }
+
+  $countStmt = $pdo->prepare('SELECT COUNT(*)' . $baseSql);
+  $countStmt->execute($params);
+  $total = (int)$countStmt->fetchColumn();
+
+  $listSql = 'SELECT d.*, s.name AS student_name, us.name AS teacher_name' . $baseSql . ' ORDER BY d.created_at DESC LIMIT ' . $per_page . ' OFFSET ' . $offset;
+  $listStmt = $pdo->prepare($listSql);
+  $listStmt->execute($params);
+  $rows = $listStmt->fetchAll(PDO::FETCH_ASSOC);
+
+  foreach ($rows as &$row) {
+    $row['file_size'] = (int)($row['file_size'] ?? 0);
+    $row['file_size_formatted'] = formatFileSize($row['file_size']);
+  }
+
+  $pagination = [
+    'current_page' => $page,
+    'per_page' => $per_page,
+    'total' => $total,
+    'total_pages' => $per_page ? (int)ceil($total / $per_page) : 0,
+    'has_next' => ($offset + $per_page) < $total,
+    'has_prev' => $page > 1
+  ];
+
+  res(true, ['documentos' => $rows, 'pagination' => $pagination]);
+}
+
+if ($action === 'documentos.stats') {
+  $u = require_auth();
+
+  $sql = 'SELECT COUNT(*) AS total, COALESCE(SUM(file_size), 0) AS tamanho_total FROM documentos_gerados WHERE deleted_at IS NULL';
+  $params = [];
+  if ($u['role'] !== 'admin') {
+    $sql .= ' AND teacher_id = ?';
+    $params[] = $u['id'];
+  }
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+  $totais = $stmt->fetch(PDO::FETCH_ASSOC) ?: ['total' => 0, 'tamanho_total' => 0];
+
+  $sqlTipo = 'SELECT tipo, COUNT(*) AS count FROM documentos_gerados WHERE deleted_at IS NULL';
+  $paramsTipo = [];
+  if ($u['role'] !== 'admin') {
+    $sqlTipo .= ' AND teacher_id = ?';
+    $paramsTipo[] = $u['id'];
+  }
+  $sqlTipo .= ' GROUP BY tipo';
+  $stmt = $pdo->prepare($sqlTipo);
+  $stmt->execute($paramsTipo);
+  $porTipo = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+  res(true, [
+    'total' => (int)$totais['total'],
+    'tamanho_total' => (int)$totais['tamanho_total'],
+    'por_tipo' => array_map(function ($row) {
+      return ['tipo' => $row['tipo'], 'count' => (int)$row['count']];
+    }, $porTipo)
+  ]);
+}
+
+if ($action === 'documentos.download') {
+  $u = require_auth();
+  $id = (int)($_GET['id'] ?? 0);
+  if (!$id) res(false, null, 'INVALID_ID', 422);
+
+  $stmt = $pdo->prepare('SELECT d.*, s.name AS student_name FROM documentos_gerados d LEFT JOIN students s ON d.student_id = s.id WHERE d.id = ? AND d.deleted_at IS NULL');
+  $stmt->execute([$id]);
+  $doc = $stmt->fetch(PDO::FETCH_ASSOC);
+  if (!$doc) res(false, null, 'NOT_FOUND', 404);
+
+  if ($u['role'] !== 'admin' && (int)$doc['teacher_id'] !== (int)$u['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+
+  $baseDir = dirname(__DIR__);
+  $stored = $doc['file_path'];
+  $candidate = null;
+  if ($stored) {
+    if (preg_match('/^(?:[a-zA-Z]:\\\\|\\\\|\/)/', $stored)) {
+      $candidate = $stored;
+    } else {
+      $candidate = $baseDir . '/' . ltrim(str_replace('\\', '/', $stored), '/');
+    }
+  }
+  $fullPath = $candidate ? realpath($candidate) : null;
+  if (!$fullPath || !file_exists($fullPath)) {
+    res(false, null, 'FILE_NOT_FOUND', 404);
+  }
+
+  header('Content-Type: application/pdf');
+  $fileName = $doc['file_name'] ?: ('documento-' . $doc['id'] . '.pdf');
+  header('Content-Disposition: attachment; filename="' . basename($fileName) . '"');
+  header('Content-Length: ' . filesize($fullPath));
+  readfile($fullPath);
+  exit;
+}
+
+if ($action === 'documentos.delete') {
+  $u = require_auth();
+  $id = (int)($_GET['id'] ?? 0);
+  if (!$id) res(false, null, 'INVALID_ID', 422);
+
+  $stmt = $pdo->prepare('SELECT * FROM documentos_gerados WHERE id = ? AND deleted_at IS NULL');
+  $stmt->execute([$id]);
+  $doc = $stmt->fetch(PDO::FETCH_ASSOC);
+  if (!$doc) res(false, null, 'NOT_FOUND', 404);
+
+  if ($u['role'] !== 'admin' && (int)$doc['teacher_id'] !== (int)$u['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+
+  $pdo->prepare('UPDATE documentos_gerados SET deleted_at = NOW() WHERE id = ?')->execute([$id]);
+
+  // Opcionalmente remover arquivo físico
+  $baseDir = dirname(__DIR__);
+  $stored = $doc['file_path'];
+  $candidate = null;
+  if ($stored) {
+    if (preg_match('/^(?:[a-zA-Z]:\\\\|\\\\|\/)/', $stored)) {
+      $candidate = $stored;
+    } else {
+      $candidate = $baseDir . '/' . ltrim(str_replace('\\', '/', $stored), '/');
+    }
+  }
+  $fullPath = $candidate ? realpath($candidate) : null;
+  if ($fullPath && file_exists($fullPath)) {
+    @unlink($fullPath);
+  }
+
+  res(true, ['message' => 'Documento removido com sucesso']);
+}
+
 

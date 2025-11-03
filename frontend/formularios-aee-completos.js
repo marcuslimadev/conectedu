@@ -28,13 +28,27 @@ const EntrevistaResponsavelCompleta = {
                 Entrevista com Responsável
               </h1>
               <p class="text-gray-600">Formulário completo com 180+ campos - Complete em etapas</p>
+              
+              <!-- AUTO-SAVE INDICATOR -->
+              <div class="mt-3 flex items-center text-sm font-medium" :class="{
+                'text-blue-600': autoSaving,
+                'text-green-600': autoSaved && !autoSaving,
+                'text-gray-500': !autoSaving && !autoSaved
+              }">
+                <i v-if="autoSaving" class="fas fa-circle-notch fa-spin mr-2"></i>
+                <i v-else-if="autoSaved" class="fas fa-check-circle mr-2"></i>
+                <i v-else class="fas fa-cloud mr-2"></i>
+                <span v-if="autoSaving">Salvando automaticamente...</span>
+                <span v-else-if="autoSaved">Alterações salvas automaticamente</span>
+                <span v-else>Preencha os campos para salvar automaticamente</span>
+              </div>
             </div>
             <div class="text-right">
               <div class="text-sm text-gray-500">Etapa</div>
               <div class="text-3xl font-bold text-indigo-600">{{ currentStep }}/{{ totalSteps }}</div>
             </div>
           </div>
-          
+
           <!-- Progress Bar -->
           <div class="mt-6">
             <div class="flex items-center justify-between mb-2">
@@ -42,13 +56,13 @@ const EntrevistaResponsavelCompleta = {
               <span class="text-sm text-gray-500">{{ Math.round((currentStep / totalSteps) * 100) }}%</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-3">
-              <div class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 h-3 rounded-full transition-all duration-500"
+              <div class="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-500"
                    :style="{ width: ((currentStep / totalSteps) * 100) + '%' }"></div>
             </div>
           </div>
         </div>
 
-        <!-- Step Pills Navigation -->
+        <!-- Step Pills -->
         <div class="bg-white rounded-xl shadow-lg p-4 mb-6">
           <div class="flex flex-wrap gap-2 justify-center">
             <button v-for="(step, index) in steps" :key="index"
@@ -66,20 +80,18 @@ const EntrevistaResponsavelCompleta = {
         <!-- Form Content -->
         <div class="bg-white rounded-xl shadow-lg overflow-hidden">
           <form @submit.prevent="handleSubmit">
-            
-            <!-- STEP 1: IDENTIFICAÇÃO DO ALUNO -->
+            <!-- STEP 1: IDENTIFICAÇÃO -->
             <div v-show="currentStep === 1" class="p-8">
               <div class="max-w-4xl mx-auto">
                 <div class="text-center mb-8">
-                  <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-user-graduate text-3xl text-blue-600"></i>
+                  <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user-graduate text-3xl text-indigo-600"></i>
                   </div>
-                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Identificação do Aluno</h2>
-                  <p class="text-gray-600">Dados pessoais e informações básicas</p>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Identificação do Estudante</h2>
+                  <p class="text-gray-600">Dados gerais do aluno e do responsável pela entrevista</p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <!-- Aluno -->
                   <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                       Selecionar Aluno <span class="text-red-500">*</span>
@@ -93,27 +105,23 @@ const EntrevistaResponsavelCompleta = {
                     </select>
                   </div>
 
-                  <!-- Data da Entrevista -->
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Data da Entrevista <span class="text-red-500">*</span>
+                      Data da Entrevista
                     </label>
-                    <input type="date" v-model="form.data_entrevista" required
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                           title="Selecione a data em que esta entrevista foi realizada">
+                    <input type="date" v-model="form.data_entrevista"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
                   </div>
 
-                  <!-- Entrevistador -->
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Nome do Entrevistador <span class="text-red-500">*</span>
+                      Entrevistador(a)
                     </label>
-                    <input type="text" v-model="form.nome_entrevistador" required
+                    <input type="text" v-model="form.nome_entrevistador"
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                           placeholder="Ex: Maria Silva - Professora AEE">
+                           placeholder="Ex: Profa. Ana Souza">
                   </div>
 
-                  <!-- Nome do Estudante -->
                   <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                       Nome Completo do Estudante <span class="text-red-500">*</span>
@@ -123,7 +131,6 @@ const EntrevistaResponsavelCompleta = {
                            placeholder="Ex: João Pedro da Silva Santos">
                   </div>
 
-                  <!-- Data de Nascimento -->
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                       Data de Nascimento
@@ -133,7 +140,6 @@ const EntrevistaResponsavelCompleta = {
                            title="Data de nascimento do estudante">
                   </div>
 
-                  <!-- Naturalidade -->
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                       Naturalidade
@@ -143,17 +149,6 @@ const EntrevistaResponsavelCompleta = {
                            placeholder="Ex: São Paulo - SP">
                   </div>
 
-                  <!-- Nome da Escola -->
-                  <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Nome da Escola
-                    </label>
-                    <input type="text" v-model="form.nome_escola"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                           placeholder="Ex: EMEF Professor José de Alencar">
-                  </div>
-
-                  <!-- Série/Ano -->
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                       Série/Ano Escolar
@@ -163,7 +158,6 @@ const EntrevistaResponsavelCompleta = {
                            placeholder="Ex: 5º ano do Ensino Fundamental">
                   </div>
 
-                  <!-- Turno -->
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                       Turno
@@ -1012,8 +1006,10 @@ const EntrevistaResponsavelCompleta = {
       currentStep: 1,
       totalSteps: 12,
       alunos: [],
-      autoSaving: false,
-      autoSaved: false,
+  autoSaving: false,
+  autoSaved: false,
+  autoSaveTimeout: null,
+  isLoadingForm: false,
       
       steps: [
         { name: 'Identificação', icon: 'fas fa-user-graduate' },
@@ -1037,7 +1033,6 @@ const EntrevistaResponsavelCompleta = {
         nome_estudante: '',
         data_nascimento: '',
         naturalidade: '',
-        nome_escola: '',
         serie_ano: '',
         turno: '',
         // Família
@@ -1117,12 +1112,119 @@ const EntrevistaResponsavelCompleta = {
     }
   },
 
+  watch: {
+    form: {
+      handler(newVal, oldVal) {
+        if (this.isLoadingForm) {
+          console.log('⏸️ [ENTREVISTA COMPLETA] Auto-save pausado durante carregamento');
+          return;
+        }
+        const oldStudentId = oldVal?.student_id ?? null;
+        if (newVal.student_id !== oldStudentId) {
+          console.log('ℹ️ [ENTREVISTA COMPLETA] Mudança de aluno detectada, auto-save ignorado');
+          return;
+        }
+        if (newVal.student_id && !this.autoSaving && !this.isLoadingForm) {
+          console.log('💾 [ENTREVISTA COMPLETA] Watch detectou mudança');
+          this.triggerAutoSave();
+        }
+      },
+      deep: true
+    }
+  },
+
   async mounted() {
     await this.loadAlunos();
     this.setCurrentUser();
   },
 
+  beforeUnmount() {
+    this.cancelAutoSaveTimer();
+  },
+
+  beforeDestroy() {
+    this.cancelAutoSaveTimer();
+  },
+
   methods: {
+    cancelAutoSaveTimer() {
+      if (this.autoSaveTimeout) {
+        clearTimeout(this.autoSaveTimeout);
+        this.autoSaveTimeout = null;
+        console.log('🛑 Timer de auto-save cancelado');
+      }
+    },
+
+    triggerAutoSave() {
+      if (this.isLoadingForm) {
+        console.log('🚫 [AUTO-SAVE] Ignorado porque formulário está carregando');
+        return;
+      }
+      this.cancelAutoSaveTimer();
+      console.log('⏱️ Timer de 2 segundos iniciado');
+      this.autoSaveTimeout = setTimeout(() => {
+        this.performAutoSave();
+      }, 2000);
+    },
+    
+    async performAutoSave() {
+      if (!this.form.student_id || this.autoSaving || this.isLoadingForm) {
+        if (!this.form.student_id) {
+          console.log('🚫 [AUTO-SAVE] Nenhum aluno selecionado, cancelando');
+        }
+        if (this.autoSaving) {
+          console.log('🚫 [AUTO-SAVE] Já existe uma operação em andamento');
+        }
+        if (this.isLoadingForm) {
+          console.log('🚫 [AUTO-SAVE] Ignorado porque formulário está carregando');
+        }
+        return;
+      }
+      
+      console.log('🚀 [AUTO-SAVE] Salvando...', this.form.id ? `(UPDATE ID: ${this.form.id})` : '(CREATE)');
+      this.autoSaving = true;
+      
+      try {
+        const formDataCopy = { ...this.form };
+        delete formDataCopy.student_id;
+        delete formDataCopy.id;
+        
+        const payload = {
+          student_id: this.form.student_id,
+          form_data: formDataCopy,
+          status: 'rascunho'
+        };
+        
+        let response;
+        if (this.form.id) {
+          // Atualizar entrevista existente - ID vai como query parameter
+          response = await api.post(`?action=entrevistas-responsavel.update&id=${this.form.id}`, payload);
+          console.log('🔄 Atualizando entrevista ID:', this.form.id);
+        } else {
+          // Criar nova entrevista
+          response = await api.post('?action=entrevistas-responsavel.create', payload);
+          console.log('✨ Criando nova entrevista');
+        }
+        
+        console.log('📥 Resposta:', response.data);
+        
+        if (response.data?.ok) {
+          if (response.data.data?.id && !this.form.id) {
+            this.form.id = response.data.data.id;
+            console.log('🆔 ID criado:', this.form.id);
+          }
+          this.autoSaved = true;
+          console.log('✅ Salvo automaticamente!');
+          setTimeout(() => { this.autoSaved = false; }, 3000);
+        }
+      } catch (error) {
+        console.error('❌ Erro auto-save:', error);
+        console.error('❌ Detalhes:', error.response?.data);
+      } finally {
+        this.autoSaving = false;
+      }
+    },
+    
     setCurrentUser() {
       // Auto-preencher nome do entrevistador com usuário logado
       if (this.$root.user && this.$root.user.name) {
@@ -1132,19 +1234,16 @@ const EntrevistaResponsavelCompleta = {
 
     async loadAlunos() {
       try {
-        // Usar endpoint de seleção dinâmica com filtros
-        let params = {};
-        if (this.$root.user && this.$root.user.role !== 'admin') {
-          params.teacher_id = this.$root.user.id;
-        }
+        // Usar endpoint de seleção dinâmica (já filtra por professor automaticamente via token)
+        const response = await api.get('?action=students.options');
+        console.log('📚 Entrevista - Alunos carregados:', response.data);
         
-        const response = await api.get('/students/options', { params });
-        console.log('📚 Entrevista - Alunos carregados (dinâmico):', response.data);
-        
-        if (response.data.ok && response.data.data) {
-          this.alunos = response.data.data;
-        } else if (Array.isArray(response.data)) {
-          this.alunos = response.data;
+        if (response.data.ok && response.data.data && response.data.data.options) {
+          // Endpoint retorna {ok: true, data: {options: [{id, text}]}}
+          this.alunos = response.data.data.options.map(opt => ({
+            id: opt.id,
+            name: opt.text.split(' (')[0] // Remove modalidade do texto
+          }));
         } else {
           console.warn('Formato inesperado de resposta:', response.data);
           this.alunos = [];
@@ -1153,35 +1252,107 @@ const EntrevistaResponsavelCompleta = {
         console.log('✅ Entrevista - Total de alunos (filtrado por professor):', this.alunos.length);
       } catch (error) {
         console.error('❌ Entrevista - Erro ao carregar alunos:', error);
-        this.$root.showNotification('Erro ao carregar lista de alunos', 'error');
+        if (this.$root.showToast) {
+          this.$root.showToast('error', 'Erro ao carregar lista de alunos');
+        }
         this.alunos = [];
       }
     },
 
     async loadStudentData() {
       if (!this.form.student_id) return;
-      
+
+      this.cancelAutoSaveTimer();
+      this.isLoadingForm = true;
+      this.autoSaving = false;
+      this.autoSaved = false;
+
       try {
-        // Buscar aluno na lista local primeiro
-        const alunoLocal = this.alunos.find(a => a.id == this.form.student_id);
-        
-        if (alunoLocal) {
-          console.log('🎓 Auto-preenchendo dados do aluno:', alunoLocal);
-          
-          // Preencher campos automaticamente com dados do cadastro
-          this.form.nome_estudante = alunoLocal.name || '';
-          this.form.data_nascimento = alunoLocal.birth_date || '';
-          this.form.nome_escola = alunoLocal.school_name || '';
-          this.form.serie_ano = alunoLocal.grade || '';
-          this.form.turno = alunoLocal.shift || '';
-          this.form.endereco = alunoLocal.address || '';
-          this.form.telefone = alunoLocal.phone || '';
-          this.form.responsavel_nome = alunoLocal.guardian_name || '';
-          
-          this.$root.showNotification('Dados do aluno preenchidos automaticamente', 'success');
+        const studentId = this.form.student_id;
+        console.log('🎓 Carregando dados completos do aluno:', studentId);
+
+        const response = await api.get('?action=students.get', { params: { id: studentId } });
+        const alunoData = response.data?.data;
+
+        // Resetar formulário utilizando estrutura base
+        const baseForm = JSON.parse(JSON.stringify(this.$options.data().form));
+        this.form = { ...baseForm, student_id: studentId };
+
+        if (alunoData) {
+          this.form.id = alunoData.last_interview_id || null;
+          this.form.nome_estudante = alunoData.name || '';
+          this.form.data_nascimento = alunoData.birth_date || '';
+          this.form.serie_ano = alunoData.grade || '';
+          this.form.turno = alunoData.shift || '';
+          this.form.endereco = alunoData.address || '';
+          this.form.telefone = alunoData.phone || '';
+          this.form.responsavel_nome = alunoData.guardian_name || '';
+
+          console.log('✅ Dados do aluno preenchidos automaticamente');
         }
+
+        await this.loadSavedInterview();
       } catch (error) {
         console.error('❌ Erro ao carregar dados do aluno:', error);
+      } finally {
+        this.isLoadingForm = false;
+      }
+    },
+
+    async loadSavedInterview() {
+      if (!this.form.student_id) return;
+
+      try {
+        console.log('🔍 Buscando entrevista salva para aluno:', this.form.student_id);
+
+        const response = await api.get('?action=entrevistas-responsavel.list', {
+          params: { student_id: this.form.student_id }
+        });
+
+        console.log('📥 Resposta da busca:', response.data);
+
+        if (response.data?.ok) {
+          const data = response.data.data;
+          const entrevistas = data?.data || data?.rows || data || [];
+
+          if (entrevistas.length > 0) {
+            const entrevistasOrdenadas = [...entrevistas].sort((a, b) => {
+              const dateA = new Date(a.updated_at || a.created_at || 0);
+              const dateB = new Date(b.updated_at || b.created_at || 0);
+              if (dateA.getTime() === dateB.getTime()) {
+                return (b.id || 0) - (a.id || 0);
+              }
+              return dateB - dateA;
+            });
+
+            const ultima = entrevistasOrdenadas[0];
+            console.log('📄 Entrevista encontrada:', ultima);
+
+            if (ultima.id) {
+              this.form.id = ultima.id;
+            }
+
+            if (ultima.form_data) {
+              Object.entries(ultima.form_data).forEach(([key, value]) => {
+                if (key !== 'student_id' && key in this.form) {
+                  this.form[key] = value;
+                }
+              });
+
+              console.log('✅ Entrevista recuperada com sucesso! ID:', ultima.id);
+
+              if (this.$root.showToast) {
+                this.$root.showToast('info', `Entrevista recuperada (ID: ${ultima.id})`);
+              }
+
+              this.autoSaved = false;
+            }
+          } else {
+            console.log('ℹ️ Nenhuma entrevista salva encontrada para este aluno');
+          }
+        }
+      } catch (error) {
+        console.error('❌ Erro ao carregar entrevista salva:', error);
       }
     },
 
@@ -1196,7 +1367,7 @@ const EntrevistaResponsavelCompleta = {
       if (this.currentStep < this.totalSteps) {
         this.currentStep++;
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        this.autoSave();
+        this.triggerAutoSave();
       }
     },
 
@@ -1207,27 +1378,21 @@ const EntrevistaResponsavelCompleta = {
       }
     },
 
-    async autoSave() {
-      // Implementar salvamento automático
-      this.autoSaving = true;
-      setTimeout(() => {
-        this.autoSaving = false;
-        this.autoSaved = true;
-        setTimeout(() => this.autoSaved = false, 2000);
-      }, 1000);
-    },
-
     async handleSubmit() {
       try {
         const response = await api.post('/entrevistas/create', this.form);
         
         if (response.data.ok) {
-          this.$root.showNotification('Entrevista salva com sucesso!', 'success');
+          if (this.$root.showToast) {
+            this.$root.showToast('success', 'Entrevista salva com sucesso!');
+          }
           this.$router.push('/dashboard');
         }
       } catch (error) {
         console.error('Erro ao salvar entrevista:', error);
-        this.$root.showNotification('Erro ao salvar entrevista', 'error');
+        if (this.$root.showToast) {
+          this.$root.showToast('error', 'Erro ao salvar entrevista');
+        }
       }
     }
   }
@@ -1251,6 +1416,18 @@ const PDICompleto = {
                 PDI - Plano de Desenvolvimento Individual
               </h1>
               <p class="text-gray-600">Formulário com 250+ campos - Avaliação completa multidimensional</p>
+              <div class="mt-3 flex items-center text-sm font-medium" :class="{
+                'text-blue-600': autoSaving,
+                'text-emerald-600': autoSaved && !autoSaving,
+                'text-gray-500': !autoSaving && !autoSaved
+              }">
+                <i v-if="autoSaving" class="fas fa-circle-notch fa-spin mr-2"></i>
+                <i v-else-if="autoSaved" class="fas fa-check-circle mr-2"></i>
+                <i v-else class="fas fa-cloud mr-2"></i>
+                <span v-if="autoSaving">Salvando automaticamente...</span>
+                <span v-else-if="autoSaved">Alterações salvas automaticamente</span>
+                <span v-else>Edições serão salvas automaticamente</span>
+              </div>
             </div>
             <div class="text-right">
               <div class="text-sm text-gray-500">Etapa</div>
@@ -1349,15 +1526,6 @@ const PDICompleto = {
                     <input type="text" v-model="form.supervisor_pedagogico" 
                            class="w-full px-4 py-3 border rounded-lg"
                            placeholder="Ex: Profa. Carla Regina Souza">
-                  </div>
-                  
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Nome da Escola
-                    </label>
-                    <input type="text" v-model="form.nome_escola" 
-                           class="w-full px-4 py-3 border rounded-lg"
-                           placeholder="Ex: EMEF Monteiro Lobato">
                   </div>
                   
                   <div>
@@ -2027,6 +2195,15 @@ const PDICompleto = {
 
           </form>
         </div>
+
+        <div v-if="autoSaving" class="fixed bottom-4 right-4 bg-emerald-500 text-white px-4 py-2 rounded-lg shadow-lg">
+          <i class="fas fa-sync fa-spin mr-2"></i>
+          Salvando automaticamente...
+        </div>
+        <div v-if="autoSaved" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg">
+          <i class="fas fa-check mr-2"></i>
+          Salvo!
+        </div>
       </div>
     </div>
   `,
@@ -2036,6 +2213,10 @@ const PDICompleto = {
       currentStep: 1,
       totalSteps: 10,
       alunos: [],
+      autoSaving: false,
+      autoSaved: false,
+      autoSaveTimeout: null,
+      isLoadingForm: false,
       
       steps: [
         { name: 'Institucional', icon: 'fas fa-school' },
@@ -2070,12 +2251,12 @@ const PDICompleto = {
       ],
       
       form: {
+        id: null,
         student_id: '',
         nome_estudante: '',
         diretor: '',
         vice_diretor: '',
         supervisor_pedagogico: '',
-        nome_escola: '',
         ano_letivo: new Date().getFullYear().toString(),
         turno: '',
         // Psicomotor (16 campos enum)
@@ -2157,12 +2338,195 @@ const PDICompleto = {
     }
   },
 
+  watch: {
+    form: {
+      handler(newVal, oldVal) {
+        if (this.isLoadingForm) {
+          console.log('⏸️ [PDI COMPLETO] Auto-save pausado durante carregamento');
+          return;
+        }
+
+        const oldStudentId = oldVal?.student_id ?? null;
+        if (newVal.student_id !== oldStudentId) {
+          console.log('ℹ️ [PDI COMPLETO] Mudança de aluno detectada, auto-save ignorado');
+          return;
+        }
+
+        if (newVal.student_id && !this.autoSaving && !this.isLoadingForm) {
+          console.log('💾 [PDI COMPLETO] Watch detectou mudança');
+          this.triggerAutoSave();
+        }
+      },
+      deep: true
+    }
+  },
+
   async mounted() {
     await this.loadAlunos();
     this.setCurrentUser();
   },
 
+  beforeUnmount() {
+    this.cancelAutoSaveTimer();
+  },
+
+  beforeDestroy() {
+    this.cancelAutoSaveTimer();
+  },
+
   methods: {
+    cancelAutoSaveTimer() {
+      if (this.autoSaveTimeout) {
+        clearTimeout(this.autoSaveTimeout);
+        this.autoSaveTimeout = null;
+        console.log('🛑 [PDI COMPLETO] Timer de auto-save cancelado');
+      }
+    },
+
+    triggerAutoSave() {
+      if (this.isLoadingForm) {
+        console.log('🚫 [PDI COMPLETO] Auto-save ignorado porque formulário está carregando');
+        return;
+      }
+
+      this.cancelAutoSaveTimer();
+      console.log('⏱️ [PDI COMPLETO] Timer de 2 segundos iniciado');
+      this.autoSaveTimeout = setTimeout(() => {
+        this.performAutoSave();
+      }, 2000);
+    },
+
+    async performAutoSave(status = 'rascunho', options = {}) {
+      if (!this.form.student_id || this.isLoadingForm) {
+        if (!this.form.student_id) {
+          console.log('🚫 [PDI COMPLETO] Auto-save abortado: nenhum aluno selecionado');
+        }
+        if (this.isLoadingForm) {
+          console.log('🚫 [PDI COMPLETO] Auto-save abortado: formulário carregando');
+        }
+        return false;
+      }
+
+    const isAuto = status === 'rascunho' && !options.showToast;
+    this.cancelAutoSaveTimer();
+      if (isAuto && this.autoSaving) {
+        console.log('⏳ [PDI COMPLETO] Auto-save já em andamento, ignorando novo disparo');
+        return false;
+      }
+
+      if (isAuto) {
+        this.autoSaving = true;
+      }
+
+      try {
+        const formDataCopy = { ...this.form };
+        delete formDataCopy.student_id;
+        delete formDataCopy.id;
+
+        const payload = {
+          student_id: this.form.student_id,
+          form_data: formDataCopy,
+          status,
+          data_inicio: this.form.data_inicio || null,
+          data_fim: this.form.data_termino || null
+        };
+
+        let response;
+        if (this.form.id) {
+          console.log('🔄 [PDI COMPLETO] Atualizando PDI ID:', this.form.id, 'Status:', status);
+          response = await api.post(`?action=pdi.update&id=${this.form.id}`, payload);
+        } else {
+          console.log('✨ [PDI COMPLETO] Criando novo PDI (status:', status, ')');
+          response = await api.post('?action=pdi.create', payload);
+        }
+
+        if (response.data?.ok) {
+          if (response.data.data?.id && !this.form.id) {
+            this.form.id = response.data.data.id;
+            console.log('🆔 [PDI COMPLETO] ID criado:', this.form.id);
+          }
+
+          if (isAuto) {
+            this.autoSaved = true;
+            setTimeout(() => { this.autoSaved = false; }, 3000);
+            console.log('✅ [PDI COMPLETO] Salvo automaticamente!');
+          }
+
+          if (options.showToast && this.$root.showToast) {
+            this.$root.showToast('success', 'PDI salvo com sucesso!');
+          }
+
+          return true;
+        }
+
+        console.warn('⚠️ [PDI COMPLETO] Resposta inesperada no auto-save:', response.data);
+        if (options.showToast && this.$root.showToast) {
+          this.$root.showToast('error', 'Erro ao salvar PDI');
+        }
+      } catch (error) {
+        console.error('❌ [PDI COMPLETO] Erro ao salvar:', error);
+        if (options.showToast && this.$root.showToast) {
+          this.$root.showToast('error', 'Erro ao salvar PDI');
+        }
+      } finally {
+        if (isAuto) {
+          this.autoSaving = false;
+        }
+      }
+
+      return false;
+    },
+
+    async loadSavedPdi(studentId = this.form.student_id) {
+      if (!studentId) return;
+
+      try {
+        console.log('🔍 [PDI COMPLETO] Buscando PDI salvo para aluno:', studentId);
+        const response = await api.get('?action=pdi.list', { params: { student_id: studentId } });
+
+        const registros = Array.isArray(response.data?.data)
+          ? response.data.data
+          : response.data?.data?.data || [];
+
+        if (registros.length === 0) {
+          console.log('ℹ️ [PDI COMPLETO] Nenhum PDI salvo encontrado para este aluno');
+          return;
+        }
+
+        const ordenados = [...registros].sort((a, b) => {
+          const dateA = new Date(a.updated_at || a.created_at || 0);
+          const dateB = new Date(b.updated_at || b.created_at || 0);
+          if (dateA.getTime() === dateB.getTime()) {
+            return (b.id || 0) - (a.id || 0);
+          }
+          return dateB - dateA;
+        });
+
+        const ultimo = ordenados[0];
+        console.log('📄 [PDI COMPLETO] Registro recuperado:', ultimo);
+
+        this.form.id = ultimo.id || null;
+        this.form.data_inicio = ultimo.data_inicio || this.form.data_inicio;
+        this.form.data_termino = ultimo.data_fim || this.form.data_termino;
+
+        if (ultimo.form_data) {
+          Object.entries(ultimo.form_data).forEach(([key, value]) => {
+            if (key !== 'student_id' && key in this.form) {
+              this.form[key] = value;
+            }
+          });
+        }
+
+        this.autoSaved = false;
+
+        if (this.$root.showToast) {
+          this.$root.showToast('info', `PDI recuperado (ID: ${ultimo.id})`);
+        }
+      } catch (error) {
+        console.error('❌ [PDI COMPLETO] Erro ao carregar PDI salvo:', error);
+      }
+    },
+
     setCurrentUser() {
       // Auto-preencher professor AEE com usuário logado
       if (this.$root.user && this.$root.user.name) {
@@ -2172,46 +2536,66 @@ const PDICompleto = {
 
     async loadAlunos() {
       try {
-        // Usar endpoint de seleção dinâmica com filtros
-        let params = {};
-        if (this.$root.user && this.$root.user.role !== 'admin') {
-          params.teacher_id = this.$root.user.id;
-        }
+        // Usar endpoint de seleção dinâmica (já filtra por professor automaticamente via token)
+        const response = await api.get('?action=students.options');
+        console.log('📚 PDI - Alunos carregados:', response.data);
         
-        const response = await api.get('/students/options', { params });
-        console.log('📚 PDI - Alunos carregados (dinâmico):', response.data);
-        
-        if (response.data.ok && response.data.data) {
-          this.alunos = response.data.data;
-        } else if (Array.isArray(response.data)) {
-          this.alunos = response.data;
+        if (response.data.ok && response.data.data && response.data.data.options) {
+          // Endpoint retorna {ok: true, data: {options: [{id, text}]}}
+          this.alunos = response.data.data.options.map(opt => ({
+            id: opt.id,
+            name: opt.text.split(' (')[0] // Remove modalidade do texto
+          }));
         } else {
           this.alunos = [];
         }
         
-        console.log('✅ PDI - Total de alunos (filtrado por professor):', this.alunos.length);
+        console.log('✅ PDI - Total de alunos:', this.alunos.length);
       } catch (error) {
         console.error('❌ PDI - Erro ao carregar alunos:', error);
+        if (this.$root.showToast) {
+          this.$root.showToast('error', 'Erro ao carregar lista de alunos');
+        }
         this.alunos = [];
       }
     },
 
     async loadStudentData() {
       if (!this.form.student_id) return;
+
+      this.cancelAutoSaveTimer();
+      this.isLoadingForm = true;
+      this.autoSaving = false;
+      this.autoSaved = false;
+
       try {
-        const alunoLocal = this.alunos.find(a => a.id == this.form.student_id);
-        
-        if (alunoLocal) {
-          console.log('🎓 PDI - Auto-preenchendo dados:', alunoLocal);
-          
-          this.form.nome_estudante = alunoLocal.name || '';
-          this.form.nome_escola = alunoLocal.school_name || '';
-          this.form.turno = alunoLocal.shift || '';
-          
-          this.$root.showNotification('Dados do aluno preenchidos automaticamente', 'success');
+        const studentId = this.form.student_id;
+        console.log('🎓 [PDI COMPLETO] Carregando dados completos do aluno:', studentId);
+
+        const baseForm = JSON.parse(JSON.stringify(this.$options.data().form));
+        this.form = { ...baseForm, student_id: studentId };
+  this.setCurrentUser();
+
+        const response = await api.get('?action=students.get', { params: { id: studentId } });
+        const alunoData = response.data?.data;
+
+        if (alunoData) {
+          this.form.nome_estudante = alunoData.name || '';
+          this.form.turno = alunoData.shift || '';
+
+          if (this.$root.showToast) {
+            this.$root.showToast('success', 'Dados do aluno preenchidos automaticamente');
+          }
         }
+
+        await this.loadSavedPdi(studentId);
       } catch (error) {
-        console.error('❌ PDI - Erro ao carregar dados do aluno:', error);
+        console.error('❌ [PDI COMPLETO] Erro ao carregar dados do aluno:', error);
+        if (this.$root.showToast) {
+          this.$root.showToast('error', 'Erro ao carregar dados do aluno');
+        }
+      } finally {
+        this.isLoadingForm = false;
       }
     },
 
@@ -2226,6 +2610,7 @@ const PDICompleto = {
       if (this.currentStep < this.totalSteps) {
         this.currentStep++;
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        this.triggerAutoSave();
       }
     },
 
@@ -2237,15 +2622,9 @@ const PDICompleto = {
     },
 
     async handleSubmit() {
-      try {
-        const response = await api.post('/pdis/create', this.form);
-        if (response.data.ok) {
-          this.$root.showNotification('PDI salvo com sucesso!', 'success');
-          this.$router.push('/dashboard');
-        }
-      } catch (error) {
-        console.error('Erro ao salvar PDI:', error);
-        this.$root.showNotification('Erro ao salvar PDI', 'error');
+      const sucesso = await this.performAutoSave('completo', { showToast: true });
+      if (sucesso) {
+        this.$router.push('/dashboard');
       }
     }
   }
@@ -2269,6 +2648,18 @@ const PAICompleto = {
                 PAI - Plano de Atendimento Individual
               </h1>
               <p class="text-gray-600">Formulário completo com 46 campos - Complete em etapas</p>
+              <div class="mt-3 flex items-center text-sm font-medium" :class="{
+                'text-indigo-600': autoSaving,
+                'text-purple-600': autoSaved && !autoSaving,
+                'text-gray-500': !autoSaving && !autoSaved
+              }">
+                <i v-if="autoSaving" class="fas fa-circle-notch fa-spin mr-2"></i>
+                <i v-else-if="autoSaved" class="fas fa-check-circle mr-2"></i>
+                <i v-else class="fas fa-cloud mr-2"></i>
+                <span v-if="autoSaving">Salvando automaticamente...</span>
+                <span v-else-if="autoSaved">Alterações salvas automaticamente</span>
+                <span v-else>Edições serão salvas automaticamente</span>
+              </div>
             </div>
             <div class="text-right">
               <div class="text-sm text-gray-500">Etapa</div>
@@ -2346,15 +2737,6 @@ const PAICompleto = {
                     </label>
                     <input type="date" v-model="form.data_nascimento" 
                            class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500">
-                  </div>
-
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Nome da Escola
-                    </label>
-                    <input type="text" v-model="form.nome_escola" 
-                           class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500"
-                           placeholder="Ex: EMEF Santos Dumont">
                   </div>
 
                   <div>
@@ -2871,6 +3253,15 @@ const PAICompleto = {
 
           </form>
         </div>
+
+        <div v-if="autoSaving" class="fixed bottom-4 right-4 bg-purple-500 text-white px-4 py-2 rounded-lg shadow-lg">
+          <i class="fas fa-sync fa-spin mr-2"></i>
+          Salvando automaticamente...
+        </div>
+        <div v-if="autoSaved" class="fixed bottom-4 right-4 bg-pink-500 text-white px-4 py-2 rounded-lg shadow-lg">
+          <i class="fas fa-check mr-2"></i>
+          Salvo!
+        </div>
       </div>
     </div>
   `,
@@ -2880,6 +3271,10 @@ const PAICompleto = {
       currentStep: 1,
       totalSteps: 7,
       alunos: [],
+      autoSaving: false,
+      autoSaved: false,
+      autoSaveTimeout: null,
+      isLoadingForm: false,
       
       steps: [
         { name: 'Identificação', icon: 'fas fa-id-card' },
@@ -2892,11 +3287,11 @@ const PAICompleto = {
       ],
       
       form: {
+        id: null,
         // Step 1: Identificação
         student_id: '',
         nome_estudante: '',
         data_nascimento: '',
-        nome_escola: '',
         serie_ano: '',
         ano_letivo: new Date().getFullYear().toString(),
         turno: '',
@@ -2955,13 +3350,197 @@ const PAICompleto = {
     }
   },
 
+  watch: {
+    form: {
+      handler(newVal, oldVal) {
+        if (this.isLoadingForm) {
+          console.log('⏸️ [PAI COMPLETO] Auto-save pausado durante carregamento');
+          return;
+        }
+
+        const oldStudentId = oldVal?.student_id ?? null;
+        if (newVal.student_id !== oldStudentId) {
+          console.log('ℹ️ [PAI COMPLETO] Mudança de aluno detectada, auto-save ignorado');
+          return;
+        }
+
+        if (newVal.student_id && !this.autoSaving && !this.isLoadingForm) {
+          console.log('💾 [PAI COMPLETO] Watch detectou mudança');
+          this.triggerAutoSave();
+        }
+      },
+      deep: true
+    }
+  },
+
   async mounted() {
     await this.loadAlunos();
     this.setCurrentUser();
     this.setDefaultDates();
   },
 
+  beforeUnmount() {
+    this.cancelAutoSaveTimer();
+  },
+
+  beforeDestroy() {
+    this.cancelAutoSaveTimer();
+  },
+
   methods: {
+    cancelAutoSaveTimer() {
+      if (this.autoSaveTimeout) {
+        clearTimeout(this.autoSaveTimeout);
+        this.autoSaveTimeout = null;
+        console.log('🛑 [PAI COMPLETO] Timer de auto-save cancelado');
+      }
+    },
+
+    triggerAutoSave() {
+      if (this.isLoadingForm) {
+        console.log('🚫 [PAI COMPLETO] Auto-save ignorado porque formulário está carregando');
+        return;
+      }
+
+      this.cancelAutoSaveTimer();
+      console.log('⏱️ [PAI COMPLETO] Timer de 2 segundos iniciado');
+      this.autoSaveTimeout = setTimeout(() => {
+        this.performAutoSave();
+      }, 2000);
+    },
+
+    async performAutoSave(status = 'rascunho', options = {}) {
+      if (!this.form.student_id || this.isLoadingForm) {
+        if (!this.form.student_id) {
+          console.log('🚫 [PAI COMPLETO] Auto-save abortado: nenhum aluno selecionado');
+        }
+        if (this.isLoadingForm) {
+          console.log('🚫 [PAI COMPLETO] Auto-save abortado: formulário carregando');
+        }
+        return false;
+      }
+
+      const isAuto = status === 'rascunho' && !options.showToast;
+      this.cancelAutoSaveTimer();
+
+      if (isAuto && this.autoSaving) {
+        console.log('⏳ [PAI COMPLETO] Auto-save em andamento, ignorando novo disparo');
+        return false;
+      }
+
+      if (isAuto) {
+        this.autoSaving = true;
+      }
+
+      try {
+        const formDataCopy = { ...this.form };
+        delete formDataCopy.student_id;
+        delete formDataCopy.id;
+
+        const payload = {
+          student_id: this.form.student_id,
+          form_data: formDataCopy,
+          status,
+          data_inicio: this.form.data_inicio || null,
+          data_fim: this.form.data_termino || null
+        };
+
+        let response;
+        if (this.form.id) {
+          console.log('🔄 [PAI COMPLETO] Atualizando PAI ID:', this.form.id, 'Status:', status);
+          response = await api.post(`?action=plano-atendimento.update&id=${this.form.id}`, payload);
+        } else {
+          console.log('✨ [PAI COMPLETO] Criando novo PAI (status:', status, ')');
+          response = await api.post('?action=plano-atendimento.create', payload);
+        }
+
+        if (response.data?.ok) {
+          if (response.data.data?.id && !this.form.id) {
+            this.form.id = response.data.data.id;
+            console.log('🆔 [PAI COMPLETO] ID criado:', this.form.id);
+          }
+
+          if (isAuto) {
+            this.autoSaved = true;
+            setTimeout(() => { this.autoSaved = false; }, 3000);
+            console.log('✅ [PAI COMPLETO] Salvo automaticamente!');
+          }
+
+          if (options.showToast && this.$root.showToast) {
+            this.$root.showToast('success', 'PAI salvo com sucesso!');
+          }
+
+          return true;
+        }
+
+        console.warn('⚠️ [PAI COMPLETO] Resposta inesperada no auto-save:', response.data);
+        if (options.showToast && this.$root.showToast) {
+          this.$root.showToast('error', 'Erro ao salvar PAI');
+        }
+      } catch (error) {
+        console.error('❌ [PAI COMPLETO] Erro ao salvar:', error);
+        if (options.showToast && this.$root.showToast) {
+          this.$root.showToast('error', 'Erro ao salvar PAI');
+        }
+      } finally {
+        if (isAuto) {
+          this.autoSaving = false;
+        }
+      }
+
+      return false;
+    },
+
+    async loadSavedPai(studentId = this.form.student_id) {
+      if (!studentId) return;
+
+      try {
+        console.log('🔍 [PAI COMPLETO] Buscando PAI salvo para aluno:', studentId);
+        const response = await api.get('?action=plano-atendimento.list', { params: { student_id: studentId } });
+
+        const registros = Array.isArray(response.data?.data)
+          ? response.data.data
+          : response.data?.data?.data || [];
+
+        if (registros.length === 0) {
+          console.log('ℹ️ [PAI COMPLETO] Nenhum PAI salvo encontrado para este aluno');
+          return;
+        }
+
+        const ordenados = [...registros].sort((a, b) => {
+          const dateA = new Date(a.updated_at || a.created_at || 0);
+          const dateB = new Date(b.updated_at || b.created_at || 0);
+          if (dateA.getTime() === dateB.getTime()) {
+            return (b.id || 0) - (a.id || 0);
+          }
+          return dateB - dateA;
+        });
+
+        const ultimo = ordenados[0];
+        console.log('📄 [PAI COMPLETO] Registro recuperado:', ultimo);
+
+        this.form.id = ultimo.id || null;
+        this.form.data_inicio = ultimo.data_inicio || this.form.data_inicio;
+        this.form.data_termino = ultimo.data_fim || this.form.data_termino;
+
+        if (ultimo.form_data) {
+          Object.entries(ultimo.form_data).forEach(([key, value]) => {
+            if (key !== 'student_id' && key in this.form) {
+              this.form[key] = value;
+            }
+          });
+        }
+
+        this.autoSaved = false;
+
+        if (this.$root.showToast) {
+          this.$root.showToast('info', `PAI recuperado (ID: ${ultimo.id})`);
+        }
+      } catch (error) {
+        console.error('❌ [PAI COMPLETO] Erro ao carregar PAI salvo:', error);
+      }
+    },
+
     setCurrentUser() {
       // Auto-preencher professor AEE com usuário logado
       if (this.$root.user && this.$root.user.name) {
@@ -2984,51 +3563,70 @@ const PAICompleto = {
 
     async loadAlunos() {
       try {
-        // Usar endpoint de seleção dinâmica com filtros
-        let params = {};
-        if (this.$root.user && this.$root.user.role !== 'admin') {
-          params.teacher_id = this.$root.user.id;
-        }
+        // Usar endpoint de seleção dinâmica (já filtra por professor automaticamente via token)
+        const response = await api.get('?action=students.options');
+        console.log('📚 PAI - Alunos carregados:', response.data);
         
-        const response = await api.get('/students/options', { params });
-        console.log('📚 PAI - Alunos carregados (dinâmico):', response.data);
-        
-        if (response.data.ok && response.data.data) {
-          this.alunos = response.data.data;
-        } else if (Array.isArray(response.data)) {
-          this.alunos = response.data;
+        if (response.data.ok && response.data.data && response.data.data.options) {
+          // Endpoint retorna {ok: true, data: {options: [{id, text}]}}
+          this.alunos = response.data.data.options.map(opt => ({
+            id: opt.id,
+            name: opt.text.split(' (')[0] // Remove modalidade do texto
+          }));
         } else {
           this.alunos = [];
         }
         
-        console.log('✅ PAI - Total de alunos (filtrado por professor):', this.alunos.length);
+        console.log('✅ PAI - Total de alunos:', this.alunos.length);
       } catch (error) {
         console.error('❌ PAI - Erro ao carregar alunos:', error);
+        if (this.$root.showToast) {
+          this.$root.showToast('error', 'Erro ao carregar lista de alunos');
+        }
         this.alunos = [];
       }
     },
 
     async loadStudentData() {
       if (!this.form.student_id) return;
-      
+
+      this.cancelAutoSaveTimer();
+      this.isLoadingForm = true;
+      this.autoSaving = false;
+      this.autoSaved = false;
+
       try {
-        const alunoLocal = this.alunos.find(a => a.id == this.form.student_id);
-        
-        if (alunoLocal) {
-          console.log('🎓 PAI - Auto-preenchendo dados:', alunoLocal);
-          
-          // Preencher campos do aluno
-          this.form.nome_estudante = alunoLocal.name || '';
-          this.form.data_nascimento = alunoLocal.birth_date || '';
-          this.form.nome_escola = alunoLocal.school_name || '';
-          this.form.serie_ano = alunoLocal.grade || '';
-          this.form.turno = alunoLocal.shift || '';
-          this.form.tipo_deficiencia = alunoLocal.disability_type || '';
-          
-          this.$root.showNotification('Dados do aluno preenchidos automaticamente', 'success');
+        const studentId = this.form.student_id;
+        console.log('🎓 [PAI COMPLETO] Carregando dados completos do aluno:', studentId);
+
+        const baseForm = JSON.parse(JSON.stringify(this.$options.data().form));
+        this.form = { ...baseForm, student_id: studentId };
+  this.setCurrentUser();
+
+        const response = await api.get('?action=students.get', { params: { id: studentId } });
+        const alunoData = response.data?.data;
+
+        if (alunoData) {
+          this.form.nome_estudante = alunoData.name || '';
+          this.form.data_nascimento = alunoData.birth_date || '';
+          this.form.serie_ano = alunoData.grade || '';
+          this.form.turno = alunoData.shift || '';
+          this.form.tipo_deficiencia = alunoData.disability_type || this.form.tipo_deficiencia;
+
+          if (this.$root.showToast) {
+            this.$root.showToast('success', 'Dados do aluno preenchidos automaticamente');
+          }
         }
+
+        this.setDefaultDates();
+        await this.loadSavedPai(studentId);
       } catch (error) {
-        console.error('❌ PAI - Erro ao carregar dados do aluno:', error);
+        console.error('❌ [PAI COMPLETO] Erro ao carregar dados do aluno:', error);
+        if (this.$root.showToast) {
+          this.$root.showToast('error', 'Erro ao carregar dados do aluno');
+        }
+      } finally {
+        this.isLoadingForm = false;
       }
     },
 
@@ -3043,6 +3641,7 @@ const PAICompleto = {
       if (this.currentStep < this.totalSteps) {
         this.currentStep++;
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        this.triggerAutoSave();
       }
     },
 
@@ -3054,15 +3653,9 @@ const PAICompleto = {
     },
 
     async handleSubmit() {
-      try {
-        const response = await api.post('/pais/create', this.form);
-        if (response.data.ok) {
-          this.$root.showNotification('PAI salvo com sucesso!', 'success');
-          this.$router.push('/dashboard');
-        }
-      } catch (error) {
-        console.error('Erro ao salvar PAI:', error);
-        this.$root.showNotification('Erro ao salvar PAI', 'error');
+      const sucesso = await this.performAutoSave('completo', { showToast: true });
+      if (sucesso) {
+        this.$router.push('/dashboard');
       }
     }
   }

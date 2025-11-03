@@ -1,10 +1,6 @@
 // ConectAEE v5.0 - Sistema de Gestão Educacional com Tailwind CSS
 
 // Debug inicial
-console.log('🔧 INICIANDO spa-tailwind.js');
-console.log('🔧 window.CONFIG existe?', !!window.CONFIG);
-console.log('🔧 CONFIG existe?', typeof CONFIG !== 'undefined' ? CONFIG : 'UNDEFINED');
-console.log('🔧 axios existe?', typeof axios !== 'undefined');
 
 // Configuração da API
 const api = axios.create({
@@ -12,7 +8,6 @@ const api = axios.create({
   timeout: 15000
 });
 
-console.log('🔧 api criado com baseURL:', CONFIG.API_BASE);
 
 // Roteamento da API: detecção automática de PATH_INFO vs query (?action=)
 window.__API_ROUTING = window.__API_ROUTING || { mode: 'path', detected: false };
@@ -35,7 +30,6 @@ async function ensureApiRouting() {
   if (okPath) {
     window.__API_ROUTING.mode = 'path';
     window.__API_ROUTING.detected = true;
-    console.log('🔧 API routing: modo PATH confirmado');
     return 'path';
   }
   // Fallback para modo QUERY
@@ -43,7 +37,6 @@ async function ensureApiRouting() {
   if (okQuery) {
     window.__API_ROUTING.mode = 'query';
     window.__API_ROUTING.detected = true;
-    console.log('🔧 API routing: modo QUERY (?action=) ativado');
     return 'query';
   }
   // Se ambos falharem, mantém path por padrão (pode ser CORS ou offline)
@@ -221,7 +214,7 @@ const AlunosTW = {
                 </svg>
               </div>
             </th>
-            <th class="px-6 py-3 text-gray-700" role="columnheader">Vínculo</th>
+            <th class="px-6 py-3 text-gray-700" role="columnheader">Escola</th>
             <th class="px-6 py-3 text-right text-gray-700" role="columnheader">Ações</th>
           </tr>
         </thead>
@@ -235,15 +228,10 @@ const AlunosTW = {
               <span :class="['px-2 py-1 rounded text-xs font-medium', s.status==='ativo'?'bg-green-100 text-green-700':'bg-gray-100 text-gray-600']">{{ s.status || '—' }}</span>
             </td>
             <td class="px-6 py-4 text-sm text-gray-600">
-              <span v-if="s.modalidade==='apoio'" class="flex items-center">
-                <i class="fas fa-user-tie text-blue-500 mr-2" aria-hidden="true"></i>
-                {{ s.support_teacher_name || 'Não atribuído' }}
+              <span class="flex items-center">
+                <i class="fas fa-school text-blue-500 mr-2" aria-hidden="true"></i>
+                {{ s.school_name || 'Sem escola' }}
               </span>
-              <span v-else-if="s.modalidade==='srm'" class="flex items-center">
-                <i class="fas fa-door-open text-green-500 mr-2" aria-hidden="true"></i>
-                SRM #{{ s.srm_room_id || '-' }}
-              </span>
-              <span v-else class="text-gray-400">—</span>
             </td>
             <td class="px-6 py-4 text-right space-x-2">
               <button class="inline-flex items-center text-blue-800 hover:text-blue-900 mr-1 px-2 py-1 border border-blue-200 rounded transition-colors" 
@@ -314,17 +302,10 @@ const AlunosTW = {
             <span class="px-2 py-1 rounded text-xs font-medium uppercase bg-blue-100 text-blue-800">{{ s.modalidade }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-gray-700">Vínculo:</span>
+            <span class="text-gray-700">Escola:</span>
             <span class="text-gray-900 flex items-center">
-              <span v-if="s.modalidade==='apoio'">
-                <i class="fas fa-user-tie text-blue-500 mr-1"></i>
-                {{ s.support_teacher_name || 'Não atribuído' }}
-              </span>
-              <span v-else-if="s.modalidade==='srm'">
-                <i class="fas fa-door-open text-green-500 mr-1"></i>
-                SRM #{{ s.srm_room_id || '-' }}
-              </span>
-              <span v-else class="text-gray-400">—</span>
+              <i class="fas fa-school text-blue-500 mr-1"></i>
+              {{ s.school_name || 'Sem escola' }}
             </span>
           </div>
         </div>
@@ -394,12 +375,12 @@ const AlunosTW = {
     </div>
 
     <!-- Modal de Criar/Editar Aluno -->
-    <div v-if="editing" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" role="dialog" aria-labelledby="form-heading" aria-modal="true">
-      <div class="bg-gray-50 rounded-lg w-full max-w-4xl h-[90vh] overflow-y-auto shadow-xl p-6 space-y-6 border border-gray-200">
-        <div class="flex items-center justify-between">
+    <div v-if="editing" class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto" style="background-color: rgba(0, 0, 0, 0.85);" role="dialog" aria-labelledby="form-heading" aria-modal="true" @click.self="cancel">
+      <div class="bg-gray-50 rounded-lg w-full max-w-4xl overflow-y-auto shadow-xl p-6 space-y-6 border border-gray-200 m-4" style="max-height: calc(100vh - 2rem);">
+        <div class="flex items-center justify-between sticky top-0 bg-gray-50 pb-4 border-b border-gray-200 -mx-6 px-6 -mt-6 pt-6 z-10">
           <h1 id="form-heading" class="text-2xl font-bold text-gray-900">{{ form.id ? 'Editar Aluno' : 'Novo Aluno' }}</h1>
           <button @click="cancel" class="text-gray-500 hover:text-gray-700" aria-label="Fechar">
-            <i class="fas fa-times"></i>
+            <i class="fas fa-times text-xl"></i>
           </button>
         </div>
       
@@ -944,7 +925,7 @@ const AlunosTW = {
         const results = await Promise.allSettled([
           api.get('/support-teachers'),
           api.get('/srm-rooms'),
-          api.get('/schools'),
+          api.get('?action=schools.options'),
           api.get('/professores')
         ]);
         // support-teachers
@@ -963,19 +944,17 @@ const AlunosTW = {
           this.rooms = [];
           console.error('Falha ao carregar salas SRM:', results[1].reason);
         }
-        // schools com fallback de parsing + filtro teacher-centric
+        // schools.options - endpoint já filtra por teacher automaticamente
         if (results[2].status === 'fulfilled') {
           const s = results[2].value;
-          const d = s.data;
-          let allSchools = (d?.data?.rows) || (Array.isArray(d?.data) ? d.data : (Array.isArray(d) ? d : []));
-          
-          // Filtrar escolas do professor atual (se não for admin)
-          const currentUser = this.$parent?.user || this.$root?.user;
-          if (currentUser && currentUser.role !== 'admin') {
-            this.schools = allSchools.filter(school => school.created_by_teacher_id === currentUser.id);
-          } else {
-            this.schools = allSchools;
-          }
+          // Endpoint schools.options retorna {ok: true, data: {options: [{id, text, cidade, endereco}]}}
+          const options = s.data?.data?.options || [];
+          this.schools = options.map(opt => ({
+            id: opt.id,
+            name: opt.text.split(' - ')[0], // Remove cidade do texto
+            city: opt.cidade,
+            address: opt.endereco
+          }));
         } else {
           this.schools = [];
           console.error('Falha ao carregar escolas:', results[2].reason);
@@ -1494,11 +1473,11 @@ const UsuariosTW = {
     </div>
 
     <!-- Modal de Criar/Editar Usuário -->
-    <div v-if="editing" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div class="bg-gray-50 rounded-lg w-full max-w-4xl h-[90vh] shadow-xl overflow-hidden flex flex-col border border-gray-200">
-        <div class="flex items-center justify-between p-4 border-b">
+    <div v-if="editing" class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto" style="background-color: rgba(0, 0, 0, 0.85);" @click.self="cancel">
+      <div class="bg-gray-50 rounded-lg w-full max-w-4xl shadow-xl overflow-hidden flex flex-col border border-gray-200 m-4" style="max-height: calc(100vh - 2rem);">
+        <div class="flex items-center justify-between p-4 border-b bg-gray-50 sticky top-0 z-10">
           <h2 class="text-lg font-semibold">{{ form.id ? 'Editar Usuário' : 'Novo Usuário' }}</h2>
-          <button @click="cancel" class="text-gray-500 hover:text-gray-700" aria-label="Fechar"><i class="fas fa-times"></i></button>
+          <button @click="cancel" class="text-gray-500 hover:text-gray-700" aria-label="Fechar"><i class="fas fa-times text-xl"></i></button>
         </div>
       <div class="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-3">
         <div>
@@ -1529,18 +1508,18 @@ const UsuariosTW = {
           <input id="u-pass" v-model="form.password" type="password" class="border rounded px-3 py-2 w-full" :placeholder="form.id ? '••••••' : 'Defina uma senha'">
         </div>
       </div>
-      <div class="flex gap-2 justify-end p-4 border-t">
-        <button class="px-3 py-2 bg-brand-primary text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
+      <div class="flex gap-2 justify-end p-4 border-t bg-gray-50 sticky bottom-0">
+        <button class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 transition-colors" 
+                @click="cancel" 
+                :disabled="savingForm">
+          Cancelar
+        </button>
+        <button class="px-4 py-2 bg-brand-primary text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center" 
                 @click="save" 
                 :disabled="savingForm">
-          <span v-if="savingForm" class="inline-flex items-center">
-            <div class="animate-spin -ml-1 mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
-            {{ form.id ? 'Atualizando...' : 'Criando...' }}
-          </span>
-          <span v-else>{{ form.id ? 'Atualizar' : 'Criar' }} Usuário</span>
-        </button>
-        <button class="px-3 py-2 border rounded hover:bg-gray-50 transition-colors" @click="cancel" :disabled="savingForm">
-          Cancelar
+          <i v-if="savingForm" class="fas fa-spinner fa-spin mr-2"></i>
+          <i v-else :class="form.id ? 'fas fa-save' : 'fas fa-plus'" class="mr-2"></i>
+          {{ form.id ? (savingForm ? 'Atualizando...' : 'Atualizar Usuário') : (savingForm ? 'Criando...' : 'Criar Usuário') }}
         </button>
       </div>
       </div>
@@ -1832,11 +1811,11 @@ const EscolasTW = {
       </div>
 
       <!-- Modal de Edição (padrão unificado) -->
-      <div v-if="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <div class="bg-gray-50 rounded-lg w-full max-w-4xl h-[90vh] shadow-xl overflow-hidden flex flex-col border border-gray-200">
-          <div class="flex items-center justify-between p-4 border-b">
+      <div v-if="showModal" class="fixed inset-0 flex items-center justify-center z-50 overflow-y-auto" style="background-color: rgba(0, 0, 0, 0.85);" @click.self="closeModal">
+        <div class="bg-gray-50 rounded-lg w-full max-w-4xl shadow-xl overflow-hidden flex flex-col border border-gray-200 m-4" style="max-height: calc(100vh - 2rem);">
+          <div class="flex items-center justify-between p-4 border-b bg-gray-50 sticky top-0 z-10">
             <h2 class="text-lg font-semibold">{{ editingId ? 'Editar Escola' : 'Nova Escola' }}</h2>
-            <button @click="closeModal" class="text-gray-500 hover:text-gray-700" aria-label="Fechar"><i class="fas fa-times"></i></button>
+            <button @click="closeModal" class="text-gray-500 hover:text-gray-700" aria-label="Fechar"><i class="fas fa-times text-xl"></i></button>
           </div>
           
           <div class="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1950,14 +1929,11 @@ const EscolasTW = {
         this.sortDirection = 'asc';
       }
     },
-  async loadEscolas() {
+    async loadEscolas() {
       try {
-        console.log('🔄 Carregando escolas...');
         const response = await api.get('/schools');
-        console.log('🔄 Response recebida:', response);
   this.rows = response.data?.data?.rows || response.data?.data || [];
   this.currentPage = 1;
-        console.log('🔄 Rows carregadas:', this.rows.length);
       } catch (error) {
         console.error('Erro ao carregar escolas:', error);
         this.$showToast && this.$showToast('Erro', 'Erro ao carregar escolas', 'error');
@@ -2051,7 +2027,6 @@ const EscolasTW = {
   },
   
   async mounted() {
-    console.log('🏫 EscolasTW component mounted!');
     // Carregar usuário para habilitar ações
     try {
       const response = await api.get('/user');
@@ -2250,7 +2225,8 @@ const SupervisaoTW = {
       try {
         const response = await api.get('/users?role=professor');
         if (response.data?.ok) {
-          this.professores = response.data.rows || [];
+          // res() encapsula em data: {rows: [...]}
+          this.professores = response.data.data?.rows || [];
         }
       } catch (error) {
         console.error('Erro ao carregar professores:', error);
@@ -2277,9 +2253,11 @@ const SupervisaoTW = {
         }
         
         // Buscar alunos do professor
-        const alunosResponse = await api.get(`/students?teacher_id=${this.selectedProfessorId}`);
+        const alunosResponse = await api.get(`?action=students.list&teacher_id=${this.selectedProfessorId}`);
         if (alunosResponse.data?.ok) {
-          this.alunos = alunosResponse.data.data || [];
+          // Backend retorna res(true, {rows: [...], total: ...})
+          const data = alunosResponse.data.data;
+          this.alunos = data?.rows || [];
           
           // Buscar status dos formulários para cada aluno
           await this.loadFormulariosStatus();
@@ -2294,21 +2272,25 @@ const SupervisaoTW = {
     
     async loadFormulariosStatus() {
       // Buscar status de formulários para todos os alunos
+      // TODO: Implementar endpoints de formulários
       for (const aluno of this.alunos) {
+        // Por enquanto, definir valores padrão
+        aluno.has_entrevista = false;
+        aluno.has_pdi = false;
+        aluno.has_pai = false;
+        aluno.relatorios = [];
+        
+        /* TEMPORARIAMENTE DESABILITADO - endpoints não implementados
         try {
-          // Verificar Entrevista
           const entrevistaResp = await api.get(`/entrevista-completa/student/${aluno.id}`);
           aluno.has_entrevista = entrevistaResp.data?.ok && entrevistaResp.data.data?.length > 0;
           
-          // Verificar PDI
           const pdiResp = await api.get(`/pdi-completo/student/${aluno.id}`);
           aluno.has_pdi = pdiResp.data?.ok && pdiResp.data.data?.length > 0;
           
-          // Verificar PAI
           const paiResp = await api.get(`/pai-completo/student/${aluno.id}`);
           aluno.has_pai = paiResp.data?.ok && paiResp.data.data?.length > 0;
           
-          // Buscar relatórios
           const relatoriosResp = await api.get(`/relatorios-atendimento?student_id=${aluno.id}`);
           aluno.relatorios = (relatoriosResp.data?.ok ? relatoriosResp.data.data : []) || [];
         } catch (error) {
@@ -2318,6 +2300,7 @@ const SupervisaoTW = {
           aluno.has_pai = false;
           aluno.relatorios = [];
         }
+        */
       }
     },
     
@@ -2357,7 +2340,6 @@ const SupervisaoTW = {
   },
   
   async mounted() {
-    console.log('👁️ SupervisaoTW component mounted!');
     await this.loadProfessores();
   }
 };
@@ -2383,11 +2365,11 @@ const LegislacoesTW = {
       </div>
 
       <!-- Modal de Upload (apenas admin) -->
-      <div v-if="showUploadForm && user && user.role === 'admin'" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-  <form @submit.prevent="uploadLegislacao" class="bg-gray-50 rounded-lg w-full max-w-4xl h-[90vh] shadow-xl overflow-hidden flex flex-col border border-gray-200">
-          <div class="flex items-center justify-between p-4 border-b">
+      <div v-if="showUploadForm && user && user.role === 'admin'" class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto" style="background-color: rgba(0, 0, 0, 0.85);" @click.self="cancelUpload">
+  <form @submit.prevent="uploadLegislacao" class="bg-gray-50 rounded-lg w-full max-w-4xl shadow-xl overflow-hidden flex flex-col border border-gray-200 m-4" style="max-height: calc(100vh - 2rem);">
+          <div class="flex items-center justify-between p-4 border-b bg-gray-50 sticky top-0 z-10">
             <h2 class="text-lg font-semibold text-gray-900">Nova Legislação</h2>
-            <button type="button" @click="cancelUpload" class="text-gray-500 hover:text-gray-700" aria-label="Fechar"><i class="fas fa-times"></i></button>
+            <button type="button" @click="cancelUpload" class="text-gray-500 hover:text-gray-700" aria-label="Fechar"><i class="fas fa-times text-xl"></i></button>
           </div>
           <div class="flex-1 overflow-y-auto p-6 space-y-4">
             <label class="block text-sm font-medium text-gray-700 mb-2">Título *</label>
@@ -2869,7 +2851,10 @@ const FloatingMicrophone = {
       lastFocusedElement: null,
       interimTranscript: '',
       manualStopRequested: false,
-      handleFocusIn: null
+      handleFocusIn: null,
+      targetInfo: null,
+      highlightClass: 'voice-input-highlight',
+      highlightTimer: null
     };
   },
   
@@ -2890,6 +2875,128 @@ const FloatingMicrophone = {
       return tag === 'input' || tag === 'textarea' || el.isContentEditable;
     },
 
+    resolveTargetElement() {
+      if (!this.targetInfo) return null;
+      const { element, voiceId } = this.targetInfo;
+      if (element && document.contains(element)) return element;
+      if (voiceId) {
+        const replacement = document.querySelector(`[data-voice-target-id="${voiceId}"]`);
+        if (replacement) {
+          this.targetInfo.element = replacement;
+          return replacement;
+        }
+      }
+      return null;
+    },
+
+    ensureTarget() {
+      const target = this.resolveTargetElement();
+      if (!target) {
+        console.warn('⚠️ Campo de voz não encontrado durante a transcrição');
+      }
+      return target;
+    },
+
+    setElementValue(target, value) {
+      if (!target) return;
+      if (target.isContentEditable) {
+        target.innerText = value;
+      } else {
+        target.value = value;
+      }
+      const event = new Event('input', { bubbles: true });
+      target.dispatchEvent(event);
+    },
+
+    getElementValue(el) {
+      if (!el) return '';
+      if (el.isContentEditable) return el.innerText || '';
+      return el.value || '';
+    },
+
+    addHighlight(target) {
+      if (!target) return;
+      target.classList.add(this.highlightClass);
+      if (this.highlightTimer) {
+        clearTimeout(this.highlightTimer);
+        this.highlightTimer = null;
+      }
+    },
+
+    removeHighlight(delay = 0) {
+      if (!this.targetInfo || !this.targetInfo.element) {
+        this.targetInfo = null;
+        return;
+      }
+      const target = this.targetInfo.element;
+      const clear = () => {
+        target.classList.remove(this.highlightClass);
+        this.highlightTimer = null;
+        this.targetInfo = null;
+      };
+      if (delay > 0) {
+        this.highlightTimer = setTimeout(clear, delay);
+      } else {
+        clear();
+      }
+    },
+
+    captureTarget(candidate) {
+      const target = this.isTextInput(candidate) ? candidate : null;
+      if (!target) return null;
+
+      const voiceId = target.dataset.voiceTargetId || `voice-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      target.dataset.voiceTargetId = voiceId;
+
+      const value = this.getElementValue(target);
+      const hasSelection = typeof target.selectionStart === 'number' && typeof target.selectionEnd === 'number';
+      const selectionStart = hasSelection ? target.selectionStart : value.length;
+      const selectionEnd = hasSelection ? target.selectionEnd : value.length;
+
+      return {
+        element: target,
+        voiceId,
+        beforeText: value.slice(0, selectionStart),
+        afterText: value.slice(selectionEnd),
+        lastApplied: '',
+        isContentEditable: target.isContentEditable
+      };
+    },
+
+    applyTranscriptToTarget(force = false) {
+      if (!this.targetInfo) return;
+      const target = this.ensureTarget();
+      if (!target) return;
+
+      const transcriptText = this.displayTranscript;
+      if (!force && transcriptText === this.targetInfo.lastApplied) return;
+
+      const before = this.targetInfo.beforeText || '';
+      const after = this.targetInfo.afterText || '';
+      const newValue = transcriptText ? `${before}${transcriptText}${after}` : `${before}${after}`;
+      this.setElementValue(target, newValue);
+
+      const cursorPos = (before + transcriptText).length;
+      if (typeof target.setSelectionRange === 'function') {
+        try {
+          target.setSelectionRange(cursorPos, cursorPos);
+        } catch (_) {}
+      }
+
+      this.targetInfo.lastApplied = transcriptText;
+    },
+
+    clearTargetInfo() {
+      if (this.highlightTimer) {
+        clearTimeout(this.highlightTimer);
+        this.highlightTimer = null;
+      }
+      if (this.targetInfo && this.targetInfo.element) {
+        this.targetInfo.element.classList.remove(this.highlightClass);
+      }
+      this.targetInfo = null;
+    },
+
     initSpeechRecognition() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       
@@ -2907,7 +3014,6 @@ const FloatingMicrophone = {
       this.recognition.maxAlternatives = 1;
       
       this.recognition.onstart = () => {
-        console.log('🎤 Gravação iniciada');
         this.isRecording = true;
       };
       
@@ -2924,7 +3030,6 @@ const FloatingMicrophone = {
           }
         }
         this.interimTranscript = interim.trim();
-        console.log('📝 Transcrição parcial:', this.displayTranscript);
         
         // Inserir em tempo real no campo ativo
         this.updateFieldInRealTime();
@@ -2935,14 +3040,12 @@ const FloatingMicrophone = {
         
         if (event.error === 'no-speech') {
           // Silenciosamente reinicia sem mostrar toast (normal em pausas longas)
-          console.log('⏸️ Pausa detectada, aguardando fala...');
           return; // Deixa o onend fazer o restart
         } else if (event.error === 'not-allowed') {
           this.isRecording = false;
           this.manualStopRequested = true;
           this.$showToast && this.$showToast('Erro', 'Permissão de microfone negada. Permita o acesso nas configurações do navegador.', 'error');
         } else if (event.error === 'aborted') {
-          console.log('⏹️ Gravação abortada pelo usuário');
           this.isRecording = false;
         } else {
           this.isRecording = false;
@@ -2951,20 +3054,21 @@ const FloatingMicrophone = {
       };
       
       this.recognition.onend = () => {
-        console.log('🎤 Gravação finalizada');
         if (this.manualStopRequested) {
           this.manualStopRequested = false;
           this.isRecording = false;
+          this.applyTranscriptToTarget(true);
+          this.removeHighlight(500);
           return;
         }
         if (this.isRecording) {
-          console.log('🔁 Reiniciando reconhecimento por inatividade');
           setTimeout(() => {
             try {
               this.recognition?.start();
             } catch (err) {
               console.warn('⚠️ Falha ao reiniciar reconhecimento:', err);
               this.isRecording = false;
+              this.removeHighlight(500);
             }
           }, 400);
         }
@@ -2972,34 +3076,11 @@ const FloatingMicrophone = {
     },
     
     updateFieldInRealTime() {
-      const target = this.lastActiveElement;
-      console.log('🔄 updateFieldInRealTime - target:', target);
-      console.log('🔄 lastActiveElement:', this.lastActiveElement);
-      console.log('🔄 isTextInput?', this.isTextInput(target));
-      console.log('🔄 document.contains?', target ? document.contains(target) : 'null');
-      
-      if (!this.isTextInput(target) || !document.contains(target)) {
-        console.warn('⚠️ Campo não válido ou não existe no DOM');
-        return;
-      }
-      
-      const fullText = this.displayTranscript;
-      console.log('📝 Texto para inserir:', fullText);
-      if (!fullText) return;
-      
-      if (Object.prototype.hasOwnProperty.call(target, 'value')) {
-        console.log('✅ Inserindo em campo input/textarea');
-        target.value = fullText;
-        if (typeof target.setSelectionRange === 'function') {
-          const end = target.value.length;
-          target.setSelectionRange(end, end);
-        }
-        target.dispatchEvent(new Event('input', { bubbles: true }));
-      } else if (target.isContentEditable) {
-        console.log('✅ Inserindo em contentEditable');
-        target.innerText = fullText;
-        target.dispatchEvent(new Event('input', { bubbles: true }));
-      }
+      if (!this.targetInfo) return;
+      const target = this.ensureTarget();
+      if (!target) return;
+
+      this.applyTranscriptToTarget();
     },
 
     toggleRecording() {
@@ -3011,21 +3092,28 @@ const FloatingMicrophone = {
       } else {
         // Guardar último campo de texto focado antes de gravar
         const candidate = this.lastFocusedElement || document.activeElement;
-        console.log('🎯 Candidato para target:', candidate);
-        console.log('🎯 lastFocusedElement:', this.lastFocusedElement);
-        console.log('🎯 document.activeElement:', document.activeElement);
-        console.log('🎯 isTextInput(candidate)?', this.isTextInput(candidate));
-        
-        this.lastActiveElement = this.isTextInput(candidate) ? candidate : null;
-        console.log('✅ lastActiveElement definido como:', this.lastActiveElement);
-        
+        const info = this.captureTarget(candidate);
+        if (!info) {
+          this.$showToast && this.$showToast('Atenção', 'Clique em um campo de texto antes de gravar.', 'warning');
+          return;
+        }
+
+        this.lastActiveElement = info.element;
+        this.targetInfo = info;
+        this.addHighlight(info.element);
+        this.$nextTick(() => {
+          try { info.element.focus(); } catch (_) {}
+        });
+
         this.transcript = '';
         this.interimTranscript = '';
         this.manualStopRequested = false;
         this.recognition.start();
         this.isRecording = true;
       }
-    },    closeTranscript() {
+    },
+
+    closeTranscript() {
       if (this.isRecording) {
         this.manualStopRequested = true;
         this.recognition.stop();
@@ -3034,20 +3122,33 @@ const FloatingMicrophone = {
       this.transcript = '';
       this.interimTranscript = '';
       this.lastActiveElement = null;
+      this.clearTargetInfo();
     }
   },
   
   mounted() {
-    console.log('🎤 FloatingMicrophone mounted - INICIANDO');
-    console.log('🎤 Elemento:', this.$el);
     this.initSpeechRecognition();
-    console.log('🎤 isSupported:', this.isSupported);
     this.handleFocusIn = (event) => {
       if (this.isTextInput(event.target)) {
         this.lastFocusedElement = event.target;
       }
     };
     document.addEventListener('focusin', this.handleFocusIn, true);
+
+    // Estilo para campo destacado pela voz (adicionado apenas uma vez)
+    if (!document.getElementById('voice-input-highlight-style')) {
+      const styleEl = document.createElement('style');
+      styleEl.id = 'voice-input-highlight-style';
+      styleEl.textContent = `
+        .voice-input-highlight {
+          outline: 2px solid #f97316 !important;
+          box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.25) !important;
+          border-color: #fb923c !important;
+          transition: box-shadow 0.2s ease, outline 0.2s ease;
+        }
+      `;
+      document.head.appendChild(styleEl);
+    }
   },
   
   beforeUnmount() {
@@ -3055,6 +3156,7 @@ const FloatingMicrophone = {
       this.recognition.stop();
     }
     document.removeEventListener('focusin', this.handleFocusIn, true);
+    this.clearTargetInfo();
   }
 };
 
@@ -3112,13 +3214,15 @@ const Layout = {
             <h6 class="mb-2 text-xs font-semibold text-gray-700 uppercase tracking-wider">
               Gestão
             </h6>
-            <router-link to="alunos" class="nav-link-tw" @click="closeMobileSidebar">
+            <!-- Alunos - Oculto para admin -->
+            <router-link v-if="user && user.role !== 'admin'" to="alunos" class="nav-link-tw" @click="closeMobileSidebar">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>
               </svg>
               Alunos
             </router-link>
+            <!-- Usuários - Apenas para admin -->
             <router-link v-if="user && user.role === 'admin'" to="usuarios" class="nav-link-tw" @click="closeMobileSidebar">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M17 21v-2a4 4 0 0 0-3-3.87M7 21v-2a4 4 0 0 1 3-3.87"/>
@@ -3126,7 +3230,8 @@ const Layout = {
               </svg>
               Usuários
             </router-link>
-            <router-link to="escolas" class="nav-link-tw" @click="closeMobileSidebar">
+            <!-- Escolas - Oculto para admin -->
+            <router-link v-if="user && user.role !== 'admin'" to="escolas" class="nav-link-tw" @click="closeMobileSidebar">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 14l9-5-9-5-9 5 9 5z"/>
                 <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
@@ -3143,8 +3248,8 @@ const Layout = {
             </router-link>
           </div>
           
-          <!-- Formulários AEE - Apenas para professores -->
-          <div v-if="user && user.role === 'professor'">
+          <!-- Formulários AEE - Oculto apenas de admin -->
+          <div v-if="user && user.role !== 'admin'">
             <h6 class="mb-2 text-xs font-semibold text-gray-700 uppercase tracking-wider">
               Formulários AEE
             </h6>
@@ -3224,7 +3329,7 @@ const Layout = {
       <!-- Conteúdo principal -->
       <main class="flex-1 flex flex-col overflow-hidden lg:ml-0">
         <!-- Header melhorado com gradiente e informações úteis -->
-        <header class="flex-shrink-0 bg-blue-600   shadow-lg">
+        <header style="display:none" class="flex-shrink-0 bg-blue-600   shadow-lg">
           <div class="px-4 py-3 lg:px-6">
             <div class="flex items-center justify-between">
               <!-- Lado esquerdo: Menu mobile + Info do sistema -->
@@ -3608,9 +3713,9 @@ const Login = {
             </form>
             
             <!-- Modal de Privacidade -->
-            <div v-if="privacyOpen" class="fixed inset-0 z-50 flex items-center justify-center">
-              <div class="absolute inset-0 bg-black/50" @click="closePrivacy" aria-hidden="true"></div>
-              <div class="relative bg-white rounded-xl shadow-2xl w-[90%] max-w-xl p-6 border border-gray-200" role="dialog" aria-modal="true" aria-labelledby="privacy-title">
+            <div v-if="privacyOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <div class="absolute inset-0" style="background-color: rgba(0, 0, 0, 0.85);" @click="closePrivacy" aria-hidden="true"></div>
+              <div class="relative bg-white rounded-xl shadow-2xl w-[90%] max-w-xl overflow-y-auto p-6 border border-gray-200" role="dialog" aria-modal="true" aria-labelledby="privacy-title" style="max-height: 90vh;">
                 <div class="flex items-center justify-between mb-4">
                   <h3 id="privacy-title" class="text-lg font-semibold text-gray-900">Políticas de Privacidade</h3>
                   <button class="text-gray-500 hover:text-gray-700" @click="closePrivacy" aria-label="Fechar">
@@ -4747,6 +4852,15 @@ const EntrevistaResponsavel = {
             <div>
               <h1 class="text-3xl font-bold text-gray-900 mb-2">Entrevista com Responsável</h1>
               <p class="text-gray-600">Complete as informações em etapas organizadas</p>
+              <!-- Indicador de Auto-Save -->
+              <div v-if="savingAuto" class="flex items-center text-sm text-blue-600 mt-1">
+                <i class="fas fa-circle-notch fa-spin mr-2"></i>
+                Salvando automaticamente...
+              </div>
+              <div v-else-if="lastSaved" class="flex items-center text-sm text-green-600 mt-1">
+                <i class="fas fa-check-circle mr-2"></i>
+                Salvo às {{ lastSaved.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) }}
+              </div>
             </div>
             
             <!-- Botão Gerar PDF -->
@@ -4761,9 +4875,26 @@ const EntrevistaResponsavel = {
           </div>
         </div>
 
-        <!-- DEBUG: Banner temporário para confirmação de carregamento -->
-        <div class="mb-4 px-3 py-2 text-xs text-indigo-800 bg-indigo-50 border border-indigo-200 rounded" style="display: none;" id="debug-entrevista-banner">
-          EntrevistaResponsavel carregado (debug)
+        <!-- DEBUG: Banner de Auto-Save -->
+        <div class="mb-4 px-4 py-3 border-2 rounded-lg" :class="{
+          'bg-blue-50 border-blue-300': savingAuto,
+          'bg-green-50 border-green-300': lastSaved && !savingAuto,
+          'bg-gray-50 border-gray-300': !savingAuto && !lastSaved
+        }">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <i v-if="savingAuto" class="fas fa-circle-notch fa-spin text-blue-600 mr-2"></i>
+              <i v-else-if="lastSaved" class="fas fa-check-circle text-green-600 mr-2"></i>
+              <i v-else class="fas fa-info-circle text-gray-600 mr-2"></i>
+              
+              <span class="font-medium">
+                <span v-if="savingAuto" class="text-blue-700">Salvando automaticamente...</span>
+                <span v-else-if="lastSaved" class="text-green-700">✓ Salvo automaticamente às {{ lastSaved.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) }}</span>
+                <span v-else class="text-gray-700">Auto-save ativo - Digite e seus dados serão salvos automaticamente</span>
+              </span>
+            </div>
+            <span v-if="form.id" class="text-xs bg-white px-2 py-1 rounded border">ID: {{ form.id }}</span>
+          </div>
         </div>
 
         <!-- Progress Bar -->
@@ -5111,6 +5242,10 @@ const EntrevistaResponsavel = {
       alunos: [],
       escolas: [],
       preenchidosNaEntrevista: new Set(), // Campos já preenchidos na entrevista
+      autoSaveTimeout: null, // Timer para debounce
+      lastSaved: null, // Timestamp do último save
+  savingAuto: false, // Flag para indicar auto-save em progresso
+  isLoadingForm: false, // Impede auto-save durante preenchimento automático
       form: {
         student_id: '',
         escola: '',
@@ -5147,25 +5282,56 @@ const EntrevistaResponsavel = {
     
   },
   
+  watch: {
+    form: {
+      handler(newVal, oldVal) {
+        console.log('👀 Watch detectou mudança!', { 
+          student_id: newVal.student_id, 
+          loading: this.loading,
+          savingAuto: this.savingAuto,
+          isLoadingForm: this.isLoadingForm
+        });
+        
+        // Auto-save quando qualquer campo do formulário mudar
+        if (newVal.student_id && !this.loading && !this.savingAuto && !this.isLoadingForm) {
+          console.log('💾 Iniciando auto-save...');
+          this.autoSave();
+        } else {
+          console.log('⏸️ Auto-save bloqueado:', {
+            temStudentId: !!newVal.student_id,
+            loading: this.loading,
+            savingAuto: this.savingAuto,
+            isLoadingForm: this.isLoadingForm
+          });
+        }
+      },
+      deep: true
+    }
+  },
+  
   created() {
     try {
-      console.log('🧭 [EntrevistaResponsavel] created');
       const el = document.getElementById('debug-entrevista-banner');
       if (el) el.style.display = 'block';
     } catch (e) { console.warn('Debug banner não inserido', e); }
+  },
+ 
+  beforeDestroy() {
+    if (this.autoSaveTimeout) {
+      clearTimeout(this.autoSaveTimeout);
+      this.autoSaveTimeout = null;
+    }
   },
   
   methods: {
     async carregarAlunos() {
       try {
-        console.log('🔄 [Entrevista] Carregando alunos...');
         let params = {};
         if (this.$parent.user && this.$parent.user.role !== 'admin') {
           params.teacher_id = this.$parent.user.id;
         }
         const response = await api.get('/students/options', { params });
         this.alunos = response.data?.data?.rows || [];
-        console.log('✅ [Entrevista] Alunos carregados:', this.alunos.length);
       } catch (error) {
         console.error('❌ [Entrevista] Erro ao carregar alunos:', error);
         this.alunos = [];
@@ -5173,10 +5339,20 @@ const EntrevistaResponsavel = {
     },
     
     async preencherDadosAlunoEntrevista() {
-      if (this.form.student_id) {
+      if (!this.form.student_id) {
+        return;
+      }
+
+      this.isLoadingForm = true;
+      if (this.autoSaveTimeout) {
+        clearTimeout(this.autoSaveTimeout);
+        this.autoSaveTimeout = null;
+      }
+      this.savingAuto = false;
+
+      try {
         const aluno = this.alunos.find(a => a.id == this.form.student_id);
         if (aluno) {
-          // Preencher dados automaticamente do perfil do aluno
           if (aluno.school_name) {
             this.form.escola = aluno.school_name;
           }
@@ -5189,9 +5365,7 @@ const EntrevistaResponsavel = {
           if (aluno.class_name) {
             this.form.turma = aluno.class_name;
           }
-          // Mapear turno (shift) do aluno
           if (aluno.shift) {
-            // Mapear enum para valores do formulário
             const shiftMap = {
               'manha': 'matutino',
               'tarde': 'vespertino',
@@ -5199,7 +5373,6 @@ const EntrevistaResponsavel = {
             };
             this.form.turno = shiftMap[aluno.shift] || aluno.shift;
           }
-          // Preencher dados do responsável
           if (aluno.responsible_name) {
             this.form.nome_responsavel = aluno.responsible_name;
           }
@@ -5210,21 +5383,21 @@ const EntrevistaResponsavel = {
             this.form.email = aluno.responsible_email;
           }
         }
-        // Buscar última entrevista do aluno para edição
+
         try {
           const r = await api.get('/entrevistas-responsavel/list', { params: { student_id: this.form.student_id, per_page: 1 } });
           const rows = r.data?.data?.rows || r.data?.data || r.data?.rows || [];
           const ultimo = Array.isArray(rows) && rows.length ? rows[0] : null;
           if (ultimo) {
-            // Guardar id para update
             this.form.id = ultimo.id;
-            // Prefill campos básicos se existirem
-            this.form.escola = ultimo.nome_escola || this.form.escola;
-            this.form.serie = ultimo.serie_ano || this.form.serie;
-            this.form.turno = ultimo.turno || this.form.turno;
-            this.form.nome_responsavel = ultimo.nome_responsavel || this.form.nome_responsavel;
-            this.form.telefone = ultimo.telefone || this.form.telefone;
-            this.form.email = ultimo.email || this.form.email;
+
+            const recuperado = ultimo.form_data || ultimo.formData || {};
+            Object.keys(recuperado).forEach(key => {
+              if (key in this.form && recuperado[key] != null) {
+                this.form[key] = recuperado[key];
+              }
+            });
+
             this.form.diagnostico = ultimo.diagnostico || this.form.diagnostico;
             this.form.medicamentos = ultimo.medicamentos || this.form.medicamentos;
             this.form.profissionais = ultimo.profissionais || this.form.profissionais;
@@ -5233,10 +5406,16 @@ const EntrevistaResponsavel = {
             this.form.habilidades = ultimo.habilidades || this.form.habilidades;
             this.form.expectativas = ultimo.expectativas || this.form.expectativas;
             this.form.informacoes_adicionais = ultimo.informacoes_adicionais || this.form.informacoes_adicionais;
+
+            if (ultimo.updated_at || ultimo.created_at) {
+              this.lastSaved = new Date(ultimo.updated_at || ultimo.created_at);
+            }
           }
         } catch (e) {
           console.warn('Não foi possível carregar entrevista existente:', e);
         }
+      } finally {
+        this.isLoadingForm = false;
       }
     },
 
@@ -5364,21 +5543,22 @@ const EntrevistaResponsavel = {
     },
     
     async salvarEntrevista() {
-      if (!this.validateCurrentStep()) {
+      // Validação mínima: apenas student_id é obrigatório
+      if (!this.form.student_id) {
+        this.$showToast('Atenção', 'Selecione um aluno antes de salvar', 'warning');
         return;
       }
       
       this.loading = true;
       try {
-        // Mapear TODOS os campos do formulário para os campos esperados pela API
-        const dadosParaSalvar = {
-          student_id: this.form.student_id,
+        // Mapear TODOS os campos do formulário para o objeto form_data
+        const formData = {
           nome_escola: this.form.escola,
           serie_ano: this.form.serie,
           turno: this.form.turno,
           telefone: this.form.telefone,
-          data_entrevista: new Date().toISOString().split('T')[0], // Data atual
-          tipo_entrevista: 'inicial', // Valor padrão
+          data_entrevista: new Date().toISOString().split('T')[0],
+          tipo_entrevista: 'inicial',
           // Campos do responsável
           nome_responsavel: this.form.nome_responsavel,
           parentesco: this.form.parentesco,
@@ -5397,19 +5577,24 @@ const EntrevistaResponsavel = {
         
         // Filtrar apenas campos que têm valor
         const dadosLimpos = {};
-        Object.keys(dadosParaSalvar).forEach(key => {
-          if (dadosParaSalvar[key] !== null && dadosParaSalvar[key] !== undefined && dadosParaSalvar[key] !== '') {
-            dadosLimpos[key] = dadosParaSalvar[key];
+        Object.keys(formData).forEach(key => {
+          if (formData[key] !== null && formData[key] !== undefined && formData[key] !== '') {
+            dadosLimpos[key] = formData[key];
           }
         });
         
-        console.log('📤 Dados sendo enviados:', dadosLimpos);
+        // Estrutura que o backend espera: student_id + form_data + status
+        const payload = {
+          student_id: this.form.student_id,
+          form_data: dadosLimpos,
+          status: 'completo'
+        };
         
         let response;
         if (this.form.id) {
-          response = await api.post('/entrevistas-responsavel/update', { id: this.form.id, ...dadosLimpos });
+          response = await api.post(`?action=entrevistas-responsavel.update&id=${this.form.id}`, payload);
         } else {
-          response = await api.post('/entrevistas-responsavel/create', dadosLimpos);
+          response = await api.post('?action=entrevistas-responsavel.create', payload);
         }
         
         if (response.data?.ok) {
@@ -5426,14 +5611,113 @@ const EntrevistaResponsavel = {
           // Não redirecionar automaticamente para permitir gerar PDF
           // this.$router.push('/');
         } else {
+          console.error('❌ Erro na resposta:', response.data);
           this.$showToast('Erro', response.data?.error || 'Erro ao salvar entrevista', 'error');
         }
       } catch (error) {
         console.error('❌ Erro completo:', error);
+        console.error('❌ Detalhes:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        });
         this.$showToast('Erro', 'Erro ao salvar entrevista: ' + (error.response?.data?.error || error.response?.data?.message || error.message), 'error');
       } finally {
         this.loading = false;
       }
+    },
+    
+    autoSave() {
+      console.log('🔄 autoSave() chamado');
+      
+      // Limpar timeout anterior
+      if (this.autoSaveTimeout) {
+        console.log('⏰ Limpando timeout anterior');
+        clearTimeout(this.autoSaveTimeout);
+        this.autoSaveTimeout = null;
+      }
+      
+      console.log('⏱️ Iniciando timer de 2 segundos...');
+      
+      // Debounce: aguardar 2 segundos após última digitação
+      this.autoSaveTimeout = setTimeout(async () => {
+        this.autoSaveTimeout = null;
+        console.log('⏰ Timer disparado! Verificando condições...');
+        console.log('📊 Estado atual:', {
+          student_id: this.form.student_id,
+          savingAuto: this.savingAuto,
+          loading: this.loading,
+          isLoadingForm: this.isLoadingForm
+        });
+        
+        if (!this.form.student_id || this.savingAuto || this.loading || this.isLoadingForm) {
+          console.log('🚫 Auto-save cancelado por condições não atendidas');
+          return;
+        }
+        
+        console.log('✅ Condições atendidas, iniciando salvamento...');
+        this.savingAuto = true;
+        try {
+          const formData = {
+            nome_escola: this.form.escola,
+            serie_ano: this.form.serie,
+            turno: this.form.turno,
+            telefone: this.form.telefone,
+            data_entrevista: new Date().toISOString().split('T')[0],
+            tipo_entrevista: 'inicial',
+            nome_responsavel: this.form.nome_responsavel,
+            parentesco: this.form.parentesco,
+            email: this.form.email,
+            diagnostico: this.form.diagnostico,
+            medicamentos: this.form.medicamentos,
+            profissionais: this.form.profissionais,
+            comportamento_casa: this.form.comportamento_casa,
+            dificuldades: this.form.dificuldades,
+            habilidades: this.form.habilidades,
+            expectativas: this.form.expectativas,
+            informacoes_adicionais: this.form.informacoes_adicionais
+          };
+          
+          const dadosLimpos = {};
+          Object.keys(formData).forEach(key => {
+            if (formData[key] !== null && formData[key] !== undefined && formData[key] !== '') {
+              dadosLimpos[key] = formData[key];
+            }
+          });
+          
+          const payload = {
+            student_id: this.form.student_id,
+            form_data: dadosLimpos,
+            status: 'rascunho'
+          };
+          
+          let response;
+          if (this.form.id) {
+            response = await api.post(`?action=entrevistas-responsavel.update&id=${this.form.id}`, payload);
+          } else {
+            response = await api.post('?action=entrevistas-responsavel.create', payload);
+          }
+          
+          if (response.data?.ok) {
+            if (response.data.data?.id && !this.form.id) {
+              this.form.id = response.data.data.id;
+              console.log('🆕 Novo ID criado:', this.form.id);
+            }
+            this.lastSaved = new Date();
+            console.log('💾 Auto-save concluído às', this.lastSaved.toLocaleTimeString());
+            
+            // Feedback visual discreto
+            this.$showToast && this.$showToast('Auto-save', 'Rascunho salvo automaticamente', 'info', 2000);
+          } else {
+            console.error('❌ Auto-save falhou:', response.data);
+          }
+        } catch (error) {
+          console.error('❌ Erro no auto-save:', error);
+          console.error('❌ Detalhes do erro:', error.response?.data);
+        } finally {
+          this.savingAuto = false;
+        }
+      }, 2000); // 2 segundos de debounce
     },
     
     async generatePDF() {
@@ -5511,14 +5795,11 @@ const EntrevistaResponsavel = {
   },
   
   async mounted() {
-    console.log('🚀 [EntrevistaResponsavel] mounted');
     try {
       // Preferir endpoints simples e consistentes
       await this.carregarAlunos();
-      console.log('🔄 [Entrevista] Carregando escolas...');
       const escolasResponse = await api.get('/schools');
       this.escolas = escolasResponse.data?.data?.rows || [];
-      console.log('✅ [Entrevista] Escolas carregadas:', this.escolas.length);
     } catch (error) {
       console.error('❌ [Entrevista] Erro ao carregar dados:', error);
       this.$showToast && this.$showToast('Erro', 'Erro ao carregar dados necessários', 'error');
@@ -6054,22 +6335,27 @@ const PDI = {
       
       this.loading = true;
       try {
-        // Monta payload usando details para manter compatibilidade com backend
-        const details = { ...this.form };
-        // Remover chaves não desejadas nas details
-        delete details.id;
-        const payloadBase = {
+        // Preparar form_data removendo campos de controle
+        const formData = { ...this.form };
+        delete formData.id;
+        delete formData.student_id;
+        
+        // Estrutura que o backend espera
+        const payload = {
           student_id: this.form.student_id,
-          details,
-          objectives: this.form.objetivo_geral || null,
-          strategies: this.form.estrategias || null,
+          form_data: formData,
+          data_inicio: this.form.data_inicio || null,
+          data_fim: this.form.data_fim || null,
           status: 'ativo'
         };
+        
+        console.log('📤 Payload para PDI:', payload);
+        
         let response;
         if (this.form.id) {
-          response = await api.post('/pdi/update', { id: this.form.id, ...payloadBase });
+          response = await api.post('?action=pdi.update', { id: this.form.id, ...payload });
         } else {
-          response = await api.post('/pdi/create', payloadBase);
+          response = await api.post('?action=pdi.create', payload);
         }
         if (response.data?.ok) {
           const nomeAluno = (this.alunos.find(a=>a.id==this.form.student_id)?.name) || 'Aluno';
@@ -6722,12 +7008,29 @@ const PlanoAtendimento = {
       
       this.loading = true;
       try {
+        // Preparar form_data removendo campos de controle
+        const formData = { ...this.form };
+        delete formData.id;
+        delete formData.student_id;
+        delete formData.pdi_id;
+        
+        // Estrutura que o backend espera
+        const payload = {
+          student_id: this.form.student_id,
+          pdi_id: this.form.pdi_id || null,
+          form_data: formData,
+          data_inicio: this.form.data_inicio || null,
+          data_fim: this.form.data_fim || null,
+          status: 'ativo'
+        };
+        
+        console.log('📤 Payload para Plano de Atendimento:', payload);
+        
         let response;
         if (this.form.id) {
-          const { id, ...payload } = this.form;
-          response = await api.post('/planos-atendimento/update', { id, ...payload });
+          response = await api.post('?action=plano-atendimento.update', { id: this.form.id, ...payload });
         } else {
-          response = await api.post('/planos-atendimento/create', this.form);
+          response = await api.post('?action=plano-atendimento.create', payload);
         }
         if (response.data?.ok) {
           const nomeAlunoPlano = (this.alunos.find(a=>a.id==this.form.student_id)?.name) || 'Aluno';
@@ -6928,10 +7231,13 @@ const RelatorioAtendimento = {
               </div>
               
               <!-- Textarea para descrição -->
-              <textarea v-model="form.descricao" 
-                        rows="8" 
+              <textarea v-model="form.descricao"
+                        rows="8"
                         placeholder="Digite ou grave a descrição detalhada do atendimento..."
-                        class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                        ref="descricaoField"
+                        data-voice-field="descricao"
+                        @focus="setVoiceTarget('descricao', $event)"
+                        :class="fieldInputClass('descricao')"
                         required></textarea>
 
               <div class="flex justify-end mt-2">
@@ -6962,9 +7268,12 @@ const RelatorioAtendimento = {
                   <i class="fas fa-bullseye text-amber-500 mr-1"></i>
                   Objetivos Trabalhados
                 </label>
-                <textarea v-model="form.objetivos" 
-                          rows="5" 
-                          class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500" 
+                <textarea v-model="form.objetivos"
+                          rows="5"
+                          ref="objetivosField"
+                          data-voice-field="objetivos"
+                          @focus="setVoiceTarget('objetivos', $event)"
+                          :class="fieldInputClass('objetivos')"
                           placeholder="Descreva os objetivos específicos trabalhados durante o atendimento..."></textarea>
               </div>
               
@@ -6973,9 +7282,12 @@ const RelatorioAtendimento = {
                   <i class="fas fa-tools text-amber-500 mr-1"></i>
                   Recursos Utilizados
                 </label>
-                <textarea v-model="form.recursos" 
-                          rows="5" 
-                          class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500" 
+                <textarea v-model="form.recursos"
+                          rows="5"
+                          ref="recursosField"
+                          data-voice-field="recursos"
+                          @focus="setVoiceTarget('recursos', $event)"
+                          :class="fieldInputClass('recursos')"
                           placeholder="Liste os materiais, jogos, tecnologias e outros recursos utilizados..."></textarea>
               </div>
             </div>
@@ -6993,9 +7305,12 @@ const RelatorioAtendimento = {
                 <i class="fas fa-chart-line text-amber-500 mr-1"></i>
                 Observações e Progressos
               </label>
-              <textarea v-model="form.observacoes" 
-                        rows="6" 
-                        class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500" 
+              <textarea v-model="form.observacoes"
+                        rows="6"
+                        ref="observacoesField"
+                        data-voice-field="observacoes"
+                        @focus="setVoiceTarget('observacoes', $event)"
+                        :class="fieldInputClass('observacoes')"
                         placeholder="Descreva progressos observados, dificuldades encontradas, recomendações para próximos atendimentos..."></textarea>
             </div>
 
@@ -7131,12 +7446,25 @@ const RelatorioAtendimento = {
       recordingTime: 0,
       mediaRecorder: null,
       audioChunks: [],
-      recordingTimer: null
+      recordingTimer: null,
+      voiceTargetField: 'descricao',
+      voiceTargetElement: null,
+      voiceHighlightActive: false,
+      voiceHighlightTimeout: null,
+      fieldRefMap: {
+        descricao: 'descricaoField',
+        objetivos: 'objetivosField',
+        recursos: 'recursosField',
+        observacoes: 'observacoesField'
+      }
     }
   },
   async mounted() {
     await this.loadStudents();
     await this.loadRelatorios();
+    this.$nextTick(() => {
+      this.ensureVoiceTarget();
+    });
   },
   computed: {
     canProceed() {
@@ -7209,6 +7537,124 @@ const RelatorioAtendimento = {
       }
     },
 
+    fieldInputClass(fieldKey) {
+      const baseClasses = 'border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors duration-150';
+      const highlightClasses = (this.voiceTargetField === fieldKey && this.voiceHighlightActive)
+        ? 'border-amber-500 ring-2 ring-amber-400 bg-amber-50 shadow-sm'
+        : 'border-gray-300';
+      return [baseClasses, highlightClasses];
+    },
+
+    setVoiceTarget(fieldKey, event) {
+      this.voiceTargetField = fieldKey;
+      this.voiceTargetElement = event?.target || this.getFieldElement(fieldKey);
+      if (this.isRecording || this.isProcessingAudio || this.voiceHighlightActive) {
+        this.activateVoiceHighlight();
+      }
+    },
+
+    getFieldElement(fieldKey) {
+      const refName = this.fieldRefMap[fieldKey];
+      if (!refName) return null;
+      const ref = this.$refs[refName];
+      if (!ref) return null;
+      return Array.isArray(ref) ? ref[0] : ref;
+    },
+
+    ensureVoiceTarget() {
+      if (!this.voiceTargetField || !Object.prototype.hasOwnProperty.call(this.form, this.voiceTargetField)) {
+        this.voiceTargetField = 'descricao';
+      }
+      const el = this.getFieldElement(this.voiceTargetField);
+      if (el && document.contains(el)) {
+        this.voiceTargetElement = el;
+      }
+    },
+
+    activateVoiceHighlight(durationMs = null) {
+      this.voiceHighlightActive = true;
+      if (this.voiceHighlightTimeout) {
+        clearTimeout(this.voiceHighlightTimeout);
+        this.voiceHighlightTimeout = null;
+      }
+      if (durationMs && durationMs > 0) {
+        this.voiceHighlightTimeout = setTimeout(() => {
+          this.voiceHighlightActive = false;
+          this.voiceHighlightTimeout = null;
+        }, durationMs);
+      }
+    },
+
+    deactivateVoiceHighlight() {
+      if (this.voiceHighlightTimeout) {
+        clearTimeout(this.voiceHighlightTimeout);
+        this.voiceHighlightTimeout = null;
+      }
+      this.voiceHighlightActive = false;
+    },
+
+    isVoiceEditableElement(el) {
+      if (!el) return false;
+      const tag = (el.tagName || '').toUpperCase();
+      if (tag === 'TEXTAREA') return true;
+      if (tag === 'INPUT') {
+        const type = (el.type || '').toLowerCase();
+        return ['text', 'search', 'tel', 'url', 'email', 'number'].includes(type);
+      }
+      return false;
+    },
+
+    insertTranscription(text) {
+      if (!text) return;
+
+      const activeEl = document.activeElement;
+      if (this.isVoiceEditableElement(activeEl) && activeEl?.dataset?.voiceField) {
+        this.voiceTargetField = activeEl.dataset.voiceField;
+        this.voiceTargetElement = activeEl;
+      }
+
+      const targetKey = (this.voiceTargetField && Object.prototype.hasOwnProperty.call(this.form, this.voiceTargetField))
+        ? this.voiceTargetField
+        : 'descricao';
+
+      if (!Object.prototype.hasOwnProperty.call(this.form, targetKey)) {
+        console.warn('⚠️ Campo de voz não encontrado:', targetKey);
+        return;
+      }
+
+      let targetEl = this.voiceTargetElement;
+      if (!targetEl || !this.isVoiceEditableElement(targetEl) || !document.contains(targetEl)) {
+        targetEl = this.getFieldElement(targetKey);
+      }
+
+      const hasEditableTarget = targetEl && this.isVoiceEditableElement(targetEl) && document.contains(targetEl);
+
+      if (hasEditableTarget) {
+        const currentValue = targetEl.value ?? '';
+        const selectionStart = typeof targetEl.selectionStart === 'number' ? targetEl.selectionStart : currentValue.length;
+        const selectionEnd = typeof targetEl.selectionEnd === 'number' ? targetEl.selectionEnd : currentValue.length;
+        const before = currentValue.slice(0, selectionStart);
+        const after = currentValue.slice(selectionEnd);
+        const newValue = before + text + after;
+
+        this.form[targetKey] = newValue;
+        this.voiceTargetElement = targetEl;
+
+        this.$nextTick(() => {
+          targetEl.value = newValue;
+          try {
+            targetEl.focus();
+            const cursorPos = before.length + text.length;
+            targetEl.setSelectionRange(cursorPos, cursorPos);
+          } catch (_) {}
+          targetEl.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+      } else {
+        const current = this.form[targetKey] || '';
+        this.form[targetKey] = current ? `${current.trimEnd()}\n\n${text}` : text;
+      }
+    },
+
     async toggleRecording() {
       if (this.isRecording) {
         await this.stopRecording();
@@ -7219,6 +7665,8 @@ const RelatorioAtendimento = {
 
     async startRecording() {
       try {
+        this.ensureVoiceTarget();
+        this.activateVoiceHighlight();
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         this.mediaRecorder = new MediaRecorder(stream);
         this.audioChunks = [];
@@ -7231,7 +7679,7 @@ const RelatorioAtendimento = {
         this.mediaRecorder.onstop = async () => {
           const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
           await this.processAudio(audioBlob);
-          
+
           // Parar todas as tracks de áudio
           stream.getTracks().forEach(track => track.stop());
         };
@@ -7247,6 +7695,7 @@ const RelatorioAtendimento = {
       } catch (error) {
         console.error('Erro ao iniciar gravação:', error);
         this.$showToast('Erro', 'Erro ao acessar o microfone. Verifique as permissões.', 'error');
+        this.deactivateVoiceHighlight();
       }
     },
 
@@ -7270,7 +7719,8 @@ const RelatorioAtendimento = {
 
     async processAudio(audioBlob) {
       this.isProcessingAudio = true;
-      
+      this.activateVoiceHighlight();
+
       try {
         // Validar tamanho do blob antes de enviar
         if (audioBlob.size < 1000) { // Menos de 1KB
@@ -7290,14 +7740,10 @@ const RelatorioAtendimento = {
         if (!transcricao) {
           throw new Error('Transcrição vazia - tente falar mais claramente');
         }
-        
-        // Adicionar ao texto existente
-        if (this.form.descricao) {
-          this.form.descricao += '\n\n' + transcricao;
-        } else {
-          this.form.descricao = transcricao;
-        }
-        
+
+        this.ensureVoiceTarget();
+        this.insertTranscription(transcricao);
+
         this.$showToast('Sucesso', 'Áudio transcrito com sucesso!', 'success');
         
       } catch (error) {
@@ -7306,6 +7752,7 @@ const RelatorioAtendimento = {
         this.$showToast('Erro', msg, 'error');
       } finally {
         this.isProcessingAudio = false;
+        this.activateVoiceHighlight(2000);
       }
     },
 
@@ -7363,6 +7810,10 @@ const RelatorioAtendimento = {
         recursos: '',
         observacoes: ''
       };
+      this.voiceTargetField = 'descricao';
+      this.voiceTargetElement = null;
+      this.deactivateVoiceHighlight();
+      this.$nextTick(() => this.ensureVoiceTarget());
     },
 
     edit(relatorio) {
@@ -7430,6 +7881,9 @@ const RelatorioAtendimento = {
   const url = buildApiUrl('/pai/pdf', `student_id=${this.form.student_id}&token=${encodeURIComponent(token)}`);
   window.open(url, '_blank');
     }
+  },
+  beforeUnmount() {
+    this.deactivateVoiceHighlight();
   }
 };
 

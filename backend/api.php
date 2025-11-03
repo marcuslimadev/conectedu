@@ -2254,6 +2254,12 @@ if ($action === 'reports.student') {
   }
 
   $report['anamneses'] = $anamneses;
+  
+  // Separar entrevistas para facilitar no frontend
+  $report['entrevistas'] = array_filter($anamneses, function($item) {
+    return ($item['source'] ?? '') === 'entrevista';
+  });
+  $report['entrevistas'] = array_values($report['entrevistas']); // Reindexar
 
   // PDIs
   $sql = 'SELECT id, student_id, created_by_teacher_id, status, form_data, data_inicio, data_fim, created_at, updated_at

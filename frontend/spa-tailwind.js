@@ -4787,6 +4787,7 @@ const Relatorios = {
           atendimentos,
           estatisticas,
           anamneses: reportData.anamneses || [],
+          entrevistas: reportData.entrevistas || reportData.anamneses || [], // Alias para compatibilidade
           pdis: reportData.pdis || [],
           pais: reportData.pais || [],
           attendance: reportData.attendance || [],

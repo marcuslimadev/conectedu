@@ -4737,11 +4737,25 @@ const Relatorios = {
       if (!this.dadosRelatorio) return;
       this.carregandoPDF = true;
       try {
-        const token = localStorage.getItem('token');
-        if (!token) { this.$showToast && this.$showToast('Erro', 'Faça login novamente.', 'error'); return; }
-        const q = `student_id=${this.alunoId}&tipo=${this.tipoRelatorio}&token=${encodeURIComponent(token)}`;
-        const url = buildApiUrl('/reports/student/pdf', q);
-        window.open(url, '_blank');
+        // Verificar se tem formulários AEE para este aluno
+        const temEntrevista = this.dadosRelatorio.entrevistas && this.dadosRelatorio.entrevistas.length > 0;
+        const temPDI = this.dadosRelatorio.pdis && this.dadosRelatorio.pdis.length > 0;
+        const temPAI = this.dadosRelatorio.pais && this.dadosRelatorio.pais.length > 0;
+        
+        if (!temEntrevista && !temPDI && !temPAI) {
+          this.$showToast && this.$showToast('Aviso', 'Este aluno ainda não possui formulários AEE preenchidos. Preencha uma Entrevista, PDI ou PAI primeiro.', 'warning');
+          return;
+        }
+        
+        // Mostrar opções de qual PDF gerar
+        let mensagem = 'Escolha qual formulário gerar em PDF:\n\n';
+        const opcoes = [];
+        if (temEntrevista) { mensagem += '- Entrevista com Responsável\n'; opcoes.push('entrevista'); }
+        if (temPDI) { mensagem += '- PDI (Plano de Desenvolvimento Individual)\n'; opcoes.push('pdi'); }
+        if (temPAI) { mensagem += '- PAI (Plano de Atendimento Individual)\n'; opcoes.push('pai'); }
+        
+        this.$showToast && this.$showToast('Info', 'Use o menu lateral para acessar os formulários AEE (Entrevista, PDI ou PAI) e clicar em "Exportar PDF" lá. O PDF de relatório geral está em desenvolvimento.', 'info');
+        
       } catch(e) {
         this.$showToast && this.$showToast('Erro', 'Erro ao exportar PDF: ' + e.message, 'error');
       } finally { this.carregandoPDF = false; }

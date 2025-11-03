@@ -2341,7 +2341,26 @@ if ($action === 'reports.student') {
 // GET /reports/student/pdf?student_id=X
 if ($action === 'reports.student.pdf') {
   $u = require_auth();
-  res(false, null, 'REPORT_PDF_NOT_IMPLEMENTED', 501);
+  $student_id = (int)($_GET['student_id'] ?? 0);
+  $tipo = $_GET['tipo'] ?? 'geral';
+  
+  if (!$student_id) res(false, null, 'STUDENT_ID_REQUIRED', 400);
+  
+  // Verificar se o aluno existe e o usuário tem permissão
+  $sql = 'SELECT * FROM students WHERE id = ?';
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([$student_id]);
+  $student = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$student) res(false, null, 'STUDENT_NOT_FOUND', 404);
+  
+  if ($u['role'] !== 'admin' && $student['created_by_teacher_id'] != $u['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  // Por enquanto, retornar mensagem indicando que está em desenvolvimento
+  // TODO: Implementar gerador de PDF dedicado para relatórios gerais
+  res(false, ['message' => 'Gerador de PDF de relatórios gerais em desenvolvimento. Use "Exportar PDF" nos formulários específicos (Entrevista, PDI, PAI).'], 'PDF_GERAL_EM_DESENVOLVIMENTO', 501);
 }
 
 // ========================================

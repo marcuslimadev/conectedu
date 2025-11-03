@@ -858,6 +858,11 @@ if ($action === 'students.options') {
 if ($action === 'students.create') {
   $u = require_auth();
   
+  // Limpar dados inválidos antes de validar
+  if (isset($B['birth_date']) && $B['birth_date'] === '0000-00-00') {
+    $B['birth_date'] = null;
+  }
+  
   // Validar dados recebidos
   $validation = validateStudent($B, false);
   if (!$validation['valid']) {
@@ -939,6 +944,11 @@ if ($action === 'students.update') {
   
   $fields = [];
   $values = [];
+  
+  // Limpar dados inválidos antes de processar
+  if (isset($B['birth_date']) && $B['birth_date'] === '0000-00-00') {
+    $B['birth_date'] = null;
+  }
   
   $allowed = ['name', 'school_id', 'modalidade', 'birth_date', 'cpf', 'grade', 'class_name',
               'address', 'responsible_name', 'responsible_phone', 'status',

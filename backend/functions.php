@@ -382,9 +382,12 @@ function validateStudent($data, $isUpdate = false) {
   
   // Data de nascimento (se fornecido e não vazio)
   if (isset($data['birth_date']) && $data['birth_date'] !== '' && !empty($data['birth_date'])) {
-    $date = DateTime::createFromFormat('Y-m-d', $data['birth_date']);
-    if (!$date || $date->format('Y-m-d') !== $data['birth_date']) {
-      $errors['birth_date'] = 'Data de nascimento inválida (formato: YYYY-MM-DD)';
+    // Ignorar data padrão inválida do MySQL
+    if ($data['birth_date'] !== '0000-00-00') {
+      $date = DateTime::createFromFormat('Y-m-d', $data['birth_date']);
+      if (!$date || $date->format('Y-m-d') !== $data['birth_date']) {
+        $errors['birth_date'] = 'Data de nascimento inválida (formato: YYYY-MM-DD)';
+      }
     }
   }
   

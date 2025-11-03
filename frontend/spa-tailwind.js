@@ -4625,6 +4625,73 @@ const Relatorios = {
           </div>
         </div>
       </div>
+      
+      <!-- Modal de Seleção de PDF -->
+      <div v-if="mostrarModalPDF" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click="mostrarModalPDF = false">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full m-4" @click.stop>
+          <div class="p-6">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">📄 Selecione o PDF para Gerar</h3>
+            <p class="text-sm text-gray-600 mb-6">Escolha qual formulário AEE deseja exportar em PDF:</p>
+            
+            <div class="space-y-3">
+              <!-- Entrevista -->
+              <button v-if="dadosRelatorio.entrevistas && dadosRelatorio.entrevistas.length > 0"
+                      @click="gerarPDFSelecionado('entrevista')"
+                      class="w-full flex items-center justify-between p-4 border-2 border-blue-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all group">
+                <div class="flex items-center">
+                  <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4 group-hover:bg-blue-200">
+                    <i class="fas fa-clipboard-list text-blue-600 text-xl"></i>
+                  </div>
+                  <div class="text-left">
+                    <div class="font-semibold text-gray-900">Entrevista com Responsável</div>
+                    <div class="text-sm text-gray-500">{{ dadosRelatorio.entrevistas.length }} registro(s)</div>
+                  </div>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400 group-hover:text-blue-600"></i>
+              </button>
+              
+              <!-- PDI -->
+              <button v-if="dadosRelatorio.pdis && dadosRelatorio.pdis.length > 0"
+                      @click="gerarPDFSelecionado('pdi')"
+                      class="w-full flex items-center justify-between p-4 border-2 border-green-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition-all group">
+                <div class="flex items-center">
+                  <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4 group-hover:bg-green-200">
+                    <i class="fas fa-file-alt text-green-600 text-xl"></i>
+                  </div>
+                  <div class="text-left">
+                    <div class="font-semibold text-gray-900">PDI - Plano de Desenvolvimento Individual</div>
+                    <div class="text-sm text-gray-500">{{ dadosRelatorio.pdis.length }} registro(s)</div>
+                  </div>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400 group-hover:text-green-600"></i>
+              </button>
+              
+              <!-- PAI -->
+              <button v-if="dadosRelatorio.pais && dadosRelatorio.pais.length > 0"
+                      @click="gerarPDFSelecionado('pai')"
+                      class="w-full flex items-center justify-between p-4 border-2 border-purple-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all group">
+                <div class="flex items-center">
+                  <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4 group-hover:bg-purple-200">
+                    <i class="fas fa-tasks text-purple-600 text-xl"></i>
+                  </div>
+                  <div class="text-left">
+                    <div class="font-semibold text-gray-900">PAI - Plano de Atendimento Individual</div>
+                    <div class="text-sm text-gray-500">{{ dadosRelatorio.pais.length }} registro(s)</div>
+                  </div>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400 group-hover:text-purple-600"></i>
+              </button>
+            </div>
+            
+            <div class="mt-6 flex justify-end">
+              <button @click="mostrarModalPDF = false" 
+                      class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   `,
   data(){
@@ -4640,7 +4707,8 @@ const Relatorios = {
       analiseIA_resultado: null,
       erroIA: null,
       tentouGerar: false,
-      novaNota: { title: '', content: '' }
+      novaNota: { title: '', content: '' },
+      mostrarModalPDF: false
     };
   },
   computed: {
@@ -4735,30 +4803,57 @@ const Relatorios = {
     },
     async exportarPDF(){
       if (!this.dadosRelatorio) return;
+      
+      // Verificar quais formulários existem para este aluno
+      const temEntrevista = this.dadosRelatorio.entrevistas && this.dadosRelatorio.entrevistas.length > 0;
+      const temPDI = this.dadosRelatorio.pdis && this.dadosRelatorio.pdis.length > 0;
+      const temPAI = this.dadosRelatorio.pais && this.dadosRelatorio.pais.length > 0;
+      
+      if (!temEntrevista && !temPDI && !temPAI) {
+        this.$showToast && this.$showToast('Aviso', 'Este aluno ainda não possui formulários AEE preenchidos. Preencha uma Entrevista, PDI ou PAI primeiro.', 'warning');
+        return;
+      }
+      
+      // Mostrar modal de seleção
+      this.mostrarModalPDF = true;
+    },
+    
+    async gerarPDFSelecionado(tipo){
       this.carregandoPDF = true;
+      this.mostrarModalPDF = false;
+      
       try {
-        // Verificar se tem formulários AEE para este aluno
-        const temEntrevista = this.dadosRelatorio.entrevistas && this.dadosRelatorio.entrevistas.length > 0;
-        const temPDI = this.dadosRelatorio.pdis && this.dadosRelatorio.pdis.length > 0;
-        const temPAI = this.dadosRelatorio.pais && this.dadosRelatorio.pais.length > 0;
-        
-        if (!temEntrevista && !temPDI && !temPAI) {
-          this.$showToast && this.$showToast('Aviso', 'Este aluno ainda não possui formulários AEE preenchidos. Preencha uma Entrevista, PDI ou PAI primeiro.', 'warning');
+        const token = localStorage.getItem('token');
+        if (!token) {
+          this.$showToast && this.$showToast('Erro', 'Faça login novamente.', 'error');
           return;
         }
         
-        // Mostrar opções de qual PDF gerar
-        let mensagem = 'Escolha qual formulário gerar em PDF:\n\n';
-        const opcoes = [];
-        if (temEntrevista) { mensagem += '- Entrevista com Responsável\n'; opcoes.push('entrevista'); }
-        if (temPDI) { mensagem += '- PDI (Plano de Desenvolvimento Individual)\n'; opcoes.push('pdi'); }
-        if (temPAI) { mensagem += '- PAI (Plano de Atendimento Individual)\n'; opcoes.push('pai'); }
+        let endpoint = '';
+        switch(tipo) {
+          case 'entrevista':
+            endpoint = '/forms/anamnese/pdf';
+            break;
+          case 'pdi':
+            endpoint = '/pdi/pdf';
+            break;
+          case 'pai':
+            endpoint = '/pai/pdf';
+            break;
+          default:
+            this.$showToast && this.$showToast('Erro', 'Tipo de PDF inválido', 'error');
+            return;
+        }
         
-        this.$showToast && this.$showToast('Info', 'Use o menu lateral para acessar os formulários AEE (Entrevista, PDI ou PAI) e clicar em "Exportar PDF" lá. O PDF de relatório geral está em desenvolvimento.', 'info');
+        const url = buildApiUrl(endpoint, `student_id=${this.alunoId}&token=${encodeURIComponent(token)}`);
+        window.open(url, '_blank');
+        this.$showToast && this.$showToast('Sucesso', 'PDF está sendo gerado em nova aba...', 'success');
         
       } catch(e) {
         this.$showToast && this.$showToast('Erro', 'Erro ao exportar PDF: ' + e.message, 'error');
-      } finally { this.carregandoPDF = false; }
+      } finally {
+        this.carregandoPDF = false;
+      }
     },
     async analiseIA(){
       if (!this.dadosRelatorio) return;

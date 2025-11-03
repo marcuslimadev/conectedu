@@ -921,7 +921,10 @@ if ($action === 'students.update') {
   // Validar dados recebidos (update permite campos parciais)
   $validation = validateStudent($B, true);
   if (!$validation['valid']) {
-    res(false, null, json_encode($validation['errors']), 422);
+    // Log para debug
+    error_log('Validation errors: ' . json_encode($validation['errors']));
+    error_log('Data sent: ' . json_encode($B));
+    res(false, $validation['errors'], 'VALIDATION_FAILED', 422);
   }
   
   // Verificar permissão
@@ -2329,6 +2332,79 @@ if ($action === 'reports.student') {
 if ($action === 'reports.student.pdf') {
   $u = require_auth();
   res(false, null, 'REPORT_PDF_NOT_IMPLEMENTED', 501);
+}
+
+// ========================================
+// GERADORES DE PDF AEE
+// ========================================
+
+// GET /forms/anamnese/pdf?student_id=X
+if ($action === 'forms.anamnese.pdf') {
+  $u = require_auth();
+  $student_id = (int)($_GET['student_id'] ?? 0);
+  
+  if (!$student_id) res(false, null, 'STUDENT_ID_REQUIRED', 400);
+  
+  // Buscar última entrevista do aluno
+  $sql = 'SELECT id FROM entrevistas_responsavel WHERE student_id = ? ORDER BY created_at DESC LIMIT 1';
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([$student_id]);
+  $entrevista = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$entrevista) {
+    res(false, null, 'NO_ENTREVISTA_FOUND', 404);
+  }
+  
+  // Redirecionar para o gerador standalone
+  $token = bearer();
+  header('Location: generate-pdf-entrevista.php?id=' . $entrevista['id'] . '&token=' . urlencode($token));
+  exit;
+}
+
+// GET /pdi/pdf?student_id=X
+if ($action === 'pdi.pdf') {
+  $u = require_auth();
+  $student_id = (int)($_GET['student_id'] ?? 0);
+  
+  if (!$student_id) res(false, null, 'STUDENT_ID_REQUIRED', 400);
+  
+  // Buscar último PDI do aluno
+  $sql = 'SELECT id FROM pdi_conectaee WHERE student_id = ? ORDER BY created_at DESC LIMIT 1';
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([$student_id]);
+  $pdi = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$pdi) {
+    res(false, null, 'NO_PDI_FOUND', 404);
+  }
+  
+  // Redirecionar para o gerador standalone
+  $token = bearer();
+  header('Location: generate-pdf-pdi.php?id=' . $pdi['id'] . '&token=' . urlencode($token));
+  exit;
+}
+
+// GET /pai/pdf?student_id=X
+if ($action === 'pai.pdf') {
+  $u = require_auth();
+  $student_id = (int)($_GET['student_id'] ?? 0);
+  
+  if (!$student_id) res(false, null, 'STUDENT_ID_REQUIRED', 400);
+  
+  // Buscar último PAI do aluno
+  $sql = 'SELECT id FROM planos_atendimento WHERE student_id = ? ORDER BY created_at DESC LIMIT 1';
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([$student_id]);
+  $pai = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$pai) {
+    res(false, null, 'NO_PAI_FOUND', 404);
+  }
+  
+  // Redirecionar para o gerador standalone
+  $token = bearer();
+  header('Location: generate-pdf-pai.php?id=' . $pai['id'] . '&token=' . urlencode($token));
+  exit;
 }
 
 // ========================================

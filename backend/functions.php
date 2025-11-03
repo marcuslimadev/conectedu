@@ -359,48 +359,48 @@ function validateStudent($data, $isUpdate = false) {
   $errors = [];
   
   // Nome obrigatório
-  if (!$isUpdate || isset($data['name'])) {
-    if (empty($data['name']) || strlen(trim($data['name'])) < 3) {
+  if (!$isUpdate || (isset($data['name']) && $data['name'] !== '')) {
+    if (isset($data['name']) && (empty($data['name']) || strlen(trim($data['name'])) < 3)) {
       $errors['name'] = 'Nome deve ter no mínimo 3 caracteres';
     }
   }
   
-  // Email (se fornecido)
-  if (isset($data['email']) && !empty($data['email'])) {
+  // Email (se fornecido e não vazio)
+  if (isset($data['email']) && $data['email'] !== '' && !empty($data['email'])) {
     if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
       $errors['email'] = 'Email inválido';
     }
   }
   
-  // CPF (se fornecido) - validação básica
-  if (isset($data['cpf']) && !empty($data['cpf'])) {
+  // CPF (se fornecido e não vazio)
+  if (isset($data['cpf']) && $data['cpf'] !== '' && !empty($data['cpf'])) {
     $cpf = preg_replace('/[^0-9]/', '', $data['cpf']);
     if (strlen($cpf) !== 11 || preg_match('/^(\d)\1{10}$/', $cpf)) {
       $errors['cpf'] = 'CPF inválido';
     }
   }
   
-  // Data de nascimento (se fornecido)
-  if (isset($data['birth_date']) && !empty($data['birth_date'])) {
+  // Data de nascimento (se fornecido e não vazio)
+  if (isset($data['birth_date']) && $data['birth_date'] !== '' && !empty($data['birth_date'])) {
     $date = DateTime::createFromFormat('Y-m-d', $data['birth_date']);
     if (!$date || $date->format('Y-m-d') !== $data['birth_date']) {
       $errors['birth_date'] = 'Data de nascimento inválida (formato: YYYY-MM-DD)';
     }
   }
   
-  // Status (se fornecido)
-  if (isset($data['status'])) {
+  // Status (se fornecido e não vazio)
+  if (isset($data['status']) && $data['status'] !== '') {
     $validStatuses = ['ativo', 'inativo', 'transferido', 'concluido'];
     if (!in_array($data['status'], $validStatuses)) {
       $errors['status'] = 'Status inválido. Use: ativo, inativo, transferido ou concluido';
     }
   }
   
-  // Modalidade (se fornecido)
-  if (isset($data['modalidade'])) {
-    $validModalidades = ['Sala Comum', 'Sala de Recurso', 'Atendimento Domiciliar', 'Classe Hospitalar'];
+  // Modalidade (se fornecido e não vazio)
+  if (isset($data['modalidade']) && $data['modalidade'] !== '') {
+    $validModalidades = ['apoio', 'srm'];
     if (!in_array($data['modalidade'], $validModalidades)) {
-      $errors['modalidade'] = 'Modalidade inválida';
+      $errors['modalidade'] = 'Modalidade inválida. Use: apoio ou srm';
     }
   }
   

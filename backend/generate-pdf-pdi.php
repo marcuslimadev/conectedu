@@ -5,23 +5,24 @@
  * Template baseado 100% no modelo oficial do PDI
  * Gera documento profissional com 11 seções + tabelas bimestrais dinâmicas
  * 
- * Complexidade: ALTA
- * - 11 seções principais
- * - Tabelas bimestrais por disciplina (4 bimestres × até 15 disciplinas)
- * - Aspectos psicomotores e pedagógicos (tabelas extensas)
- * - Sistema de avaliação com checkboxes
- * 
- * Endpoint: POST /backend/generate-pdf-pdi.php?id={pdi_id}
+ * Pode ser chamado diretamente ou incluído via api.php
  */
 
-require_once 'functions.php';
-require_once 'vendor/autoload.php';
+// Só carrega dependencies se não estiver sendo incluído
+if (!function_exists('db')) {
+    require_once 'functions.php';
+}
+if (!class_exists('Mpdf\Mpdf')) {
+    require_once __DIR__ . '/vendor/autoload.php';
+}
 
 use Mpdf\Mpdf;
 use Mpdf\Output\Destination;
 
-// Validar autenticação
-$user = require_auth();
+// Se chamado diretamente (não via api.php)
+if (!isset($user)) {
+    $user = require_auth();
+}
 
 // Validar ID do PDI
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {

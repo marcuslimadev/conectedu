@@ -2408,18 +2408,27 @@ if ($action === 'forms.anamnese.pdf') {
   
   error_log('[PDF-Entrevista] OK: Encontrada entrevista id=' . $entrevista['id']);
   
-  // Incluir o gerador e gerar PDF diretamente
+  // Passar variáveis para o gerador
   $_GET['id'] = $entrevista['id'];
+  $user = $u; // Disponibilizar para o gerador
+  // $pdo já está disponível globalmente
+  
+  // Incluir o gerador e gerar PDF diretamente
   include __DIR__ . '/generate-pdf-entrevista.php';
   exit;
 }
 
 // GET /pdi/pdf?student_id=X
 if ($action === 'pdi.pdf') {
+  error_log('[PDF-PDI] Iniciando');
   $u = require_auth();
   $student_id = (int)($_GET['student_id'] ?? 0);
+  error_log('[PDF-PDI] student_id=' . $student_id . ', user_id=' . $u['id']);
   
-  if (!$student_id) res(false, null, 'STUDENT_ID_REQUIRED', 400);
+  if (!$student_id) {
+    error_log('[PDF-PDI] ERROR: student_id nao fornecido');
+    res(false, null, 'STUDENT_ID_REQUIRED', 400);
+  }
   
   // Buscar último PDI do aluno (tabela nova)
   $sql = 'SELECT id FROM pdi_forms WHERE student_id = ?';
@@ -2432,26 +2441,38 @@ if ($action === 'pdi.pdf') {
   }
   
   $sql .= ' ORDER BY created_at DESC LIMIT 1';
+  error_log('[PDF-PDI] SQL=' . $sql);
   $stmt = $pdo->prepare($sql);
   $stmt->execute($params);
   $pdi = $stmt->fetch(PDO::FETCH_ASSOC);
   
   if (!$pdi) {
+    error_log('[PDF-PDI] ERROR: Nenhum PDI encontrado');
     res(false, null, 'NO_PDI_FOUND', 404);
   }
   
-  // Redirecionar para o gerador standalone
-  $token = bearer();
-  header('Location: generate-pdf-pdi.php?id=' . $pdi['id'] . '&token=' . urlencode($token));
+  error_log('[PDF-PDI] OK: Encontrado PDI id=' . $pdi['id']);
+  
+  // Passar variáveis para o gerador
+  $_GET['id'] = $pdi['id'];
+  $user = $u; // Disponibilizar para o gerador
+  
+  // Incluir o gerador e gerar PDF diretamente
+  include __DIR__ . '/generate-pdf-pdi.php';
   exit;
 }
 
 // GET /pai/pdf?student_id=X
 if ($action === 'pai.pdf') {
+  error_log('[PDF-PAI] Iniciando');
   $u = require_auth();
   $student_id = (int)($_GET['student_id'] ?? 0);
+  error_log('[PDF-PAI] student_id=' . $student_id . ', user_id=' . $u['id']);
   
-  if (!$student_id) res(false, null, 'STUDENT_ID_REQUIRED', 400);
+  if (!$student_id) {
+    error_log('[PDF-PAI] ERROR: student_id nao fornecido');
+    res(false, null, 'STUDENT_ID_REQUIRED', 400);
+  }
   
   // Buscar último PAI do aluno (tabela nova)
   $sql = 'SELECT id FROM plano_atendimento_forms WHERE student_id = ?';
@@ -2464,17 +2485,24 @@ if ($action === 'pai.pdf') {
   }
   
   $sql .= ' ORDER BY created_at DESC LIMIT 1';
+  error_log('[PDF-PAI] SQL=' . $sql);
   $stmt = $pdo->prepare($sql);
   $stmt->execute($params);
   $pai = $stmt->fetch(PDO::FETCH_ASSOC);
   
   if (!$pai) {
+    error_log('[PDF-PAI] ERROR: Nenhum PAI encontrado');
     res(false, null, 'NO_PAI_FOUND', 404);
   }
   
-  // Redirecionar para o gerador standalone
-  $token = bearer();
-  header('Location: generate-pdf-pai.php?id=' . $pai['id'] . '&token=' . urlencode($token));
+  error_log('[PDF-PAI] OK: Encontrado PAI id=' . $pai['id']);
+  
+  // Passar variáveis para o gerador
+  $_GET['id'] = $pai['id'];
+  $user = $u; // Disponibilizar para o gerador
+  
+  // Incluir o gerador e gerar PDF diretamente
+  include __DIR__ . '/generate-pdf-pai.php';
   exit;
 }
 

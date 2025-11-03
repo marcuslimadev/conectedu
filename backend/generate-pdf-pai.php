@@ -5,24 +5,24 @@
  * Template baseado 100% no modelo oficial do PAI
  * Gera documento profissional com 7 seções + assinaturas
  * 
- * Complexidade: MÉDIA
- * - 7 seções principais
- * - Avaliação diagnóstica detalhada (4 áreas)
- * - Objetivos e metas definidos
- * - Estratégias pedagógicas
- * - 5 assinaturas
- * 
- * Endpoint: POST /backend/generate-pdf-pai.php?id={pai_id}
+ * Pode ser chamado diretamente ou incluído via api.php
  */
 
-require_once 'functions.php';
-require_once 'vendor/autoload.php';
+// Só carrega dependencies se não estiver sendo incluído
+if (!function_exists('db')) {
+    require_once 'functions.php';
+}
+if (!class_exists('Mpdf\Mpdf')) {
+    require_once __DIR__ . '/vendor/autoload.php';
+}
 
 use Mpdf\Mpdf;
 use Mpdf\Output\Destination;
 
-// Validar autenticação
-$user = require_auth();
+// Se chamado diretamente (não via api.php)
+if (!isset($user)) {
+    $user = require_auth();
+}
 
 // Validar ID do PAI
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {

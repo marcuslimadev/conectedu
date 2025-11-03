@@ -5,20 +5,26 @@
  * Gera documento PDF profissional baseado no modelo fornecido
  * Utiliza mPDF para geração do documento
  * 
- * Endpoint: POST /pdf/entrevista/{id}
- * Resposta: Arquivo PDF para download
+ * Pode ser chamado diretamente ou incluído via api.php
  */
 
-require_once 'functions.php';
-require_once __DIR__ . '/vendor/autoload.php';
+// Só carrega dependencies se não estiver sendo incluído
+if (!function_exists('db')) {
+    require_once 'functions.php';
+}
+if (!class_exists('Mpdf\Mpdf')) {
+    require_once __DIR__ . '/vendor/autoload.php';
+}
 
 use Mpdf\Mpdf;
 
-header('Content-Type: application/json; charset=utf-8');
-cors();
-
-// Verificar autenticação
-$user = require_auth();
+// Se chamado diretamente (não via api.php)
+if (!isset($user) || !isset($pdo)) {
+    header('Content-Type: application/json; charset=utf-8');
+    cors();
+    $user = require_auth();
+    $pdo = db();
+}
 
 // Pegar ID da entrevista
 $entrevista_id = $_GET['id'] ?? null;
@@ -28,7 +34,6 @@ if (!$entrevista_id) {
 }
 
 try {
-    $pdo = db();
     
     // Buscar dados da entrevista (tabela nova entrevista_forms)
     $sql = "SELECT e.*, s.name as student_name, s.photo_url, s.birth_date, s.school_name

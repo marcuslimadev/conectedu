@@ -59,6 +59,10 @@ try {
     // Decodificar form_data JSON
     $formData = json_decode($entrevista['form_data'], true) ?? [];
     
+    error_log('[PDF-Entrevista] form_data keys: ' . implode(', ', array_keys($formData)));
+    error_log('[PDF-Entrevista] student_name=' . ($entrevista['student_name'] ?? 'NULL'));
+    error_log('[PDF-Entrevista] nome_estudante=' . ($formData['nome_estudante'] ?? 'NULL'));
+    
     // Preparar dados para o template (mesclar form_data com dados do aluno)
     $data = array_merge($formData, [
         'id' => $entrevista['id'],
@@ -69,9 +73,21 @@ try {
         'school_name' => $entrevista['school_name'] ?? $formData['nome_escola'] ?? ''
     ]);
     
+    // Usar student_name do banco como fallback
+    if (empty($data['nome_estudante']) && !empty($data['student_name'])) {
+        $data['nome_estudante'] = $data['student_name'];
+    }
+    
+    // Usar school_name do banco como fallback
+    if (empty($data['nome_escola']) && !empty($data['school_name'])) {
+        $data['nome_escola'] = $data['school_name'];
+    }
+    
     // Formatação de datas
     $data['data_entrevista_formatada'] = !empty($data['data_entrevista']) ? date('d/m/Y', strtotime($data['data_entrevista'])) : date('d/m/Y');
     $data['data_nascimento_formatada'] = !empty($data['data_nascimento']) ? date('d/m/Y', strtotime($data['data_nascimento'])) : '';
+    
+    error_log('[PDF-Entrevista] Dados finais: nome=' . ($data['nome_estudante'] ?? 'NULL') . ', escola=' . ($data['nome_escola'] ?? 'NULL'));
     
     // Template HTML baseado no modelo PDF
     $html = getEntrevistaTemplate($data);
@@ -143,6 +159,13 @@ try {
 }
 
 /**
+ * Helper para pegar valor com fallback
+ */
+function v($data, $key, $default = '') {
+    return $data[$key] ?? $default;
+}
+
+/**
  * Template HTML da Entrevista
  * Baseado no modelo PDF fornecido
  */
@@ -157,12 +180,12 @@ function getEntrevistaTemplate($data) {
     }
     
     // Checkboxes
-    $motivo_primeira = $data['motivo_entrevista'] == 'primeira' ? '☑' : '☐';
-    $motivo_atualizacao = $data['motivo_entrevista'] == 'atualizacao' ? '☑' : '☐';
-    $motivo_outros = $data['motivo_entrevista'] == 'outros' ? '☑' : '☐';
+    $motivo_primeira = v($data, 'motivo_entrevista') == 'primeira' ? '☑' : '☐';
+    $motivo_atualizacao = v($data, 'motivo_entrevista') == 'atualizacao' ? '☑' : '☐';
+    $motivo_outros = v($data, 'motivo_entrevista') == 'outros' ? '☑' : '☐';
     
-    $amamentado_sim = $data['foi_amamentado'] == 1 ? '☑' : '☐';
-    $amamentado_nao = $data['foi_amamentado'] == 0 ? '☑' : '☐';
+    $amamentado_sim = v($data, 'foi_amamentado') == 1 ? '☑' : '☐';
+    $amamentado_nao = v($data, 'foi_amamentado') == 0 ? '☑' : '☐';
     
     return <<<HTML
 <!DOCTYPE html>
@@ -261,7 +284,7 @@ function getEntrevistaTemplate($data) {
     <!-- HEADER -->
     <div class="header">
         <h1>ENTREVISTA COM O RESPONSÁVEL</h1>
-        <div class="data-entrevista">Data da Entrevista: {$data['data_entrevista_formatada']}</div>
+        <div class="data-entrevista">Data da Entrevista: {v($data, 'data_entrevista_formatada', date('d/m/Y'))}</div>
     </div>
     
     <!-- DADOS DE IDENTIFICAÇÃO -->
@@ -272,29 +295,29 @@ function getEntrevistaTemplate($data) {
         
         <div class="field-row">
             <span class="field-label">Nome do estudante:</span>
-            <span class="field-value">{$data['nome_estudante']}</span>
+            <span class="field-value">{v($data, 'nome_estudante')}</span>
         </div>
         
         <div class="grid-2">
             <div class="grid-col">
                 <span class="field-label">Data de Nascimento:</span>
-                <span class="field-value">{$data['data_nascimento_formatada']}</span>
+                <span class="field-value">{v($data, 'data_nascimento_formatada')}</span>
             </div>
             <div class="grid-col">
                 <span class="field-label">Naturalidade:</span>
-                <span class="field-value">{$data['naturalidade']}</span>
+                <span class="field-value">{v($data, 'naturalidade')}</span>
             </div>
         </div>
         
         <div class="field-row">
             <span class="field-label">Nome da Escola:</span>
-            <span class="field-value">{$data['nome_escola']}</span>
+            <span class="field-value">{v($data, 'nome_escola')}</span>
         </div>
         
         <div class="grid-2">
             <div class="grid-col">
                 <span class="field-label">Série/Ano:</span>
-                <span class="field-value">{$data['serie_ano']}</span>
+                <span class="field-value">{v($data, 'serie_ano')}</span>
             </div>
             <div class="grid-col">
                 <span class="field-label">Turno:</span>

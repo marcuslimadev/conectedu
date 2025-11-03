@@ -2380,10 +2380,19 @@ if ($action === 'forms.anamnese.pdf') {
   
   if (!$student_id) res(false, null, 'STUDENT_ID_REQUIRED', 400);
   
-  // Buscar última entrevista do aluno
-  $sql = 'SELECT id FROM entrevistas_responsavel WHERE student_id = ? ORDER BY created_at DESC LIMIT 1';
+  // Buscar última entrevista do aluno (tabela nova)
+  $sql = 'SELECT id FROM entrevista_forms WHERE student_id = ?';
+  $params = [$student_id];
+  
+  // Teacher-centric: professor só vê suas entrevistas
+  if ($u['role'] !== 'admin') {
+    $sql .= ' AND created_by_teacher_id = ?';
+    $params[] = $u['id'];
+  }
+  
+  $sql .= ' ORDER BY created_at DESC LIMIT 1';
   $stmt = $pdo->prepare($sql);
-  $stmt->execute([$student_id]);
+  $stmt->execute($params);
   $entrevista = $stmt->fetch(PDO::FETCH_ASSOC);
   
   if (!$entrevista) {
@@ -2403,10 +2412,19 @@ if ($action === 'pdi.pdf') {
   
   if (!$student_id) res(false, null, 'STUDENT_ID_REQUIRED', 400);
   
-  // Buscar último PDI do aluno
-  $sql = 'SELECT id FROM pdi_conectaee WHERE student_id = ? ORDER BY created_at DESC LIMIT 1';
+  // Buscar último PDI do aluno (tabela nova)
+  $sql = 'SELECT id FROM pdi_forms WHERE student_id = ?';
+  $params = [$student_id];
+  
+  // Teacher-centric: professor só vê seus PDIs
+  if ($u['role'] !== 'admin') {
+    $sql .= ' AND created_by_teacher_id = ?';
+    $params[] = $u['id'];
+  }
+  
+  $sql .= ' ORDER BY created_at DESC LIMIT 1';
   $stmt = $pdo->prepare($sql);
-  $stmt->execute([$student_id]);
+  $stmt->execute($params);
   $pdi = $stmt->fetch(PDO::FETCH_ASSOC);
   
   if (!$pdi) {
@@ -2426,10 +2444,19 @@ if ($action === 'pai.pdf') {
   
   if (!$student_id) res(false, null, 'STUDENT_ID_REQUIRED', 400);
   
-  // Buscar último PAI do aluno
-  $sql = 'SELECT id FROM planos_atendimento WHERE student_id = ? ORDER BY created_at DESC LIMIT 1';
+  // Buscar último PAI do aluno (tabela nova)
+  $sql = 'SELECT id FROM plano_atendimento_forms WHERE student_id = ?';
+  $params = [$student_id];
+  
+  // Teacher-centric: professor só vê seus PAIs
+  if ($u['role'] !== 'admin') {
+    $sql .= ' AND created_by_teacher_id = ?';
+    $params[] = $u['id'];
+  }
+  
+  $sql .= ' ORDER BY created_at DESC LIMIT 1';
   $stmt = $pdo->prepare($sql);
-  $stmt->execute([$student_id]);
+  $stmt->execute($params);
   $pai = $stmt->fetch(PDO::FETCH_ASSOC);
   
   if (!$pai) {

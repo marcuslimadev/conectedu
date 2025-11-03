@@ -2413,8 +2413,8 @@ if ($action === 'forms.anamnese.pdf') {
   $user = $u; // Disponibilizar para o gerador
   // $pdo já está disponível globalmente
   
-  // Incluir o gerador e gerar PDF diretamente
-  include __DIR__ . '/generate-pdf-entrevista.php';
+  // Incluir o gerador V2 simplificado
+  include __DIR__ . '/generate-pdf-entrevista-v2.php';
   exit;
 }
 

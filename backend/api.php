@@ -2385,7 +2385,7 @@ if ($action === 'forms.anamnese.pdf') {
     res(false, null, 'STUDENT_ID_REQUIRED', 400);
   }
   
-  // Buscar última entrevista do aluno (tabela nova)
+  // Buscar entrevista mais completa (com mais dados preenchidos)
   $sql = 'SELECT id FROM entrevista_forms WHERE student_id = ?';
   $params = [$student_id];
   
@@ -2395,7 +2395,8 @@ if ($action === 'forms.anamnese.pdf') {
     $params[] = $u['id'];
   }
   
-  $sql .= ' ORDER BY created_at DESC LIMIT 1';
+  // Ordena pelo tamanho do form_data (entrevista mais completa) e depois pela mais recente
+  $sql .= ' ORDER BY LENGTH(form_data) DESC, created_at DESC LIMIT 1';
   error_log('[PDF-Entrevista] SQL=' . $sql);
   $stmt = $pdo->prepare($sql);
   $stmt->execute($params);

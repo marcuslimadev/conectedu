@@ -3817,7 +3817,7 @@ const Dashboard = {
             <input 
               v-model="filtros.busca" 
               type="text" 
-              :placeholder="isAdmin ? 'Buscar por professor...' : 'Buscar por aluno...'" 
+              :placeholder="isAdmin ? 'Buscar aluno, escola ou professor...' : 'Buscar aluno ou escola...'" 
               class="flex-1 md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
             <select 
@@ -3946,10 +3946,17 @@ const Dashboard = {
       if (busca) {
         console.log('🔍 [Dashboard] Filtro por busca:', busca);
         resultado = resultado.filter(a => {
+          // Buscar em múltiplos campos
+          const nome = (a.name || '').toLowerCase();
+          const escola = (a.school_name || '').toLowerCase();
+          const professorNome = (a.professor_nome || '').toLowerCase();
+          
           if (this.isAdmin) {
-            return (a.professor_nome || '').toLowerCase().includes(busca);
+            // Admin: busca por nome do aluno, escola ou professor
+            return nome.includes(busca) || escola.includes(busca) || professorNome.includes(busca);
           } else {
-            return (a.name || '').toLowerCase().includes(busca);
+            // Professor: busca por nome do aluno ou escola
+            return nome.includes(busca) || escola.includes(busca);
           }
         });
         console.log('🔍 [Dashboard] Após filtro busca:', resultado.length);
@@ -4044,9 +4051,11 @@ const Dashboard = {
         // Inicializar alunos com percentuais zerados
         this.alunos = alunosData.map(aluno => {
           let professorNome = '';
-          if (this.isAdmin && aluno.created_by_teacher_id) {
+          // Verificação direta do role (não usar this.isAdmin que pode estar desatualizado no map)
+          if (isAdminNow && aluno.created_by_teacher_id && this.professores) {
             const prof = this.professores.find(p => p.id === aluno.created_by_teacher_id);
             professorNome = prof ? prof.name : '';
+            console.log(`👨‍🏫 [Dashboard] Aluno ${aluno.name} -> Professor: ${professorNome}`);
           }
           return {
             ...aluno,

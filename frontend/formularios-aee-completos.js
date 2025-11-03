@@ -1195,26 +1195,20 @@ const EntrevistaResponsavelCompleta = {
           status: 'rascunho'
         };
         
-        let response;
-        if (this.form.id) {
-          // Atualizar entrevista existente - ID vai como query parameter
-          response = await api.post(`?action=entrevistas-responsavel.update&id=${this.form.id}`, payload);
-          console.log('🔄 Atualizando entrevista ID:', this.form.id);
-        } else {
-          // Criar nova entrevista
-          response = await api.post('?action=entrevistas-responsavel.create', payload);
-          console.log('✨ Criando nova entrevista');
-        }
+        // LÓGICA 1:1 - Sempre usa .create que faz UPSERT (INSERT ou UPDATE automaticamente)
+        response = await api.post('?action=entrevistas-responsavel.create', payload);
+        console.log('💾 Salvando entrevista (UPSERT)...');
         
         console.log('📥 Resposta:', response.data);
         
         if (response.data?.ok) {
+          // Armazenar ID se foi criado agora ou já existia
           if (response.data.data?.id && !this.form.id) {
             this.form.id = response.data.data.id;
             console.log('🆔 ID criado:', this.form.id);
           }
           this.autoSaved = true;
-          console.log('✅ Salvo automaticamente!');
+          console.log('✅ Salvo automaticamente! Action:', response.data.data?.action || 'unknown');
           setTimeout(() => { this.autoSaved = false; }, 3000);
         }
       } catch (error) {
@@ -2431,25 +2425,20 @@ const PDICompleto = {
           data_fim: this.form.data_termino || null
         };
 
-        let response;
-        if (this.form.id) {
-          console.log('🔄 [PDI COMPLETO] Atualizando PDI ID:', this.form.id, 'Status:', status);
-          response = await api.post(`?action=pdi.update&id=${this.form.id}`, payload);
-        } else {
-          console.log('✨ [PDI COMPLETO] Criando novo PDI (status:', status, ')');
-          response = await api.post('?action=pdi.create', payload);
-        }
+        // LÓGICA 1:1 - Sempre usa .create que faz UPSERT
+        console.log('💾 [PDI COMPLETO] Salvando PDI (UPSERT) - Status:', status);
+        response = await api.post('?action=pdi.create', payload);
 
         if (response.data?.ok) {
           if (response.data.data?.id && !this.form.id) {
             this.form.id = response.data.data.id;
-            console.log('🆔 [PDI COMPLETO] ID criado:', this.form.id);
+            console.log('🆔 [PDI COMPLETO] ID:', this.form.id);
           }
 
           if (isAuto) {
             this.autoSaved = true;
             setTimeout(() => { this.autoSaved = false; }, 3000);
-            console.log('✅ [PDI COMPLETO] Salvo automaticamente!');
+            console.log('✅ [PDI COMPLETO] Salvo automaticamente! Action:', response.data.data?.action);
           }
 
           if (options.showToast && this.$root.showToast) {
@@ -3445,25 +3434,20 @@ const PAICompleto = {
           data_fim: this.form.data_termino || null
         };
 
-        let response;
-        if (this.form.id) {
-          console.log('🔄 [PAI COMPLETO] Atualizando PAI ID:', this.form.id, 'Status:', status);
-          response = await api.post(`?action=plano-atendimento.update&id=${this.form.id}`, payload);
-        } else {
-          console.log('✨ [PAI COMPLETO] Criando novo PAI (status:', status, ')');
-          response = await api.post('?action=plano-atendimento.create', payload);
-        }
+        // LÓGICA 1:1 - Sempre usa .create que faz UPSERT
+        console.log('💾 [PAI COMPLETO] Salvando PAI (UPSERT) - Status:', status);
+        response = await api.post('?action=plano-atendimento.create', payload);
 
         if (response.data?.ok) {
           if (response.data.data?.id && !this.form.id) {
             this.form.id = response.data.data.id;
-            console.log('🆔 [PAI COMPLETO] ID criado:', this.form.id);
+            console.log('🆔 [PAI COMPLETO] ID:', this.form.id);
           }
 
           if (isAuto) {
             this.autoSaved = true;
             setTimeout(() => { this.autoSaved = false; }, 3000);
-            console.log('✅ [PAI COMPLETO] Salvo automaticamente!');
+            console.log('✅ [PAI COMPLETO] Salvo automaticamente! Action:', response.data.data?.action);
           }
 
           if (options.showToast && this.$root.showToast) {

@@ -3842,7 +3842,7 @@ const Dashboard = {
       <div class="bg-white rounded-lg shadow p-6">
         <h2 class="text-xl font-bold mb-6 text-gray-800">
           Alunos 
-          <span v-if="alunos && alunos.length" class="text-sm font-normal text-gray-500">({{ alunos.length }} total)</span>
+          <span v-if="alunosFiltrados && alunosFiltrados.length" class="text-sm font-normal text-gray-500">({{ alunosFiltrados.length }} exibindo{{ alunos.length > alunosFiltrados.length ? ' de ' + alunos.length : '' }})</span>
         </h2>
 
         <div v-if="loading" class="text-center py-12">
@@ -3853,7 +3853,7 @@ const Dashboard = {
           <p class="mt-4 text-gray-600">Carregando alunos...</p>
         </div>
 
-        <div v-else-if="!alunos || alunos.length === 0" class="text-center py-12 text-gray-500">
+        <div v-else-if="!alunosFiltrados || alunosFiltrados.length === 0" class="text-center py-12 text-gray-500">
           <svg class="w-20 h-20 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
           </svg>
@@ -3862,7 +3862,7 @@ const Dashboard = {
         </div>
 
         <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          <div v-for="aluno in alunos" :key="aluno.id" class="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+          <div v-for="aluno in alunosFiltrados" :key="aluno.id" class="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
             <div class="flex items-center gap-4 mb-4 pb-4 border-b border-gray-200">
               <div class="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-md">{{ getInitials(aluno.name || '') }}</div>
               <div class="flex-1 min-w-0">
@@ -4092,56 +4092,81 @@ const Dashboard = {
     },
     async calcularPercentuais(studentId) {
       const percentuais = { entrevista: 0, pdi: 0, pai: 0 };
+      
       try {
-        // Entrevista
+        // Entrevista - Buscar o único formulário do aluno
         try {
           const entrevistaRes = await api.get('/entrevistas-responsavel/list', { params: { student_id: studentId } });
-          const entrevistaData = entrevistaRes.data?.data?.rows || entrevistaRes.data?.data || [];
-          if (entrevistaData.length > 0) {
-            percentuais.entrevista = this.calcularPreenchimento(entrevistaData[0], 180);
+          const entrevistas = entrevistaRes.data?.data?.rows || entrevistaRes.data?.data || [];
+          if (entrevistas.length > 0) {
+            const formData = typeof entrevistas[0].form_data === 'string' 
+              ? JSON.parse(entrevistas[0].form_data) 
+              : entrevistas[0].form_data;
+            percentuais.entrevista = this.calcularPreenchimentoJSON(formData);
           }
         } catch (e) {
-          console.warn(`Entrevista não encontrada para aluno ${studentId}`);
+          console.warn(`[Dashboard] Entrevista não encontrada para aluno ${studentId}`, e.message);
         }
         
-        // PDI
+        // PDI - Buscar o único formulário do aluno
         try {
-          const pdiRes = await api.get('/pdi-conectaee/list', { params: { student_id: studentId } });
-          const pdiData = pdiRes.data?.data?.rows || pdiRes.data?.data || [];
-          if (pdiData.length > 0) {
-            percentuais.pdi = this.calcularPreenchimento(pdiData[0], 74);
+          const pdiRes = await api.get('/pdi/list', { params: { student_id: studentId } });
+          const pdis = pdiRes.data?.data?.rows || pdiRes.data?.data || [];
+          if (pdis.length > 0) {
+            const formData = typeof pdis[0].form_data === 'string' 
+              ? JSON.parse(pdis[0].form_data) 
+              : pdis[0].form_data;
+            percentuais.pdi = this.calcularPreenchimentoJSON(formData);
           }
         } catch (e) {
-          console.warn(`PDI não encontrado para aluno ${studentId}`);
+          console.warn(`[Dashboard] PDI não encontrado para aluno ${studentId}`, e.message);
         }
         
-        // PAI
+        // PAI - Buscar o único formulário do aluno
         try {
-          const paiRes = await api.get('/pai', { params: { student_id: studentId } });
-          const paiData = paiRes.data?.data?.rows || paiRes.data?.data || [];
-          if (paiData.length > 0) {
-            percentuais.pai = this.calcularPreenchimento(paiData[0], 46);
+          const paiRes = await api.get('/plano-atendimento/list', { params: { student_id: studentId } });
+          const pais = paiRes.data?.data?.rows || paiRes.data?.data || [];
+          if (pais.length > 0) {
+            const formData = typeof pais[0].form_data === 'string' 
+              ? JSON.parse(pais[0].form_data) 
+              : pais[0].form_data;
+            percentuais.pai = this.calcularPreenchimentoJSON(formData);
           }
         } catch (e) {
-          console.warn(`PAI não encontrado para aluno ${studentId}`);
+          console.warn(`[Dashboard] PAI não encontrado para aluno ${studentId}`, e.message);
         }
       } catch (error) {
-        console.error(`Erro ao calcular percentuais para aluno ${studentId}:`, error);
+        console.error(`❌ Erro ao calcular percentuais para aluno ${studentId}:`, error);
       }
+      
       return percentuais;
     },
-    calcularPreenchimento(formData, totalCampos) {
-      if (!formData) return 0;
-      let camposPreenchidos = 0;
+    
+    calcularPreenchimentoJSON(formData) {
+      if (!formData || typeof formData !== 'object') return 0;
+      
+      let total = 0;
+      let preenchidos = 0;
+      
       for (const key in formData) {
-        if (key !== 'id' && key !== 'student_id' && key !== 'created_at' && key !== 'updated_at') {
-          const valor = formData[key];
-          if (valor !== null && valor !== undefined && valor !== '') {
-            camposPreenchidos++;
+        // Ignorar campos de metadados
+        if (['id', 'student_id', 'created_at', 'updated_at', 'status', 'created_by_teacher_id'].includes(key)) {
+          continue;
+        }
+        
+        total++;
+        const valor = formData[key];
+        
+        // Considerar preenchido se não for null, undefined, string vazia ou array vazio
+        if (valor !== null && valor !== undefined && valor !== '') {
+          if (Array.isArray(valor) && valor.length === 0) {
+            continue; // Array vazio não conta
           }
+          preenchidos++;
         }
       }
-      return Math.round((camposPreenchidos / totalCampos) * 100);
+      
+      return total > 0 ? Math.round((preenchidos / total) * 100) : 0;
     },
     getInitials(name) {
       if (!name) return '?';
@@ -4157,8 +4182,14 @@ const Dashboard = {
     },
     renderChart() {
       setTimeout(() => {
-        if (!this.alunos || this.alunos.length === 0) {
+        const alunosParaGrafico = this.alunosFiltrados;
+        
+        if (!alunosParaGrafico || alunosParaGrafico.length === 0) {
           console.log('⚠️ [Dashboard] Sem dados para gráfico');
+          const container = document.getElementById('chart-container');
+          if (container) {
+            container.innerHTML = '<div class="text-center text-gray-500 py-12">Nenhum dado disponível para exibir no gráfico</div>';
+          }
           return;
         }
         
@@ -4168,10 +4199,10 @@ const Dashboard = {
           return;
         }
         
-        const totalAlunos = this.alunos.length;
-        const mediaEntrevista = Math.round(this.alunos.reduce((sum, a) => sum + (a.entrevista_percent || 0), 0) / totalAlunos);
-        const mediaPDI = Math.round(this.alunos.reduce((sum, a) => sum + (a.pdi_percent || 0), 0) / totalAlunos);
-        const mediaPAI = Math.round(this.alunos.reduce((sum, a) => sum + (a.pai_percent || 0), 0) / totalAlunos);
+        const totalAlunos = alunosParaGrafico.length;
+        const mediaEntrevista = Math.round(alunosParaGrafico.reduce((sum, a) => sum + (a.entrevista_percent || 0), 0) / totalAlunos);
+        const mediaPDI = Math.round(alunosParaGrafico.reduce((sum, a) => sum + (a.pdi_percent || 0), 0) / totalAlunos);
+        const mediaPAI = Math.round(alunosParaGrafico.reduce((sum, a) => sum + (a.pai_percent || 0), 0) / totalAlunos);
         
         console.log('📈 [Dashboard] Gráfico:', { mediaEntrevista, mediaPDI, mediaPAI });
         

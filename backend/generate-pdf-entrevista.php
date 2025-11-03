@@ -28,9 +28,11 @@ if (!$entrevista_id) {
 }
 
 try {
-    // Buscar dados da entrevista
+    $pdo = db();
+    
+    // Buscar dados da entrevista (tabela nova entrevista_forms)
     $sql = "SELECT e.*, s.name as student_name, s.photo_url, s.birth_date, s.school_name
-            FROM entrevistas_responsavel e
+            FROM entrevista_forms e
             LEFT JOIN students s ON e.student_id = s.id
             WHERE e.id = :id";
     
@@ -43,14 +45,26 @@ try {
     }
     
     // Verificar permissões (professor só vê suas entrevistas)
-    if ($user['role'] !== 'admin' && $entrevista['teacher_id'] != $user['id']) {
+    if ($user['role'] !== 'admin' && $entrevista['created_by_teacher_id'] != $user['id']) {
         res(false, null, 'Sem permissão para acessar esta entrevista', 403);
     }
     
-    // Preparar dados para o template
-    $data = $entrevista;
-    $data['data_entrevista_formatada'] = date('d/m/Y', strtotime($data['data_entrevista']));
-    $data['data_nascimento_formatada'] = $data['data_nascimento'] ? date('d/m/Y', strtotime($data['data_nascimento'])) : '';
+    // Decodificar form_data JSON
+    $formData = json_decode($entrevista['form_data'], true) ?? [];
+    
+    // Preparar dados para o template (mesclar form_data com dados do aluno)
+    $data = array_merge($formData, [
+        'id' => $entrevista['id'],
+        'student_id' => $entrevista['student_id'],
+        'student_name' => $entrevista['student_name'] ?? $formData['nome_estudante'] ?? '',
+        'photo_url' => $entrevista['photo_url'],
+        'birth_date' => $entrevista['birth_date'],
+        'school_name' => $entrevista['school_name'] ?? $formData['nome_escola'] ?? ''
+    ]);
+    
+    // Formatação de datas
+    $data['data_entrevista_formatada'] = !empty($data['data_entrevista']) ? date('d/m/Y', strtotime($data['data_entrevista'])) : date('d/m/Y');
+    $data['data_nascimento_formatada'] = !empty($data['data_nascimento']) ? date('d/m/Y', strtotime($data['data_nascimento'])) : '';
     
     // Template HTML baseado no modelo PDF
     $html = getEntrevistaTemplate($data);

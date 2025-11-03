@@ -4626,6 +4626,23 @@ const Relatorios = {
         </div>
       </div>
       
+      <!-- Modal de Visualização do PDF -->
+      <div v-if="mostrarModalVisualizarPDF" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50" @click="fecharModalPDF">
+        <div class="relative w-full h-full max-w-7xl max-h-screen p-4" @click.stop>
+          <div class="bg-white rounded-lg shadow-2xl h-full flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b">
+              <h3 class="text-xl font-bold text-gray-900">📄 Visualização do PDF</h3>
+              <button @click="fecharModalPDF" class="text-gray-500 hover:text-gray-700 text-2xl font-bold">
+                ×
+              </button>
+            </div>
+            <div class="flex-1 overflow-hidden">
+              <iframe v-if="pdfUrl" :src="pdfUrl" class="w-full h-full border-0"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <!-- Modal de Seleção de PDF -->
       <div v-if="mostrarModalPDF" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click="mostrarModalPDF = false">
         <div class="bg-white rounded-lg shadow-xl max-w-md w-full m-4" @click.stop>
@@ -4708,7 +4725,9 @@ const Relatorios = {
       erroIA: null,
       tentouGerar: false,
       novaNota: { title: '', content: '' },
-      mostrarModalPDF: false
+      mostrarModalPDF: false,
+      mostrarModalVisualizarPDF: false,
+      pdfUrl: null
     };
   },
   computed: {
@@ -4823,9 +4842,13 @@ const Relatorios = {
       this.carregandoPDF = true;
       this.mostrarModalPDF = false;
       
+      console.log('🔧 Iniciando geração de PDF:', tipo);
+      console.log('🔧 Aluno ID:', this.alunoId);
+      
       try {
         const token = localStorage.getItem('token');
         if (!token) {
+          console.error('❌ Token não encontrado');
           this.$showToast && this.$showToast('Erro', 'Faça login novamente.', 'error');
           return;
         }
@@ -4842,19 +4865,69 @@ const Relatorios = {
             endpoint = '/pai/pdf';
             break;
           default:
+            console.error('❌ Tipo de PDF inválido:', tipo);
             this.$showToast && this.$showToast('Erro', 'Tipo de PDF inválido', 'error');
             return;
         }
         
-        const url = buildApiUrl(endpoint, `student_id=${this.alunoId}&token=${encodeURIComponent(token)}`);
-        window.open(url, '_blank');
-        this.$showToast && this.$showToast('Sucesso', 'PDF está sendo gerado em nova aba...', 'success');
+        console.log('🔧 Endpoint:', endpoint);
+        console.log('🔧 Fazendo requisição...');
+        
+        // Fazer requisição para obter o PDF como blob
+        const response = await fetch(buildApiUrl(endpoint, `student_id=${this.alunoId}`), {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        console.log('🔧 Response status:', response.status);
+        console.log('🔧 Response headers:', Object.fromEntries(response.headers.entries()));
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('❌ Erro na resposta:', errorText);
+          throw new Error(`Erro ao gerar PDF: ${response.status} - ${errorText.substring(0, 100)}`);
+        }
+        
+        // Verificar se é realmente um PDF
+        const contentType = response.headers.get('content-type');
+        console.log('🔧 Content-Type:', contentType);
+        
+        if (!contentType || !contentType.includes('application/pdf')) {
+          const text = await response.text();
+          console.error('❌ Resposta não é PDF:', text.substring(0, 200));
+          throw new Error('Resposta não é um PDF válido');
+        }
+        
+        // Obter o blob do PDF
+        const blob = await response.blob();
+        console.log('✅ PDF recebido! Tamanho:', blob.size, 'bytes');
+        
+        // Criar URL do blob
+        const pdfUrl = URL.createObjectURL(blob);
+        console.log('✅ URL do blob criada:', pdfUrl);
+        
+        // Abrir em modal
+        this.pdfUrl = pdfUrl;
+        this.mostrarModalVisualizarPDF = true;
+        
+        this.$showToast && this.$showToast('Sucesso', 'PDF gerado com sucesso!', 'success');
         
       } catch(e) {
+        console.error('❌ Erro ao gerar PDF:', e);
         this.$showToast && this.$showToast('Erro', 'Erro ao exportar PDF: ' + e.message, 'error');
       } finally {
         this.carregandoPDF = false;
       }
+    },
+    
+    fecharModalPDF() {
+      if (this.pdfUrl) {
+        URL.revokeObjectURL(this.pdfUrl);
+        this.pdfUrl = null;
+      }
+      this.mostrarModalVisualizarPDF = false;
     },
     async analiseIA(){
       if (!this.dadosRelatorio) return;

@@ -2375,10 +2375,15 @@ if ($action === 'reports.student.pdf') {
 
 // GET /forms/anamnese/pdf?student_id=X
 if ($action === 'forms.anamnese.pdf') {
+  error_log('[PDF-Entrevista] Iniciando');
   $u = require_auth();
   $student_id = (int)($_GET['student_id'] ?? 0);
+  error_log('[PDF-Entrevista] student_id=' . $student_id . ', user_id=' . $u['id']);
   
-  if (!$student_id) res(false, null, 'STUDENT_ID_REQUIRED', 400);
+  if (!$student_id) {
+    error_log('[PDF-Entrevista] ERROR: student_id nao fornecido');
+    res(false, null, 'STUDENT_ID_REQUIRED', 400);
+  }
   
   // Buscar última entrevista do aluno (tabela nova)
   $sql = 'SELECT id FROM entrevista_forms WHERE student_id = ?';
@@ -2391,17 +2396,21 @@ if ($action === 'forms.anamnese.pdf') {
   }
   
   $sql .= ' ORDER BY created_at DESC LIMIT 1';
+  error_log('[PDF-Entrevista] SQL=' . $sql);
   $stmt = $pdo->prepare($sql);
   $stmt->execute($params);
   $entrevista = $stmt->fetch(PDO::FETCH_ASSOC);
   
   if (!$entrevista) {
+    error_log('[PDF-Entrevista] ERROR: Nenhuma entrevista encontrada');
     res(false, null, 'NO_ENTREVISTA_FOUND', 404);
   }
   
-  // Redirecionar para o gerador standalone
-  $token = bearer();
-  header('Location: generate-pdf-entrevista.php?id=' . $entrevista['id'] . '&token=' . urlencode($token));
+  error_log('[PDF-Entrevista] OK: Encontrada entrevista id=' . $entrevista['id']);
+  
+  // Incluir o gerador e gerar PDF diretamente
+  $_GET['id'] = $entrevista['id'];
+  include __DIR__ . '/generate-pdf-entrevista.php';
   exit;
 }
 

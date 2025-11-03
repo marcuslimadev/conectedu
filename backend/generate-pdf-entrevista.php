@@ -36,9 +36,11 @@ if (!$entrevista_id) {
 try {
     
     // Buscar dados da entrevista (tabela nova entrevista_forms)
-    $sql = "SELECT e.*, s.name as student_name, s.photo_url, s.birth_date, s.school_name
+    $sql = "SELECT e.*, s.name as student_name, s.photo_url, s.birth_date, 
+                   sch.name as school_name
             FROM entrevista_forms e
             LEFT JOIN students s ON e.student_id = s.id
+            LEFT JOIN schools sch ON s.school_id = sch.id
             WHERE e.id = :id";
     
     $stmt = $pdo->prepare($sql);

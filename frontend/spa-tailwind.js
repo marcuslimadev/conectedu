@@ -5461,29 +5461,26 @@ const Relatorios = {
 const EntrevistaResponsavel = {
   template: `
     <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
-      <div class="max-w-4xl mx-auto px-4">
-        <!-- Header -->
-        <div class="mb-8">
+      <div class="max-w-6xl mx-auto px-4">
+        <!-- Header Compacto -->
+        <div class="mb-6">
           <div class="flex items-center justify-between">
             <div>
-              <h1 class="text-3xl font-bold text-gray-900 mb-2">Entrevista com Responsável</h1>
-              <p class="text-gray-600">Complete as informações em etapas organizadas</p>
-              <!-- Indicador de Auto-Save -->
+              <h1 class="text-2xl font-bold text-gray-900">Entrevista com Responsável</h1>
               <div v-if="savingAuto" class="flex items-center text-sm text-blue-600 mt-1">
                 <i class="fas fa-circle-notch fa-spin mr-2"></i>
-                Salvando automaticamente...
+                Salvando...
               </div>
               <div v-else-if="lastSaved" class="flex items-center text-sm text-green-600 mt-1">
                 <i class="fas fa-check-circle mr-2"></i>
-                Salvo às {{ lastSaved.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) }}
+                Salvo {{ lastSaved.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) }}
               </div>
             </div>
             
-            <!-- Botão Gerar PDF -->
             <button v-if="form.id" 
                     @click="generatePDF"
                     :disabled="generatingPDF"
-                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md">
+                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center space-x-2 disabled:opacity-50 transition-colors shadow-md">
               <i v-if="!generatingPDF" class="fas fa-file-pdf"></i>
               <i v-else class="fas fa-spinner fa-spin"></i>
               <span>{{ generatingPDF ? 'Gerando...' : 'Gerar PDF' }}</span>
@@ -5491,79 +5488,44 @@ const EntrevistaResponsavel = {
           </div>
         </div>
 
-        <!-- DEBUG: Banner de Auto-Save -->
-        <div class="mb-4 px-4 py-3 border-2 rounded-lg" :class="{
-          'bg-blue-50 border-blue-300': savingAuto,
-          'bg-green-50 border-green-300': lastSaved && !savingAuto,
-          'bg-gray-50 border-gray-300': !savingAuto && !lastSaved
-        }">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center">
-              <i v-if="savingAuto" class="fas fa-circle-notch fa-spin text-blue-600 mr-2"></i>
-              <i v-else-if="lastSaved" class="fas fa-check-circle text-green-600 mr-2"></i>
-              <i v-else class="fas fa-info-circle text-gray-600 mr-2"></i>
-              
-              <span class="font-medium">
-                <span v-if="savingAuto" class="text-blue-700">Salvando automaticamente...</span>
-                <span v-else-if="lastSaved" class="text-green-700">✓ Salvo automaticamente às {{ lastSaved.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) }}</span>
-                <span v-else class="text-gray-700">Auto-save ativo - Digite e seus dados serão salvos automaticamente</span>
-              </span>
-            </div>
-            <span v-if="form.id" class="text-xs bg-white px-2 py-1 rounded border">ID: {{ form.id }}</span>
-          </div>
-        </div>
-
-        <!-- Progress Bar -->
-        <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
-          <div class="flex items-center justify-between mb-4">
-            <span class="text-sm font-medium text-gray-700">Progresso do Formulário</span>
-            <span class="text-sm text-gray-500">{{ currentStep }}/{{ totalSteps }}</span>
-          </div>
-          <div class="w-full bg-gray-200 rounded-full h-2">
-            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 rounded-full transition-all duration-500 ease-out" 
-                 :style="{ width: progressPercentage + '%' }"></div>
-          </div>
-          <div class="flex justify-between mt-2">
-            <span v-for="(step, index) in steps" :key="index" 
-                  class="text-xs font-medium transition-colors duration-300"
-                  :class="index < currentStep ? 'text-indigo-600' : index === currentStep - 1 ? 'text-indigo-500' : 'text-gray-400'">
-              {{ step.title }}
-            </span>
-          </div>
-        </div>
-
-        <!-- Step Navigation Pills -->
-        <div class="flex flex-wrap justify-center gap-2 mb-8">
-          <button v-for="(step, index) in steps" :key="index"
-                  @click="goToStep(index + 1)"
-                  :disabled="index + 1 > maxCompletedStep"
-                  class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300"
-                  :class="[
+        <!-- TabBar Navigation -->
+        <div class="bg-white rounded-lg shadow-md mb-6 overflow-hidden">
+          <div class="flex border-b border-gray-200 overflow-x-auto">
+            <button v-for="(step, index) in steps" :key="index"
+                    @click="goToStep(index + 1)"
+                    class="flex-1 min-w-[120px] px-6 py-4 text-sm font-medium transition-all duration-200 relative"
+                    :class="[
                     index + 1 === currentStep 
-                      ? 'bg-indigo-600 text-white shadow-lg' 
-                      : index + 1 <= maxCompletedStep 
-                        ? 'bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50' 
-                        : 'bg-gray-100 text-gray-600 cursor-not-allowed'
+                      ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-600' 
+                      : index + 1 < currentStep 
+                        ? 'text-green-600 hover:bg-green-50' 
+                        : 'text-gray-500 hover:bg-gray-50'
                   ]">
-            <i :class="step.icon + ' mr-2'"></i>{{ step.title }}
-          </button>
+              <div class="flex items-center justify-center space-x-2">
+                <i :class="[step.icon, index + 1 < currentStep ? 'fa-check-circle' : '']"></i>
+                <span>{{ step.title }}</span>
+              </div>
+              <div v-if="index + 1 === currentStep" class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"></div>
+            </button>
+          </div>
+          
+          <!-- Progress Indicator -->
+          <div class="px-6 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between text-sm">
+            <span class="text-gray-600">
+              <i class="fas fa-tasks mr-2"></i>
+              Etapa {{ currentStep }} de {{ totalSteps }}
+            </span>
+            <span class="font-medium text-blue-600">{{ Math.round(progressPercentage) }}% completo</span>
+          </div>
         </div>
 
         <!-- Form Card -->
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
           <form @submit.prevent="salvarEntrevista" class="relative">
             <!-- Step 1: Dados do Aluno -->
             <div v-show="currentStep === 1" class="step-content">
-              <div class="p-8">
-                <div class="text-center mb-8">
-                  <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-user-graduate text-2xl text-blue-600"></i>
-                  </div>
-                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Dados do Aluno</h2>
-                  <p class="text-gray-600">Vamos começar com as informações básicas do aluno</p>
-                </div>
-
-                <div class="max-w-2xl mx-auto space-y-6">
+              <div class="p-6">
+                <div class="max-w-4xl mx-auto space-y-6">
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                       Selecionar Aluno <span class="text-red-500">*</span>
@@ -5808,26 +5770,23 @@ const EntrevistaResponsavel = {
             </div>
 
             <!-- Navigation Buttons -->
-            <div class="bg-gray-50 px-8 py-6 flex justify-between items-center">
+            <div class="border-t border-gray-200 px-6 py-4 flex justify-between items-center bg-white">
               <button type="button" @click="previousStep" 
-                      :disabled="currentStep === 1"
-                      class="flex items-center px-6 py-3 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
+                      v-if="currentStep > 1"
+                      class="flex items-center px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
                 <i class="fas fa-chevron-left mr-2"></i>
                 Anterior
               </button>
-
-              <div class="flex items-center space-x-2">
-                <span class="text-sm text-gray-500">{{ currentStep }} de {{ totalSteps }}</span>
-              </div>
+              <div v-else></div>
 
               <button v-if="currentStep < totalSteps" type="button" @click="nextStep"
-                      class="flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200">
+                      class="flex items-center px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
                 Próximo
                 <i class="fas fa-chevron-right ml-2"></i>
               </button>
 
               <button v-else type="submit" :disabled="loading"
-                      class="flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
+                      class="flex items-center px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm">
                 <div v-if="loading" class="animate-spin -ml-1 mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
                 <i v-else class="fas fa-save mr-2"></i>
                 {{ loading ? 'Salvando...' : 'Finalizar Entrevista' }}

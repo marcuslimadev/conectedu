@@ -52,33 +52,48 @@ const EntrevistaResponsavelCompleta = {
           <!-- Progress Bar -->
           <div class="mt-6">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-sm font-medium text-gray-700">Progresso</span>
-              <span class="text-sm text-gray-500">{{ Math.round((currentStep / totalSteps) * 100) }}%</span>
+              <span class="text-sm font-medium text-gray-700">Campos preenchidos</span>
+              <span class="text-sm font-semibold" :class="[
+                progressPercentage >= 80 ? 'text-green-600' : 
+                progressPercentage >= 50 ? 'text-blue-600' : 
+                'text-gray-500'
+              ]">{{ progressPercentage }}%</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-3">
-              <div class="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-500"
-                   :style="{ width: ((currentStep / totalSteps) * 100) + '%' }"></div>
+              <div class="h-3 rounded-full transition-all duration-500"
+                   :class="[
+                     progressPercentage >= 80 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
+                     progressPercentage >= 50 ? 'bg-gradient-to-r from-blue-500 to-indigo-500' :
+                     'bg-gradient-to-r from-gray-400 to-gray-500'
+                   ]"
+                   :style="{ width: progressPercentage + '%' }"></div>
             </div>
           </div>
         </div>
 
-        <!-- Step Pills -->
-        <div class="bg-white rounded-xl shadow-lg p-4 mb-6">
-          <div class="flex flex-wrap gap-2 justify-center">
+        <!-- TabBar Navigation -->
+        <div class="bg-white rounded-lg shadow-md mb-6 overflow-hidden">
+          <div class="flex border-b border-gray-200 overflow-x-auto scrollbar-hide">
             <button v-for="(step, index) in steps" :key="index"
                     @click="goToStep(index + 1)"
-                    class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
-                    :class="currentStep === index + 1 
-                      ? 'bg-indigo-600 text-white shadow-lg scale-105' 
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
-              <i :class="step.icon + ' mr-2'"></i>
-              {{ step.name }}
+                    class="flex-shrink-0 px-6 py-4 text-sm font-medium transition-all duration-200 relative whitespace-nowrap"
+                    :class="[
+                      currentStep === index + 1 
+                        ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-600' 
+                        : index + 1 < currentStep 
+                          ? 'text-green-600 hover:bg-green-50' 
+                          : 'text-gray-500 hover:bg-gray-50'
+                    ]">
+              <div class="flex items-center justify-center space-x-2">
+                <i :class="[step.icon, index + 1 < currentStep ? 'fa-check-circle' : '']"></i>
+                <span>{{ step.name }}</span>
+              </div>
             </button>
           </div>
         </div>
 
         <!-- Form Content -->
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
           <form @submit.prevent="handleSubmit">
             <!-- STEP 1: IDENTIFICAÇÃO -->
             <div v-show="currentStep === 1" class="p-8">
@@ -1112,6 +1127,24 @@ const EntrevistaResponsavelCompleta = {
     }
   },
 
+  computed: {
+    progressPercentage() {
+      // Campos obrigatórios/importantes que devem ser considerados
+      const totalFields = Object.keys(this.form).length;
+      
+      // Contar campos preenchidos
+      let filledFields = 0;
+      for (const [key, value] of Object.entries(this.form)) {
+        // Considerar preenchido se não for vazio, null ou undefined
+        if (value !== '' && value !== null && value !== undefined) {
+          filledFields++;
+        }
+      }
+      
+      return Math.round((filledFields / totalFields) * 100);
+    }
+  },
+
   watch: {
     form: {
       handler(newVal, oldVal) {
@@ -1432,12 +1465,21 @@ const PDICompleto = {
           <!-- Progress Bar -->
           <div class="mt-6">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-sm font-medium text-gray-700">Progresso</span>
-              <span class="text-sm text-gray-500">{{ Math.round((currentStep / totalSteps) * 100) }}%</span>
+              <span class="text-sm font-medium text-gray-700">Campos preenchidos</span>
+              <span class="text-sm font-semibold" :class="[
+                progressPercentage >= 80 ? 'text-green-600' : 
+                progressPercentage >= 50 ? 'text-emerald-600' : 
+                'text-gray-500'
+              ]">{{ progressPercentage }}%</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-3">
-              <div class="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 h-3 rounded-full transition-all duration-500"
-                   :style="{ width: ((currentStep / totalSteps) * 100) + '%' }"></div>
+              <div class="h-3 rounded-full transition-all duration-500"
+                   :class="[
+                     progressPercentage >= 80 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
+                     progressPercentage >= 50 ? 'bg-gradient-to-r from-emerald-500 to-teal-500' :
+                     'bg-gradient-to-r from-gray-400 to-gray-500'
+                   ]"
+                   :style="{ width: progressPercentage + '%' }"></div>
             </div>
           </div>
         </div>
@@ -2332,6 +2374,19 @@ const PDICompleto = {
     }
   },
 
+  computed: {
+    progressPercentage() {
+      const totalFields = Object.keys(this.form).length;
+      let filledFields = 0;
+      for (const [key, value] of Object.entries(this.form)) {
+        if (value !== '' && value !== null && value !== undefined) {
+          filledFields++;
+        }
+      }
+      return Math.round((filledFields / totalFields) * 100);
+    }
+  },
+
   watch: {
     form: {
       handler(newVal, oldVal) {
@@ -2659,12 +2714,21 @@ const PAICompleto = {
           <!-- Progress Bar -->
           <div class="mt-6">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-sm font-medium text-gray-700">Progresso</span>
-              <span class="text-sm text-gray-500">{{ Math.round((currentStep / totalSteps) * 100) }}%</span>
+              <span class="text-sm font-medium text-gray-700">Campos preenchidos</span>
+              <span class="text-sm font-semibold" :class="[
+                progressPercentage >= 80 ? 'text-green-600' : 
+                progressPercentage >= 50 ? 'text-purple-600' : 
+                'text-gray-500'
+              ]">{{ progressPercentage }}%</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-3">
-              <div class="bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 h-3 rounded-full transition-all duration-500"
-                   :style="{ width: ((currentStep / totalSteps) * 100) + '%' }"></div>
+              <div class="h-3 rounded-full transition-all duration-500"
+                   :class="[
+                     progressPercentage >= 80 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
+                     progressPercentage >= 50 ? 'bg-gradient-to-r from-purple-500 to-pink-500' :
+                     'bg-gradient-to-r from-gray-400 to-gray-500'
+                   ]"
+                   :style="{ width: progressPercentage + '%' }"></div>
             </div>
           </div>
         </div>
@@ -3336,6 +3400,19 @@ const PAICompleto = {
         encaminhamentos: '',
         observacoes_gerais: ''
       }
+    }
+  },
+
+  computed: {
+    progressPercentage() {
+      const totalFields = Object.keys(this.form).length;
+      let filledFields = 0;
+      for (const [key, value] of Object.entries(this.form)) {
+        if (value !== '' && value !== null && value !== undefined) {
+          filledFields++;
+        }
+      }
+      return Math.round((filledFields / totalFields) * 100);
     }
   },
 

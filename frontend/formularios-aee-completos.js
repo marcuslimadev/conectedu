@@ -77,13 +77,7 @@ const EntrevistaResponsavelCompleta = {
             <button v-for="(step, index) in steps" :key="index"
                     @click="goToStep(index + 1)"
                     class="flex-shrink-0 px-6 py-4 text-sm font-medium transition-all duration-200 relative whitespace-nowrap"
-                    :class="[
-                      currentStep === index + 1 
-                        ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-600' 
-                        : index + 1 < currentStep 
-                          ? 'text-green-600 hover:bg-green-50' 
-                          : 'text-gray-500 hover:bg-gray-50'
-                    ]">
+                    :class="getTabColorClasses(index + 1)">
               <div class="flex items-center justify-center space-x-2">
                 <i :class="[step.icon, index + 1 < currentStep ? 'fa-check-circle' : '']"></i>
                 <span>{{ step.name }}</span>
@@ -1180,6 +1174,33 @@ const EntrevistaResponsavelCompleta = {
   },
 
   methods: {
+    getTabColorClasses(stepNumber) {
+      const colors = [
+        { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-600', hover: 'hover:bg-blue-50' },
+        { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-600', hover: 'hover:bg-purple-50' },
+        { bg: 'bg-pink-100', text: 'text-pink-700', border: 'border-pink-600', hover: 'hover:bg-pink-50' },
+        { bg: 'bg-orange-100', text: 'text-orange-700', border: 'border-orange-600', hover: 'hover:bg-orange-50' },
+        { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-600', hover: 'hover:bg-red-50' },
+        { bg: 'bg-teal-100', text: 'text-teal-700', border: 'border-teal-600', hover: 'hover:bg-teal-50' },
+        { bg: 'bg-cyan-100', text: 'text-cyan-700', border: 'border-cyan-600', hover: 'hover:bg-cyan-50' },
+        { bg: 'bg-indigo-100', text: 'text-indigo-700', border: 'border-indigo-600', hover: 'hover:bg-indigo-50' },
+        { bg: 'bg-rose-100', text: 'text-rose-700', border: 'border-rose-600', hover: 'hover:bg-rose-50' },
+        { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-600', hover: 'hover:bg-emerald-50' },
+        { bg: 'bg-violet-100', text: 'text-violet-700', border: 'border-violet-600', hover: 'hover:bg-violet-50' },
+        { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-600', hover: 'hover:bg-amber-50' }
+      ];
+      
+      const color = colors[(stepNumber - 1) % colors.length];
+      
+      if (this.currentStep === stepNumber) {
+        return `${color.bg} ${color.text} border-b-3 ${color.border}`;
+      } else if (stepNumber < this.currentStep) {
+        return `text-green-600 hover:bg-green-50`;
+      } else {
+        return `text-gray-500 ${color.hover}`;
+      }
+    },
+
     cancelAutoSaveTimer() {
       if (this.autoSaveTimeout) {
         clearTimeout(this.autoSaveTimeout);
@@ -1484,23 +1505,23 @@ const PDICompleto = {
           </div>
         </div>
 
-        <!-- Step Pills -->
-        <div class="bg-white rounded-xl shadow-lg p-4 mb-6">
-          <div class="flex flex-wrap gap-2 justify-center">
+        <!-- TabBar Navigation -->
+        <div class="bg-white rounded-lg shadow-md mb-6 overflow-hidden">
+          <div class="flex border-b border-gray-200 overflow-x-auto scrollbar-hide">
             <button v-for="(step, index) in steps" :key="index"
                     @click="goToStep(index + 1)"
-                    class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
-                    :class="currentStep === index + 1 
-                      ? 'bg-emerald-600 text-white shadow-lg scale-105' 
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
-              <i :class="step.icon + ' mr-2'"></i>
-              {{ step.name }}
+                    class="flex-shrink-0 px-6 py-4 text-sm font-medium transition-all duration-200 relative whitespace-nowrap"
+                    :class="getTabColorClasses(index + 1)">
+              <div class="flex items-center justify-center space-x-2">
+                <i :class="[step.icon, index + 1 < currentStep ? 'fa-check-circle' : '']"></i>
+                <span>{{ step.name }}</span>
+              </div>
             </button>
           </div>
         </div>
 
         <!-- Form Content -->
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
           <form @submit.prevent="handleSubmit">
             
             <!-- STEP 1: DADOS INSTITUCIONAIS -->
@@ -2424,6 +2445,31 @@ const PDICompleto = {
   },
 
   methods: {
+    getTabColorClasses(stepNumber) {
+      const colors = [
+        { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-600', hover: 'hover:bg-emerald-50' },
+        { bg: 'bg-teal-100', text: 'text-teal-700', border: 'border-teal-600', hover: 'hover:bg-teal-50' },
+        { bg: 'bg-cyan-100', text: 'text-cyan-700', border: 'border-cyan-600', hover: 'hover:bg-cyan-50' },
+        { bg: 'bg-sky-100', text: 'text-sky-700', border: 'border-sky-600', hover: 'hover:bg-sky-50' },
+        { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-600', hover: 'hover:bg-blue-50' },
+        { bg: 'bg-indigo-100', text: 'text-indigo-700', border: 'border-indigo-600', hover: 'hover:bg-indigo-50' },
+        { bg: 'bg-violet-100', text: 'text-violet-700', border: 'border-violet-600', hover: 'hover:bg-violet-50' },
+        { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-600', hover: 'hover:bg-purple-50' },
+        { bg: 'bg-fuchsia-100', text: 'text-fuchsia-700', border: 'border-fuchsia-600', hover: 'hover:bg-fuchsia-50' },
+        { bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-600', hover: 'hover:bg-green-50' }
+      ];
+      
+      const color = colors[(stepNumber - 1) % colors.length];
+      
+      if (this.currentStep === stepNumber) {
+        return `${color.bg} ${color.text} border-b-3 ${color.border}`;
+      } else if (stepNumber < this.currentStep) {
+        return `text-green-600 hover:bg-green-50`;
+      } else {
+        return `text-gray-500 ${color.hover}`;
+      }
+    },
+
     cancelAutoSaveTimer() {
       if (this.autoSaveTimeout) {
         clearTimeout(this.autoSaveTimeout);
@@ -2733,24 +2779,24 @@ const PAICompleto = {
           </div>
         </div>
 
-        <!-- Step Pills Navigation -->
-        <div class="bg-white rounded-xl shadow-lg p-4 mb-6">
-          <div class="flex flex-wrap gap-2 justify-center">
+        <!-- TabBar Navigation -->
+        <div class="bg-white rounded-lg shadow-md mb-6 overflow-hidden">
+          <div class="flex border-b border-gray-200 overflow-x-auto scrollbar-hide">
             <button v-for="(step, index) in steps" :key="index"
                     @click="goToStep(index + 1)"
                     type="button"
-                    class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
-                    :class="currentStep === index + 1 
-                      ? 'bg-purple-600 text-white shadow-lg scale-105' 
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
-              <i :class="step.icon + ' mr-2'"></i>
-              {{ step.name }}
+                    class="flex-shrink-0 px-6 py-4 text-sm font-medium transition-all duration-200 relative whitespace-nowrap"
+                    :class="getTabColorClasses(index + 1)">
+              <div class="flex items-center justify-center space-x-2">
+                <i :class="[step.icon, index + 1 < currentStep ? 'fa-check-circle' : '']"></i>
+                <span>{{ step.name }}</span>
+              </div>
             </button>
           </div>
         </div>
 
         <!-- Form -->
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
           <form @submit.prevent="handleSubmit">
             
             <!-- STEP 1: IDENTIFICAÇÃO -->
@@ -3454,6 +3500,28 @@ const PAICompleto = {
   },
 
   methods: {
+    getTabColorClasses(stepNumber) {
+      const colors = [
+        { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-600', hover: 'hover:bg-purple-50' },
+        { bg: 'bg-pink-100', text: 'text-pink-700', border: 'border-pink-600', hover: 'hover:bg-pink-50' },
+        { bg: 'bg-rose-100', text: 'text-rose-700', border: 'border-rose-600', hover: 'hover:bg-rose-50' },
+        { bg: 'bg-fuchsia-100', text: 'text-fuchsia-700', border: 'border-fuchsia-600', hover: 'hover:bg-fuchsia-50' },
+        { bg: 'bg-violet-100', text: 'text-violet-700', border: 'border-violet-600', hover: 'hover:bg-violet-50' },
+        { bg: 'bg-indigo-100', text: 'text-indigo-700', border: 'border-indigo-600', hover: 'hover:bg-indigo-50' },
+        { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-600', hover: 'hover:bg-blue-50' }
+      ];
+      
+      const color = colors[(stepNumber - 1) % colors.length];
+      
+      if (this.currentStep === stepNumber) {
+        return `${color.bg} ${color.text} border-b-3 ${color.border}`;
+      } else if (stepNumber < this.currentStep) {
+        return `text-green-600 hover:bg-green-50`;
+      } else {
+        return `text-gray-500 ${color.hover}`;
+      }
+    },
+
     cancelAutoSaveTimer() {
       if (this.autoSaveTimeout) {
         clearTimeout(this.autoSaveTimeout);

@@ -2549,15 +2549,15 @@ const LegislacoesTW = {
         </div>
         
         <!-- Paginação -->
-        <div v-if="pagination.total_pages > 1" class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+        <div v-if="pagination && pagination.total_pages > 1" class="px-6 py-4 bg-gray-50 border-t border-gray-200">
           <div class="flex items-center justify-between">
             <div class="text-sm text-gray-700">
-              Mostrando {{ ((pagination.page - 1) * pagination.per_page) + 1 }} a {{ Math.min(pagination.page * pagination.per_page, pagination.total) }} de {{ pagination.total }} resultados
+              Mostrando {{ ((pagination.page - 1) * pagination.per_page) + 1 }} a {{ Math.min(pagination.page * pagination.per_page, pagination.total || 0) }} de {{ pagination.total || 0 }} resultados
             </div>
             <div class="flex space-x-1">
               <button 
                 @click="changePage(pagination.page - 1)"
-                :disabled="pagination.page <= 1"
+                :disabled="!pagination || pagination.page <= 1"
                 class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
                 Anterior
               </button>
@@ -2572,7 +2572,7 @@ const LegislacoesTW = {
               
               <button 
                 @click="changePage(pagination.page + 1)"
-                :disabled="pagination.page >= pagination.total_pages"
+                :disabled="!pagination || pagination.page >= pagination.total_pages"
                 class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
                 Próxima
               </button>
@@ -2654,15 +2654,17 @@ const LegislacoesTW = {
     },
     
     async changePage(page) {
-      if (page >= 1 && page <= this.pagination.total_pages) {
+      if (!this.pagination) return;
+      if (page >= 1 && page <= (this.pagination.total_pages || 1)) {
         this.pagination.page = page;
         await this.loadLegislacoes();
       }
     },
 
     getVisiblePages() {
-      const current = this.pagination.page;
-      const total = this.pagination.total_pages;
+      if (!this.pagination) return [];
+      const current = this.pagination.page || 1;
+      const total = this.pagination.total_pages || 1;
       const pages = [];
       const start = Math.max(1, current - 2);
       const end = Math.min(total, current + 2);
@@ -3806,43 +3808,290 @@ const Login = {
 const Dashboard = {
   template: `
     <div class="p-6 space-y-6">
-      <!-- Header com Busca -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <!-- Resumos -->
+      <section v-if="!isAdmin" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h1 class="text-2xl font-bold text-gray-800">Visão Geral dos Alunos</h1>
-            <p class="text-sm text-gray-600 mt-1">Acompanhe o progresso dos formulários AEE</p>
+            <p class="text-sm text-gray-500">Olá{{ $root?.user?.name ? ', ' + $root.user.name.split(' ')[0] : '' }}!</p>
+            <h1 class="text-3xl font-bold text-gray-900">Visão rápida dos seus alunos</h1>
+            <p class="text-sm text-gray-600 mt-1">Use os atalhos para atualizar formulários e acompanhar pendências.</p>
           </div>
-          <div class="flex gap-3 w-full md:w-auto">
-            <input 
-              v-model="filtros.busca" 
-              type="text" 
-              :placeholder="isAdmin ? 'Buscar aluno, escola ou professor...' : 'Buscar aluno ou escola...'" 
-              class="flex-1 md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+            <input
+              v-model="filtros.busca"
+              type="text"
+              placeholder="Buscar aluno ou escola..."
+              class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
-            <select 
-              v-if="isAdmin && professores" 
-              v-model="filtros.professorId" 
-              class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
+            <button
+              v-if="filtros.busca"
+              type="button"
+              @click="limparBusca"
+              class="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            >
+              Limpar
+            </button>
+            <button
+              type="button"
+              @click="debugDashboard"
+              class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+            >
+              🔧 Debug
+            </button>
+          </div>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div class="rounded-xl border border-blue-100 bg-blue-50/60 p-4">
+            <p class="text-xs font-semibold text-blue-600 uppercase tracking-wide">Alunos ativos</p>
+            <p class="mt-2 text-3xl font-semibold text-blue-900">{{ (professorResumo && professorResumo.total) || 0 }}</p>
+            <p class="text-xs text-blue-700 mt-1">Somente alunos vinculados a você</p>
+          </div>
+          <div class="rounded-xl border border-emerald-100 bg-emerald-50/60 p-4">
+            <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wide">Média geral</p>
+            <p class="mt-2 text-3xl font-semibold text-emerald-900">{{ (professorResumo && professorResumo.mediaGeral) || 0 }}%</p>
+            <p class="text-xs text-emerald-700 mt-1">Progresso médio dos formulários</p>
+          </div>
+          <div class="rounded-xl border border-purple-100 bg-purple-50/60 p-4">
+            <p class="text-xs font-semibold text-purple-600 uppercase tracking-wide">Formulários completos</p>
+            <p class="mt-2 text-3xl font-semibold text-purple-900">{{ (professorResumo && professorResumo.concluidos) || 0 }}</p>
+            <p class="text-xs text-purple-700 mt-1">Alunos com finalização acima de 90%</p>
+          </div>
+          <div class="rounded-xl border border-amber-100 bg-amber-50/60 p-4">
+            <p class="text-xs font-semibold text-amber-600 uppercase tracking-wide">Pendências</p>
+            <p class="mt-2 text-3xl font-semibold text-amber-900">{{ (professorResumo && professorResumo.pendentes) || 0 }}</p>
+            <p class="text-xs text-amber-700 mt-1">Alunos que ainda precisam de atenção</p>
+          </div>
+        </div>
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <button type="button" @click="irPara('alunos')" class="flex items-center justify-center gap-2 rounded-xl border border-blue-100 bg-blue-50/80 px-4 py-3 text-sm font-medium text-blue-700 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <i class="fas fa-users"></i>
+            Gerenciar alunos
+          </button>
+          <button type="button" @click="abrirFormulario('entrevista')" class="flex items-center justify-center gap-2 rounded-xl border border-sky-100 bg-sky-50/80 px-4 py-3 text-sm font-medium text-sky-700 hover:bg-sky-100 focus:outline-none focus:ring-2 focus:ring-sky-500">
+            <i class="fas fa-comments"></i>
+            Registrar entrevista
+          </button>
+          <button type="button" @click="abrirFormulario('pdi')" class="flex items-center justify-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50/80 px-4 py-3 text-sm font-medium text-emerald-700 hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <i class="fas fa-clipboard-check"></i>
+            Atualizar PDI
+          </button>
+          <button type="button" @click="abrirFormulario('pai')" class="flex items-center justify-center gap-2 rounded-xl border border-purple-100 bg-purple-50/80 px-4 py-3 text-sm font-medium text-purple-700 hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-500">
+            <i class="fas fa-bullseye"></i>
+            Revisar PAI
+          </button>
+        </div>
+      </section>
+      <section v-else class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900">Painel administrativo</h1>
+            <p class="text-sm text-gray-600 mt-1">Resumo do engajamento das equipes e dos formulários AEE.</p>
+          </div>
+          <div class="flex flex-col lg:flex-row gap-3 w-full lg:w-auto">
+            <input
+              v-model="filtros.busca"
+              type="text"
+              placeholder="Buscar aluno, escola ou professor..."
+              class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            />
+            <select
+              v-model="filtros.professorId"
+              class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white"
             >
               <option value="">Todos os professores</option>
               <option v-for="prof in professores" :key="prof.id" :value="prof.id">{{ prof.name }}</option>
             </select>
+            <button
+              v-if="filtros.busca || filtros.professorId"
+              type="button"
+              @click="resetarFiltros"
+              class="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+            >
+              Limpar filtros
+            </button>
+          </div>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div class="rounded-xl border border-purple-100 bg-purple-50/60 p-4">
+            <p class="text-xs font-semibold text-purple-600 uppercase tracking-wide">Alunos cadastrados</p>
+            <p class="mt-2 text-3xl font-semibold text-purple-900">{{ (adminResumo && adminResumo.totalAlunos) || 0 }}</p>
+            <p class="text-xs text-purple-700 mt-1">Distribuídos por toda a rede</p>
+          </div>
+          <div class="rounded-xl border border-indigo-100 bg-indigo-50/60 p-4">
+            <p class="text-xs font-semibold text-indigo-600 uppercase tracking-wide">Professores ativos</p>
+            <p class="mt-2 text-3xl font-semibold text-indigo-900">{{ (adminResumo && adminResumo.totalProfessores) || 0 }}</p>
+            <p class="text-xs text-indigo-700 mt-1">Usuários com perfil professor</p>
+          </div>
+          <div class="rounded-xl border border-blue-100 bg-blue-50/60 p-4">
+            <p class="text-xs font-semibold text-blue-600 uppercase tracking-wide">Escolas atendidas</p>
+            <p class="mt-2 text-3xl font-semibold text-blue-900">{{ (adminResumo && adminResumo.totalEscolas) || 0 }}</p>
+            <p class="text-xs text-blue-700 mt-1">Com alunos cadastrados</p>
+          </div>
+          <div class="rounded-xl border border-amber-100 bg-amber-50/60 p-4">
+            <p class="text-xs font-semibold text-amber-600 uppercase tracking-wide">Pendências críticas</p>
+            <p class="mt-2 text-3xl font-semibold text-amber-900">{{ (adminResumo && adminResumo.pendentes) || 0 }}</p>
+            <p class="text-xs text-amber-700 mt-1">Alunos com média abaixo de 80%</p>
+          </div>
+        </div>
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <button type="button" @click="irPara('usuarios')" class="flex items-center justify-between rounded-xl border border-indigo-100 bg-indigo-50/70 px-4 py-3 text-sm font-medium text-indigo-700 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <span><i class="fas fa-user-shield mr-2"></i>Gerenciar usuários</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+          <button type="button" @click="irPara('supervisao')" class="flex items-center justify-between rounded-xl border border-blue-100 bg-blue-50/70 px-4 py-3 text-sm font-medium text-blue-700 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <span><i class="fas fa-chalkboard-teacher mr-2"></i>Supervisão de professores</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+          <button type="button" @click="irPara('relatorios')" class="flex items-center justify-between rounded-xl border border-emerald-100 bg-emerald-50/70 px-4 py-3 text-sm font-medium text-emerald-700 hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <span><i class="fas fa-chart-bar mr-2"></i>Relatórios consolidados</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- Gráfico de Estatísticas -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-xl font-bold text-gray-800">{{ isAdmin ? 'Andamento dos formulários (rede)' : 'Progresso dos meus formulários' }}</h2>
+            <p class="text-sm text-gray-500">{{ isAdmin ? 'Média considerando o filtro atual' : 'Média dos alunos vinculados a você' }}</p>
+          </div>
+          <span class="text-sm text-gray-400">Atualizado automaticamente</span>
+        </div>
+        <div :id="chartContainerId" class="w-full h-[320px]"></div>
+      </div>
+
+      <div v-if="!isAdmin" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-semibold text-gray-900">Pendências prioritárias</h2>
+          <button type="button" @click="irPara('alunos')" class="text-sm text-blue-600 hover:text-blue-700">Ver todos</button>
+        </div>
+        <div v-if="professorPendencias && professorPendencias.length" class="space-y-4">
+          <div v-for="aluno in professorPendencias" :key="'pendencia-'+aluno.id" class="border border-gray-200 rounded-xl p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <p class="text-sm font-semibold text-gray-900">{{ aluno.name || 'Aluno sem nome' }}</p>
+                <p class="text-xs text-gray-500">{{ aluno.school_name || 'Escola não informada' }}</p>
+              </div>
+              <span class="text-sm font-semibold" :class="getPercentColor(aluno.__mediaCalculada)">{{ aluno.__mediaCalculada }}%</span>
+            </div>
+            <div class="mt-3 grid grid-cols-3 gap-2 text-xs text-gray-600">
+              <span>Entrevista: {{ aluno.entrevista_percent || 0 }}%</span>
+              <span>PDI: {{ aluno.pdi_percent || 0 }}%</span>
+              <span>PAI: {{ aluno.pai_percent || 0 }}%</span>
+            </div>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <button type="button" @click="abrirFormulario('entrevista', aluno.id)" class="px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Atualizar entrevista
+              </button>
+              <button type="button" @click="abrirFormulario('pdi', aluno.id)" class="px-3 py-1.5 text-xs font-medium bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                Revisar PDI
+              </button>
+              <button type="button" @click="abrirFormulario('pai', aluno.id)" class="px-3 py-1.5 text-xs font-medium bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                Ajustar PAI
+              </button>
+            </div>
+          </div>
+        </div>
+        <div v-else class="text-sm text-gray-500 bg-gray-50 border border-dashed border-gray-200 rounded-xl p-6 text-center">
+          Nenhuma pendência crítica encontrada. Continue acompanhando os formulários!
+        </div>
+      </div>
+
+      <div v-if="isAdmin" class="grid gap-6 lg:grid-cols-2">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold text-gray-900">Professores e engajamento</h2>
+            <span class="text-sm text-gray-500">Ordenado por número de alunos</span>
+          </div>
+          <div v-if="professoresResumo && professoresResumo.length" class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 text-sm">
+              <thead class="bg-gray-50">
+                <tr class="text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <th class="px-4 py-3">Professor</th>
+                  <th class="px-4 py-3">Alunos</th>
+                  <th class="px-4 py-3">Média</th>
+                  <th class="px-4 py-3">Completos</th>
+                  <th class="px-4 py-3">Pendências críticas</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <tr v-for="prof in professoresResumo" :key="'prof-resumo-'+prof.id" class="hover:bg-gray-50">
+                  <td class="px-4 py-3">
+                    <div class="font-medium text-gray-900">{{ prof.nome }}</div>
+                    <div class="text-xs text-gray-500">{{ prof.email || 'Sem e-mail' }}</div>
+                  </td>
+                  <td class="px-4 py-3 text-gray-700 font-semibold">{{ prof.totalAlunos }}</td>
+                  <td class="px-4 py-3 font-semibold" :class="getPercentColor(prof.media)">{{ prof.media }}%</td>
+                  <td class="px-4 py-3 text-emerald-600 font-semibold">{{ prof.concluidos }}</td>
+                  <td class="px-4 py-3 text-amber-600 font-semibold">{{ prof.criticos }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-else class="text-sm text-gray-500 bg-gray-50 border border-dashed border-gray-200 rounded-xl p-6 text-center">
+            Nenhum professor encontrado para o filtro atual.
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold text-gray-900">Alunos com menor avanço</h2>
+            <button type="button" @click="irPara('alunos')" class="text-sm text-purple-600 hover:text-purple-700">Ir para alunos</button>
+          </div>
+          <div v-if="alunosPendentesAdmin && alunosPendentesAdmin.length" class="space-y-4">
+            <div v-for="aluno in alunosPendentesAdmin" :key="'admin-pendencia-'+aluno.id" class="border border-gray-200 rounded-xl p-4">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <p class="text-sm font-semibold text-gray-900">{{ aluno.name || 'Aluno sem nome' }}</p>
+                  <p class="text-xs text-gray-500">
+                    {{ aluno.school_name || 'Escola não informada' }}
+                    <span v-if="aluno.professor_nome"> - {{ aluno.professor_nome }}</span>
+                  </p>
+                </div>
+                <span class="text-sm font-semibold" :class="getPercentColor(aluno.__mediaCalculada)">{{ aluno.__mediaCalculada }}%</span>
+              </div>
+              <div class="mt-3 grid grid-cols-3 gap-2 text-xs text-gray-600">
+                <span>Entrevista: {{ aluno.entrevista_percent || 0 }}%</span>
+                <span>PDI: {{ aluno.pdi_percent || 0 }}%</span>
+                <span>PAI: {{ aluno.pai_percent || 0 }}%</span>
+              </div>
+              <div class="mt-4 flex flex-wrap gap-2">
+                <button type="button" @click="abrirFormulario('entrevista', aluno.id)" class="px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  Acompanhar entrevista
+                </button>
+                <button type="button" @click="abrirFormulario('pdi', aluno.id)" class="px-3 py-1.5 text-xs font-medium bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                  Revisar PDI
+                </button>
+                <button type="button" @click="abrirFormulario('pai', aluno.id)" class="px-3 py-1.5 text-xs font-medium bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                  Ajustar PAI
+                </button>
+              </div>
+            </div>
+          </div>
+          <div v-else class="text-sm text-gray-500 bg-gray-50 border border-dashed border-gray-200 rounded-xl p-6 text-center">
+            Nenhuma pendência crítica encontrada para o filtro atual.
           </div>
         </div>
       </div>
 
-      <!-- Gráfico de Estatísticas -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-xl font-bold mb-6 text-gray-800">Estatísticas de Conclusão</h2>
-        <div id="chart-container" style="width:100%; height:350px;"></div>
       </div>
 
       <!-- Grid de Cards de Alunos -->
-      <div class="bg-white rounded-lg shadow p-6">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <h2 class="text-xl font-bold mb-6 text-gray-800">
-          Alunos 
-          <span v-if="alunosFiltrados && alunosFiltrados.length" class="text-sm font-normal text-gray-500">({{ alunosFiltrados.length }} exibindo{{ alunos.length > alunosFiltrados.length ? ' de ' + alunos.length : '' }})</span>
+          {{ isAdmin ? 'Alunos (visão completa)' : 'Meus alunos' }}
+          <span
+            v-if="isAdmin && alunosFiltrados && alunosFiltrados.length"
+            class="text-sm font-normal text-gray-500"
+          >
+            ({{ alunosFiltrados.length }} registro{{ alunosFiltrados.length === 1 ? '' : 's' }})
+          </span>
+          <span
+            v-else-if="!isAdmin && alunosVisiveis && alunosVisiveis.length"
+            class="text-sm font-normal text-gray-500"
+          >
+            ({{ alunosVisiveis.length }} exibindo{{ alunos && alunos.length > alunosVisiveis.length ? ' de ' + alunos.length : '' }})
+          </span>
         </h2>
 
         <div v-if="loading" class="text-center py-12">
@@ -3853,7 +4102,10 @@ const Dashboard = {
           <p class="mt-4 text-gray-600">Carregando alunos...</p>
         </div>
 
-        <div v-else-if="!alunosFiltrados || alunosFiltrados.length === 0" class="text-center py-12 text-gray-500">
+        <div
+          v-else-if="isAdmin ? (!alunosFiltrados || !alunosFiltrados.length) : (!alunosVisiveis || !alunosVisiveis.length)"
+          class="text-center py-12 text-gray-500"
+        >
           <svg class="w-20 h-20 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
           </svg>
@@ -3862,13 +4114,19 @@ const Dashboard = {
         </div>
 
         <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          <div v-for="aluno in alunosFiltrados" :key="aluno.id" class="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+          <div
+            v-for="aluno in (isAdmin ? alunosFiltrados : alunosVisiveis)"
+            :key="aluno.id"
+            class="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+          >
             <div class="flex items-center gap-4 mb-4 pb-4 border-b border-gray-200">
-              <div class="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-md">{{ getInitials(aluno.name || '') }}</div>
+              <div :class="['w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-md', isAdmin ? 'bg-gradient-to-br from-purple-400 to-purple-600' : 'bg-gradient-to-br from-blue-400 to-blue-600']">
+                {{ getInitials(aluno.name || '') }}
+              </div>
               <div class="flex-1 min-w-0">
                 <h3 class="font-semibold text-gray-800 truncate text-base">{{ aluno.name || 'Sem nome' }}</h3>
                 <p class="text-xs text-gray-500 truncate">{{ aluno.school_name || 'Escola não informada' }}</p>
-                <p v-if="isAdmin && aluno.professor_nome" class="text-xs text-blue-600 truncate mt-0.5">Prof: {{ aluno.professor_nome }}</p>
+                <p v-if="isAdmin && aluno.professor_nome" class="text-xs text-purple-600 truncate mt-0.5">Prof: {{ aluno.professor_nome }}</p>
               </div>
             </div>
             <div class="space-y-3">
@@ -3878,7 +4136,7 @@ const Dashboard = {
                   <span class="font-bold" :class="getPercentColor(aluno.entrevista_percent)">{{ aluno.entrevista_percent || 0 }}%</span>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                  <div class="h-2 rounded-full transition-all duration-500 bg-gradient-to-r from-indigo-400 to-indigo-600" :style="{width: (aluno.entrevista_percent || 0) + '%'}"></div>
+                  <div class="h-2 rounded-full transition-all duration-500" :class="isAdmin ? 'bg-gradient-to-r from-purple-400 to-purple-600' : 'bg-gradient-to-r from-indigo-400 to-indigo-600'" :style="{width: (aluno.entrevista_percent || 0) + '%'}"></div>
                 </div>
               </div>
               <div>
@@ -3887,7 +4145,7 @@ const Dashboard = {
                   <span class="font-bold" :class="getPercentColor(aluno.pdi_percent)">{{ aluno.pdi_percent || 0 }}%</span>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                  <div class="h-2 rounded-full transition-all duration-500 bg-gradient-to-r from-emerald-400 to-emerald-600" :style="{width: (aluno.pdi_percent || 0) + '%'}"></div>
+                  <div class="h-2 rounded-full transition-all duration-500" :class="isAdmin ? 'bg-gradient-to-r from-purple-400 to-purple-600' : 'bg-gradient-to-r from-emerald-400 to-emerald-600'" :style="{width: (aluno.pdi_percent || 0) + '%'}"></div>
                 </div>
               </div>
               <div>
@@ -3906,7 +4164,21 @@ const Dashboard = {
                 <span class="text-lg font-bold" :class="getPercentColor(aluno.media_percent)">{{ aluno.media_percent || 0 }}%</span>
               </div>
             </div>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <button type="button" @click="abrirFormulario('entrevista', aluno.id)" class="px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Entrevista
+              </button>
+              <button type="button" @click="abrirFormulario('pdi', aluno.id)" class="px-3 py-1.5 text-xs font-medium bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                PDI
+              </button>
+              <button type="button" @click="abrirFormulario('pai', aluno.id)" class="px-3 py-1.5 text-xs font-medium bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                PAI
+              </button>
+            </div>
           </div>
+        </div>
+        <div v-if="!isAdmin && alunos && alunosVisiveis && alunos.length > alunosVisiveis.length" class="mt-6 text-center text-sm text-gray-500">
+          Refine sua busca ou acesse a listagem completa para ver todos os alunos.
         </div>
       </div>
     </div>
@@ -3920,50 +4192,169 @@ const Dashboard = {
     }
   },
   computed: {
-    isAdmin() { 
-      const result = this.$root && this.$root.user && this.$root.user.role === 'admin';
-      console.log('🔑 [Dashboard] isAdmin:', result, 'User:', this.$root?.user);
-      return result;
+    isAdmin() {
+      return this.$root && this.$root.user && this.$root.user.role === 'admin';
+    },
+    chartContainerId() {
+      return this.isAdmin ? 'chart-container-admin' : 'chart-container-prof';
     },
     alunosFiltrados() {
       if (!Array.isArray(this.alunos)) {
-        console.warn('⚠️ [Dashboard] this.alunos não é array:', this.alunos);
         return [];
       }
-      
-      console.log('🔍 [Dashboard] Filtrando alunos. Total:', this.alunos.length);
-      console.log('🔍 [Dashboard] isAdmin:', this.isAdmin);
-      console.log('🔍 [Dashboard] User role:', this.$root?.user?.role);
+
       let resultado = [...this.alunos];
-      
+
       if (this.isAdmin && this.filtros.professorId) {
-        console.log('🔍 [Dashboard] Filtro por professor:', this.filtros.professorId);
         resultado = resultado.filter(a => String(a.created_by_teacher_id) === String(this.filtros.professorId));
-        console.log('🔍 [Dashboard] Após filtro professor:', resultado.length);
       }
-      
+
       const busca = (this.filtros.busca || '').toLowerCase().trim();
       if (busca) {
-        console.log('🔍 [Dashboard] Filtro por busca:', busca);
+        console.log('🔍 [alunosFiltrados] Buscando por:', busca);
+        console.log('🔍 [alunosFiltrados] Total antes da busca:', resultado.length);
+        console.log('🔍 [alunosFiltrados] Primeiro aluno:', resultado[0]);
+        
         resultado = resultado.filter(a => {
-          // Buscar em múltiplos campos
           const nome = (a.name || '').toLowerCase();
           const escola = (a.school_name || '').toLowerCase();
-          const professorNome = (a.professor_nome || '').toLowerCase();
+          const professor = (a.professor_nome || '').toLowerCase();
           
-          if (this.isAdmin) {
-            // Admin: busca por nome do aluno, escola ou professor
-            return nome.includes(busca) || escola.includes(busca) || professorNome.includes(busca);
-          } else {
-            // Professor: busca por nome do aluno ou escola
-            return nome.includes(busca) || escola.includes(busca);
+          const match = this.isAdmin
+            ? nome.includes(busca) || escola.includes(busca) || professor.includes(busca)
+            : nome.includes(busca) || escola.includes(busca);
+          
+          if (match) {
+            console.log('✅ Match:', a.name, '| Escola:', a.school_name, '| Prof:', a.professor_nome);
           }
+          
+          return match;
         });
-        console.log('🔍 [Dashboard] Após filtro busca:', resultado.length);
+        
+        console.log('🔍 [alunosFiltrados] Total após busca:', resultado.length);
       }
-      
-      console.log('✅ [Dashboard] Total filtrado:', resultado.length);
+
       return resultado;
+    },
+    alunosVisiveis() {
+      const filtrados = Array.isArray(this.alunosFiltrados) ? this.alunosFiltrados : [];
+      return this.isAdmin ? filtrados : filtrados.slice(0, 8);
+    },
+    professorResumo() {
+      const total = Array.isArray(this.alunos) ? this.alunos.length : 0;
+      if (!total) {
+        return { total: 0, mediaGeral: 0, concluidos: 0, pendentes: 0 };
+      }
+
+      let concluidos = 0;
+      let soma = 0;
+      this.alunos.forEach(aluno => {
+        const entrevista = aluno?.entrevista_percent || 0;
+        const pdi = aluno?.pdi_percent || 0;
+        const pai = aluno?.pai_percent || 0;
+        if (entrevista >= 90 && pdi >= 90 && pai >= 90) concluidos++;
+        soma += Math.round((entrevista + pdi + pai) / 3);
+      });
+
+      return {
+        total,
+        mediaGeral: Math.round(soma / total) || 0,
+        concluidos,
+        pendentes: Math.max(total - concluidos, 0)
+      };
+    },
+    professorPendencias() {
+      const filtrados = Array.isArray(this.alunosFiltrados) ? this.alunosFiltrados : [];
+      if (!filtrados.length) return [];
+      return filtrados
+        .map(aluno => ({
+          ...aluno,
+          __mediaCalculada: this.calcularMediaAluno(aluno)
+        }))
+        .filter(aluno => aluno.__mediaCalculada < 80)
+        .sort((a, b) => a.__mediaCalculada - b.__mediaCalculada)
+        .slice(0, 5);
+    },
+    adminResumo() {
+      const alunos = Array.isArray(this.alunos) ? this.alunos : [];
+      const professores = Array.isArray(this.professores) ? this.professores : [];
+      const totalAlunos = alunos.length;
+      const totalProfessores = professores.length;
+      const escolas = new Set();
+      let pendentes = 0;
+
+      alunos.forEach(aluno => {
+        if (aluno && aluno.school_id) escolas.add(aluno.school_id);
+        const media = this.calcularMediaAluno(aluno);
+        if (media < 80) pendentes++;
+      });
+
+      return {
+        totalAlunos,
+        totalProfessores,
+        totalEscolas: escolas.size,
+        pendentes
+      };
+    },
+    professoresResumo() {
+      if (!this.isAdmin) return [];
+      const professores = Array.isArray(this.professores) ? this.professores : [];
+      const alunos = Array.isArray(this.alunos) ? this.alunos : [];
+      const map = new Map();
+
+      professores.forEach(prof => {
+        map.set(prof.id, {
+          id: prof.id,
+          nome: prof.name,
+          email: prof.email,
+          totalAlunos: 0,
+          somaMedia: 0,
+          concluidos: 0,
+          criticos: 0
+        });
+      });
+
+      alunos.forEach(aluno => {
+        const profId = aluno?.created_by_teacher_id;
+        if (!profId) return;
+        if (!map.has(profId)) {
+          map.set(profId, {
+            id: profId,
+            nome: aluno.professor_nome || 'Professor n?o identificado',
+            email: '',
+            totalAlunos: 0,
+            somaMedia: 0,
+            concluidos: 0,
+            criticos: 0
+          });
+        }
+        const entry = map.get(profId);
+        const entrevista = aluno?.entrevista_percent || 0;
+        const pdi = aluno?.pdi_percent || 0;
+        const pai = aluno?.pai_percent || 0;
+        const media = this.calcularMediaAluno(aluno);
+        entry.totalAlunos += 1;
+        entry.somaMedia += media;
+        if (entrevista >= 90 && pdi >= 90 && pai >= 90) entry.concluidos += 1;
+        if (media < 80) entry.criticos += 1;
+      });
+
+      return Array.from(map.values()).map(entry => ({
+        ...entry,
+        media: entry.totalAlunos ? Math.round(entry.somaMedia / entry.totalAlunos) : 0
+      })).sort((a, b) => b.totalAlunos - a.totalAlunos);
+    },
+    alunosPendentesAdmin() {
+      if (!this.isAdmin) return [];
+      const filtrados = Array.isArray(this.alunosFiltrados) ? this.alunosFiltrados : [];
+      return filtrados
+        .map(aluno => ({
+          ...aluno,
+          __mediaCalculada: this.calcularMediaAluno(aluno)
+        }))
+        .filter(aluno => aluno.__mediaCalculada < 80)
+        .sort((a, b) => a.__mediaCalculada - b.__mediaCalculada)
+        .slice(0, 8);
     }
   },
   async mounted() {
@@ -3999,183 +4390,154 @@ const Dashboard = {
   methods: {
     async loadData() {
       this.loading = true;
-      console.log('📥 [Dashboard] Iniciando carregamento de dados...');
-      console.log('👤 [Dashboard] User:', this.$root?.user);
-      
+      console.log('📥 [Dashboard] Iniciando loadData...');
       try {
-        // Verificar se é admin AGORA (não usar this.isAdmin que pode estar desatualizado)
         const isAdminNow = this.$root?.user?.role === 'admin';
-        console.log('🔑 [Dashboard] isAdmin NOW:', isAdminNow, 'Role:', this.$root?.user?.role);
-        
-        // Carregar professores se admin
+        console.log('🔑 [Dashboard] isAdmin:', isAdminNow);
+
         if (isAdminNow) {
-          console.log('👨‍🏫 [Dashboard] Carregando professores (admin)...');
-          const profRes = await api.get('/users');
-          this.professores = (profRes.data?.data?.rows || profRes.data?.data || []).filter(u => u.role !== 'admin');
-          console.log('✅ [Dashboard] Professores carregados:', this.professores.length);
-        }
-        
-        // Carregar alunos
-        let params = {};
-        if (!isAdminNow && this.$root && this.$root.user) {
-          params.teacher_id = this.$root.user.id;
-          console.log('🔐 [Dashboard] Filtrando por professor:', this.$root.user.id);
+          console.log('👥 [Dashboard] Carregando professores...');
+          try {
+            const profRes = await api.get('/users');
+            this.professores = (profRes.data?.data?.rows || profRes.data?.data || []).filter(u => u.role !== 'admin');
+            console.log('✅ [Dashboard] Professores carregados:', this.professores.length);
+          } catch (error) {
+            console.error('❌ [Dashboard] Erro ao carregar professores:', error);
+            this.professores = [];
+          }
         } else {
-          console.log('👑 [Dashboard] Admin - carregando TODOS os alunos (sem filtro)');
+          this.professores = [];
         }
-        
-        console.log('📚 [Dashboard] Buscando alunos...');
+
+        console.log('📚 [Dashboard] Carregando alunos...');
+        const params = (!isAdminNow && this.$root?.user) ? { teacher_id: this.$root.user.id } : {};
         console.log('📚 [Dashboard] Params:', params);
         const alunosRes = await api.get('/students', { params });
-        console.log('📚 [Dashboard] Resposta completa:', alunosRes);
-        console.log('📚 [Dashboard] Data:', alunosRes.data);
-        
-        // Tentar diferentes formatos de resposta da API
+
         let alunosData = [];
         if (alunosRes.data?.data?.rows) {
           alunosData = alunosRes.data.data.rows;
-          console.log('📚 [Dashboard] Formato: data.rows');
         } else if (Array.isArray(alunosRes.data?.data)) {
           alunosData = alunosRes.data.data;
-          console.log('📚 [Dashboard] Formato: data (array)');
         } else if (Array.isArray(alunosRes.data)) {
           alunosData = alunosRes.data;
-          console.log('📚 [Dashboard] Formato: root (array)');
-        } else {
-          console.warn('⚠️ [Dashboard] Formato de resposta desconhecido!');
         }
-        
-        console.log('✅ [Dashboard] Alunos recebidos:', alunosData.length);
-        console.log('✅ [Dashboard] Primeiro aluno:', alunosData[0]);
-        
-        // Inicializar alunos com percentuais zerados
+
         this.alunos = alunosData.map(aluno => {
-          let professorNome = '';
-          // Verificação direta do role (não usar this.isAdmin que pode estar desatualizado no map)
-          if (isAdminNow && aluno.created_by_teacher_id && this.professores) {
+          let professorNome = aluno.professor_nome || '';
+          if (isAdminNow && !professorNome && aluno.created_by_teacher_id && this.professores?.length) {
             const prof = this.professores.find(p => p.id === aluno.created_by_teacher_id);
             professorNome = prof ? prof.name : '';
-            console.log(`👨‍🏫 [Dashboard] Aluno ${aluno.name} -> Professor: ${professorNome}`);
           }
           return {
             ...aluno,
             professor_nome: professorNome,
-            entrevista_percent: 0,
-            pdi_percent: 0,
-            pai_percent: 0,
-            media_percent: 0
+            entrevista_percent: aluno.entrevista_percent || 0,
+            pdi_percent: aluno.pdi_percent || 0,
+            pai_percent: aluno.pai_percent || 0,
+            media_percent: aluno.media_percent || 0
           };
         });
-        
-        console.log('💾 [Dashboard] this.alunos definido:', this.alunos.length, 'alunos');
-        console.log('💾 [Dashboard] Primeiro aluno em this.alunos:', this.alunos[0]);
-        
+
+        console.log('💾 [Dashboard] Alunos carregados:', this.alunos.length);
         this.loading = false;
-        console.log('📊 [Dashboard] Alunos exibidos:', this.alunos.length);
-        console.log('📊 [Dashboard] Loading:', this.loading);
-        
-        // Carregar percentuais em background
+        console.log('✅ [Dashboard] Loading finalizado:', this.loading);
+        await this.$nextTick();
         this.carregarPercentuais();
-        
       } catch (error) {
-        console.error('❌ Erro ao carregar dados do dashboard:', error);
+        console.error('❌ [Dashboard] Erro ao carregar dados do dashboard:', error);
+        console.error('❌ [Dashboard] Detalhes:', error.response || error.message);
         this.loading = false;
+        console.log('⚠️ [Dashboard] Loading setado como false após erro');
       }
     },
     async carregarPercentuais() {
-      console.log('📊 [Dashboard] Calculando percentuais em background...');
-      for (let i = 0; i < this.alunos.length; i++) {
-        const aluno = this.alunos[i];
+      for (const aluno of this.alunos) {
         try {
           const percentuais = await this.calcularPercentuais(aluno.id);
           aluno.entrevista_percent = percentuais.entrevista;
           aluno.pdi_percent = percentuais.pdi;
           aluno.pai_percent = percentuais.pai;
           aluno.media_percent = Math.round((percentuais.entrevista + percentuais.pdi + percentuais.pai) / 3);
-          console.log(`✅ Aluno ${aluno.name}: E=${percentuais.entrevista}% P=${percentuais.pdi}% PAI=${percentuais.pai}%`);
         } catch (error) {
-          console.error(`❌ Erro ao calcular percentuais do aluno ${aluno.name}:`, error);
+          console.error(`Erro ao calcular percentuais do aluno ${aluno.name}:`, error);
         }
       }
-      this.renderChart();
+      await this.renderChart();
     },
     async calcularPercentuais(studentId) {
       const percentuais = { entrevista: 0, pdi: 0, pai: 0 };
-      
+
       try {
-        // Entrevista - Buscar o único formulário do aluno
         try {
           const entrevistaRes = await api.get('/entrevistas-responsavel/list', { params: { student_id: studentId } });
           const entrevistas = entrevistaRes.data?.data?.rows || entrevistaRes.data?.data || [];
           if (entrevistas.length > 0) {
-            const formData = typeof entrevistas[0].form_data === 'string' 
-              ? JSON.parse(entrevistas[0].form_data) 
+            const formData = typeof entrevistas[0].form_data === 'string'
+              ? JSON.parse(entrevistas[0].form_data)
               : entrevistas[0].form_data;
             percentuais.entrevista = this.calcularPreenchimentoJSON(formData);
           }
-        } catch (e) {
-          console.warn(`[Dashboard] Entrevista não encontrada para aluno ${studentId}`, e.message);
-        }
-        
-        // PDI - Buscar o único formulário do aluno
+        } catch (_) {}
+
         try {
           const pdiRes = await api.get('/pdi/list', { params: { student_id: studentId } });
           const pdis = pdiRes.data?.data?.rows || pdiRes.data?.data || [];
           if (pdis.length > 0) {
-            const formData = typeof pdis[0].form_data === 'string' 
-              ? JSON.parse(pdis[0].form_data) 
+            const formData = typeof pdis[0].form_data === 'string'
+              ? JSON.parse(pdis[0].form_data)
               : pdis[0].form_data;
             percentuais.pdi = this.calcularPreenchimentoJSON(formData);
           }
-        } catch (e) {
-          console.warn(`[Dashboard] PDI não encontrado para aluno ${studentId}`, e.message);
-        }
-        
-        // PAI - Buscar o único formulário do aluno
+        } catch (_) {}
+
         try {
           const paiRes = await api.get('/plano-atendimento/list', { params: { student_id: studentId } });
           const pais = paiRes.data?.data?.rows || paiRes.data?.data || [];
           if (pais.length > 0) {
-            const formData = typeof pais[0].form_data === 'string' 
-              ? JSON.parse(pais[0].form_data) 
+            const formData = typeof pais[0].form_data === 'string'
+              ? JSON.parse(pais[0].form_data)
               : pais[0].form_data;
             percentuais.pai = this.calcularPreenchimentoJSON(formData);
           }
-        } catch (e) {
-          console.warn(`[Dashboard] PAI não encontrado para aluno ${studentId}`, e.message);
-        }
+        } catch (_) {}
       } catch (error) {
-        console.error(`❌ Erro ao calcular percentuais para aluno ${studentId}:`, error);
+        console.error(`Erro ao calcular percentuais para aluno ${studentId}:`, error);
       }
-      
+
       return percentuais;
     },
-    
     calcularPreenchimentoJSON(formData) {
       if (!formData || typeof formData !== 'object') return 0;
-      
+
       let total = 0;
       let preenchidos = 0;
-      
+
       for (const key in formData) {
-        // Ignorar campos de metadados
         if (['id', 'student_id', 'created_at', 'updated_at', 'status', 'created_by_teacher_id'].includes(key)) {
           continue;
         }
-        
+
         total++;
         const valor = formData[key];
-        
-        // Considerar preenchido se não for null, undefined, string vazia ou array vazio
+
         if (valor !== null && valor !== undefined && valor !== '') {
           if (Array.isArray(valor) && valor.length === 0) {
-            continue; // Array vazio não conta
+            continue;
           }
           preenchidos++;
         }
       }
-      
+
       return total > 0 ? Math.round((preenchidos / total) * 100) : 0;
+    },
+    calcularMediaAluno(aluno) {
+      if (!aluno) return 0;
+      if (aluno.media_percent) return aluno.media_percent;
+      const entrevista = aluno?.entrevista_percent || 0;
+      const pdi = aluno?.pdi_percent || 0;
+      const pai = aluno?.pai_percent || 0;
+      return Math.round((entrevista + pdi + pai) / 3);
     },
     getInitials(name) {
       if (!name) return '?';
@@ -4189,59 +4551,90 @@ const Dashboard = {
       if (p >= 40) return 'text-yellow-600';
       return 'text-red-600';
     },
-    renderChart() {
-      setTimeout(() => {
-        const alunosParaGrafico = this.alunosFiltrados;
-        
-        if (!alunosParaGrafico || alunosParaGrafico.length === 0) {
-          console.log('⚠️ [Dashboard] Sem dados para gráfico');
-          const container = document.getElementById('chart-container');
-          if (container) {
-            container.innerHTML = '<div class="text-center text-gray-500 py-12">Nenhum dado disponível para exibir no gráfico</div>';
+    async renderChart() {
+      await this.$nextTick();
+      const container = document.getElementById(this.chartContainerId);
+      if (!container) return;
+
+      const alunosFiltrados = Array.isArray(this.alunosFiltrados) ? this.alunosFiltrados : [];
+      const alunos = Array.isArray(this.alunos) ? this.alunos : [];
+      const dados = alunosFiltrados.length ? alunosFiltrados : alunos;
+
+      if (!dados || !dados.length) {
+        container.innerHTML = '<div class="text-center text-gray-500 py-12">Nenhum dado dispon?vel para exibir no gr?fico</div>';
+        return;
+      }
+
+      const total = dados.length;
+      const mediaEntrevista = Math.round(dados.reduce((sum, a) => sum + (a.entrevista_percent || 0), 0) / total);
+      const mediaPDI = Math.round(dados.reduce((sum, a) => sum + (a.pdi_percent || 0), 0) / total);
+      const mediaPAI = Math.round(dados.reduce((sum, a) => sum + (a.pai_percent || 0), 0) / total);
+
+      Highcharts.chart(this.chartContainerId, {
+        chart: { type: 'column' },
+        title: { text: this.isAdmin ? 'M?dia geral dos formul?rios' : 'M?dia dos meus formul?rios' },
+        xAxis: { categories: ['Entrevista', 'PDI', 'PAI'], crosshair: true },
+        yAxis: { min: 0, max: 100, title: { text: 'Percentual de conclus?o (%)' } },
+        tooltip: { valueSuffix: '%' },
+        plotOptions: {
+          column: {
+            pointPadding: 0.2,
+            borderWidth: 0,
+            dataLabels: { enabled: true, format: '{y}%' }
           }
-          return;
-        }
-        
-        const container = document.getElementById('chart-container');
-        if (!container) {
-          console.warn('⚠️ [Dashboard] Container não encontrado');
-          return;
-        }
-        
-        const totalAlunos = alunosParaGrafico.length;
-        const mediaEntrevista = Math.round(alunosParaGrafico.reduce((sum, a) => sum + (a.entrevista_percent || 0), 0) / totalAlunos);
-        const mediaPDI = Math.round(alunosParaGrafico.reduce((sum, a) => sum + (a.pdi_percent || 0), 0) / totalAlunos);
-        const mediaPAI = Math.round(alunosParaGrafico.reduce((sum, a) => sum + (a.pai_percent || 0), 0) / totalAlunos);
-        
-        console.log('📈 [Dashboard] Gráfico:', { mediaEntrevista, mediaPDI, mediaPAI });
-        
-        Highcharts.chart('chart-container', {
-          chart: { type: 'column' },
-          title: { text: 'Média de Conclusão por Formulário' },
-          xAxis: { categories: ['Entrevista', 'PDI', 'PAI'], crosshair: true },
-          yAxis: { min: 0, max: 100, title: { text: 'Percentual de Conclusão (%)' } },
-          tooltip: { valueSuffix: '%' },
-          plotOptions: {
-            column: {
-              pointPadding: 0.2,
-              borderWidth: 0,
-              dataLabels: { enabled: true, format: '{y}%' }
-            }
-          },
-          series: [{
-            name: 'Conclusão Média',
-            data: [mediaEntrevista, mediaPDI, mediaPAI],
-            colorByPoint: true,
-            colors: ['#6366f1', '#10b981', '#a855f7']
-          }],
-          credits: { enabled: false }
-        });
-      }, 500);
+        },
+        series: [{
+          name: this.isAdmin ? 'Rede' : 'Minhas turmas',
+          data: [mediaEntrevista, mediaPDI, mediaPAI],
+          colorByPoint: true,
+          colors: this.isAdmin ? ['#7c3aed', '#2563eb', '#0f766e'] : ['#3b82f6', '#10b981', '#a855f7']
+        }],
+        credits: { enabled: false }
+      });
+    },
+    limparBusca() {
+      this.filtros.busca = '';
+    },
+    resetarFiltros() {
+      this.filtros.busca = '';
+      this.filtros.professorId = '';
+    },
+    debugDashboard() {
+      console.log('🔧 ===== DEBUG DASHBOARD =====');
+      console.log('🔧 User:', this.$root?.user);
+      console.log('🔧 isAdmin:', this.isAdmin);
+      console.log('🔧 alunos.length:', this.alunos?.length);
+      console.log('🔧 alunos:', this.alunos);
+      console.log('🔧 alunosFiltrados.length:', this.alunosFiltrados?.length);
+      console.log('🔧 alunosFiltrados:', this.alunosFiltrados);
+      console.log('🔧 filtros:', this.filtros);
+      console.log('🔧 professorResumo:', this.professorResumo);
+      console.log('🔧 Token:', localStorage.getItem('token'));
+      
+      alert('Debug info logged to console. Press F12 to see.');
+    },
+    irPara(segment) {
+      if (!segment) return;
+      this.$router.push(`/${segment}`);
+    },
+    abrirFormulario(tipo, alunoId = null) {
+      const rotas = {
+        entrevista: '/entrevista-responsavel',
+        pdi: '/pdi',
+        pai: '/plano-atendimento'
+      };
+      const base = rotas[tipo];
+      if (!base) return;
+      const url = alunoId ? `${base}?student_id=${alunoId}` : base;
+      this.$router.push(url);
     }
   },
   watch: {
-    alunosFiltrados() {
-      this.renderChart();
+    async alunosFiltrados() {
+      await this.renderChart();
+    },
+    async isAdmin() {
+      await this.renderChart();
     }
   },
   computed:{
@@ -5813,12 +6206,12 @@ const EntrevistaResponsavel = {
           status: 'completo'
         };
         
-        let response;
-        if (this.form.id) {
-          response = await api.post(`?action=entrevistas-responsavel.update&id=${this.form.id}`, payload);
-        } else {
-          response = await api.post('?action=entrevistas-responsavel.create', payload);
-        }
+        console.log('💾 [Entrevista] Salvando:', payload);
+        
+        // Sempre usar .create que faz UPSERT automático
+        const response = await api.post('?action=entrevistas-responsavel.create', payload);
+        
+        console.log('✅ [Entrevista] Resposta:', response.data);
         
         if (response.data?.ok) {
           // Guardar o ID retornado para permitir gerar PDF
@@ -6572,20 +6965,23 @@ const PDI = {
           status: 'ativo'
         };
         
-        console.log('📤 Payload para PDI:', payload);
+        console.log('� [PDI] Salvando:', payload);
         
-        let response;
-        if (this.form.id) {
-          response = await api.post('?action=pdi.update', { id: this.form.id, ...payload });
-        } else {
-          response = await api.post('?action=pdi.create', payload);
-        }
+        // Sempre usar .create que faz UPSERT automático
+        const response = await api.post('?action=pdi.create', payload);
+        
+        console.log('✅ [PDI] Resposta:', response.data);
+        
         if (response.data?.ok) {
+          // Atualizar ID se foi criado
+          if (response.data.data?.id) {
+            this.form.id = response.data.data.id;
+          }
           const nomeAluno = (this.alunos.find(a=>a.id==this.form.student_id)?.name) || 'Aluno';
-          this.$showToast('Sucesso', this.form.id ? `PDI de "${nomeAluno}" atualizado com sucesso!` : `PDI de "${nomeAluno}" salvo com sucesso!`, 'success');
-          this.$router.push('/');
+          this.$showToast('Sucesso', `PDI de "${nomeAluno}" salvo com sucesso!`, 'success');
+          // Não redirecionar automaticamente para permitir gerar PDF
         } else {
-          this.$showToast('Erro', 'Erro ao salvar PDI', 'error');
+          this.$showToast('Erro', response.data?.error || 'Erro ao salvar PDI', 'error');
         }
       } catch (error) {
         this.$showToast('Erro', 'Erro ao salvar PDI: ' + (error.response?.data?.message || error.message), 'error');
@@ -7247,20 +7643,23 @@ const PlanoAtendimento = {
           status: 'ativo'
         };
         
-        console.log('📤 Payload para Plano de Atendimento:', payload);
+        console.log('� [PAI] Salvando:', payload);
         
-        let response;
-        if (this.form.id) {
-          response = await api.post('?action=plano-atendimento.update', { id: this.form.id, ...payload });
-        } else {
-          response = await api.post('?action=plano-atendimento.create', payload);
-        }
+        // Sempre usar .create que faz UPSERT automático
+        const response = await api.post('?action=plano-atendimento.create', payload);
+        
+        console.log('✅ [PAI] Resposta:', response.data);
+        
         if (response.data?.ok) {
+          // Atualizar ID se foi criado
+          if (response.data.data?.id) {
+            this.form.id = response.data.data.id;
+          }
           const nomeAlunoPlano = (this.alunos.find(a=>a.id==this.form.student_id)?.name) || 'Aluno';
-          this.$showToast('Sucesso', this.form.id ? `Plano de Atendimento de "${nomeAlunoPlano}" atualizado com sucesso!` : `Plano de Atendimento de "${nomeAlunoPlano}" salvo com sucesso!`, 'success');
-          this.$router.push('/');
+          this.$showToast('Sucesso', `Plano de Atendimento de "${nomeAlunoPlano}" salvo com sucesso!`, 'success');
+          // Não redirecionar automaticamente para permitir gerar PDF
         } else {
-          this.$showToast('Erro', 'Erro ao salvar plano', 'error');
+          this.$showToast('Erro', response.data?.error || 'Erro ao salvar plano', 'error');
         }
       } catch (error) {
         this.$showToast('Erro', 'Erro ao salvar plano: ' + (error.response?.data?.message || error.message), 'error');
@@ -9184,4 +9583,3 @@ try { mountVoicePortal(app); } catch (_) {}
 
 // Inicialização completa
 // console.log('ConectEdu v5.0 - Sistema inicializado com Tailwind CSS');
-

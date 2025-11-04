@@ -439,7 +439,486 @@ HTML;
     </div>
 HTML;
 
-    // Continua com mais seções...
+    // ALIMENTAÇÃO
+    $html .= <<<HTML
+    <div class="secao">
+        <div class="secao-titulo">ALIMENTAÇÃO</div>
+        
+        <div class="campo">
+            <span class="label">Foi amamentado? Até quando?</span>
+            <span class="valor">{$d['amamentacao_ate_quando']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Teve alguma dificuldade? Qual?</span>
+            <div class="textarea">{$d['amamentacao_dificuldades']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Usou mamadeira? Até quando?</span>
+            <span class="valor">{$d['mamadeira_ate_quando']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">E a chupeta?</span>
+            <span class="valor">{$d['chupeta']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Como foi a introdução da alimentação sólida?</span>
+            <div class="textarea">{$d['introducao_alimentacao_solida']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Alimenta-se sozinho?</span>
+            <span class="valor">{$d['alimenta_sozinho']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Teve/tem alguma dificuldade? Qual?</span>
+            <div class="textarea">{$d['alimentacao_dificuldades_atuais']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Como é o apetite?</span>
+            <span class="valor">{$d['apetite']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Refeições diárias (descrever tipos de alimentos e quantas vezes se alimenta):</span>
+            <div class="textarea">{$d['refeicoes_diarias']}</div>
+        </div>
+    </div>
+HTML;
+
+    // SAÚDE
+    $html .= <<<HTML
+    <div class="secao">
+        <div class="secao-titulo">SAÚDE</div>
+        
+        <div class="campo">
+            <span class="label">Toma algum medicamento? Qual? Quem prescreve?</span>
+            <div class="textarea">{$d['medicamentos']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Já fez eletroencefalograma?</span>
+            <span class="valor">{$d['fez_eletroencefalograma']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Faz tratamento médico? Qual?</span>
+            <div class="textarea">{$d['tratamento_medico']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Vacinação em dia?</span>
+            <span class="valor">{$d['vacinacao_em_dia']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Teve alguma doença? Qual?</span>
+            <div class="textarea">{$d['doencas']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Teve ou tem convulsões?</span>
+            <span class="valor">{$d['teve_convulsoes']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Que tipo?</span>
+            <span class="valor">{$d['convulsoes_tipo']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Como é a crise?</span>
+            <div class="textarea">{$d['convulsoes_como_crise']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Com qual frequência?</span>
+            <span class="valor">{$d['convulsoes_frequencia']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Já teve internação? Motivo:</span>
+            <div class="textarea">{$d['internacoes']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Já fez cirurgia? Motivo:</span>
+            <div class="textarea">{$d['cirurgias']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Faz uso de aparelhos ortopédicos? Óculos? Prótese auditiva?</span>
+            <div class="textarea">{$d['uso_aparelhos']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Já realizou exames audiométricos, oftalmológicos, neurológicos?</span>
+            <div class="textarea">{$d['exames_realizados']}</div>
+        </div>
+    </div>
+HTML;
+
+    // DESENVOLVIMENTO PREGRESSO
+    $html .= <<<HTML
+    <div class="secao">
+        <div class="secao-titulo">DESENVOLVIMENTO PREGRESSO</div>
+        
+        <table class="grid-2col">
+            <tr>
+                <td>
+                    <span class="label">Com que idade engatinhou?</span>
+                    <span class="valor">{$d['idade_engatinhou']}</span>
+                </td>
+                <td>
+                    <span class="label">Sentou?</span>
+                    <span class="valor">{$d['idade_sentou']}</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="label">Andou?</span>
+                    <span class="valor">{$d['idade_andou']}</span>
+                </td>
+                <td>
+                    <span class="label">Falou?</span>
+                    <span class="valor">{$d['idade_falou']}</span>
+                </td>
+            </tr>
+        </table>
+        
+        <div class="campo">
+            <span class="label">Como foi o controle dos esfíncteres?</span>
+            <div class="textarea">{$d['controle_esfincters']}</div>
+        </div>
+    </div>
+HTML;
+
+    // DESENVOLVIMENTO ATUAL
+    $html .= <<<HTML
+    <div class="secao">
+        <div class="secao-titulo">DESENVOLVIMENTO ATUAL</div>
+        
+        <div class="campo">
+            <span class="label">Comunicação verbal (claro, gagueja, troca letras, prolixo, monossilábico):</span>
+            <div class="textarea">{$d['comunicacao_verbal']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Apresenta dificuldade na fala?</span>
+            <span class="valor">{$d['dificuldade_fala']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Qual?</span>
+            <div class="textarea">{$d['dificuldade_fala_qual']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Faz tratamento fonoaudiológico?</span>
+            <span class="valor">{$d['tratamento_fonoaudiologico']}</span>
+        </div>
+    </div>
+HTML;
+
+    // ATIVIDADES DE VIDA DIÁRIA
+    $html .= <<<HTML
+    <div class="secao">
+        <div class="secao-titulo">ATIVIDADES DE VIDA DIÁRIA</div>
+        
+        <div class="campo">
+            <span class="label">Toma banho e se veste sozinho?</span>
+            <span class="valor">{$d['banho_veste_sozinho']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Faz a higiene bucal?</span>
+            <span class="valor">{$d['higiene_bucal']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Escova os dentes?</span>
+            <span class="valor">{$d['escova_dentes']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Usa o banheiro sozinho?</span>
+            <span class="valor">{$d['banheiro_sozinho']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Faz a higiene após o uso?</span>
+            <span class="valor">{$d['higiene_apos_banheiro']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Usa fralda? Período:</span>
+            <span class="valor">{$d['usa_fralda_periodo']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Penteia o cabelo sozinho?</span>
+            <span class="valor">{$d['penteia_cabelo_sozinho']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Calça sapatos e amarra os cadarços?</span>
+            <span class="valor">{$d['calca_sapatos_amarra']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Reconhece situações de perigo?</span>
+            <span class="valor">{$d['reconhece_perigo']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Sai sozinho de casa?</span>
+            <span class="valor">{$d['sai_sozinho']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Anda sozinho na rua?</span>
+            <span class="valor">{$d['anda_sozinho_rua']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Fica sozinho em casa?</span>
+            <span class="valor">{$d['fica_sozinho_casa']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Como dorme (sozinho, roupas, coberta, luz acesa/apagada)?</span>
+            <div class="textarea">{$d['como_dorme']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Quantas horas de sono?</span>
+            <span class="valor">{$d['horas_sono']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Acorda durante a noite?</span>
+            <span class="valor">{$d['acorda_durante_noite']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Dorme durante o dia?</span>
+            <span class="valor">{$d['dorme_durante_dia']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Tem pesadelos?</span>
+            <span class="valor">{$d['tem_pesadelos']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Como brinca (sozinho, grupo)? Quais as brincadeiras?</span>
+            <div class="textarea">{$d['como_brinca']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Com o que gosta de brincar?</span>
+            <div class="textarea">{$d['brinquedos_preferidos']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Assiste TV, joga vídeo game? Quais programas ou jogos? Com qual frequência?</span>
+            <div class="textarea">{$d['tv_videogame']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Sente curiosidade sexual?</span>
+            <span class="valor">{$d['curiosidade_sexual']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Como os pais vêm lidando com isso?</span>
+            <div class="textarea">{$d['pais_lidam_sexualidade']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Que medidas disciplinares usam? São discutidas e decididas pelo casal?</span>
+            <div class="textarea">{$d['medidas_disciplinares']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Como reage quando contrariado?</span>
+            <div class="textarea">{$d['reacao_contrariado']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">E quando frustrado?</span>
+            <div class="textarea">{$d['reacao_frustrado']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Apresenta hiperfoco (concentração intensa e prolongada em algo específico)? Relatar.</span>
+            <div class="textarea">{$d['hiperfoco']}</div>
+        </div>
+    </div>
+HTML;
+
+    // SOCIALIZAÇÃO E PREFERÊNCIAS
+    $html .= <<<HTML
+    <div class="secao">
+        <div class="secao-titulo">SOCIALIZAÇÃO E PREFERÊNCIAS</div>
+        
+        <div class="campo">
+            <span class="label">Faz amigos com facilidade?</span>
+            <span class="valor">{$d['faz_amigos_facilidade']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Possui amigos (as) na vizinhança? Brinca na rua?</span>
+            <span class="valor">{$d['amigos_vizinhanca']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Procura crianças da sua idade?</span>
+            <span class="valor">{$d['procura_criancas_idade']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Gosta de passear?</span>
+            <span class="valor">{$d['gosta_passear']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">E de ir a festas?</span>
+            <span class="valor">{$d['gosta_festas']}</span>
+        </div>
+    </div>
+HTML;
+
+    // COMPORTAMENTO
+    $html .= <<<HTML
+    <div class="secao">
+        <div class="secao-titulo">COMPORTAMENTO</div>
+        
+        <div class="campo">
+            <span class="label">Como descreveriam seu filho? (Marcar com X):</span><br>
+            <span class="checkbox">{$check($d['comp_alegre'])}</span> alegre
+            <span class="checkbox">{$check($d['comp_carinhoso'])}</span> carinhoso
+            <span class="checkbox">{$check($d['comp_calmo'])}</span> calmo
+            <span class="checkbox">{$check($d['comp_agitado'])}</span> agitado
+            <span class="checkbox">{$check($d['comp_triste'])}</span> triste<br>
+            <span class="checkbox">{$check($d['comp_timido'])}</span> tímido
+            <span class="checkbox">{$check($d['comp_criativo'])}</span> criativo
+            <span class="checkbox">{$check($d['comp_dependente'])}</span> dependente
+            <span class="checkbox">{$check($d['comp_ciumento'])}</span> ciumento
+            <span class="checkbox">{$check($d['comp_comunicativo'])}</span> comunicativo<br>
+            <span class="checkbox">{$check($d['comp_reservado'])}</span> reservado
+            <span class="checkbox">{$check($d['comp_teimoso'])}</span> teimoso
+            <span class="checkbox">{$check($d['comp_agressivo'])}</span> agressivo
+            <span class="checkbox">{$check($d['comp_medroso'])}</span> medroso
+        </div>
+        
+        <div class="campo">
+            <span class="label">Possui hábitos ou manias? Quais?</span>
+            <div class="textarea">{$d['habitos_manias']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Como age diante da frustração?</span>
+            <div class="textarea">{$d['comportamento_frustracao']}</div>
+        </div>
+    </div>
+HTML;
+
+    // VIDA ESCOLAR
+    $html .= <<<HTML
+    <div class="secao">
+        <div class="secao-titulo">VIDA ESCOLAR</div>
+        
+        <div class="campo">
+            <span class="label">Com que idade entrou na escola?</span>
+            <span class="valor">{$d['idade_entrada_escola']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Como foi a adaptação?</span>
+            <div class="textarea">{$d['adaptacao_escola']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Repetiu de ano? Quantas vezes?</span>
+            <span class="valor">{$d['repetiu_ano']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Houve muita troca de professores?</span>
+            <span class="valor">{$d['troca_professores']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Como é a frequência escolar?</span>
+            <span class="valor">{$d['frequencia_escolar']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">A família participa dos eventos escolares e reuniões com a escola?</span>
+            <div class="textarea">{$d['familia_participa_escola']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Faz as tarefas de casa? Com ajuda de quem?</span>
+            <div class="textarea">{$d['faz_tarefas_casa']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">O que a escola acha do aluno?</span>
+            <div class="textarea">{$d['opiniao_escola']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Corresponde ao desenvolvimento de alunos da mesma idade?</span>
+            <span class="valor">{$d['desenvolvimento_compativel_idade']}</span>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Na família há casos de problemas na aprendizagem ou de saúde? Quem?</span>
+            <div class="textarea">{$d['familia_problemas_aprendizagem']}</div>
+        </div>
+        
+        <div class="campo">
+            <span class="label">Já frequentou sala de recursos?</span>
+            <span class="valor">{$d['frequentou_sala_recursos']}</span>
+        </div>
+    </div>
+HTML;
+
+    // INFORMAÇÃO COMPLEMENTAR
+    $html .= <<<HTML
+    <div class="secao">
+        <div class="secao-titulo">INFORMAÇÃO COMPLEMENTAR</div>
+        
+        <div class="campo">
+            <span class="label">Informações adicionais que julgue relevantes:</span>
+            <div class="textarea">{$d['informacoes_complementares']}</div>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <table class="grid-2col">
+                <tr>
+                    <td style="text-align: center; padding: 20px;">
+                        <div style="border-top: 1px solid #000; padding-top: 5px;">
+                            <strong>Assinatura do(a) Entrevistador(a)</strong>
+                        </div>
+                    </td>
+                    <td style="text-align: center; padding: 20px;">
+                        <div style="border-top: 1px solid #000; padding-top: 5px;">
+                            <strong>Assinatura do(a) Responsável</strong>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+HTML;
     
     $mpdf->WriteHTML($html);
     

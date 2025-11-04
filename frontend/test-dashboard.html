@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Dashboard - ConectEDU</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.5.0/dist/axios.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="p-8">
+        <div class="bg-white rounded-lg shadow p-6 max-w-4xl mx-auto">
+            <h1 class="text-2xl font-bold mb-4">Teste Dashboard Debug</h1>
+            
+            <div class="space-y-4">
+                <div>
+                    <h2 class="font-bold text-lg mb-2">1. Token:</h2>
+                    <p class="text-sm font-mono bg-gray-100 p-2 rounded">{{ token ? token.substring(0, 50) + '...' : 'NÃO ENCONTRADO' }}</p>
+                </div>
+                
+                <div>
+                    <h2 class="font-bold text-lg mb-2">2. User:</h2>
+                    <pre class="text-xs bg-gray-100 p-2 rounded overflow-auto">{{ JSON.stringify(user, null, 2) }}</pre>
+                </div>
+                
+                <div>
+                    <h2 class="font-bold text-lg mb-2">3. API Base URL:</h2>
+                    <p class="text-sm font-mono bg-gray-100 p-2 rounded">{{ apiBase }}</p>
+                </div>
+                
+                <div>
+                    <button @click="testStudents" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                        Testar GET /students
+                    </button>
+                </div>
+                
+                <div v-if="studentsResponse">
+                    <h2 class="font-bold text-lg mb-2">4. Resposta /students:</h2>
+                    <pre class="text-xs bg-gray-100 p-2 rounded overflow-auto max-h-96">{{ JSON.stringify(studentsResponse, null, 2) }}</pre>
+                </div>
+                
+                <div v-if="studentsError" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                    <h2 class="font-bold text-lg mb-2">❌ Erro:</h2>
+                    <pre class="text-xs">{{ studentsError }}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        const { createApp } = Vue;
+
+        // Load config
+        const CONFIG = {
+            API_BASE: 'http://localhost/conectedu/backend/api.php'
+        };
+
+        // Create axios instance
+        const api = axios.create({
+            baseURL: CONFIG.API_BASE,
+            timeout: 15000
+        });
+
+        // Add auth interceptor
+        api.interceptors.request.use(cfg => {
+            const token = localStorage.getItem('token');
+            if (token) {
+                cfg.headers['Authorization'] = 'Bearer ' + token;
+            }
+            console.log('📤 Request:', cfg.method.toUpperCase(), cfg.url, cfg.headers);
+            return cfg;
+        });
+
+        api.interceptors.response.use(
+            response => {
+                console.log('📥 Response:', response.status, response.data);
+                return response;
+            },
+            error => {
+                console.error('❌ Error:', error.response || error);
+                return Promise.reject(error);
+            }
+        );
+
+        createApp({
+            data() {
+                return {
+                    token: localStorage.getItem('token'),
+                    user: null,
+                    apiBase: CONFIG.API_BASE,
+                    studentsResponse: null,
+                    studentsError: null
+                }
+            },
+            async mounted() {
+                console.log('🚀 App montado');
+                await this.loadUser();
+            },
+            methods: {
+                async loadUser() {
+                    if (!this.token) {
+                        this.user = { error: 'Token não encontrado' };
+                        return;
+                    }
+                    
+                    try {
+                        const response = await api.get('/me');
+                        this.user = response.data?.data || response.data;
+                        console.log('👤 User carregado:', this.user);
+                    } catch (error) {
+                        this.user = { error: error.message };
+                        console.error('❌ Erro ao carregar user:', error);
+                    }
+                },
+                async testStudents() {
+                    this.studentsResponse = null;
+                    this.studentsError = null;
+                    
+                    console.log('📚 Testando GET /students...');
+                    
+                    try {
+                        const response = await api.get('/students');
+                        this.studentsResponse = response.data;
+                        console.log('✅ Students:', this.studentsResponse);
+                    } catch (error) {
+                        this.studentsError = error.response?.data || error.message;
+                        console.error('❌ Erro ao buscar students:', error);
+                    }
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

@@ -110,82 +110,46 @@ const AuthGuard = (to, from, next) => {
 
 // Alunos - CRUD completo
 const AlunosTW = {
-  template: `
-  <div class="space-y-4" role="main">
-    <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-bold text-gray-900" id="alunos-heading">Alunos</h1>
-      <button @click="newAluno" 
-              class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
-              aria-label="Adicionar novo aluno">Novo Aluno</button>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-      <!-- Filtros Desktop -->
-      <div class="hidden md:block">
-        <div>
-          <label class="sr-only" for="alunos-busca">Buscar por nome</label>
-          <input id="alunos-busca" v-model="filters.q" @keyup.enter="load" 
-                 class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent" 
-                 placeholder="Buscar por nome">
+  template: /*html*/ `
+  <div id="alunos-tw" class="container mx-auto p-4 md:p-6" :key="componentKey">
+    <div class="bg-white p-4 rounded-2xl shadow-lg mb-6 border border-gray-200/80">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+        <!-- Search -->
+        <div class="relative md:col-span-5">
+          <label for="search" class="sr-only">Buscar aluno</label>
+          <i class="fas fa-search text-gray-400 absolute top-1/2 left-3 transform -translate-y-1/2"></i>
+          <input v-model.lazy="filters.q" @change="search" type="text" id="search"
+                 class="w-full pl-10 pr-4 py-2.5 border border-gray-200 bg-gray-50 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                 placeholder="Buscar por nome...">
         </div>
-      </div>
-      <div class="hidden md:block">
-        <label class="sr-only" for="alunos-status">Status</label>
-        <select id="alunos-status" v-model="filters.status" 
-                class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-          <option value="">Todos os status</option>
-          <option value="ativo">Ativo</option>
-          <option value="inativo">Inativo</option>
-        </select>
-      </div>
-      <div class="hidden md:block">
-        <label class="sr-only" for="alunos-modalidade">Modalidade</label>
-        <select id="alunos-modalidade" v-model="filters.modalidade" 
-                class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-          <option value="">Todas modalidades</option>
-          <option value="apoio">Apoio</option>
-          <option value="srm">SRM</option>
-        </select>
-      </div>
-      <button @click="load" 
-              class="hidden md:block px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
-              aria-label="Aplicar filtros de busca">
-        <i class="fas fa-search mr-2" aria-hidden="true"></i>Filtrar
-      </button>
 
-      <!-- Filtros Mobile -->
-      <div class="md:hidden bg-white shadow rounded-lg p-4 mb-4">
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">🔍 Buscar Aluno</label>
-            <input v-model="filters.q" @keyup.enter="load" 
-                   class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent" 
-                   placeholder="Digite o nome do aluno...">
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-              <select v-model="filters.status" 
-                      class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-                <option value="">Todos</option>
-                <option value="ativo">✅ Ativo</option>
-                <option value="inativo">❌ Inativo</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Modalidade</label>
-              <select v-model="filters.modalidade" 
-                      class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-                <option value="">Todas</option>
-                <option value="apoio">👨‍🏫 Apoio</option>
-                <option value="srm">🏫 SRM</option>
-              </select>
-            </div>
-          </div>
-          <button @click="load" class="w-full px-4 py-3 bg-brand-primary text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-            🔍 Buscar Alunos
-          </button>
+        <!-- Filters -->
+        <div class="relative md:col-span-3">
+          <label for="status" class="sr-only">Status</label>
+          <i class="fas fa-filter text-gray-400 absolute top-1/2 left-3 transform -translate-y-1/2"></i>
+          <select v-model="filters.status" @change="search" id="status" class="w-full pl-10 pr-4 py-2.5 border border-gray-200 bg-gray-50 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none transition">
+            <option value="">Todos Status</option>
+            <option value="ativo">Ativo</option>
+            <option value="inativo">Inativo</option>
+          </select>
         </div>
+
+        <div class="relative md:col-span-3">
+          <label for="modalidade" class="sr-only">Modalidade</label>
+          <i class="fas fa-graduation-cap text-gray-400 absolute top-1/2 left-3 transform -translate-y-1/2"></i>
+          <select v-model="filters.modalidade" @change="search" id="modalidade" class="w-full pl-10 pr-4 py-2.5 border border-gray-200 bg-gray-50 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none transition">
+            <option value="">Todas Modalidades</option>
+            <option value="presencial">Presencial</option>
+            <option value="remoto">Remoto</option>
+            <option value="hibrido">Híbrido</option>
+          </select>
+        </div>
+
+        <!-- Add Button -->
+        <button class="md:col-span-1 w-full bg-brand-primary hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5"
+                @click="edit({})">
+          <i class="fas fa-plus mr-2"></i> Novo
+        </button>
       </div>
     </div>
 
@@ -287,45 +251,40 @@ const AlunosTW = {
     </div>
 
     <!-- Visualização Mobile -->
-    <div class="md:hidden space-y-3">
-      <div v-for="s in rows" :key="s.id" class="bg-white shadow rounded-lg p-4 border-l-4 border-brand-primary">
-        <div class="flex items-start justify-between mb-3">
-          <h3 class="font-medium text-gray-900 text-lg">{{ s.name }}</h3>
-          <div class="flex space-x-1">
-            <span :class="['px-2 py-1 rounded text-xs font-medium', s.status==='ativo'?'bg-green-100 text-green-700':'bg-gray-100 text-gray-600']">{{ s.status }}</span>
+    <div class="grid md:hidden grid-cols-1 sm:grid-cols-2 gap-4">
+      <div v-for="s in rows" :key="s.id" class="bg-white rounded-2xl shadow-md border border-gray-200/80 overflow-hidden transform hover:-translate-y-1 transition-transform duration-300">
+        <div class="p-5">
+          <div class="flex items-start justify-between">
+            <h3 class="font-bold text-gray-800 text-lg mb-2">{{ s.name }}</h3>
+            <span :class="['px-2.5 py-1 rounded-full text-xs font-semibold', s.status === 'ativo' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600']">{{ s.status }}</span>
+          </div>
+          <div class="space-y-2 text-sm text-gray-600">
+            <p class="flex items-center gap-2">
+              <i class="fas fa-graduation-cap text-blue-500 w-4 text-center"></i>
+              <span class="px-2 py-0.5 rounded text-xs font-medium uppercase bg-blue-50 text-blue-700">{{ s.modalidade }}</span>
+            </p>
+            <p class="flex items-center gap-2">
+              <i class="fas fa-school text-blue-500 w-4 text-center"></i>
+              <span>{{ s.school_name || 'Sem escola' }}</span>
+            </p>
           </div>
         </div>
-        
-        <div class="space-y-2 text-sm">
-          <div class="flex justify-between">
-            <span class="text-gray-700">Modalidade:</span>
-            <span class="px-2 py-1 rounded text-xs font-medium uppercase bg-blue-100 text-blue-800">{{ s.modalidade }}</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-gray-700">Escola:</span>
-            <span class="text-gray-900 flex items-center">
-              <i class="fas fa-school text-blue-500 mr-1"></i>
-              {{ s.school_name || 'Sem escola' }}
-            </span>
-          </div>
-        </div>
-        
-        <div class="flex space-x-2 mt-4 pt-3 border-t">
-          <button class="flex-1 px-3 py-2 text-sm border rounded hover:bg-gray-50 transition-colors" @click="edit(s)">
-            📝 Editar
+        <div class="grid grid-cols-2 bg-gray-50/70 border-t border-gray-200">
+          <button class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors" @click="edit(s)">
+            <i class="fas fa-pencil-alt text-gray-500"></i> Editar
           </button>
-          <button class="flex-1 px-3 py-2 text-sm border rounded text-red-600 hover:bg-red-50 transition-colors" @click="del(s)">
-            🗑️ Excluir
+          <button class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 border-l border-gray-200 transition-colors" @click="del(s)">
+            <i class="fas fa-trash-alt text-red-500"></i> Excluir
           </button>
         </div>
       </div>
       
-      <div v-if="!rows || rows.length===0" class="bg-white shadow rounded-lg p-8 text-center text-gray-700">
+      <div v-if="!rows || rows.length===0" class="bg-white shadow rounded-lg p-8 text-center text-gray-700 sm:col-span-2">
         Nenhum aluno encontrado
       </div>
       
       <!-- Paginação Mobile -->
-      <div v-if="totalPages > 1" class="bg-white shadow rounded-lg p-4">
+      <div v-if="totalPages > 1" class="bg-white shadow rounded-lg p-4 sm:col-span-2">
         <div class="text-sm text-gray-700 text-center mb-3">
           {{ (currentPage - 1) * perPage + 1 }} - {{ Math.min(currentPage * perPage, totalItems) }} de {{ totalItems }} alunos
         </div>
@@ -396,22 +355,21 @@ const AlunosTW = {
         </div>
       </div>
 
-      <!-- Indicadores de Etapas -->
-      <div class="flex justify-between mb-8">
-        <div v-for="(step, index) in stepsAluno" :key="index" 
-             class="flex flex-col items-center cursor-pointer transition-all duration-200"
-             @click="goToStepAluno(index)">
-          <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-200"
-               :class="index < currentStepAluno ? 'bg-blue-500 border-blue-500 text-white' : 
-                       index === currentStepAluno ? 'bg-blue-100 border-blue-500 text-blue-700' : 
-                       'bg-gray-100 border-gray-300 text-gray-600'">
-            <i :class="step.icon"></i>
-          </div>
-          <span class="text-xs mt-2 text-center max-w-20"
-                :class="index <= currentStepAluno ? 'text-blue-600 font-medium' : 'text-gray-700'">
-            {{ step.title }}
-          </span>
-        </div>
+      <!-- Step Navigation Pills -->
+      <div class="flex flex-wrap justify-center gap-2 mb-8">
+        <button v-for="(step, index) in stepsAluno" :key="index"
+                @click="goToStepAluno(index)"
+                :disabled="index > totalStepsAluno"
+                class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300"
+                :class="[
+                  index === currentStepAluno
+                    ? 'bg-indigo-600 text-white shadow-lg'
+                    : index <= totalStepsAluno
+                      ? 'bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50'
+                      : 'bg-gray-100 text-gray-600 cursor-not-allowed'
+                ]">
+          <i :class="step.icon + ' mr-2'"></i>{{ step.title }}
+        </button>
       </div>
 
       <!-- Etapa 1: Dados Básicos -->
@@ -599,6 +557,32 @@ const AlunosTW = {
         </div>
       </div>
 
+      <!-- Etapa 4: Galeria de Fotos -->
+      <div v-if="currentStepAluno === 3" class="space-y-6">
+        <div class="border-l-4 border-blue-500 pl-4 mb-6">
+          <h2 class="text-lg font-semibold text-gray-900">Galeria de Fotos</h2>
+          <p class="text-sm text-gray-600">Adicione imagens relevantes do aluno</p>
+        </div>
+
+        <!-- Botão de Upload -->
+        <div class="text-center">
+          <button @click="$refs.galleryInput.click()" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+            <i class="fas fa-upload mr-2"></i> Adicionar Imagens
+          </button>
+          <input type="file" ref="galleryInput" @change="handleImageUpload" multiple accept="image/*" class="hidden">
+        </div>
+
+        <!-- Galeria -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div v-for="image in images" :key="image.id" class="relative">
+            <img :src="apiBase + '/' + image.path" alt="Foto do aluno" class="w-full h-32 object-cover rounded-lg shadow">
+            <button @click="deleteImage(image)" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
+              <i class="fas fa-trash-alt text-xs"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Etapa 2: Atribuições -->
       <div v-if="currentStepAluno === 1" class="space-y-6">
         <div class="border-l-4 border-blue-500 pl-4 mb-6">
@@ -731,6 +715,40 @@ const AlunosTW = {
         </div>
       </div>
 
+      <!-- Etapa 4: Galeria de Fotos -->
+      <div v-if="currentStepAluno === 3" class="space-y-6">
+        <div class="border-l-4 border-blue-500 pl-4 mb-6">
+          <h2 class="text-lg font-semibold text-gray-900">Galeria de Fotos</h2>
+          <p class="text-sm text-gray-600">Adicione imagens relevantes do aluno (trabalhos, atividades, etc.)</p>
+        </div>
+
+        <!-- Botão de Upload -->
+        <div class="text-center">
+          <button @click="$refs.galleryInput.click()" type="button"
+                  class="px-5 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all shadow-md hover:shadow-lg">
+            <i class="fas fa-upload mr-2"></i> Adicionar Imagens
+          </button>
+          <input type="file" ref="galleryInput" @change="handleImageUpload" multiple accept="image/*" class="hidden">
+        </div>
+
+        <!-- Galeria -->
+        <div v-if="images && images.length > 0" class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
+          <div v-for="image in images" :key="image.id" class="relative group">
+            <img :src="apiBase + '/' + image.path" alt="Foto do aluno"
+                 class="w-full h-32 object-cover rounded-lg shadow-md border-2 border-transparent group-hover:border-blue-500 transition-all">
+            <button @click="deleteImage(image)"
+                    class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <i class="fas fa-trash-alt text-xs"></i>
+            </button>
+          </div>
+        </div>
+
+        <div v-else class="text-center py-8 text-gray-500 bg-gray-100 rounded-lg">
+          <i class="fas fa-images text-3xl mb-2"></i>
+          <p>Nenhuma imagem na galeria.</p>
+        </div>
+      </div>
+
       <!-- Navegação -->
       <div class="flex justify-between pt-6 border-t">
         <button type="button" 
@@ -778,17 +796,19 @@ const AlunosTW = {
     editing:false,
     // Wizard properties
     currentStepAluno: 0,
-    totalStepsAluno: 3,
+    totalStepsAluno: 4,
     stepsAluno: [
       { title: 'Dados Básicos', icon: 'fas fa-user' },
       { title: 'Atribuições', icon: 'fas fa-chalkboard-teacher' },
-      { title: 'Contato', icon: 'fas fa-phone' }
+      { title: 'Contato', icon: 'fas fa-phone' },
+      { title: 'Galeria', icon: 'fas fa-images' }
     ],
   form:{ id:null, name:'', modalidade:'', status:'ativo', school_id:null, _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:'', created_by_teacher_id:null, photo_url:null }, 
   teachers:[], 
     rooms:[],
     schools:[],
   professores:[],
+  images:[],
     // Upload de foto
     photoFile: null,
     photoPreview: null,
@@ -829,6 +849,8 @@ const AlunosTW = {
           return true; // Atribuições são opcionais
         case 2:
           return true; // Dados de contato são opcionais
+        case 3:
+          return true; // Galeria é opcional
         default:
           return false;
       }
@@ -873,11 +895,59 @@ const AlunosTW = {
       this.currentStepAluno = 0;
       this.form=Object.assign({_st_name:'', _room_name:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:'', created_by_teacher_id: s.created_by_teacher_id || null}, s); 
       this.loadLists();
+      this.loadImages();
     },
     cancel(){ 
       this.editing=false; 
       this.currentStepAluno = 0;
       this.form={ id:null, name:'', modalidade:'', status:'ativo', school_id:null, _st_name:'', _room_name:'', support_teacher_id:null, srm_room_id:null, responsible_name:'', responsible_phone:'', cid_code:'', birth_date:'', cpf:'', rg:'', grade:'', class_name:'', address:'', created_by_teacher_id:null }; 
+      this.images = [];
+    },
+    async handleImageUpload(e) {
+      if (!this.form.id) {
+        this.$showToast('Atenção', 'Salve o aluno antes de adicionar imagens.', 'warning');
+        return;
+      }
+      const files = e.target.files;
+      if (!files.length) return;
+
+      const formData = new FormData();
+      for (const file of files) {
+        formData.append('images[]', file);
+      }
+
+      try {
+        const r = await api.post(`/students/${this.form.id}/images`, formData);
+        if (r.data?.ok) {
+          this.$showToast && this.$showToast('Sucesso', 'Imagens enviadas com sucesso!', 'success');
+          await this.loadImages();
+        } else {
+          this.$showToast && this.$showToast('Erro', r.data?.error || 'Erro ao enviar imagens.', 'error');
+        }
+      } catch (err) {
+        console.error('Erro ao enviar imagens:', err);
+        this.$showToast && this.$showToast('Erro', 'Erro de conexão ao enviar imagens.', 'error');
+      } finally {
+        // Limpar o input de arquivo
+        if (this.$refs.galleryInput) {
+          this.$refs.galleryInput.value = '';
+        }
+      }
+    },
+    async deleteImage(image) {
+      if (!confirm('Deseja realmente excluir esta imagem?')) return;
+      try {
+        const r = await api.delete(`/students/images/${image.id}`);
+        if (r.data?.ok) {
+          this.$showToast && this.$showToast('Sucesso', 'Imagem excluída com sucesso!', 'success');
+          this.images = this.images.filter(img => img.id !== image.id);
+        } else {
+          this.$showToast && this.$showToast('Erro', r.data?.error || 'Erro ao excluir imagem.', 'error');
+        }
+      } catch (err) {
+        console.error('Erro ao excluir imagem:', err);
+        this.$showToast && this.$showToast('Erro', 'Erro de conexão ao excluir imagem.', 'error');
+      }
     },
     async load(){ 
       const params={ 
@@ -893,6 +963,15 @@ const AlunosTW = {
       this.rows = r.data?.data?.rows || []; 
       this.totalItems = r.data?.data?.total || 0;
       this.totalPages = Math.ceil(this.totalItems / this.perPage);
+    },
+    async loadImages() {
+      if (!this.form.id) return;
+      try {
+        const r = await api.get(`/students/${this.form.id}/images`);
+        this.images = r.data?.data || [];
+      } catch (err) {
+        console.error('Erro ao carregar imagens:', err);
+      }
     },
     previousPage() {
       if (this.currentPage > 1) {
@@ -1285,17 +1364,51 @@ const RegisterTW = {
 
 // Usuários (Professores/Admins)
 const UsuariosTW = {
-  template: `
-  <div class="space-y-4" role="main">
-    <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-bold text-gray-900" id="usuarios-heading">Usuários</h1>
-      <button @click="novo" 
-              class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
-              aria-label="Adicionar novo usuário">Novo Usuário</button>
+  template: /*html*/`
+  <div id="usuarios-tw" class="container mx-auto p-4 md:p-6">
+    <div class="bg-white p-4 rounded-2xl shadow-lg mb-6 border border-gray-200/80">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+        <!-- Search -->
+        <div class="relative md:col-span-4">
+          <label for="search-users" class="sr-only">Buscar usuário</label>
+          <i class="fas fa-search text-gray-400 absolute top-1/2 left-3 transform -translate-y-1/2"></i>
+          <input v-model="filters.q" @keyup.enter="load" type="text" id="search-users"
+                 class="w-full pl-10 pr-4 py-2.5 border border-gray-200 bg-gray-50 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                 placeholder="Buscar por nome ou email...">
+        </div>
+
+        <!-- Filters -->
+        <div class="relative md:col-span-3">
+          <label for="role-filter" class="sr-only">Perfil</label>
+          <i class="fas fa-user-tie text-gray-400 absolute top-1/2 left-3 transform -translate-y-1/2"></i>
+          <select v-model="filters.role" @change="load" id="role-filter" class="w-full pl-10 pr-4 py-2.5 border border-gray-200 bg-gray-50 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none transition">
+            <option value="">Todos os Perfis</option>
+            <option value="admin">Administrador</option>
+            <option value="professor">Professor</option>
+            <option value="coordenador">Coordenador</option>
+          </select>
+        </div>
+
+        <div class="relative md:col-span-3">
+          <label for="status-filter" class="sr-only">Status</label>
+          <i class="fas fa-toggle-on text-gray-400 absolute top-1/2 left-3 transform -translate-y-1/2"></i>
+          <select v-model="filters.status" @change="load" id="status-filter" class="w-full pl-10 pr-4 py-2.5 border border-gray-200 bg-gray-50 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none transition">
+            <option value="">Todos Status</option>
+            <option value="ativo">Ativo</option>
+            <option value="inativo">Inativo</option>
+          </select>
+        </div>
+
+        <!-- Add Button -->
+        <button class="md:col-span-2 w-full bg-brand-primary hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5"
+                @click="novo">
+          <i class="fas fa-plus mr-2"></i> Novo Usuário
+        </button>
+      </div>
     </div>
 
     <!-- Mensagens de Feedback -->
-    <div v-if="successMessage" class="bg-green-50 border border-green-200 rounded-md p-4">
+    <div v-if="successMessage" class="bg-green-50 border border-green-200 rounded-md p-4 mb-4">
       <div class="flex">
         <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
@@ -1306,7 +1419,7 @@ const UsuariosTW = {
       </div>
     </div>
     
-    <div v-if="errorMessage" class="bg-red-50 border border-red-200 rounded-md p-4">
+    <div v-if="errorMessage" class="bg-red-50 border border-red-200 rounded-md p-4 mb-4">
       <div class="flex">
         <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
@@ -1315,39 +1428,6 @@ const UsuariosTW = {
           <p class="text-sm font-medium text-red-800">{{ errorMessage }}</p>
         </div>
       </div>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-      <div>
-        <label class="sr-only" for="u-busca">Buscar por nome ou email</label>
-        <input id="u-busca" v-model="filters.q" @keyup.enter="load" 
-               class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent" 
-               placeholder="Buscar por nome ou email">
-      </div>
-      <div>
-        <label class="sr-only" for="u-role">Perfil</label>
-        <select id="u-role" v-model="filters.role" 
-                class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-          <option value="">Todos os perfis</option>
-          <option value="admin">Administrador</option>
-          <option value="professor">Professor</option>
-          <option value="coordenador">Coordenador</option>
-        </select>
-      </div>
-      <div>
-        <label class="sr-only" for="u-status">Status</label>
-        <select id="u-status" v-model="filters.status" 
-                class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent">
-          <option value="">Todos os status</option>
-          <option value="ativo">Ativo</option>
-          <option value="inativo">Inativo</option>
-        </select>
-      </div>
-      <button @click="load" 
-              class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
-              aria-label="Aplicar filtros de busca">
-        <i class="fas fa-search mr-2" aria-hidden="true"></i>Filtrar
-      </button>
     </div>
 
     
@@ -1472,56 +1552,101 @@ const UsuariosTW = {
       </nav>
     </div>
 
+    <!-- Visualização Mobile -->
+    <div class="grid md:hidden grid-cols-1 sm:grid-cols-2 gap-4">
+      <div v-for="u in paginatedRows" :key="u.id" class="bg-white rounded-2xl shadow-md border border-gray-200/80 overflow-hidden transform hover:-translate-y-1 transition-transform duration-300">
+        <div class="p-5">
+          <div class="flex items-start justify-between">
+            <h3 class="font-bold text-gray-800 text-lg mb-2">{{ u.name }}</h3>
+            <span :class="['px-2.5 py-1 rounded-full text-xs font-semibold', u.status === 'ativo' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600']">{{ u.status }}</span>
+          </div>
+          <div class="space-y-2 text-sm text-gray-600">
+            <p class="flex items-center gap-2">
+              <i class="fas fa-envelope text-blue-500 w-4 text-center"></i>
+              <span>{{ u.email }}</span>
+            </p>
+            <p class="flex items-center gap-2">
+              <i class="fas fa-user-tie text-blue-500 w-4 text-center"></i>
+              <span class="px-2 py-0.5 rounded text-xs font-medium uppercase" :class="getRoleClass(u.role)">{{ getRoleLabel(u.role) }}</span>
+            </p>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 bg-gray-50/70 border-t border-gray-200">
+          <button class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors" @click="edit(u)">
+            <i class="fas fa-pencil-alt text-gray-500"></i> Editar
+          </button>
+          <button class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 border-l border-gray-200 transition-colors" @click="del(u)">
+            <i class="fas fa-trash-alt text-red-500"></i> Excluir
+          </button>
+        </div>
+      </div>
+
+      <div v-if="!paginatedRows || paginatedRows.length===0" class="bg-white shadow rounded-lg p-8 text-center text-gray-700 sm:col-span-2">
+        Nenhum usuário encontrado
+      </div>
+
+      <!-- Paginação Mobile -->
+      <nav v-if="totalPages > 1" class="sm:col-span-2 flex items-center justify-between p-4">
+        <div class="text-sm text-gray-700">Página {{ currentPage }} de {{ totalPages }}</div>
+        <div class="flex items-center space-x-2">
+          <button @click="previousPage" :disabled="currentPage === 1" class="px-4 py-2 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            Anterior
+          </button>
+          <button @click="nextPage" :disabled="currentPage === totalPages" class="px-4 py-2 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            Próxima
+          </button>
+        </div>
+      </nav>
+    </div>
+
     <!-- Modal de Criar/Editar Usuário -->
     <div v-if="editing" class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto" style="background-color: rgba(0, 0, 0, 0.85);" @click.self="cancel">
-      <div class="bg-gray-50 rounded-lg w-full max-w-4xl shadow-xl overflow-hidden flex flex-col border border-gray-200 m-4" style="max-height: calc(100vh - 2rem);">
-        <div class="flex items-center justify-between p-4 border-b bg-gray-50 sticky top-0 z-10">
+      <div class="bg-gray-50 rounded-lg w-full max-w-lg shadow-xl m-4" style="max-height: calc(100vh - 2rem);">
+        <div class="flex items-center justify-between p-4 border-b">
           <h2 class="text-lg font-semibold">{{ form.id ? 'Editar Usuário' : 'Novo Usuário' }}</h2>
           <button @click="cancel" class="text-gray-500 hover:text-gray-700" aria-label="Fechar"><i class="fas fa-times text-xl"></i></button>
         </div>
-      <div class="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div>
-          <label class="text-sm font-medium text-gray-700 mb-1 block" for="u-nome">Nome</label>
-          <input id="u-nome" v-model="form.name" class="border rounded px-3 py-2 w-full" placeholder="Nome">
+        <div class="p-6 space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2" for="u-nome">Nome Completo</label>
+            <input id="u-nome" v-model="form.name" class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500" placeholder="Nome do usuário">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2" for="u-email">Email</label>
+            <input id="u-email" v-model="form.email" type="email" class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500" placeholder="email@dominio.com">
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2" for="u-role2">Perfil</label>
+              <select id="u-role2" v-model="form.role" class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500">
+                <option value="professor">Professor</option>
+                <option value="admin">Administrador</option>
+                <option value="coordenador">Coordenador</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2" for="u-status2">Status</label>
+              <select id="u-status2" v-model="form.status" class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500">
+                <option value="ativo">Ativo</option>
+                <option value="inativo">Inativo</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2" for="u-pass">Senha {{ form.id ? '(deixe em branco para manter)' : '' }}</label>
+            <input id="u-pass" v-model="form.password" type="password" class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-500" :placeholder="form.id ? '••••••' : 'Defina uma senha forte'">
+          </div>
         </div>
-        <div>
-          <label class="text-sm font-medium text-gray-700 mb-1 block" for="u-email">Email</label>
-          <input id="u-email" v-model="form.email" type="email" class="border rounded px-3 py-2 w-full" placeholder="email@dominio.com">
+        <div class="flex justify-end space-x-3 p-4 bg-gray-100 border-t">
+          <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-200" @click="cancel" :disabled="savingForm">
+            Cancelar
+          </button>
+          <button type="button" class="px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center" @click="save" :disabled="savingForm">
+            <i v-if="savingForm" class="fas fa-spinner fa-spin mr-2"></i>
+            <i v-else :class="form.id ? 'fas fa-save' : 'fas fa-plus'" class="mr-2"></i>
+            {{ form.id ? (savingForm ? 'Salvando...' : 'Salvar Alterações') : (savingForm ? 'Criando...' : 'Criar Usuário') }}
+          </button>
         </div>
-        <div>
-          <label class="text-sm font-medium text-gray-700 mb-1 block" for="u-role2">Perfil</label>
-          <select id="u-role2" v-model="form.role" class="border rounded px-3 py-2 w-full">
-            <option value="professor">Professor</option>
-            <option value="admin">Administrador</option>
-            <option value="coordenador">Coordenador</option>
-          </select>
-        </div>
-        <div>
-          <label class="text-sm font-medium text-gray-700 mb-1 block" for="u-status2">Status</label>
-          <select id="u-status2" v-model="form.status" class="border rounded px-3 py-2 w-full">
-            <option value="ativo">Ativo</option>
-            <option value="inativo">Inativo</option>
-          </select>
-        </div>
-        <div>
-          <label class="text-sm font-medium text-gray-700 mb-1 block" for="u-pass">Senha {{ form.id ? '(deixe vazio para manter)' : '' }}</label>
-          <input id="u-pass" v-model="form.password" type="password" class="border rounded px-3 py-2 w-full" :placeholder="form.id ? '••••••' : 'Defina uma senha'">
-        </div>
-      </div>
-      <div class="flex gap-2 justify-end p-4 border-t bg-gray-50 sticky bottom-0">
-        <button class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 transition-colors" 
-                @click="cancel" 
-                :disabled="savingForm">
-          Cancelar
-        </button>
-        <button class="px-4 py-2 bg-brand-primary text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center" 
-                @click="save" 
-                :disabled="savingForm">
-          <i v-if="savingForm" class="fas fa-spinner fa-spin mr-2"></i>
-          <i v-else :class="form.id ? 'fas fa-save' : 'fas fa-plus'" class="mr-2"></i>
-          {{ form.id ? (savingForm ? 'Atualizando...' : 'Atualizar Usuário') : (savingForm ? 'Criando...' : 'Criar Usuário') }}
-        </button>
-      </div>
       </div>
     </div>
   </div>
@@ -1680,40 +1805,41 @@ const UsuariosTW = {
 
 // Componente de Escolas - Recriado seguindo padrão dos outros componentes
 const EscolasTW = {
-  template: `
-    <div class="space-y-4" role="main">
-      <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-900" id="escolas-heading">Escolas</h1>
-        <button @click="newEscola" 
-                class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
-                aria-label="Adicionar nova escola">
-          <i class="fas fa-plus mr-2"></i>Nova Escola
-        </button>
-      </div>
+  template: /*html*/`
+    <div id="escolas-tw" class="container mx-auto p-4 md:p-6">
+      <div class="bg-white p-4 rounded-2xl shadow-lg mb-6 border border-gray-200/80">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+          <!-- Search by Name -->
+          <div class="relative md:col-span-4">
+            <label for="search-escolas" class="sr-only">Buscar escola</label>
+            <i class="fas fa-search text-gray-400 absolute top-1/2 left-3 transform -translate-y-1/2"></i>
+            <input v-model="searchTerm" @keyup.enter="goToPage(1)" type="text" id="search-escolas"
+                   class="w-full pl-10 pr-4 py-2.5 border border-gray-200 bg-gray-50 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                   placeholder="Buscar por nome...">
+          </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-        <div>
-          <label class="sr-only" for="escolas-busca">Buscar por nome</label>
-          <input id="escolas-busca" v-model="searchTerm" @keyup.enter="goToPage(1)" 
-                 class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent" 
-                 placeholder="Buscar por nome">
+          <!-- Filter by City -->
+          <div class="relative md:col-span-4">
+            <label for="city-filter" class="sr-only">Filtrar por cidade</label>
+            <i class="fas fa-map-marker-alt text-gray-400 absolute top-1/2 left-3 transform -translate-y-1/2"></i>
+            <input v-model="cityFilter" @keyup.enter="goToPage(1)" type="text" id="city-filter"
+                   class="w-full pl-10 pr-4 py-2.5 border border-gray-200 bg-gray-50 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                   placeholder="Filtrar por cidade...">
+          </div>
+
+          <!-- Spacer -->
+          <div class="md:col-span-2"></div>
+
+          <!-- Add Button -->
+          <button class="md:col-span-2 w-full bg-brand-primary hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5"
+                  @click="newEscola">
+            <i class="fas fa-plus mr-2"></i> Nova Escola
+          </button>
         </div>
-        <div>
-          <label class="sr-only" for="escolas-cidade">Cidade</label>
-          <input id="escolas-cidade" v-model="cityFilter" @keyup.enter="goToPage(1)" 
-                 class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent" 
-                 placeholder="Filtrar por cidade">
-        </div>
-        <div></div>
-        <button @click="goToPage(1)" 
-                class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
-                aria-label="Aplicar filtros de busca">
-          <i class="fas fa-search mr-2" aria-hidden="true"></i>Filtrar
-        </button>
       </div>
 
       <!-- Visualização Desktop -->
-      <div class="bg-white shadow rounded-lg overflow-hidden" role="region" aria-labelledby="escolas-heading">
+      <div class="bg-white shadow rounded-lg overflow-hidden hidden md:block" role="region" aria-labelledby="escolas-heading">
         <table class="min-w-full" role="table" aria-label="Lista de escolas">
           <thead class="bg-gray-50">
             <tr class="text-left">
@@ -1810,55 +1936,84 @@ const EscolasTW = {
         </nav>
       </div>
 
-      <!-- Modal de Edição (padrão unificado) -->
-      <div v-if="showModal" class="fixed inset-0 flex items-center justify-center z-50 overflow-y-auto" style="background-color: rgba(0, 0, 0, 0.85);" @click.self="closeModal">
-        <div class="bg-gray-50 rounded-lg w-full max-w-4xl shadow-xl overflow-hidden flex flex-col border border-gray-200 m-4" style="max-height: calc(100vh - 2rem);">
-          <div class="flex items-center justify-between p-4 border-b bg-gray-50 sticky top-0 z-10">
+      <!-- Visualização Mobile -->
+      <div class="grid md:hidden grid-cols-1 sm:grid-cols-2 gap-4">
+        <div v-for="escola in paginatedRows" :key="escola.id" class="bg-white rounded-2xl shadow-md border border-gray-200/80 overflow-hidden transform hover:-translate-y-1 transition-transform duration-300">
+          <div class="p-5">
+            <h3 class="font-bold text-gray-800 text-lg mb-2">{{ escola.name }}</h3>
+            <div class="space-y-2 text-sm text-gray-600">
+              <p class="flex items-center gap-2">
+                <i class="fas fa-map-marker-alt text-blue-500 w-4 text-center"></i>
+                <span>{{ escola.city || 'Cidade não informada' }}</span>
+              </p>
+              <p class="flex items-center gap-2">
+                <i class="fas fa-phone-alt text-blue-500 w-4 text-center"></i>
+                <span>{{ escola.phone || 'Telefone não informado' }}</span>
+              </p>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 bg-gray-50/70 border-t border-gray-200">
+            <button class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors" @click="edit(escola)">
+              <i class="fas fa-pencil-alt text-gray-500"></i> Editar
+            </button>
+            <button class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 border-l border-gray-200 transition-colors" @click="deleteEscola(escola)">
+              <i class="fas fa-trash-alt text-red-500"></i> Excluir
+            </button>
+          </div>
+        </div>
+
+        <div v-if="!paginatedRows || paginatedRows.length === 0" class="bg-white shadow rounded-lg p-8 text-center text-gray-700 sm:col-span-2">
+          Nenhuma escola encontrada
+        </div>
+
+        <!-- Paginação Mobile -->
+        <nav v-if="totalPages > 1" class="sm:col-span-2 flex items-center justify-between p-4">
+          <div class="text-sm text-gray-700">Página {{ currentPage }} de {{ totalPages }}</div>
+          <div class="flex items-center space-x-2">
+            <button @click="previousPage" :disabled="currentPage === 1" class="px-4 py-2 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+              Anterior
+            </button>
+            <button @click="nextPage" :disabled="currentPage === totalPages" class="px-4 py-2 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+              Próxima
+            </button>
+          </div>
+        </nav>
+      </div>
+
+      <!-- Modal de Edição -->
+      <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto" style="background-color: rgba(0, 0, 0, 0.85);" @click.self="closeModal">
+        <div class="bg-gray-50 rounded-lg w-full max-w-lg shadow-xl m-4" style="max-height: calc(100vh - 2rem);">
+          <div class="flex items-center justify-between p-4 border-b">
             <h2 class="text-lg font-semibold">{{ editingId ? 'Editar Escola' : 'Nova Escola' }}</h2>
             <button @click="closeModal" class="text-gray-500 hover:text-gray-700" aria-label="Fechar"><i class="fas fa-times text-xl"></i></button>
           </div>
-          
-          <div class="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Nome *</label>
-              <input 
-                v-model="form.name" 
-                type="text" 
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+          <div class="p-6 space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Nome da Escola *</label>
+              <input v-model="form.name" type="text" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
             </div>
-            
-            <div class="md:col-span-2">
+            <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Endereço</label>
-              <textarea 
-                v-model="form.address" 
-                rows="2"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+              <textarea v-model="form.address" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
             </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Cidade</label>
-              <input 
-                v-model="form.city" 
-                type="text"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-            </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Telefone</label>
-              <input 
-                v-model="form.phone" 
-                type="tel"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Cidade</label>
+                <input v-model="form.city" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Telefone</label>
+                <input v-model="form.phone" type="tel" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+              </div>
             </div>
           </div>
-          
-          <div class="flex justify-end space-x-3 p-4 border-t">
-            <button @click="closeModal" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+          <div class="flex justify-end space-x-3 p-4 bg-gray-100 border-t">
+            <button type="button" @click="closeModal" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-200">
               Cancelar
             </button>
-            <button @click="save" :disabled="!form.name" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors">
-              {{ editingId ? 'Atualizar' : 'Salvar' }}
+            <button @click="save" :disabled="!form.name || saving" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 inline-flex items-center">
+              <i v-if="saving" class="fas fa-spinner fa-spin mr-2"></i>
+              {{ saving ? 'Salvando...' : (editingId ? 'Atualizar' : 'Salvar') }}
             </button>
           </div>
         </div>
@@ -3796,7 +3951,7 @@ const Login = {
 // Dashboard principal
 const Dashboard = {
   template: `
-    <div class="p-6 space-y-6">
+    <div class="space-y-6">
       <!-- Resumos -->
       <section v-if="!isAdmin" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -3830,25 +3985,27 @@ const Dashboard = {
           </div>
         </div>
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <div class="rounded-xl border border-blue-100 bg-blue-50/60 p-4">
-            <p class="text-xs font-semibold text-blue-600 uppercase tracking-wide">Alunos ativos</p>
-            <p class="mt-2 text-3xl font-semibold text-blue-900">{{ (professorResumo && professorResumo.total) || 0 }}</p>
-            <p class="text-xs text-blue-700 mt-1">Somente alunos vinculados a você</p>
+          <div class="rounded-xl border border-blue-200 bg-blue-50/80 p-5 flex flex-col justify-between">
+            <div>
+              <p class="text-sm font-semibold text-blue-700 uppercase tracking-wide">Alunos ativos</p>
+              <p class="mt-2 text-4xl font-bold text-blue-900">{{ (professorResumo && professorResumo.total) || 0 }}</p>
+            </div>
+            <p class="text-xs text-blue-800 mt-3">Somente alunos vinculados a você</p>
           </div>
-          <div class="rounded-xl border border-emerald-100 bg-emerald-50/60 p-4">
-            <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wide">Média geral</p>
-            <p class="mt-2 text-3xl font-semibold text-emerald-900">{{ (professorResumo && professorResumo.mediaGeral) || 0 }}%</p>
-            <p class="text-xs text-emerald-700 mt-1">Progresso médio dos formulários</p>
+          <div class="rounded-xl border border-emerald-200 bg-emerald-50/80 p-5 flex flex-col justify-between">
+            <p class="text-sm font-semibold text-emerald-700 uppercase tracking-wide">Média geral</p>
+            <p class="mt-2 text-4xl font-bold text-emerald-900">{{ (professorResumo && professorResumo.mediaGeral) || 0 }}%</p>
+            <p class="text-xs text-emerald-800 mt-3">Progresso médio dos formulários</p>
           </div>
-          <div class="rounded-xl border border-purple-100 bg-purple-50/60 p-4">
-            <p class="text-xs font-semibold text-purple-600 uppercase tracking-wide">Formulários completos</p>
-            <p class="mt-2 text-3xl font-semibold text-purple-900">{{ (professorResumo && professorResumo.concluidos) || 0 }}</p>
-            <p class="text-xs text-purple-700 mt-1">Alunos com finalização acima de 90%</p>
+          <div class="rounded-xl border border-purple-200 bg-purple-50/80 p-5 flex flex-col justify-between">
+            <p class="text-sm font-semibold text-purple-700 uppercase tracking-wide">Formulários completos</p>
+            <p class="mt-2 text-4xl font-bold text-purple-900">{{ (professorResumo && professorResumo.concluidos) || 0 }}</p>
+            <p class="text-xs text-purple-800 mt-3">Alunos com finalização > 90%</p>
           </div>
-          <div class="rounded-xl border border-amber-100 bg-amber-50/60 p-4">
-            <p class="text-xs font-semibold text-amber-600 uppercase tracking-wide">Pendências</p>
-            <p class="mt-2 text-3xl font-semibold text-amber-900">{{ (professorResumo && professorResumo.pendentes) || 0 }}</p>
-            <p class="text-xs text-amber-700 mt-1">Alunos que ainda precisam de atenção</p>
+          <div class="rounded-xl border border-amber-200 bg-amber-50/80 p-5 flex flex-col justify-between">
+            <p class="text-sm font-semibold text-amber-700 uppercase tracking-wide">Pendências</p>
+            <p class="mt-2 text-4xl font-bold text-amber-900">{{ (professorResumo && professorResumo.pendentes) || 0 }}</p>
+            <p class="text-xs text-amber-800 mt-3">Alunos que precisam de atenção</p>
           </div>
         </div>
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -3870,6 +4027,250 @@ const Dashboard = {
           </button>
         </div>
       </section>
+
+      <!-- Gráfico de Estatísticas -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-xl font-bold text-gray-800">{{ isAdmin ? 'Andamento dos formulários (rede)' : 'Progresso dos meus formulários' }}</h2>
+            <p class="text-sm text-gray-500">{{ isAdmin ? 'Média considerando o filtro atual' : 'Média dos alunos vinculados a você' }}</p>
+          </div>
+          <span class="text-sm text-gray-400">Atualizado automaticamente</span>
+        </div>
+        <div :id="chartContainerId" class="w-full h-[320px]"></div>
+      </div>
+
+      <div v-if="!isAdmin" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-semibold text-gray-900">Pendências prioritárias</h2>
+          <button type="button" @click="irPara('alunos')" class="text-sm text-blue-600 hover:text-blue-700">Ver todos</button>
+        </div>
+        <div v-if="professorPendencias && professorPendencias.length" class="space-y-4">
+          <div v-for="aluno in professorPendencias" :key="'pendencia-'+aluno.id" class="border border-gray-200 rounded-xl p-4 hover:bg-gray-50/50 transition-colors">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex-1">
+                <p class="font-semibold text-gray-800">{{ aluno.name || 'Aluno sem nome' }}</p>
+                <p class="text-xs text-gray-500 mt-1">{{ aluno.school_name || 'Escola não informada' }}</p>
+              </div>
+              <div class="text-right">
+                <p class="text-lg font-bold" :class="getPercentColor(aluno.__mediaCalculada)">{{ aluno.__mediaCalculada }}%</p>
+                <p class="text-xs text-gray-500">Média</p>
+              </div>
+            </div>
+            <div class="mt-4 space-y-2">
+              <div v-for="form in getFormProgress(aluno)" :key="form.key" class="text-xs">
+                <div class="flex justify-between mb-1">
+                  <span class="font-medium text-gray-600">{{ form.label }}</span>
+                  <span class="font-semibold" :class="getPercentColor(form.value)">{{ form.value }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-1.5">
+                  <div class="h-1.5 rounded-full" :class="form.color" :style="{width: form.value + '%'}"></div>
+                </div>
+              </div>
+            </div>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <button type="button" @click="abrirFormulario('entrevista', aluno.id)" class="px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Atualizar entrevista
+              </button>
+              <button type="button" @click="abrirFormulario('pdi', aluno.id)" class="px-3 py-1.5 text-xs font-medium bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                Revisar PDI
+              </button>
+              <button type="button" @click="abrirFormulario('pai', aluno.id)" class="px-3 py-1.5 text-xs font-medium bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                Ajustar PAI
+              </button>
+            </div>
+          </div>
+        </div>
+        <div v-else class="text-sm text-gray-500 bg-gray-50 border border-dashed border-gray-200 rounded-xl p-6 text-center">
+          Nenhuma pendência crítica encontrada. Continue acompanhando os formulários!
+        </div>
+      </div>
+
+      <div v-if="isAdmin" class="grid gap-6 lg:grid-cols-2">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold text-gray-900">Professores e engajamento</h2>
+            <span class="text-sm text-gray-500">Ordenado por número de alunos</span>
+          </div>
+          <div v-if="professoresResumo && professoresResumo.length" class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 text-sm">
+              <thead class="bg-gray-50">
+                <tr class="text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <th class="px-4 py-3">Professor</th>
+                  <th class="px-4 py-3">Alunos</th>
+                  <th class="px-4 py-3">Média</th>
+                  <th class="px-4 py-3">Completos</th>
+                  <th class="px-4 py-3">Pendências críticas</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <tr v-for="prof in professoresResumo" :key="'prof-resumo-'+prof.id" class="hover:bg-gray-50">
+                  <td class="px-4 py-3">
+                    <div class="font-medium text-gray-900">{{ prof.nome }}</div>
+                    <div class="text-xs text-gray-500">{{ prof.email || 'Sem e-mail' }}</div>
+                  </td>
+                  <td class="px-4 py-3 text-gray-700 font-semibold">{{ prof.totalAlunos }}</td>
+                  <td class="px-4 py-3 font-semibold" :class="getPercentColor(prof.media)">{{ prof.media }}%</td>
+                  <td class="px-4 py-3 text-emerald-600 font-semibold">{{ prof.concluidos }}</td>
+                  <td class="px-4 py-3 text-amber-600 font-semibold">{{ prof.criticos }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-else class="text-sm text-gray-500 bg-gray-50 border border-dashed border-gray-200 rounded-xl p-6 text-center">
+            Nenhum professor encontrado para o filtro atual.
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold text-gray-900">Alunos com menor avanço</h2>
+            <button type="button" @click="irPara('alunos')" class="text-sm text-purple-600 hover:text-purple-700">Ir para alunos</button>
+          </div>
+          <div v-if="alunosPendentesAdmin && alunosPendentesAdmin.length" class="space-y-4">
+            <div v-for="aluno in alunosPendentesAdmin" :key="'admin-pendencia-'+aluno.id" class="border border-gray-200 rounded-xl p-4">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <p class="text-sm font-semibold text-gray-900">{{ aluno.name || 'Aluno sem nome' }}</p>
+                  <p class="text-xs text-gray-500">
+                    {{ aluno.school_name || 'Escola não informada' }}
+                    <span v-if="aluno.professor_nome"> - {{ aluno.professor_nome }}</span>
+                  </p>
+                </div>
+                <span class="text-sm font-semibold" :class="getPercentColor(aluno.__mediaCalculada)">{{ aluno.__mediaCalculada }}%</span>
+              </div>
+              <div class="mt-3 grid grid-cols-3 gap-2 text-xs text-gray-600">
+                <span>Entrevista: {{ aluno.entrevista_percent || 0 }}%</span>
+                <span>PDI: {{ aluno.pdi_percent || 0 }}%</span>
+                <span>PAI: {{ aluno.pai_percent || 0 }}%</span>
+              </div>
+              <div class="mt-4 flex flex-wrap gap-2">
+                <button type="button" @click="abrirFormulario('entrevista', aluno.id)" class="px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  Acompanhar entrevista
+                </button>
+                <button type="button" @click="abrirFormulario('pdi', aluno.id)" class="px-3 py-1.5 text-xs font-medium bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                  Revisar PDI
+                </button>
+                <button type="button" @click="abrirFormulario('pai', aluno.id)" class="px-3 py-1.5 text-xs font-medium bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                  Ajustar PAI
+                </button>
+              </div>
+            </div>
+          </div>
+          <div v-else class="text-sm text-gray-500 bg-gray-50 border border-dashed border-gray-200 rounded-xl p-6 text-center">
+            Nenhuma pendência crítica encontrada para o filtro atual.
+          </div>
+        </div>
+      </div>
+
+      </div>
+
+      <!-- Grid de Cards de Alunos -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h2 class="text-xl font-bold mb-6 text-gray-800">
+          {{ isAdmin ? 'Alunos (visão completa)' : 'Meus alunos' }}
+          <span
+            v-if="isAdmin && alunosFiltrados && alunosFiltrados.length"
+            class="text-sm font-normal text-gray-500"
+          >
+            ({{ alunosFiltrados.length }} registro{{ alunosFiltrados.length === 1 ? '' : 's' }})
+          </span>
+          <span
+            v-else-if="!isAdmin && alunosVisiveis && alunosVisiveis.length"
+            class="text-sm font-normal text-gray-500"
+          >
+            ({{ alunosVisiveis.length }} exibindo{{ alunos && alunos.length > alunosVisiveis.length ? ' de ' + alunos.length : '' }})
+          </span>
+        </h2>
+
+        <div v-if="loading" class="text-center py-12">
+          <svg class="animate-spin h-12 w-12 text-blue-500 mx-auto" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p class="mt-4 text-gray-600">Carregando alunos...</p>
+        </div>
+
+        <div
+          v-else-if="isAdmin ? (!alunosFiltrados || !alunosFiltrados.length) : (!alunosVisiveis || !alunosVisiveis.length)"
+          class="text-center py-12 text-gray-500"
+        >
+          <svg class="w-20 h-20 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+          <p class="text-lg font-medium">Nenhum aluno encontrado</p>
+          <p class="text-sm mt-1">{{ filtros.busca ? 'Tente ajustar sua busca' : 'Comece cadastrando novos alunos' }}</p>
+        </div>
+
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div
+            v-for="aluno in (isAdmin ? alunosFiltrados : alunosVisiveis)"
+            :key="aluno.id"
+            class="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+          >
+            <div class="flex items-center gap-4 mb-4 pb-4 border-b border-gray-200">
+              <div :class="['w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-md', isAdmin ? 'bg-gradient-to-br from-purple-400 to-purple-600' : 'bg-gradient-to-br from-blue-400 to-blue-600']">
+                {{ getInitials(aluno.name || '') }}
+              </div>
+              <div class="flex-1 min-w-0">
+                <h3 class="font-semibold text-gray-800 truncate text-base">{{ aluno.name || 'Sem nome' }}</h3>
+                <p class="text-xs text-gray-500 truncate">{{ aluno.school_name || 'Escola não informada' }}</p>
+                <p v-if="isAdmin && aluno.professor_nome" class="text-xs text-purple-600 truncate mt-0.5">Prof: {{ aluno.professor_nome }}</p>
+              </div>
+            </div>
+            <div class="space-y-3">
+              <div>
+                <div class="flex items-center justify-between text-xs mb-1">
+                  <span class="font-medium text-gray-700">Entrevista</span>
+                  <span class="font-bold" :class="getPercentColor(aluno.entrevista_percent)">{{ aluno.entrevista_percent || 0 }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                  <div class="h-2 rounded-full transition-all duration-500" :class="isAdmin ? 'bg-gradient-to-r from-purple-400 to-purple-600' : 'bg-gradient-to-r from-indigo-400 to-indigo-600'" :style="{width: (aluno.entrevista_percent || 0) + '%'}"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex items-center justify-between text-xs mb-1">
+                  <span class="font-medium text-gray-700">PDI</span>
+                  <span class="font-bold" :class="getPercentColor(aluno.pdi_percent)">{{ aluno.pdi_percent || 0 }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                  <div class="h-2 rounded-full transition-all duration-500" :class="isAdmin ? 'bg-gradient-to-r from-purple-400 to-purple-600' : 'bg-gradient-to-r from-emerald-400 to-emerald-600'" :style="{width: (aluno.pdi_percent || 0) + '%'}"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex items-center justify-between text-xs mb-1">
+                  <span class="font-medium text-gray-700">PAI</span>
+                  <span class="font-bold" :class="getPercentColor(aluno.pai_percent)">{{ aluno.pai_percent || 0 }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                  <div class="h-2 rounded-full transition-all duration-500 bg-gradient-to-r from-purple-400 to-purple-600" :style="{width: (aluno.pai_percent || 0) + '%'}"></div>
+                </div>
+              </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-200">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-700">Média Geral</span>
+                <span class="text-lg font-bold" :class="getPercentColor(aluno.media_percent)">{{ aluno.media_percent || 0 }}%</span>
+              </div>
+            </div>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <button type="button" @click="abrirFormulario('entrevista', aluno.id)" class="px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Entrevista
+              </button>
+              <button type="button" @click="abrirFormulario('pdi', aluno.id)" class="px-3 py-1.5 text-xs font-medium bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                PDI
+              </button>
+              <button type="button" @click="abrirFormulario('pai', aluno.id)" class="px-3 py-1.5 text-xs font-medium bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                PAI
+              </button>
+            </div>
+          </div>
+        </div>
+        <div v-if="!isAdmin && alunos && alunosVisiveis && alunos.length > alunosVisiveis.length" class="mt-6 text-center text-sm text-gray-500">
+          Refine sua busca ou acesse a listagem completa para ver todos os alunos.
+        </div>
+      </div>
+    </div>
+  `,
       <section v-else class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -4519,6 +4920,13 @@ const Dashboard = {
       if (p >= 70) return 'text-green-600';
       if (p >= 40) return 'text-yellow-600';
       return 'text-red-600';
+    },
+    getFormProgress(aluno) {
+      return [
+        { key: 'entrevista', label: 'Entrevista', value: aluno.entrevista_percent || 0, color: 'bg-blue-500' },
+        { key: 'pdi', label: 'PDI', value: aluno.pdi_percent || 0, color: 'bg-emerald-500' },
+        { key: 'pai', label: 'PAI', value: aluno.pai_percent || 0, color: 'bg-purple-500' }
+      ];
     },
     async renderChart() {
       await this.$nextTick();
@@ -7684,9 +8092,10 @@ const PlanoAtendimento = {
 // Componente de Relatório de Atendimento
 const RelatorioAtendimento = {
   template: `
-    <div class="max-w-6xl mx-auto p-6 space-y-6">
-      <div class="bg-white shadow rounded-lg p-6">
-        <h1 class="text-2xl font-bold text-gray-900 mb-6">Relatório de Atendimento</h1>
+    <div class="container mx-auto p-4 md:p-6 space-y-6">
+      <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-200/80">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Relatório de Atendimento</h1>
+        <p class="text-gray-600 mb-8">Registre o progresso e as atividades das sessões de atendimento.</p>
         
         <!-- Barra de Progresso -->
         <div class="mb-8">
@@ -7700,22 +8109,21 @@ const RelatorioAtendimento = {
           </div>
         </div>
 
-        <!-- Indicadores de Etapas -->
-        <div class="flex justify-between mb-8">
-          <div v-for="(step, index) in steps" :key="index" 
-               class="flex flex-col items-center cursor-pointer transition-all duration-200"
-               @click="goToStep(index)">
-            <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-200"
-                 :class="index < currentStep ? 'bg-amber-500 border-amber-500 text-white' : 
-                         index === currentStep ? 'bg-amber-100 border-amber-500 text-amber-700' : 
-                         'bg-gray-100 border-gray-300 text-gray-600'">
-              <i :class="step.icon"></i>
-            </div>
-            <span class="text-xs mt-2 text-center max-w-20"
-                  :class="index <= currentStep ? 'text-amber-600 font-medium' : 'text-gray-700'">
-              {{ step.title }}
-            </span>
-          </div>
+        <!-- Step Navigation Pills -->
+        <div class="flex flex-wrap justify-center gap-2 mb-8">
+          <button v-for="(step, index) in steps" :key="index"
+                  @click="goToStep(index)"
+                  :disabled="index > totalSteps"
+                  class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300"
+                  :class="[
+                    index === currentStep
+                      ? 'bg-indigo-600 text-white shadow-lg'
+                      : index <= totalSteps
+                        ? 'bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50'
+                        : 'bg-gray-100 text-gray-600 cursor-not-allowed'
+                  ]">
+            <i :class="step.icon + ' mr-2'"></i>{{ step.title }}
+          </button>
         </div>
         
         <form @submit.prevent="save" class="space-y-6">

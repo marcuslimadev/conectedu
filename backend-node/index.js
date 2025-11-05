@@ -15,13 +15,6 @@ app.get('/health', (req, res) => {
 });
 
 // Import routes
-const authRoutes = require('./routes/auth');
-
-// Route Middlewares
-app.use('/', authRoutes); // Use auth routes at the root level
-
-// Import routes
-const authRoutes = require('./routes/auth');
 const studentRoutes = require('./routes/students');
 const userRoutes = require('./routes/users');
 const schoolRoutes = require('./routes/schools');

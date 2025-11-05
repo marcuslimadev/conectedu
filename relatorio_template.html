@@ -1,0 +1,304 @@
+  template: `
+    <div class="max-w-6xl mx-auto p-6 space-y-6">
+      <div class="bg-white shadow rounded-lg p-6">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">Relatório de Atendimento</h1>
+
+        <!-- Barra de Progresso -->
+        <div class="mb-8">
+          <div class="flex items-center justify-between mb-2">
+            <div class="text-sm font-medium text-gray-600">Progresso</div>
+            <div class="text-sm font-medium text-amber-600">{{ Math.round((currentStep / (totalSteps || 1)) * 100) }}%</div>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-gradient-to-r from-amber-400 to-amber-600 h-2 rounded-full transition-all duration-300"
+                 :style="{ width: (currentStep / (totalSteps || 1)) * 100 + '%' }"></div>
+          </div>
+        </div>
+
+        <!-- Step Navigation Pills -->
+        <div class="flex flex-wrap justify-center gap-2 mb-8">
+          <button v-for="(step, index) in steps" :key="index"
+                  @click="goToStep(index)"
+                  :disabled="index > totalSteps"
+                  class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300"
+                  :class="[
+                    index === currentStep
+                      ? 'bg-indigo-600 text-white shadow-lg'
+                      : index <= totalSteps
+                        ? 'bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50'
+                        : 'bg-gray-100 text-gray-600 cursor-not-allowed'
+                  ]">
+            <i :class="step.icon + ' mr-2'"></i>{{ step.title }}
+          </button>
+        </div>
+
+        <form @submit.prevent="save" class="space-y-6">
+          <!-- Etapa 1: Identificação -->
+          <div v-if="currentStep === 0" class="space-y-6">
+            <div class="border-l-4 border-amber-500 pl-4 mb-6">
+              <h2 class="text-lg font-semibold text-gray-900">Identificação do Atendimento</h2>
+              <p class="text-sm text-gray-600">Selecione o aluno e a data do atendimento</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="fas fa-user text-amber-500 mr-1"></i>
+                  Aluno *
+                </label>
+                <select v-model="form.student_id"
+                        @change="loadStudentData"
+                        class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                        required>
+                  <option value="">Selecione um aluno</option>
+                  <option v-for="aluno in alunos" :key="aluno.id" :value="aluno.id">
+                    {{ aluno.name }}
+                  </option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="fas fa-calendar text-amber-500 mr-1"></i>
+                  Data do Atendimento *
+                </label>
+                <input type="date"
+                       v-model="form.data_atendimento"
+                       class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                       required>
+              </div>
+            </div>
+          </div>
+
+          <!-- Etapa 2: Descrição (com gravação) -->
+          <div v-if="currentStep === 1" class="space-y-6">
+            <div class="border-l-4 border-amber-500 pl-4 mb-6">
+              <h2 class="text-lg font-semibold text-gray-900">Descrição do Atendimento</h2>
+              <p class="text-sm text-gray-600">Descreva detalhadamente o que foi realizado no atendimento</p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-file-alt text-amber-500 mr-1"></i>
+                Descrição do Atendimento *
+              </label>
+
+              <!-- Controles de gravação -->
+              <div class="mb-3 flex items-center space-x-3">
+                <button type="button"
+                        @click="toggleRecording"
+                        :disabled="isProcessingAudio"
+                        class="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                        :class="isRecording
+                          ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                          : 'bg-amber-100 text-amber-700 hover:bg-amber-200'">
+                  <i :class="isRecording ? 'fas fa-stop' : 'fas fa-microphone'"></i>
+                  <span>{{ isRecording ? 'Parar Gravação' : 'Gravar Áudio' }}</span>
+                </button>
+
+                <!-- Indicador de gravação -->
+                <div v-if="isRecording" class="flex items-center space-x-2 text-red-600">
+                  <div class="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div>
+                  <span class="text-sm font-medium">{{ Math.floor(recordingTime / 60) }}:{{ String(recordingTime % 60).padStart(2, '0') }}</span>
+                </div>
+
+                <!-- Instruções -->
+                <div class="text-xs text-gray-500">
+                  Clique no microfone para gravar ou digite diretamente
+                </div>
+              </div>
+
+              <!-- Status de processamento -->
+              <div v-if="isProcessingAudio" class="bg-amber-50 border border-amber-200 rounded p-3 mb-3">
+                <div class="flex items-center space-x-2">
+                  <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-amber-600"></div>
+                  <span class="text-sm text-amber-700">Convertendo áudio para texto...</span>
+                </div>
+              </div>
+
+              <!-- Textarea para descrição -->
+              <textarea v-model="form.descricao"
+                        rows="8"
+                        placeholder="Digite ou grave a descrição detalhada do atendimento..."
+                        ref="descricaoField"
+                        data-voice-field="descricao"
+                        @focus="setVoiceTarget('descricao', $event)"
+                        :class="fieldInputClass('descricao')"
+                        required></textarea>
+
+              <div class="flex justify-end mt-2">
+                <button type="button"
+                        @click="speak(form.descricao)"
+                        :disabled="!form.descricao || isProcessingAudio"
+                        class="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                        :class="(!form.descricao || isProcessingAudio)
+                          ? 'bg-gray-100 text-gray-600 cursor-not-allowed'
+                          : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'">
+                  <i class="fas fa-volume-up"></i>
+                  <span>Ouvir descrição</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Etapa 3: Objetivos e Recursos -->
+          <div v-if="currentStep === 2" class="space-y-6">
+            <div class="border-l-4 border-amber-500 pl-4 mb-6">
+              <h2 class="text-lg font-semibold text-gray-900">Objetivos e Recursos</h2>
+              <p class="text-sm text-gray-600">Informe os objetivos trabalhados e recursos utilizados</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="fas fa-bullseye text-amber-500 mr-1"></i>
+                  Objetivos Trabalhados
+                </label>
+                <textarea v-model="form.objetivos"
+                          rows="5"
+                          ref="objetivosField"
+                          data-voice-field="objetivos"
+                          @focus="setVoiceTarget('objetivos', $event)"
+                          :class="fieldInputClass('objetivos')"
+                          placeholder="Descreva os objetivos específicos trabalhados durante o atendimento..."></textarea>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <i class="fas fa-tools text-amber-500 mr-1"></i>
+                  Recursos Utilizados
+                </label>
+                <textarea v-model="form.recursos"
+                          rows="5"
+                          ref="recursosField"
+                          data-voice-field="recursos"
+                          @focus="setVoiceTarget('recursos', $event)"
+                          :class="fieldInputClass('recursos')"
+                          placeholder="Liste os materiais, jogos, tecnologias e outros recursos utilizados..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Etapa 4: Observações e Finalização -->
+          <div v-if="currentStep === 3" class="space-y-6">
+            <div class="border-l-4 border-amber-500 pl-4 mb-6">
+              <h2 class="text-lg font-semibold text-gray-900">Observações e Progressos</h2>
+              <p class="text-sm text-gray-600">Registre observações importantes e progressos identificados</p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-chart-line text-amber-500 mr-1"></i>
+                Observações e Progressos
+              </label>
+              <textarea v-model="form.observacoes"
+                        rows="6"
+                        ref="observacoesField"
+                        data-voice-field="observacoes"
+                        @focus="setVoiceTarget('observacoes', $event)"
+                        :class="fieldInputClass('observacoes')"
+                        placeholder="Descreva progressos observados, dificuldades encontradas, recomendações para próximos atendimentos..."></textarea>
+            </div>
+
+            <!-- Resumo dos dados -->
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <h3 class="font-medium text-amber-800 mb-3">
+                <i class="fas fa-clipboard-check mr-1"></i>
+                Resumo do Relatório
+              </h3>
+              <div class="space-y-2 text-sm">
+                <div><strong>Aluno:</strong> {{ getStudentName(form.student_id) || 'Não selecionado' }}</div>
+                <div><strong>Data:</strong> {{ formatDate(form.data_atendimento) }}</div>
+                <div><strong>Descrição:</strong> {{ form.descricao ? (form.descricao.length > 100 ? form.descricao.substring(0, 100) + '...' : form.descricao) : 'Não informada' }}</div>
+                <div><strong>Objetivos:</strong> {{ form.objetivos || 'Não informados' }}</div>
+                <div><strong>Recursos:</strong> {{ form.recursos || 'Não informados' }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Navegação -->
+            <div class="flex justify-between pt-6 border-t">
+            <button type="button"
+                    @click="previousStep"
+                    :disabled="currentStep === 0 || loading || isProcessingAudio"
+                    class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+              <i class="fas fa-arrow-left mr-1"></i>
+              Anterior
+            </button>
+
+            <div class="flex space-x-3">
+              <button type="button"
+                      @click="cancel"
+                      :disabled="loading || isProcessingAudio"
+                      class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                Cancelar
+              </button>
+
+              <button v-if="currentStep < totalSteps - 1"
+                      type="button"
+                      @click="nextStep"
+                      :disabled="!canProceed || loading || isProcessingAudio"
+                      class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                Próximo
+                <i class="fas fa-arrow-right ml-1"></i>
+              </button>
+
+              <button v-else
+                      type="submit"
+                      :disabled="loading || !canProceed"
+                      class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50">
+                <i class="fas fa-save mr-1"></i>
+                <span v-if="loading">Salvando...</span>
+                <span v-else>Salvar Relatório</span>
+              </button>
+
+              <!-- Botão PDF -->
+              <button v-if="form.student_id" type="button" @click="exportarPDF"
+                      :disabled="loading || isProcessingAudio"
+                      class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fas fa-file-pdf mr-1"></i>
+                📄 Exportar PDF
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Lista de relatórios -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Relatórios Anteriores</h2>
+        <div v-if="loadingRelatorios" class="text-sm text-gray-500 py-2 flex items-center gap-2">
+          <span class="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></span>
+          Carregando relatórios...
+        </div>
+        <div v-if="!relatorios || relatorios.length === 0" class="text-center text-gray-500 py-8">
+          Nenhum relatório de atendimento encontrado.
+        </div>
+        <div v-else class="space-y-4">
+          <div v-for="r in relatorios" :key="r.id" class="border rounded-lg p-4 hover:bg-gray-50">
+            <div class="flex justify-between items-start">
+              <div class="flex-1">
+                <div class="flex items-center space-x-3 mb-2">
+                  <h3 class="text-sm font-medium text-gray-900">{{ r.student_name || 'Aluno não encontrado' }}</h3>
+                  <span class="text-xs text-gray-500">{{ formatDate(r.data_atendimento) }}</span>
+                </div>
+                <p class="text-sm text-gray-600 line-clamp-2">{{ r.descricao }}</p>
+              </div>
+              <div class="flex space-x-2">
+                <button @click="edit(r)" :disabled="loading || isProcessingAudio" class="text-blue-600 hover:text-blue-800 text-sm disabled:opacity-50 disabled:cursor-not-allowed">Editar</button>
+                <button @click="deleteRelatorio(r)"
+                        :disabled="deletingId===r.id || loading"
+                        class="text-red-600 hover:text-red-800 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                  <span v-if="deletingId===r.id" class="inline-flex items-center gap-1">
+                    <span class="animate-spin rounded-full h-3 w-3 border-b-2 border-red-600"></span>
+                    Excluindo...
+                  </span>
+                  <span v-else>Excluir</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,

@@ -10,3 +10,10 @@ logs/*.json
 node_modules/
 vendor/**/.DS_Store
 .DS_Store
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

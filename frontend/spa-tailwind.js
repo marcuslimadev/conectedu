@@ -3469,11 +3469,9 @@ const Layout = {
     async logout() {
       if (this.loggingOut) return;
       this.loggingOut = true;
-      console.log('🔒 Logout iniciado');
       try {
         // Tenta informar o backend (se o endpoint existir)
         await api.post('/logout').catch(() => {});
-        console.log('🔒 Logout: backend notificado (se disponível)');
       } catch (error) {
         console.error('Erro no logout:', error);
       } finally {
@@ -3482,7 +3480,6 @@ const Layout = {
           if (window.innerWidth < 1024) this.sidebarOpen = false;
           // Limpa token e header Authorization
           localStorage.removeItem('token');
-          console.log('🔒 Logout: token removido');
           if (api?.defaults?.headers?.common?.Authorization) delete api.defaults.headers.common['Authorization'];
           this.user = null;
           // Feedback visual
@@ -3490,13 +3487,11 @@ const Layout = {
           // Redireciona via router (suave)
           if (this.$route.path !== '/login') {
             await this.$router.push('/login').catch(() => {});
-            console.log('🔒 Logout: navegação para /login');
           }
           // Fallback hard caso algo impeça a navegação
           setTimeout(() => {
             if (location.hash !== '#/login') location.hash = '#/login';
             this.loggingOut = false;
-            console.log('🔒 Logout finalizado');
           }, 50);
         } catch (e) {
           this.loggingOut = false;
@@ -3505,21 +3500,15 @@ const Layout = {
     }
   },
   async mounted() {
-    console.log('🏢 [Layout] Mounted - iniciando carregamento do user');
-    console.log('🏢 [Layout] Token:', localStorage.getItem('token') ? 'EXISTS' : 'MISSING');
     try {
-      console.log('🏢 [Layout] Chamando /user...');
       const response = await api.get('/user');
-      console.log('🏢 [Layout] Resposta /user:', response);
       this.user = (response.data && response.data.data) ? response.data.data : response.data;
       
       // CRÍTICO: Atualizar $root.user para todos os componentes filhos acessarem
       if (this.$root) {
         this.$root.user = this.user;
-        console.log('✅ [Layout] $root.user atualizado:', this.$root.user);
       }
       
-      console.log('✅ [Layout] User carregado:', this.user);
     } catch (error) {
       console.error('❌ [Layout] Erro ao carregar dados do usuário:', error);
       console.error('❌ [Layout] Response:', error.response);
@@ -4211,9 +4200,6 @@ const Dashboard = {
 
       const busca = (this.filtros.busca || '').toLowerCase().trim();
       if (busca) {
-        console.log('🔍 [alunosFiltrados] Buscando por:', busca);
-        console.log('🔍 [alunosFiltrados] Total antes da busca:', resultado.length);
-        console.log('🔍 [alunosFiltrados] Primeiro aluno:', resultado[0]);
         
         resultado = resultado.filter(a => {
           const nome = (a.name || '').toLowerCase();
@@ -4225,13 +4211,11 @@ const Dashboard = {
             : nome.includes(busca) || escola.includes(busca);
           
           if (match) {
-            console.log('✅ Match:', a.name, '| Escola:', a.school_name, '| Prof:', a.professor_nome);
           }
           
           return match;
         });
         
-        console.log('🔍 [alunosFiltrados] Total após busca:', resultado.length);
       }
 
       return resultado;
@@ -4358,15 +4342,10 @@ const Dashboard = {
     }
   },
   async mounted() {
-    console.log('='.repeat(80));
-    console.log('🚀🚀🚀 DASHBOARD MOUNTED - INICIANDO 🚀🚀🚀');
-    console.log('='.repeat(80));
-    console.log('🔄 [Dashboard] Montando componente...');
     
     // Esperar o user estar disponível (max 5 segundos)
     let attempts = 0;
     while (!this.$root?.user && attempts < 50) {
-      console.log('⏳ [Dashboard] Aguardando user... tentativa', attempts + 1);
       await new Promise(resolve => setTimeout(resolve, 100));
       attempts++;
     }
@@ -4377,7 +4356,6 @@ const Dashboard = {
       return;
     }
     
-    console.log('✅ [Dashboard] User carregado:', this.$root.user);
     
     try {
       await this.loadData();
@@ -4390,17 +4368,13 @@ const Dashboard = {
   methods: {
     async loadData() {
       this.loading = true;
-      console.log('📥 [Dashboard] Iniciando loadData...');
       try {
         const isAdminNow = this.$root?.user?.role === 'admin';
-        console.log('🔑 [Dashboard] isAdmin:', isAdminNow);
 
         if (isAdminNow) {
-          console.log('👥 [Dashboard] Carregando professores...');
           try {
             const profRes = await api.get('/users');
             this.professores = (profRes.data?.data?.rows || profRes.data?.data || []).filter(u => u.role !== 'admin');
-            console.log('✅ [Dashboard] Professores carregados:', this.professores.length);
           } catch (error) {
             console.error('❌ [Dashboard] Erro ao carregar professores:', error);
             this.professores = [];
@@ -4409,9 +4383,7 @@ const Dashboard = {
           this.professores = [];
         }
 
-        console.log('📚 [Dashboard] Carregando alunos...');
         const params = (!isAdminNow && this.$root?.user) ? { teacher_id: this.$root.user.id } : {};
-        console.log('📚 [Dashboard] Params:', params);
         const alunosRes = await api.get('/students', { params });
 
         let alunosData = [];
@@ -4439,16 +4411,13 @@ const Dashboard = {
           };
         });
 
-        console.log('💾 [Dashboard] Alunos carregados:', this.alunos.length);
         this.loading = false;
-        console.log('✅ [Dashboard] Loading finalizado:', this.loading);
         await this.$nextTick();
         this.carregarPercentuais();
       } catch (error) {
         console.error('❌ [Dashboard] Erro ao carregar dados do dashboard:', error);
         console.error('❌ [Dashboard] Detalhes:', error.response || error.message);
         this.loading = false;
-        console.log('⚠️ [Dashboard] Loading setado como false após erro');
       }
     },
     async carregarPercentuais() {
@@ -4600,16 +4569,6 @@ const Dashboard = {
       this.filtros.professorId = '';
     },
     debugDashboard() {
-      console.log('🔧 ===== DEBUG DASHBOARD =====');
-      console.log('🔧 User:', this.$root?.user);
-      console.log('🔧 isAdmin:', this.isAdmin);
-      console.log('🔧 alunos.length:', this.alunos?.length);
-      console.log('🔧 alunos:', this.alunos);
-      console.log('🔧 alunosFiltrados.length:', this.alunosFiltrados?.length);
-      console.log('🔧 alunosFiltrados:', this.alunosFiltrados);
-      console.log('🔧 filtros:', this.filtros);
-      console.log('🔧 professorResumo:', this.professorResumo);
-      console.log('🔧 Token:', localStorage.getItem('token'));
       
       alert('Debug info logged to console. Press F12 to see.');
     },
@@ -5275,8 +5234,6 @@ const Relatorios = {
       this.carregandoPDF = true;
       this.mostrarModalPDF = false;
       
-      console.log('🔧 Iniciando geração de PDF:', tipo);
-      console.log('🔧 Aluno ID:', this.alunoId);
       
       try {
         const token = localStorage.getItem('token');
@@ -5287,35 +5244,49 @@ const Relatorios = {
         }
         
         let endpoint = '';
+        let formId = null;
+
         switch(tipo) {
           case 'entrevista':
-            endpoint = '/forms/anamnese/pdf';
+            endpoint = '/generate-pdf-entrevista.php';
+            if (this.dadosRelatorio.entrevistas && this.dadosRelatorio.entrevistas.length > 0) {
+              formId = this.dadosRelatorio.entrevistas[0].id;
+            }
             break;
           case 'pdi':
-            endpoint = '/pdi/pdf';
+            endpoint = '/generate-pdf-pdi.php';
+            if (this.dadosRelatorio.pdis && this.dadosRelatorio.pdis.length > 0) {
+              formId = this.dadosRelatorio.pdis[0].id;
+            }
             break;
           case 'pai':
-            endpoint = '/pai/pdf';
+            endpoint = '/generate-pdf-pai.php';
+             if (this.dadosRelatorio.pais && this.dadosRelatorio.pais.length > 0) {
+              formId = this.dadosRelatorio.pais[0].id;
+            }
             break;
           default:
             console.error('❌ Tipo de PDF inválido:', tipo);
             this.$showToast && this.$showToast('Erro', 'Tipo de PDF inválido', 'error');
             return;
         }
-        
-        console.log('🔧 Endpoint:', endpoint);
-        console.log('🔧 Fazendo requisição...');
+
+        if (!formId) {
+          this.$showToast && this.$showToast('Aviso', 'Nenhuma versão deste formulário foi encontrada para o aluno.', 'warning');
+          this.carregandoPDF = false;
+          return;
+        }
+
+        const pdfUrl = buildApiUrl(endpoint, `id=${formId}`);
         
         // Fazer requisição para obter o PDF como blob
-        const response = await fetch(buildApiUrl(endpoint, `student_id=${this.alunoId}`), {
+        const response = await fetch(pdfUrl, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
         
-        console.log('🔧 Response status:', response.status);
-        console.log('🔧 Response headers:', Object.fromEntries(response.headers.entries()));
         
         if (!response.ok) {
           const errorText = await response.text();
@@ -5325,7 +5296,6 @@ const Relatorios = {
         
         // Verificar se é realmente um PDF
         const contentType = response.headers.get('content-type');
-        console.log('🔧 Content-Type:', contentType);
         
         if (!contentType || !contentType.includes('application/pdf')) {
           const text = await response.text();
@@ -5335,11 +5305,9 @@ const Relatorios = {
         
         // Obter o blob do PDF
         const blob = await response.blob();
-        console.log('✅ PDF recebido! Tamanho:', blob.size, 'bytes');
         
         // Criar URL do blob
         const pdfUrl = URL.createObjectURL(blob);
-        console.log('✅ URL do blob criada:', pdfUrl);
         
         // Abrir em modal
         this.pdfUrl = pdfUrl;
@@ -5860,7 +5828,6 @@ const EntrevistaResponsavel = {
   watch: {
     form: {
       handler(newVal, oldVal) {
-        console.log('👀 Watch detectou mudança!', { 
           student_id: newVal.student_id, 
           loading: this.loading,
           savingAuto: this.savingAuto,
@@ -5869,10 +5836,8 @@ const EntrevistaResponsavel = {
         
         // Auto-save quando qualquer campo do formulário mudar
         if (newVal.student_id && !this.loading && !this.savingAuto && !this.isLoadingForm) {
-          console.log('💾 Iniciando auto-save...');
           this.autoSave();
         } else {
-          console.log('⏸️ Auto-save bloqueado:', {
             temStudentId: !!newVal.student_id,
             loading: this.loading,
             savingAuto: this.savingAuto,
@@ -6165,12 +6130,10 @@ const EntrevistaResponsavel = {
           status: 'completo'
         };
         
-        console.log('💾 [Entrevista] Salvando:', payload);
         
         // Sempre usar .create que faz UPSERT automático
         const response = await api.post('?action=entrevistas-responsavel.create', payload);
         
-        console.log('✅ [Entrevista] Resposta:', response.data);
         
         if (response.data?.ok) {
           // Guardar o ID retornado para permitir gerar PDF
@@ -6203,22 +6166,17 @@ const EntrevistaResponsavel = {
     },
     
     autoSave() {
-      console.log('🔄 autoSave() chamado');
       
       // Limpar timeout anterior
       if (this.autoSaveTimeout) {
-        console.log('⏰ Limpando timeout anterior');
         clearTimeout(this.autoSaveTimeout);
         this.autoSaveTimeout = null;
       }
       
-      console.log('⏱️ Iniciando timer de 2 segundos...');
       
       // Debounce: aguardar 2 segundos após última digitação
       this.autoSaveTimeout = setTimeout(async () => {
         this.autoSaveTimeout = null;
-        console.log('⏰ Timer disparado! Verificando condições...');
-        console.log('📊 Estado atual:', {
           student_id: this.form.student_id,
           savingAuto: this.savingAuto,
           loading: this.loading,
@@ -6226,11 +6184,9 @@ const EntrevistaResponsavel = {
         });
         
         if (!this.form.student_id || this.savingAuto || this.loading || this.isLoadingForm) {
-          console.log('🚫 Auto-save cancelado por condições não atendidas');
           return;
         }
         
-        console.log('✅ Condições atendidas, iniciando salvamento...');
         this.savingAuto = true;
         try {
           const formData = {
@@ -6276,10 +6232,8 @@ const EntrevistaResponsavel = {
           if (response.data?.ok) {
             if (response.data.data?.id && !this.form.id) {
               this.form.id = response.data.data.id;
-              console.log('🆕 Novo ID criado:', this.form.id);
             }
             this.lastSaved = new Date();
-            console.log('💾 Auto-save concluído às', this.lastSaved.toLocaleTimeString());
             
             // Feedback visual discreto
             this.$showToast && this.$showToast('Auto-save', 'Rascunho salvo automaticamente', 'info', 2000);
@@ -6924,12 +6878,10 @@ const PDI = {
           status: 'ativo'
         };
         
-        console.log('� [PDI] Salvando:', payload);
         
         // Sempre usar .create que faz UPSERT automático
         const response = await api.post('?action=pdi.create', payload);
         
-        console.log('✅ [PDI] Resposta:', response.data);
         
         if (response.data?.ok) {
           // Atualizar ID se foi criado
@@ -7602,12 +7554,10 @@ const PlanoAtendimento = {
           status: 'ativo'
         };
         
-        console.log('� [PAI] Salvando:', payload);
         
         // Sempre usar .create que faz UPSERT automático
         const response = await api.post('?action=plano-atendimento.create', payload);
         
-        console.log('✅ [PAI] Resposta:', response.data);
         
         if (response.data?.ok) {
           // Atualizar ID se foi criado
@@ -8899,9 +8849,6 @@ router.beforeEach((to, from, next) => {
 // Configuração da aplicação Vue
 const { createApp } = Vue;
 
-console.log('='.repeat(100));
-console.log('🎯 INICIANDO APLICAÇÃO VUE - spa-tailwind.js');
-console.log('='.repeat(100));
 
 const app = createApp({
   components: {
@@ -9524,21 +9471,15 @@ const mountVoicePortal = (mainApp) => {
 // Registrar componente DatePicker
 if (typeof DatePickerComponent !== 'undefined') {
   app.component('DatePicker', DatePickerComponent);
-  console.log('✅ DatePicker registrado');
 }
 
 // Registrar FloatingMicrophone globalmente
 app.component('FloatingMicrophone', FloatingMicrophone);
-console.log('✅ FloatingMicrophone registrado');
 
 // Usar router e montar aplicação
-console.log('🔧 Usando router...');
 app.use(router);
-console.log('🚀 Montando app no #app...');
 app.mount('#app');
-console.log('✅ APP MONTADO COM SUCESSO!');
 // montar portal do modal de voz após app existir
 try { mountVoicePortal(app); } catch (_) {}
 
 // Inicialização completa
-// console.log('ConectEdu v5.0 - Sistema inicializado com Tailwind CSS');

@@ -1,0 +1,241 @@
+  template: `
+  <div class="space-y-4" role="main">
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-bold text-gray-900" id="usuarios-heading">Usuários</h1>
+      <button @click="novo"
+              class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
+              aria-label="Adicionar novo usuário">Novo Usuário</button>
+    </div>
+
+    <!-- Mensagens de Feedback -->
+    <div v-if="successMessage" class="bg-green-50 border border-green-200 rounded-md p-4">
+      <div class="flex">
+        <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        <div class="ml-3">
+          <p class="text-sm font-medium text-green-800">{{ successMessage }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="errorMessage" class="bg-red-50 border border-red-200 rounded-md p-4">
+      <div class="flex">
+        <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+        </svg>
+        <div class="ml-3">
+          <p class="text-sm font-medium text-red-800">{{ errorMessage }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+      <div>
+        <label class="sr-only" for="u-busca">Buscar por nome ou email</label>
+        <input id="u-busca" v-model="filters.q" @keyup.enter="load"
+               class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+               placeholder="Buscar por nome ou email">
+      </div>
+      <div>
+        <label class="sr-only" for="u-role">Perfil</label>
+        <select id="u-role" v-model="filters.role"
+                class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent">
+          <option value="">Todos os perfis</option>
+          <option value="admin">Administrador</option>
+          <option value="professor">Professor</option>
+          <option value="coordenador">Coordenador</option>
+        </select>
+      </div>
+      <div>
+        <label class="sr-only" for="u-status">Status</label>
+        <select id="u-status" v-model="filters.status"
+                class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent">
+          <option value="">Todos os status</option>
+          <option value="ativo">Ativo</option>
+          <option value="inativo">Inativo</option>
+        </select>
+      </div>
+      <button @click="load"
+              class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
+              aria-label="Aplicar filtros de busca">
+        <i class="fas fa-search mr-2" aria-hidden="true"></i>Filtrar
+      </button>
+    </div>
+
+
+
+    <div class="bg-white shadow rounded-lg overflow-hidden" role="region" aria-labelledby="usuarios-heading">
+      <table class="min-w-full" role="table" aria-label="Lista de usuários">
+        <thead class="bg-gray-50">
+          <tr class="text-left">
+            <th class="px-6 py-3 text-gray-700 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none"
+                @click="sortBy('name')" @keydown.enter="sortBy('name')" @keydown.space="sortBy('name')" tabindex="0"
+                role="columnheader" :aria-sort="sortField === 'name' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
+              <div class="flex items-center justify-between">
+                <span>Nome</span>
+                <svg v-if="sortField === 'name'" class="w-4 h-4" :class="sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+            </th>
+            <th class="px-6 py-3 text-gray-700" role="columnheader">Email</th>
+            <th class="px-6 py-3 text-gray-700 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none"
+                @click="sortBy('role')" @keydown.enter="sortBy('role')" @keydown.space="sortBy('role')" tabindex="0"
+                role="columnheader" :aria-sort="sortField === 'role' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
+              <div class="flex items-center justify-between">
+                <span>Perfil</span>
+                <svg v-if="sortField === 'role'" class="w-4 h-4" :class="sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+            </th>
+            <th class="px-6 py-3 text-gray-700 cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset select-none"
+                @click="sortBy('status')" @keydown.enter="sortBy('status')" @keydown.space="sortBy('status')" tabindex="0"
+                role="columnheader" :aria-sort="sortField === 'status' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'">
+              <div class="flex items-center justify-between">
+                <span>Status</span>
+                <svg v-if="sortField === 'status'" class="w-4 h-4" :class="sortDirection === 'asc' ? 'rotate-0' : 'rotate-180'" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+            </th>
+            <th class="px-6 py-3 text-right text-gray-700" role="columnheader">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="u in paginatedRows" :key="u.id" class="border-t hover:bg-gray-50">
+            <td class="px-6 py-4 font-medium">{{ u.name || '—' }}</td>
+            <td class="px-6 py-4">{{ u.email || '—' }}</td>
+            <td class="px-6 py-4">
+              <span :class="[
+                'px-2 py-1 rounded text-xs font-medium uppercase',
+                u.role === 'admin' ? 'bg-purple-100 text-purple-800' :
+                u.role === 'professor' ? 'bg-blue-100 text-blue-800' :
+                u.role === 'coordenador' ? 'bg-indigo-100 text-indigo-800' :
+                'bg-gray-100 text-gray-600'
+              ]">{{ getRoleLabel(u.role) }}</span>
+            </td>
+            <td class="px-6 py-4">
+              <span :class="[
+                'px-2 py-1 rounded text-xs font-medium',
+                u.status === 'ativo' ? 'bg-green-100 text-green-700' :
+                'bg-gray-100 text-gray-600'
+              ]">{{ u.status || '—' }}</span>
+            </td>
+            <td class="px-6 py-4">
+              <div class="flex items-center justify-end gap-2">
+                <button class="inline-flex items-center text-blue-800 hover:text-blue-900 px-2 py-1 border border-blue-200 rounded transition-colors"
+                        @click="edit(u)" :aria-label="'Editar usuário ' + u.name">
+                  <i class="fas fa-edit mr-1" aria-hidden="true"></i>
+                  <span>Editar</span>
+                </button>
+                <button class="inline-flex items-center text-red-800 hover:text-red-900 px-2 py-1 border border-red-200 rounded transition-colors"
+                        @click="del(u)" :aria-label="'Excluir usuário ' + u.name"
+                        :disabled="deletingUserId === u.id">
+                  <span v-if="deletingUserId === u.id">
+                    <div class="animate-spin -ml-1 mr-1 h-3 w-3 border border-red-600 border-t-transparent rounded-full inline-block"></div>
+                    Excluindo...
+                  </span>
+                  <span v-else>
+                    <i class="fas fa-trash mr-1" aria-hidden="true"></i>
+                    Excluir
+                  </span>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr v-if="!rows || rows.length===0">
+            <td colspan="5" class="px-6 py-4 text-center text-gray-700">
+              {{ (filters.q || filters.role || filters.status) ? 'Nenhum resultado para os filtros aplicados' : 'Sem registros' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Paginação -->
+      <nav v-if="totalPages > 1" class="flex items-center justify-between mt-4 px-4 py-3 border-t" role="navigation" aria-label="Navegação por páginas">
+        <div class="text-sm text-gray-700" aria-live="polite">
+          Mostrando {{ (currentPage - 1) * perPage + 1 }} a {{ Math.min(currentPage * perPage, totalItems) }} de {{ totalItems }} usuários
+        </div>
+        <div class="flex items-center space-x-2">
+          <button @click="previousPage" :disabled="currentPage === 1"
+                  class="px-3 py-1 text-sm border rounded hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  :aria-label="'Ir para página anterior'"
+                  :aria-disabled="currentPage === 1">
+            <i class="fas fa-chevron-left mr-1" aria-hidden="true"></i>Anterior
+          </button>
+          <button v-for="page in visiblePages" :key="page"
+                @click="goToPage(page)"
+                :class="[
+                  'px-3 py-1 text-sm cursor-pointer rounded transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1',
+                  page === currentPage ? 'bg-blue-600 text-white' : 'border hover:bg-gray-50 focus:bg-gray-50'
+                ]"
+                :aria-label="'Ir para página ' + page"
+                :aria-current="page === currentPage ? 'page' : false">
+            {{ page }}
+          </button>
+          <button @click="nextPage" :disabled="currentPage === totalPages"
+                  class="px-3 py-1 text-sm border rounded hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  :aria-label="'Ir para próxima página'"
+                  :aria-disabled="currentPage === totalPages">
+            Próxima<i class="fas fa-chevron-right ml-1" aria-hidden="true"></i>
+          </button>
+        </div>
+      </nav>
+    </div>
+
+    <!-- Modal de Criar/Editar Usuário -->
+    <div v-if="editing" class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto" style="background-color: rgba(0, 0, 0, 0.85);" @click.self="cancel">
+      <div class="bg-gray-50 rounded-lg w-full max-w-4xl shadow-xl overflow-hidden flex flex-col border border-gray-200 m-4" style="max-height: calc(100vh - 2rem);">
+        <div class="flex items-center justify-between p-4 border-b bg-gray-50 sticky top-0 z-10">
+          <h2 class="text-lg font-semibold">{{ form.id ? 'Editar Usuário' : 'Novo Usuário' }}</h2>
+          <button @click="cancel" class="text-gray-500 hover:text-gray-700" aria-label="Fechar"><i class="fas fa-times text-xl"></i></button>
+        </div>
+      <div class="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div>
+          <label class="text-sm font-medium text-gray-700 mb-1 block" for="u-nome">Nome</label>
+          <input id="u-nome" v-model="form.name" class="border rounded px-3 py-2 w-full" placeholder="Nome">
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700 mb-1 block" for="u-email">Email</label>
+          <input id="u-email" v-model="form.email" type="email" class="border rounded px-3 py-2 w-full" placeholder="email@dominio.com">
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700 mb-1 block" for="u-role2">Perfil</label>
+          <select id="u-role2" v-model="form.role" class="border rounded px-3 py-2 w-full">
+            <option value="professor">Professor</option>
+            <option value="admin">Administrador</option>
+            <option value="coordenador">Coordenador</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700 mb-1 block" for="u-status2">Status</label>
+          <select id="u-status2" v-model="form.status" class="border rounded px-3 py-2 w-full">
+            <option value="ativo">Ativo</option>
+            <option value="inativo">Inativo</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700 mb-1 block" for="u-pass">Senha {{ form.id ? '(deixe vazio para manter)' : '' }}</label>
+          <input id="u-pass" v-model="form.password" type="password" class="border rounded px-3 py-2 w-full" :placeholder="form.id ? '••••••' : 'Defina uma senha'">
+        </div>
+      </div>
+      <div class="flex gap-2 justify-end p-4 border-t bg-gray-50 sticky bottom-0">
+        <button class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 transition-colors"
+                @click="cancel"
+                :disabled="savingForm">
+          Cancelar
+        </button>
+        <button class="px-4 py-2 bg-brand-primary text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
+                @click="save"
+                :disabled="savingForm">
+          <i v-if="savingForm" class="fas fa-spinner fa-spin mr-2"></i>
+          <i v-else :class="form.id ? 'fas fa-save' : 'fas fa-plus'" class="mr-2"></i>
+          {{ form.id ? (savingForm ? 'Atualizando...' : 'Atualizar Usuário') : (savingForm ? 'Criando...' : 'Criar Usuário') }}
+        </button>
+      </div>
+      </div>
+    </div>
+  </div>
+  `,

@@ -17,6 +17,30 @@ if (!file_exists($migrationLockFile)) {
     }
 }
 
+// Migração para adicionar versionamento de formulários
+$versioningMigrationLockFile = __DIR__ . '/.migration_versioning_completed';
+if (!file_exists($versioningMigrationLockFile)) {
+    try {
+        $pdo_migration = db();
+        $pdo_migration->exec("
+            ALTER TABLE `entrevista_forms`
+            ADD COLUMN `version_name` VARCHAR(255) NULL DEFAULT 'Versão Inicial' COMMENT 'Nome da versão do formulário, ex: \"Entrevista 2024\"' AFTER `status`;
+        ");
+        $pdo_migration->exec("
+            ALTER TABLE `pdi_forms`
+            ADD COLUMN `version_name` VARCHAR(255) NULL DEFAULT 'Versão Inicial' COMMENT 'Nome da versão do formulário, ex: \"PDI 2024/1\"' AFTER `status`;
+        ");
+        $pdo_migration->exec("
+            ALTER TABLE `plano_atendimento_forms`
+            ADD COLUMN `version_name` VARCHAR(255) NULL DEFAULT 'Versão Inicial' COMMENT 'Nome da versão do formulário, ex: \"PAI 2024\"' AFTER `status`;
+        ");
+        file_put_contents($versioningMigrationLockFile, date('Y-m-d H:i:s'));
+        error_log("ConectEDU: Migração de versionamento de formulários aplicada com sucesso!");
+    } catch (Exception $e) {
+        error_log("ConectEDU: Erro ao aplicar migração de versionamento - " . $e->getMessage());
+    }
+}
+
 // Sistema de roteamento REST - converte URLs REST para actions
 $requestUri = $_SERVER['REQUEST_URI'] ?? '';
 $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
@@ -1267,17 +1291,22 @@ if ($action === 'schools.delete') {
 // ENDPOINTS FORMULÁRIOS AEE
 // ========================================
 
-// POST /entrevistas-responsavel/create - Criar entrevista
+// POST /entrevistas-responsavel/create - Criar nova versão de entrevista
 if ($action === 'entrevistas-responsavel.create') {
   $u = require_auth();
   
   $student_id = (int)($B['student_id'] ?? 0);
   $form_data = $B['form_data'] ?? [];
-  
+  $version_name = trim($B['version_name'] ?? '');
+
   if (!$student_id || empty($form_data)) {
     res(false, null, 'MISSING_REQUIRED_FIELDS - student_id e form_data são obrigatórios', 422);
   }
   
+  if (empty($version_name)) {
+      $version_name = "Entrevista de " . date('d/m/Y');
+  }
+
   // Verificar se aluno pertence ao professor
   if ($u['role'] !== 'admin') {
     $check = $pdo->prepare('SELECT id FROM students WHERE id=? AND created_by_teacher_id=?');
@@ -1287,37 +1316,21 @@ if ($action === 'entrevistas-responsavel.create') {
     }
   }
   
-  // LÓGICA 1:1 - Verificar se já existe entrevista para este aluno
-  $checkExisting = $pdo->prepare('SELECT id FROM entrevista_forms WHERE student_id = ?');
-  $checkExisting->execute([$student_id]);
-  $existing = $checkExisting->fetch(PDO::FETCH_ASSOC);
+  // Lógica de versionamento: Sempre criar uma nova entrada
+  $sql = 'INSERT INTO entrevista_forms (student_id, created_by_teacher_id, form_data, status, version_name, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, NOW(), NOW())';
   
-  if ($existing) {
-    // Se já existe, fazer UPDATE ao invés de INSERT
-    $sql = 'UPDATE entrevista_forms SET form_data = ?, status = ?, updated_at = NOW() WHERE id = ?';
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-      json_encode($form_data, JSON_UNESCAPED_UNICODE),
-      $B['status'] ?? 'rascunho',
-      $existing['id']
-    ]);
-    res(true, ['id' => $existing['id'], 'message' => 'Entrevista atualizada com sucesso', 'action' => 'updated']);
-  } else {
-    // Se não existe, criar nova
-    $sql = 'INSERT INTO entrevista_forms (student_id, created_by_teacher_id, form_data, status, created_at, updated_at) 
-            VALUES (?, ?, ?, ?, NOW(), NOW())';
-    
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-      $student_id,
-      $u['id'],
-      json_encode($form_data, JSON_UNESCAPED_UNICODE),
-      $B['status'] ?? 'rascunho'
-    ]);
-    
-    $id = $pdo->lastInsertId();
-    res(true, ['id' => $id, 'message' => 'Entrevista criada com sucesso', 'action' => 'created']);
-  }
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([
+    $student_id,
+    $u['id'],
+    json_encode($form_data, JSON_UNESCAPED_UNICODE),
+    $B['status'] ?? 'rascunho',
+    $version_name
+  ]);
+
+  $id = $pdo->lastInsertId();
+  res(true, ['id' => $id, 'message' => 'Nova versão da entrevista criada com sucesso', 'action' => 'created']);
 }
 
 // GET /entrevistas-responsavel/list - Listar entrevistas
@@ -1435,15 +1448,20 @@ if ($action === 'entrevistas-responsavel.update') {
 
 // ========== PDI ENDPOINTS ==========
 
-// POST /pdi/create - Criar PDI
+// POST /pdi/create - Criar nova versão de PDI
 if ($action === 'pdi.create') {
   $u = require_auth();
   
   $student_id = (int)($B['student_id'] ?? 0);
   $form_data = $B['form_data'] ?? [];
-  
+  $version_name = trim($B['version_name'] ?? '');
+
   if (!$student_id || empty($form_data)) {
     res(false, null, 'MISSING_REQUIRED_FIELDS', 422);
+  }
+
+  if (empty($version_name)) {
+      $version_name = "PDI de " . date('d/m/Y');
   }
   
   if ($u['role'] !== 'admin') {
@@ -1454,41 +1472,23 @@ if ($action === 'pdi.create') {
     }
   }
   
-  // LÓGICA 1:1 - Verificar se já existe PDI para este aluno
-  $checkExisting = $pdo->prepare('SELECT id FROM pdi_forms WHERE student_id = ?');
-  $checkExisting->execute([$student_id]);
-  $existing = $checkExisting->fetch(PDO::FETCH_ASSOC);
+  // Lógica de versionamento: Sempre criar uma nova entrada
+  $sql = 'INSERT INTO pdi_forms (student_id, created_by_teacher_id, form_data, data_inicio, data_fim, status, version_name, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())';
   
-  if ($existing) {
-    // Se já existe, fazer UPDATE
-    $sql = 'UPDATE pdi_forms SET form_data = ?, data_inicio = ?, data_fim = ?, status = ?, updated_at = NOW() WHERE id = ?';
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-      json_encode($form_data, JSON_UNESCAPED_UNICODE),
-      $B['data_inicio'] ?? null,
-      $B['data_fim'] ?? null,
-      $B['status'] ?? 'rascunho',
-      $existing['id']
-    ]);
-    res(true, ['id' => $existing['id'], 'message' => 'PDI atualizado com sucesso', 'action' => 'updated']);
-  } else {
-    // Se não existe, criar novo
-    $sql = 'INSERT INTO pdi_forms (student_id, created_by_teacher_id, form_data, data_inicio, data_fim, status, created_at, updated_at) 
-            VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())';
-    
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-      $student_id,
-      $u['id'],
-      json_encode($form_data, JSON_UNESCAPED_UNICODE),
-      $B['data_inicio'] ?? null,
-      $B['data_fim'] ?? null,
-      $B['status'] ?? 'rascunho'
-    ]);
-    
-    $id = $pdo->lastInsertId();
-    res(true, ['id' => $id, 'message' => 'PDI criado com sucesso', 'action' => 'created']);
-  }
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([
+    $student_id,
+    $u['id'],
+    json_encode($form_data, JSON_UNESCAPED_UNICODE),
+    $B['data_inicio'] ?? null,
+    $B['data_fim'] ?? null,
+    $B['status'] ?? 'rascunho',
+    $version_name
+  ]);
+
+  $id = $pdo->lastInsertId();
+  res(true, ['id' => $id, 'message' => 'Nova versão do PDI criada com sucesso', 'action' => 'created']);
 }
 
 // GET /pdi - Listar PDIs
@@ -1583,15 +1583,20 @@ if ($action === 'pdi.update') {
 
 // ========== PLANO DE ATENDIMENTO ENDPOINTS ==========
 
-// POST /plano-atendimento/create - Criar Plano de Atendimento
+// POST /plano-atendimento/create - Criar nova versão de Plano de Atendimento
 if ($action === 'plano-atendimento.create') {
   $u = require_auth();
   
   $student_id = (int)($B['student_id'] ?? 0);
   $form_data = $B['form_data'] ?? [];
-  
+  $version_name = trim($B['version_name'] ?? '');
+
   if (!$student_id || empty($form_data)) {
     res(false, null, 'MISSING_REQUIRED_FIELDS', 422);
+  }
+
+  if (empty($version_name)) {
+      $version_name = "PAI de " . date('d/m/Y');
   }
   
   if ($u['role'] !== 'admin') {
@@ -1602,43 +1607,24 @@ if ($action === 'plano-atendimento.create') {
     }
   }
   
-  // LÓGICA 1:1 - Verificar se já existe PAI para este aluno
-  $checkExisting = $pdo->prepare('SELECT id FROM plano_atendimento_forms WHERE student_id = ?');
-  $checkExisting->execute([$student_id]);
-  $existing = $checkExisting->fetch(PDO::FETCH_ASSOC);
+  // Lógica de versionamento: Sempre criar uma nova entrada
+  $sql = 'INSERT INTO plano_atendimento_forms (student_id, created_by_teacher_id, pdi_id, form_data, data_inicio, data_fim, status, version_name, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())';
   
-  if ($existing) {
-    // Se já existe, fazer UPDATE
-    $sql = 'UPDATE plano_atendimento_forms SET pdi_id = ?, form_data = ?, data_inicio = ?, data_fim = ?, status = ?, updated_at = NOW() WHERE id = ?';
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-      $B['pdi_id'] ?? null,
-      json_encode($form_data, JSON_UNESCAPED_UNICODE),
-      $B['data_inicio'] ?? null,
-      $B['data_fim'] ?? null,
-      $B['status'] ?? 'rascunho',
-      $existing['id']
-    ]);
-    res(true, ['id' => $existing['id'], 'message' => 'Plano de Atendimento atualizado com sucesso', 'action' => 'updated']);
-  } else {
-    // Se não existe, criar novo
-    $sql = 'INSERT INTO plano_atendimento_forms (student_id, created_by_teacher_id, pdi_id, form_data, data_inicio, data_fim, status, created_at, updated_at) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())';
-    
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-      $student_id,
-      $u['id'],
-      $B['pdi_id'] ?? null,
-      json_encode($form_data, JSON_UNESCAPED_UNICODE),
-      $B['data_inicio'] ?? null,
-      $B['data_fim'] ?? null,
-      $B['status'] ?? 'rascunho'
-    ]);
-    
-    $id = $pdo->lastInsertId();
-    res(true, ['id' => $id, 'message' => 'Plano de Atendimento criado com sucesso', 'action' => 'created']);
-  }
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([
+    $student_id,
+    $u['id'],
+    $B['pdi_id'] ?? null,
+    json_encode($form_data, JSON_UNESCAPED_UNICODE),
+    $B['data_inicio'] ?? null,
+    $B['data_fim'] ?? null,
+    $B['status'] ?? 'rascunho',
+    $version_name
+  ]);
+
+  $id = $pdo->lastInsertId();
+  res(true, ['id' => $id, 'message' => 'Nova versão do Plano de Atendimento criada com sucesso', 'action' => 'created']);
 }
 
 // GET /plano-atendimento/list - Listar Planos de Atendimento
@@ -2432,135 +2418,59 @@ if ($action === 'reports.student.pdf') {
 // GERADORES DE PDF AEE
 // ========================================
 
-// GET /forms/anamnese/pdf?student_id=X
+// GET /forms/anamnese/pdf?id=X (onde X é o ID da VERSÃO da entrevista)
 if ($action === 'forms.anamnese.pdf') {
-  error_log('[PDF-Entrevista] Iniciando');
   $u = require_auth();
-  $student_id = (int)($_GET['student_id'] ?? 0);
-  error_log('[PDF-Entrevista] student_id=' . $student_id . ', user_id=' . $u['id']);
+  $entrevista_id = (int)($_GET['id'] ?? 0);
   
-  if (!$student_id) {
-    error_log('[PDF-Entrevista] ERROR: student_id nao fornecido');
-    res(false, null, 'STUDENT_ID_REQUIRED', 400);
+  if (!$entrevista_id) {
+    res(false, null, 'ID da versão da entrevista é obrigatório.', 400);
   }
+
+  // A verificação de permissão já é feita dentro do script gerador de PDF,
+  // que também garante que o ID da entrevista existe.
   
-  // Buscar a única entrevista do aluno (1:1 com student)
-  $sql = 'SELECT id FROM entrevista_forms WHERE student_id = ?';
-  $params = [$student_id];
+  // Passar o ID e o usuário autenticado para o escopo do script incluído
+  $_GET['id'] = $entrevista_id;
+  $user = $u;
   
-  // Teacher-centric: professor só vê suas entrevistas
-  if ($u['role'] !== 'admin') {
-    $sql .= ' AND created_by_teacher_id = ?';
-    $params[] = $u['id'];
-  }
-  
-  $sql .= ' LIMIT 1';
-  error_log('[PDF-Entrevista] SQL=' . $sql);
-  $stmt = $pdo->prepare($sql);
-  $stmt->execute($params);
-  $entrevista = $stmt->fetch(PDO::FETCH_ASSOC);
-  
-  if (!$entrevista) {
-    error_log('[PDF-Entrevista] ERROR: Nenhuma entrevista encontrada');
-    res(false, null, 'NO_ENTREVISTA_FOUND', 404);
-  }
-  
-  error_log('[PDF-Entrevista] OK: Encontrada entrevista id=' . $entrevista['id']);
-  
-  // Passar variáveis para o gerador
-  $_GET['id'] = $entrevista['id'];
-  $user = $u; // Disponibilizar para o gerador
-  // $pdo já está disponível globalmente
-  
-  // Incluir o gerador V2 simplificado
-  include __DIR__ . '/generate-pdf-entrevista-v2.php';
+  // Incluir o gerador de PDF refatorado
+  include __DIR__ . '/generate-pdf-entrevista.php';
   exit;
 }
 
-// GET /pdi/pdf?student_id=X
+// GET /pdi/pdf?id=X (onde X é o ID da VERSÃO do PDI)
 if ($action === 'pdi.pdf') {
-  error_log('[PDF-PDI] Iniciando');
   $u = require_auth();
-  $student_id = (int)($_GET['student_id'] ?? 0);
-  error_log('[PDF-PDI] student_id=' . $student_id . ', user_id=' . $u['id']);
-  
-  if (!$student_id) {
-    error_log('[PDF-PDI] ERROR: student_id nao fornecido');
-    res(false, null, 'STUDENT_ID_REQUIRED', 400);
+  $pdi_id = (int)($_GET['id'] ?? 0);
+
+  if (!$pdi_id) {
+    res(false, null, 'ID da versão do PDI é obrigatório.', 400);
   }
+
+  // A verificação de permissão já é feita dentro do script gerador de PDF.
   
-  // Buscar o único PDI do aluno (1:1 com student)
-  $sql = 'SELECT id FROM pdi_forms WHERE student_id = ?';
-  $params = [$student_id];
+  $_GET['id'] = $pdi_id;
+  $user = $u;
   
-  // Teacher-centric: professor só vê seus PDIs
-  if ($u['role'] !== 'admin') {
-    $sql .= ' AND created_by_teacher_id = ?';
-    $params[] = $u['id'];
-  }
-  
-  $sql .= ' LIMIT 1';
-  error_log('[PDF-PDI] SQL=' . $sql);
-  $stmt = $pdo->prepare($sql);
-  $stmt->execute($params);
-  $pdi = $stmt->fetch(PDO::FETCH_ASSOC);
-  
-  if (!$pdi) {
-    error_log('[PDF-PDI] ERROR: Nenhum PDI encontrado');
-    res(false, null, 'NO_PDI_FOUND', 404);
-  }
-  
-  error_log('[PDF-PDI] OK: Encontrado PDI id=' . $pdi['id']);
-  
-  // Passar variáveis para o gerador
-  $_GET['id'] = $pdi['id'];
-  $user = $u; // Disponibilizar para o gerador
-  
-  // Incluir o gerador e gerar PDF diretamente
   include __DIR__ . '/generate-pdf-pdi.php';
   exit;
 }
 
-// GET /pai/pdf?student_id=X
+// GET /pai/pdf?id=X (onde X é o ID da VERSÃO do PAI)
 if ($action === 'pai.pdf') {
-  error_log('[PDF-PAI] Iniciando');
   $u = require_auth();
-  $student_id = (int)($_GET['student_id'] ?? 0);
-  error_log('[PDF-PAI] student_id=' . $student_id . ', user_id=' . $u['id']);
-  
-  if (!$student_id) {
-    error_log('[PDF-PAI] ERROR: student_id nao fornecido');
-    res(false, null, 'STUDENT_ID_REQUIRED', 400);
+  $pai_id = (int)($_GET['id'] ?? 0);
+
+  if (!$pai_id) {
+    res(false, null, 'ID da versão do PAI é obrigatório.', 400);
   }
+
+  // A verificação de permissão já é feita dentro do script gerador de PDF.
   
-  // Buscar o único PAI do aluno (1:1 com student)
-  $sql = 'SELECT id FROM plano_atendimento_forms WHERE student_id = ?';
-  $params = [$student_id];
+  $_GET['id'] = $pai_id;
+  $user = $u;
   
-  // Teacher-centric: professor só vê seus PAIs
-  if ($u['role'] !== 'admin') {
-    $sql .= ' AND created_by_teacher_id = ?';
-    $params[] = $u['id'];
-  }
-  
-  $sql .= ' LIMIT 1';
-  error_log('[PDF-PAI] SQL=' . $sql);
-  $stmt = $pdo->prepare($sql);
-  $stmt->execute($params);
-  $pai = $stmt->fetch(PDO::FETCH_ASSOC);
-  
-  if (!$pai) {
-    error_log('[PDF-PAI] ERROR: Nenhum PAI encontrado');
-    res(false, null, 'NO_PAI_FOUND', 404);
-  }
-  
-  error_log('[PDF-PAI] OK: Encontrado PAI id=' . $pai['id']);
-  
-  // Passar variáveis para o gerador
-  $_GET['id'] = $pai['id'];
-  $user = $u; // Disponibilizar para o gerador
-  
-  // Incluir o gerador e gerar PDF diretamente
   include __DIR__ . '/generate-pdf-pai.php';
   exit;
 }

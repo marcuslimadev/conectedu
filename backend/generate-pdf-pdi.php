@@ -1,27 +1,29 @@
 <?php
 /**
- * GERADOR DE PDF - PLANO DE DESENVOLVIMENTO INDIVIDUAL (PDI) (Refatorado)
+ * GERADOR DE PDF - PLANO DE DESENVOLVIMENTO INDIVIDUAL (PDI) (Refatorado e Inteligente)
  *
- * Utiliza o servico centralizado de geracao de PDF.
+ * Prioriza os dados do cadastro do aluno para garantir consistência.
  */
 
 require_once 'functions.php';
 require_once __DIR__ . '/services/PdfGeneratorService.php';
 
 try {
-    // Autenticacao e Conexao DB
     $user = require_auth();
     $pdo = db();
 
-    // Validar ID
     $pdi_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
     if (!$pdi_id) {
         res(false, null, 'ID do PDI inválido', 400);
     }
 
-    // Buscar dados do PDI
+    // Busca dados do PDI e os dados mais recentes do aluno
     $stmt = $pdo->prepare("
-        SELECT pdi.*, s.name as student_name, s.birth_date, s.photo_url
+        SELECT
+            pdi.*,
+            s.name as student_name_from_db,
+            s.birth_date,
+            s.photo_url
         FROM pdi_forms pdi
         JOIN students s ON pdi.student_id = s.id
         WHERE pdi.id = :id
@@ -33,35 +35,36 @@ try {
         res(false, null, 'PDI não encontrado', 404);
     }
 
-    // Validar permissao
     if ($user['role'] !== 'admin' && $pdi['created_by_teacher_id'] != $user['id']) {
         res(false, null, 'Acesso não autorizado', 403);
     }
 
-    // Preparar dados para o template
-    $form_data = json_decode($pdi['form_data'], true) ?? [];
+    $form_data = json_decode($pdi['form_data'], true) ?: [];
+
+    // Lógica inteligente: dados do formulário são a base, mas dados
+    // de identificação do aluno são sempre os mais recentes.
     $data = [
-        'pdi' => array_merge($pdi, $form_data, [
-            'data_elaboracao_formatada' => !empty($form_data['data_elaboracao']) ? date('d/m/Y', strtotime($form_data['data_elaboracao'])) : '',
+        'pdi' => array_merge($form_data, [
+            'student_name' => $pdi['student_name_from_db'], // Prioridade
             'data_nascimento_formatada' => !empty($pdi['birth_date']) ? date('d/m/Y', strtotime($pdi['birth_date'])) : '',
+            'data_elaboracao_formatada' => !empty($form_data['data_elaboracao']) ? date('d/m/Y', strtotime($form_data['data_elaboracao'])) : '',
         ]),
-        'aspectos_psicomotores' => json_decode($form_data['aspectos_psicomotores'] ?? '{}', true),
-        'aspectos_pedagogicos' => json_decode($form_data['aspectos_pedagogicos'] ?? '{}', true),
-        'planejamento_bimestral' => json_decode($form_data['planejamento_bimestral'] ?? '{}', true),
+        'aspectos_psicomotores' => $form_data['aspectos_psicomotores'] ?? [],
+        'aspectos_pedagogicos' => $form_data['aspectos_pedagogicos'] ?? [],
+        'planejamento_bimestral' => $form_data['planejamento_bimestral'] ?? [],
+        'avaliacoes_bimestrais' => $form_data['avaliacoes_bimestrais'] ?? [],
         'photo_path' => $pdi['photo_url'] ? '../' . $pdi['photo_url'] : null,
     ];
 
-    // Capturar o HTML do template
     ob_start();
     include __DIR__ . '/templates/pdf/pdi_template.php';
     $html = ob_get_clean();
 
-    // Configurar e gerar PDF
     $pdfService = new PdfGeneratorService($pdo, $user);
     $pdfConfig = [
         'document_type' => 'pdi',
-        'title' => 'Plano de Desenvolvimento Individual - ' . $pdi['student_name'],
-        'student_name' => $pdi['student_name'],
+        'title' => 'Plano de Desenvolvimento Individual - ' . $pdi['student_name_from_db'],
+        'student_name' => $pdi['student_name_from_db'],
         'form_id' => $pdi_id,
         'student_id' => $pdi['student_id']
     ];

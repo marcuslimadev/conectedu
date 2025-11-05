@@ -1,29 +1,33 @@
 <?php
 /**
- * GERADOR DE PDF - PLANO DE ATENDIMENTO INDIVIDUAL (PAI) (Refatorado)
+ * GERADOR DE PDF - PLANO DE ATENDIMENTO INDIVIDUAL (PAI) (Refatorado e Inteligente)
  *
- * Utiliza o servico centralizado de geracao de PDF.
+ * Prioriza os dados do cadastro do aluno para garantir consistência.
  */
 
 require_once 'functions.php';
 require_once __DIR__ . '/services/PdfGeneratorService.php';
 
 try {
-    // Autenticacao e Conexao DB
     $user = require_auth();
     $pdo = db();
 
-    // Validar ID
     $pai_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
     if (!$pai_id) {
         res(false, null, 'ID do PAI inválido', 400);
     }
 
-    // Buscar dados do PAI
+    // Busca dados do PAI e os dados mais recentes do aluno e da escola
     $stmt = $pdo->prepare("
-        SELECT pai.*, s.name as student_name, s.birth_date, s.photo_url
-        FROM pai_forms pai
+        SELECT
+            pai.*,
+            s.name as student_name_from_db,
+            s.birth_date,
+            s.photo_url,
+            sch.name as school_name_from_db
+        FROM plano_atendimento_forms pai
         JOIN students s ON pai.student_id = s.id
+        LEFT JOIN schools sch ON s.school_id = sch.id
         WHERE pai.id = :id
     ");
     $stmt->execute([':id' => $pai_id]);
@@ -33,31 +37,32 @@ try {
         res(false, null, 'PAI não encontrado', 404);
     }
 
-    // Validar permissao
     if ($user['role'] !== 'admin' && $pai['created_by_teacher_id'] != $user['id']) {
         res(false, null, 'Acesso não autorizado', 403);
     }
 
-    // Preparar dados para o template
     $form_data = json_decode($pai['form_data'], true) ?: [];
+
+    // Lógica inteligente: dados do formulário são a base, mas dados de identificação
+    // do aluno são sempre os mais recentes do banco de dados.
     $data = [
-        'pai' => array_merge($pai, $form_data, [
+        'pai' => array_merge($form_data, [
+            'student_name' => $pai['student_name_from_db'], // Prioridade
+            'nome_escola' => $pai['school_name_from_db'], // Prioridade
             'data_nascimento_formatada' => !empty($pai['birth_date']) ? date('d/m/Y', strtotime($pai['birth_date'])) : '',
         ]),
         'photo_path' => $pai['photo_url'] ? '../' . $pai['photo_url'] : null,
     ];
 
-    // Capturar o HTML do template
     ob_start();
     include __DIR__ . '/templates/pdf/pai_template.php';
     $html = ob_get_clean();
 
-    // Configurar e gerar PDF
     $pdfService = new PdfGeneratorService($pdo, $user);
     $pdfConfig = [
         'document_type' => 'pai',
-        'title' => 'Plano de Atendimento Individual - ' . $pai['student_name'],
-        'student_name' => $pai['student_name'],
+        'title' => 'Plano de Atendimento Individual - ' . $pai['student_name_from_db'],
+        'student_name' => $pai['student_name_from_db'],
         'form_id' => $pai_id,
         'student_id' => $pai['student_id']
     ];

@@ -1,35 +1,37 @@
 <?php
 /**
- * GERADOR DE PDF - PLANO DE ATENDIMENTO INDIVIDUAL (PAI) (Refatorado e Inteligente)
+ * GERADOR DE PDF - PLANO DE ATENDIMENTO INDIVIDUAL (PAI) (Refatorado)
  *
- * Prioriza os dados do cadastro do aluno para garantir consistência.
+ * Gera o PAI utilizando a classe PdfGenerator e templates externos.
  */
 
-require_once 'functions.php';
-require_once __DIR__ . '/services/PdfGeneratorService.php';
+if (!function_exists('db')) {
+    require_once 'functions.php';
+}
+if (!class_exists('PdfGenerator')) {
+    require_once 'PdfGenerator.php';
+}
+
+// --- Inicialização e Autenticação ---
+header('Content-Type: application/json; charset=utf-8');
+cors();
+$user = require_auth();
+$pdo = db();
+
+// --- Validação de Entrada ---
+$pai_id = $_GET['id'] ?? null;
+if (!$pai_id || !is_numeric($pai_id)) {
+    res(false, null, 'ID do PAI inválido', 400);
+}
 
 try {
-    $user = require_auth();
-    $pdo = db();
+    // --- Busca de Dados ---
+    $sql = "SELECT p.*, s.name as student_name, s.photo_url
+            FROM planos_atendimento p
+            LEFT JOIN students s ON p.student_id = s.id
+            WHERE p.id = :id";
 
-    $pai_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
-    if (!$pai_id) {
-        res(false, null, 'ID do PAI inválido', 400);
-    }
-
-    // Busca dados do PAI e os dados mais recentes do aluno e da escola
-    $stmt = $pdo->prepare("
-        SELECT
-            pai.*,
-            s.name as student_name_from_db,
-            s.birth_date,
-            s.photo_url,
-            sch.name as school_name_from_db
-        FROM plano_atendimento_forms pai
-        JOIN students s ON pai.student_id = s.id
-        LEFT JOIN schools sch ON s.school_id = sch.id
-        WHERE pai.id = :id
-    ");
+    $stmt = $pdo->prepare($sql);
     $stmt->execute([':id' => $pai_id]);
     $pai = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -37,39 +39,54 @@ try {
         res(false, null, 'PAI não encontrado', 404);
     }
 
-    if ($user['role'] !== 'admin' && $pai['created_by_teacher_id'] != $user['id']) {
-        res(false, null, 'Acesso não autorizado', 403);
+    // --- Verificação de Permissões ---
+    if ($user['role'] !== 'admin' && $pai['teacher_id'] != $user['id']) {
+        res(false, null, 'Sem permissão para gerar este PDF', 403);
     }
 
-    $form_data = json_decode($pai['form_data'], true) ?: [];
-
-    // Lógica inteligente: dados do formulário são a base, mas dados de identificação
-    // do aluno são sempre os mais recentes do banco de dados.
+    // --- Preparação dos Dados para o Template ---
     $data = [
-        'pai' => array_merge($form_data, [
-            'student_name' => $pai['student_name_from_db'], // Prioridade
-            'nome_escola' => $pai['school_name_from_db'], // Prioridade
-            'data_nascimento_formatada' => !empty($pai['birth_date']) ? date('d/m/Y', strtotime($pai['birth_date'])) : '',
-        ]),
-        'photo_path' => $pai['photo_url'] ? '../' . $pai['photo_url'] : null,
+        'pai' => $pai,
+        'photo_path' => $pai['photo_url'] ? __DIR__ . '/../' . $pai['photo_url'] : null,
+        'main_title' => 'PLANO DE ATENDIMENTO INDIVIDUAL',
+        'document_date' => date('d/m/Y'),
     ];
 
-    ob_start();
-    include __DIR__ . '/templates/pdf/pai_template.php';
-    $html = ob_get_clean();
+    // --- Geração do PDF ---
+    $pdfGenerator = new PdfGenerator($pdo);
 
-    $pdfService = new PdfGeneratorService($pdo, $user);
-    $pdfConfig = [
-        'document_type' => 'pai',
-        'title' => 'Plano de Atendimento Individual - ' . $pai['student_name_from_db'],
-        'student_name' => $pai['student_name_from_db'],
-        'form_id' => $pai_id,
-        'student_id' => $pai['student_id']
-    ];
+    $pdfGenerator->setMetadata(
+        'PAI - ' . $pai['student_name'],
+        'ConectEDU - Sistema AEE',
+        'Plano de Atendimento Individual (PAI)',
+        'AEE, PAI, Educação Especial'
+    );
+
+    // Carregar o template HTML
+    $pdfGenerator->loadHtmlFromFile(__DIR__ . '/templates/pai-template.php', $data);
+
+    // --- Salvamento e Registro ---
+    $uploadDir = __DIR__ . '/uploads/documentos/pais/';
+    $fileName = 'PAI_' . sanitizeFileName($pai['student_name']) . '_' . date('Y-m-d') . '.pdf';
+    $filePath = $uploadDir . $fileName;
+    $relativeFilePath = 'backend/uploads/documentos/pais/' . $fileName;
+
+    $pdfGenerator->saveToFile($filePath);
+
+    $pdfGenerator->logDocument(
+        'pai',
+        $pai_id,
+        $pai['student_id'],
+        $user['id'],
+        $relativeFilePath,
+        $fileName,
+        'PAI - ' . $pai['student_name'] . ' - ' . date('d/m/Y')
+    );
+
+    // --- Resposta ---
+    $pdfGenerator->downloadFile($filePath, $fileName);
     
-    $pdfService->generate($html, $pdfConfig);
-
 } catch (Exception $e) {
-    error_log("Erro ao gerar PDF do PAI: " . $e->getMessage());
-    res(false, null, 'Ocorreu um erro interno ao gerar o PDF.', 500);
+    error_log('Erro ao gerar PDF do PAI (refatorado): ' . $e->getMessage());
+    res(false, null, 'Erro interno ao gerar o PDF.', 500);
 }

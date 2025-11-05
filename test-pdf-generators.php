@@ -1,129 +1,143 @@
 <?php
 require __DIR__.'/backend/functions.php';
 
-echo "🔧 Testando Geradores de PDF com Versionamento\n\n";
+echo "🔧 Testando Geradores de PDF ConectEDU\n\n";
 
-function run_curl_request($url) {
-    // Para este teste, vamos simular a execução direta do script,
-    // pois o ambiente de CLI não tem um servidor web rodando.
-    // Isso evita problemas com cURL e localhost.
+// Test 1: Login e obter token
+echo "1. Fazendo login...\n";
+$loginData = [
+    'action' => 'auth.login',
+    'email' => 'admin@conectedu.local',
+    'password' => 'admin123'
+];
 
-    // Extrai o ID da URL
-    parse_str(parse_url($url, PHP_URL_QUERY), $queryParams);
-    $id = $queryParams['id'] ?? 0;
+$ch = curl_init('http://localhost/conectedu/backend/api.php');
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($loginData));
+curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-    if (!$id) {
-        return ['code' => 400, 'response' => 'ID não encontrado na URL'];
-    }
+$response = curl_exec($ch);
+$responseData = json_decode($response, true);
 
-    // Isola o nome do script
-    $script_name = basename(parse_url($url, PHP_URL_PATH));
-    $script_path = __DIR__ . '/backend/' . $script_name;
-
-    if (!file_exists($script_path)) {
-        return ['code' => 404, 'response' => "Script não encontrado: $script_path"];
-    }
-
-    // Prepara o ambiente para a execução do script
-    $_GET['id'] = $id;
-
-    ob_start();
-    try {
-        // Inclui o script, que irá gerar o PDF e dar 'exit'
-        include $script_path;
-        $output = ob_get_clean();
-
-        // Se o script der 'exit', a execução aqui para.
-        // Se não, podemos capturar qualquer outra saída.
-        // A validação real será se o output começa com '%PDF'.
-        return ['code' => 200, 'response' => $output];
-
-    } catch (Exception $e) {
-        $error = ob_get_clean();
-        return ['code' => 500, 'response' => "Erro ao executar script: " . $e->getMessage() . "\nOutput: " . $error];
-    }
-}
-
-// Simular usuário admin para `require_auth()`
-if (!function_exists('require_auth')) {
-    function require_auth() {
-        return ['id' => 1, 'role' => 'admin'];
-    }
-}
-
-echo "1. Conectando ao banco de dados e buscando dados de teste...\n";
-$pdo = db();
-
-// Pegar o primeiro aluno que tenha os 3 tipos de formulários
-$query = "
-    SELECT s.id AS student_id
-    FROM students s
-    WHERE
-        EXISTS (SELECT 1 FROM entrevista_forms ef WHERE ef.student_id = s.id) AND
-        EXISTS (SELECT 1 FROM pdi_forms pf WHERE pf.student_id = s.id) AND
-        EXISTS (SELECT 1 FROM plano_atendimento_forms paf WHERE paf.student_id = s.id)
-    LIMIT 1
-";
-$student_id = $pdo->query($query)->fetchColumn();
-
-if (!$student_id) {
-    echo "❌ Erro: Nenhum aluno de teste com os 3 formulários associados foi encontrado.\n";
-    echo "   Por favor, crie dados de teste antes de rodar a verificação.\n";
+if (!$responseData['success']) {
+    echo "❌ Erro no login: " . $responseData['message'] . "\n";
     exit(1);
 }
 
-// Buscar a ÚLTIMA versão de cada formulário para este aluno
-$entrevista_id = $pdo->query("SELECT id FROM entrevista_forms WHERE student_id = $student_id ORDER BY id DESC LIMIT 1")->fetchColumn();
-$pdi_id = $pdo->query("SELECT id FROM pdi_forms WHERE student_id = $student_id ORDER BY id DESC LIMIT 1")->fetchColumn();
-$pai_id = $pdo->query("SELECT id FROM plano_atendimento_forms WHERE student_id = $student_id ORDER BY id DESC LIMIT 1")->fetchColumn();
+$token = $responseData['data']['token'];
+echo "✅ Login realizado com sucesso! Token: " . substr($token, 0, 10) . "...\n\n";
 
-if (!$entrevista_id || !$pdi_id || !$pai_id) {
-    echo "❌ Erro: Não foi possível encontrar a última versão de um dos formulários para o aluno ID $student_id.\n";
+curl_close($ch);
+
+// Test 2: Criar dados de teste mínimos
+echo "2. Criando dados de teste...\n";
+
+// Criar aluno de teste
+$studentData = [
+    'action' => 'students.create',
+    'name' => 'João da Silva Teste',
+    'birthdate' => '2010-05-15',
+    'responsible_name' => 'Maria da Silva',
+    'responsible_phone' => '(11) 99999-9999',
+    'school' => 'EMEF Teste',
+    'class' => '5º Ano A',
+    'shift' => 'manha',
+    'disability_type' => 'Autismo',
+    'modalidade' => 'apoio'
+];
+
+$ch = curl_init('http://localhost/conectedu/backend/api.php');
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($studentData));
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Content-Type: application/json',
+    'Authorization: Bearer ' . $token
+]);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+$response = curl_exec($ch);
+$studentResponse = json_decode($response, true);
+
+if (!$studentResponse['success']) {
+    echo "⚠️ Erro ao criar aluno (pode já existir): " . $studentResponse['message'] . "\n";
+} else {
+    echo "✅ Aluno de teste criado com ID: " . $studentResponse['data']['id'] . "\n";
+}
+curl_close($ch);
+
+// Pegar ID do primeiro aluno disponível
+$ch = curl_init('http://localhost/conectedu/backend/api.php');
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['action' => 'students.list']));
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Content-Type: application/json',
+    'Authorization: Bearer ' . $token
+]);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+$response = curl_exec($ch);
+$studentsResponse = json_decode($response, true);
+
+if (!$studentsResponse['success'] || empty($studentsResponse['data'])) {
+    echo "❌ Nenhum aluno encontrado para teste\n";
     exit(1);
 }
 
-echo "✅ Dados de teste encontrados:\n";
-echo "   - Aluno ID: $student_id\n";
-echo "   - Última Entrevista ID: $entrevista_id\n";
-echo "   - Último PDI ID: $pdi_id\n";
-echo "   - Último PAI ID: $pai_id\n\n";
+$studentId = $studentsResponse['data'][0]['id'];
+echo "📝 Usando aluno ID $studentId para teste\n\n";
+curl_close($ch);
 
-// Test 2: Gerar PDF da Entrevista
-echo "2. Testando gerador de PDF - Entrevista (ID: $entrevista_id)...\n";
-$entrevistaUrl = "http://localhost/backend/generate-pdf-entrevista.php?id=$entrevista_id";
-$result = run_curl_request($entrevistaUrl);
+// Test 3: Testar gerador de PDF de Entrevista
+echo "3. Testando gerador PDF - Entrevista...\n";
+$entrevistaUrl = "http://localhost/conectedu/backend/generate-pdf-entrevista.php?student_id=$studentId&token=$token";
+$ch = curl_init($entrevistaUrl);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+$pdfResponse = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
 
-// Como o script de geração de PDF finaliza com `exit`, a resposta direta
-// é o conteúdo do PDF. Se a execução continuar, algo deu errado.
-if (strpos($result['response'], '%PDF') === 0) {
-    echo "✅ PDF de Entrevista gerado com sucesso! (" . strlen($result['response']) . " bytes)\n";
+if ($httpCode == 200 && strpos($pdfResponse, '%PDF') === 0) {
+    echo "✅ PDF de Entrevista gerado com sucesso! (" . strlen($pdfResponse) . " bytes)\n";
 } else {
-    echo "❌ Erro ao gerar PDF de Entrevista. HTTP: " . $result['code'] . "\n";
-    echo "   Resposta: " . substr($result['response'], 0, 300) . "...\n";
+    echo "❌ Erro ao gerar PDF de Entrevista. HTTP: $httpCode\n";
+    echo "Resposta: " . substr($pdfResponse, 0, 200) . "...\n";
 }
 
-// Test 3: Gerar PDF do PDI
-echo "\n3. Testando gerador de PDF - PDI (ID: $pdi_id)...\n";
-$pdiUrl = "http://localhost/backend/generate-pdf-pdi.php?id=$pdi_id";
-$result = run_curl_request($pdiUrl);
+// Test 4: Testar gerador de PDF de PDI
+echo "\n4. Testando gerador PDF - PDI...\n";
+$pdiUrl = "http://localhost/conectedu/backend/generate-pdf-pdi.php?student_id=$studentId&token=$token";
+$ch = curl_init($pdiUrl);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+$pdfResponse = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
 
-if (strpos($result['response'], '%PDF') === 0) {
-    echo "✅ PDF de PDI gerado com sucesso! (" . strlen($result['response']) . " bytes)\n";
+if ($httpCode == 200 && strpos($pdfResponse, '%PDF') === 0) {
+    echo "✅ PDF de PDI gerado com sucesso! (" . strlen($pdfResponse) . " bytes)\n";
 } else {
-    echo "❌ Erro ao gerar PDF de PDI. HTTP: " . $result['code'] . "\n";
-    echo "   Resposta: " . substr($result['response'], 0, 300) . "...\n";
+    echo "❌ Erro ao gerar PDF de PDI. HTTP: $httpCode\n";
+    echo "Resposta: " . substr($pdfResponse, 0, 200) . "...\n";
 }
 
-// Test 4: Gerar PDF do PAI
-echo "\n4. Testando gerador de PDF - PAI (ID: $pai_id)...\n";
-$paiUrl = "http://localhost/backend/generate-pdf-pai.php?id=$pai_id";
-$result = run_curl_request($paiUrl);
+// Test 5: Testar gerador de PDF de PAI
+echo "\n5. Testando gerador PDF - PAI...\n";
+$paiUrl = "http://localhost/conectedu/backend/generate-pdf-pai.php?student_id=$studentId&token=$token";
+$ch = curl_init($paiUrl);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+$pdfResponse = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
 
-if (strpos($result['response'], '%PDF') === 0) {
-    echo "✅ PDF de PAI gerado com sucesso! (" . strlen($result['response']) . " bytes)\n";
+if ($httpCode == 200 && strpos($pdfResponse, '%PDF') === 0) {
+    echo "✅ PDF de PAI gerado com sucesso! (" . strlen($pdfResponse) . " bytes)\n";
 } else {
-    echo "❌ Erro ao gerar PDF de PAI. HTTP: " . $result['code'] . "\n";
-    echo "   Resposta: " . substr($result['response'], 0, 300) . "...\n";
+    echo "❌ Erro ao gerar PDF de PAI. HTTP: $httpCode\n";
+    echo "Resposta: " . substr($pdfResponse, 0, 200) . "...\n";
 }
 
 echo "\n📊 Teste concluído!\n";
+?>

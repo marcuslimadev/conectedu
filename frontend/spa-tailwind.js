@@ -5166,20 +5166,29 @@ const Relatorios = {
                   <div v-for="pdi in dadosRelatorio.pdis" :key="pdi.id" class="border rounded-lg p-4 hover:bg-gray-50">
                     <div class="flex justify-between items-start mb-3">
                       <h4 class="font-medium text-gray-900">PDI #{{ pdi.id }}</h4>
-                      <div class="text-xs"><span class="px-2 py-1 rounded-full text-xs" :class="pdi.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">{{ pdi.status }}</span></div>
+                      <div class="text-xs"><span class="px-2 py-1 rounded-full text-xs" :class="pdi.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">{{ pdi.status || 'rascunho' }}</span></div>
                     </div>
-                    <div class="space-y-2 text-sm">
-                      <div v-if="pdi.objectives"><span class="font-medium text-gray-700">Objetivos:</span><p class="text-gray-600 mt-1">{{ pdi.objectives }}</p></div>
-                      <div v-if="pdi.strategies"><span class="font-medium text-gray-700">Estratégias:</span><p class="text-gray-600 mt-1">{{ pdi.strategies }}</p></div>
-                      <div class="grid grid-cols-2 gap-4 mt-3">
-                        <div v-if="pdi.start_date"><span class="font-medium text-gray-700">Data Início:</span><span class="text-gray-600 ml-1">{{ formatarData(pdi.start_date) }}</span></div>
-                        <div v-if="pdi.end_date"><span class="font-medium text-gray-700">Data Fim:</span><span class="text-gray-600 ml-1">{{ formatarData(pdi.end_date) }}</span></div>
+                    <div class="space-y-3 text-sm">
+                      <div v-if="pdi.form_data?.nome_estudante" class="bg-blue-50 p-3 rounded">
+                        <span class="font-medium text-blue-900">Estudante:</span>
+                        <span class="text-blue-700 ml-2">{{ pdi.form_data.nome_estudante }}</span>
+                      </div>
+                      <div v-if="pdi.form_data?.ano_letivo" class="flex items-center gap-4">
+                        <div><span class="font-medium text-gray-700">Ano Letivo:</span> <span class="text-gray-600">{{ pdi.form_data.ano_letivo }}</span></div>
+                        <div v-if="pdi.form_data?.serie_ano"><span class="font-medium text-gray-700">Série:</span> <span class="text-gray-600">{{ pdi.form_data.serie_ano }}</span></div>
+                      </div>
+                      <div v-if="pdi.form_data?.objetivos_especificos">
+                        <span class="font-medium text-gray-700">Objetivos:</span>
+                        <p class="text-gray-600 mt-1 whitespace-pre-wrap">{{ pdi.form_data.objetivos_especificos }}</p>
+                      </div>
+                      <div v-if="pdi.form_data?.diretor" class="text-xs text-gray-500 mt-2 pt-2 border-t">
+                        Diretor: {{ pdi.form_data.diretor }} | Criado em {{ formatarData(pdi.created_at) }}
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div v-else class="text-center text-gray-500 py-8"><i class="fas a-tasks text-3xl mb-2"></i><p>Nenhum PDI registrado para este aluno</p></div>
+              <div v-else class="text-center text-gray-500 py-8"><i class="fas fa-tasks text-3xl mb-2"></i><p>Nenhum PDI registrado para este aluno</p></div>
             </div>
 
             <!-- PAIs -->
@@ -5190,14 +5199,29 @@ const Relatorios = {
                   <div v-for="pai in dadosRelatorio.pais" :key="pai.id" class="border rounded-lg p-4 hover:bg-gray-50">
                     <div class="flex justify-between items-start mb-3">
                       <h4 class="font-medium text-gray-900">PAI #{{ pai.id }}</h4>
-                      <div class="text-xs"><span class="px-2 py-1 rounded-full text-xs" :class="pai.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">{{ pai.status }}</span></div>
+                      <div class="text-xs"><span class="px-2 py-1 rounded-full text-xs" :class="pai.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">{{ pai.status || 'em uso' }}</span></div>
                     </div>
-                    <div class="space-y-2 text-sm">
-                      <div v-if="pai.objectives"><span class="font-medium text-gray-700">Objetivos:</span><p class="text-gray-600 mt-1">{{ pai.objectives }}</p></div>
-                      <div v-if="pai.strategies"><span class="font-medium text-gray-700">Estratégias:</span><p class="text-gray-600 mt-1">{{ pai.strategies }}</p></div>
-                      <div class="grid grid-cols-2 gap-4 mt-3">
-                        <div v-if="pai.start_date"><span class="font-medium text-gray-700">Data Início:</span><span class="text-gray-600 ml-1">{{ formatarData(pai.start_date) }}</span></div>
-                        <div v-if="pai.end_date"><span class="font-medium text-gray-700">Data Fim:</span><span class="text-gray-600 ml-1">{{ formatarData(pai.end_date) }}</span></div>
+                    <div class="space-y-3 text-sm">
+                      <div v-if="pai.form_data?.nome_estudante" class="bg-purple-50 p-3 rounded">
+                        <span class="font-medium text-purple-900">Estudante:</span>
+                        <span class="text-purple-700 ml-2">{{ pai.form_data.nome_estudante }}</span>
+                      </div>
+                      <div class="grid grid-cols-2 gap-4">
+                        <div v-if="pai.form_data?.ano_letivo"><span class="font-medium text-gray-700">Ano Letivo:</span> <span class="text-gray-600">{{ pai.form_data.ano_letivo }}</span></div>
+                        <div v-if="pai.form_data?.serie_ano"><span class="font-medium text-gray-700">Série:</span> <span class="text-gray-600">{{ pai.form_data.serie_ano }}</span></div>
+                        <div v-if="pai.form_data?.turno"><span class="font-medium text-gray-700">Turno:</span> <span class="text-gray-600">{{ pai.form_data.turno }}</span></div>
+                        <div v-if="pai.form_data?.data_nascimento"><span class="font-medium text-gray-700">Nascimento:</span> <span class="text-gray-600">{{ formatarData(pai.form_data.data_nascimento) }}</span></div>
+                      </div>
+                      <div v-if="pai.form_data?.objetivos_especificos">
+                        <span class="font-medium text-gray-700">Objetivos:</span>
+                        <p class="text-gray-600 mt-1 whitespace-pre-wrap">{{ pai.form_data.objetivos_especificos }}</p>
+                      </div>
+                      <div v-if="pai.form_data?.data_inicio || pai.form_data?.data_fim" class="grid grid-cols-2 gap-4 pt-2 border-t">
+                        <div v-if="pai.form_data?.data_inicio"><span class="font-medium text-gray-700">Data Início:</span> <span class="text-gray-600">{{ formatarData(pai.form_data.data_inicio) }}</span></div>
+                        <div v-if="pai.form_data?.data_fim"><span class="font-medium text-gray-700">Data Fim:</span> <span class="text-gray-600">{{ formatarData(pai.form_data.data_fim) }}</span></div>
+                      </div>
+                      <div class="text-xs text-gray-500 mt-2 pt-2 border-t">
+                        Criado em {{ formatarData(pai.created_at) }}
                       </div>
                     </div>
                   </div>

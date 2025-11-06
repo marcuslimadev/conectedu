@@ -8107,43 +8107,15 @@ const RelatorioAtendimento = {
                 Descrição do Atendimento *
               </label>
               
-              <!-- Controles de gravação -->
-              <div class="mb-3 flex items-center space-x-3">
-                <button type="button" 
-                        @click="toggleRecording" 
-                        :disabled="isProcessingAudio"
-                        class="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                        :class="isRecording 
-                          ? 'bg-red-100 text-red-700 hover:bg-red-200' 
-                          : 'bg-amber-100 text-amber-700 hover:bg-amber-200'">
-                  <i :class="isRecording ? 'fas fa-stop' : 'fas fa-microphone'"></i>
-                  <span>{{ isRecording ? 'Parar Gravação' : 'Gravar Áudio' }}</span>
-                </button>
-                
-                <!-- Indicador de gravação -->
-                <div v-if="isRecording" class="flex items-center space-x-2 text-red-600">
-                  <div class="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div>
-                  <span class="text-sm font-medium">{{ Math.floor(recordingTime / 60) }}:{{ String(recordingTime % 60).padStart(2, '0') }}</span>
-                </div>
-                
-                <!-- Instruções -->
-                <div class="text-xs text-gray-500">
-                  Clique no microfone para gravar ou digite diretamente
-                </div>
-              </div>
-                
-              <!-- Status de processamento -->
-              <div v-if="isProcessingAudio" class="bg-amber-50 border border-amber-200 rounded p-3 mb-3">
-                <div class="flex items-center space-x-2">
-                  <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-amber-600"></div>
-                  <span class="text-sm text-amber-700">Convertendo áudio para texto...</span>
-                </div>
-              </div>
+              <p class="text-xs text-gray-500 mb-3">
+                <i class="fas fa-microphone text-amber-500 mr-1"></i>
+                Use o microfone flutuante no canto da tela para gravar áudio
+              </p>
               
               <!-- Textarea para descrição -->
               <textarea v-model="form.descricao"
                         rows="8"
-                        placeholder="Digite ou grave a descrição detalhada do atendimento..."
+                        placeholder="Digite a descrição detalhada do atendimento ou use o microfone flutuante para gravar..."
                         ref="descricaoField"
                         data-voice-field="descricao"
                         @focus="setVoiceTarget('descricao', $event)"
@@ -8153,9 +8125,9 @@ const RelatorioAtendimento = {
               <div class="flex justify-end mt-2">
                 <button type="button"
                         @click="speak(form.descricao)"
-                        :disabled="!form.descricao || isProcessingAudio"
+                        :disabled="!form.descricao"
                         class="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                        :class="(!form.descricao || isProcessingAudio)
+                        :class="!form.descricao
                           ? 'bg-gray-100 text-gray-600 cursor-not-allowed'
                           : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'">
                   <i class="fas fa-volume-up"></i>
@@ -8256,7 +8228,7 @@ const RelatorioAtendimento = {
             <div class="flex justify-between pt-6 border-t">
             <button type="button" 
                     @click="previousStep" 
-                    :disabled="currentStep === 0 || loading || isProcessingAudio"
+                    :disabled="currentStep === 0 || loading"
                     class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
               <i class="fas fa-arrow-left mr-1"></i>
               Anterior
@@ -8265,7 +8237,7 @@ const RelatorioAtendimento = {
             <div class="flex space-x-3">
               <button type="button" 
                       @click="cancel" 
-                      :disabled="loading || isProcessingAudio"
+                      :disabled="loading"
                       class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
                 Cancelar
               </button>
@@ -8273,7 +8245,7 @@ const RelatorioAtendimento = {
               <button v-if="currentStep < totalSteps - 1" 
                       type="button" 
                       @click="nextStep"
-                      :disabled="!canProceed || loading || isProcessingAudio"
+                      :disabled="!canProceed || loading"
                       class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed">
                 Próximo
                 <i class="fas fa-arrow-right ml-1"></i>
@@ -8290,7 +8262,7 @@ const RelatorioAtendimento = {
               
               <!-- Botão PDF -->
               <button v-if="form.student_id" type="button" @click="exportarPDF"
-                      :disabled="loading || isProcessingAudio"
+                      :disabled="loading"
                       class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
                 <i class="fas fa-file-pdf mr-1"></i>
                 📄 Exportar PDF
@@ -8321,7 +8293,7 @@ const RelatorioAtendimento = {
                 <p class="text-sm text-gray-600 line-clamp-2">{{ r.descricao }}</p>
               </div>
               <div class="flex space-x-2">
-                <button @click="edit(r)" :disabled="loading || isProcessingAudio" class="text-blue-600 hover:text-blue-800 text-sm disabled:opacity-50 disabled:cursor-not-allowed">Editar</button>
+                <button @click="edit(r)" :disabled="loading" class="text-blue-600 hover:text-blue-800 text-sm disabled:opacity-50 disabled:cursor-not-allowed">Editar</button>
                 <button @click="deleteRelatorio(r)"
                         :disabled="deletingId===r.id || loading"
                         class="text-red-600 hover:text-red-800 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
@@ -8363,12 +8335,6 @@ const RelatorioAtendimento = {
       loadingRelatorios: false,
       loadingStudents: false,
       deletingId: null,
-      isRecording: false,
-      isProcessingAudio: false,
-      recordingTime: 0,
-      mediaRecorder: null,
-      audioChunks: [],
-      recordingTimer: null,
       voiceTargetField: 'descricao',
       voiceTargetElement: null,
       voiceHighlightActive: false,
@@ -8585,107 +8551,6 @@ const RelatorioAtendimento = {
       } else {
         const current = this.form[targetKey] || '';
         this.form[targetKey] = current ? `${current.trimEnd()}\n\n${text}` : text;
-      }
-    },
-
-    async toggleRecording() {
-      if (this.isRecording) {
-        await this.stopRecording();
-      } else {
-        await this.startRecording();
-      }
-    },
-
-    async startRecording() {
-      try {
-        this.ensureVoiceTarget();
-        this.activateVoiceHighlight();
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        this.mediaRecorder = new MediaRecorder(stream);
-        this.audioChunks = [];
-        this.recordingTime = 0;
-
-        this.mediaRecorder.ondataavailable = (event) => {
-          this.audioChunks.push(event.data);
-        };
-
-        this.mediaRecorder.onstop = async () => {
-          const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
-          await this.processAudio(audioBlob);
-
-          // Parar todas as tracks de áudio
-          stream.getTracks().forEach(track => track.stop());
-        };
-
-        this.mediaRecorder.start();
-        this.isRecording = true;
-        
-        // Timer para mostrar tempo de gravação
-        this.recordingTimer = setInterval(() => {
-          this.recordingTime++;
-        }, 1000);
-
-      } catch (error) {
-        console.error('Erro ao iniciar gravação:', error);
-        this.$showToast('Erro', 'Erro ao acessar o microfone. Verifique as permissões.', 'error');
-        this.deactivateVoiceHighlight();
-      }
-    },
-
-    async stopRecording() {
-      if (this.mediaRecorder && this.isRecording) {
-        // Verificar se a gravação tem pelo menos 1 segundo
-        if (this.recordingTime < 1) {
-          this.$showToast('Atenção', 'Grave pelo menos 1 segundo de áudio para uma transcrição adequada.', 'info');
-          return;
-        }
-        
-        this.mediaRecorder.stop();
-        this.isRecording = false;
-        
-        if (this.recordingTimer) {
-          clearInterval(this.recordingTimer);
-          this.recordingTimer = null;
-        }
-      }
-    },
-
-    async processAudio(audioBlob) {
-      this.isProcessingAudio = true;
-      this.activateVoiceHighlight();
-
-      try {
-        // Validar tamanho do blob antes de enviar
-        if (audioBlob.size < 1000) { // Menos de 1KB
-          throw new Error('Áudio muito curto. Grave pelo menos 1 segundo.');
-        }
-        
-        // Integração real com backend (OpenAI Whisper via PHP):
-        const formData = new FormData();
-        formData.append('audio', audioBlob, 'recording.wav');
-
-        const { data } = await api.post('/voice/transcribe', formData, {
-          // Não definir Content-Type manualmente para permitir boundary automático
-          timeout: 120000
-        });
-
-        const transcricao = data?.data?.text || '';
-        if (!transcricao) {
-          throw new Error('Transcrição vazia - tente falar mais claramente');
-        }
-
-        this.ensureVoiceTarget();
-        this.insertTranscription(transcricao);
-
-        this.$showToast('Sucesso', 'Áudio transcrito com sucesso!', 'success');
-        
-      } catch (error) {
-        console.error('Erro ao processar áudio:', error);
-        const msg = error.response?.data?.error || error.message || 'Erro ao converter áudio para texto.';
-        this.$showToast('Erro', msg, 'error');
-      } finally {
-        this.isProcessingAudio = false;
-        this.activateVoiceHighlight(2000);
       }
     },
 

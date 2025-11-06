@@ -5162,28 +5162,74 @@ const Relatorios = {
             <div class="bg-white border rounded-lg p-6">
               <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center"><i class="fas fa-tasks text-green-600 mr-2"></i>Planos de Desenvolvimento Individual (PDIs)</h3>
               <div v-if="dadosRelatorio.pdis && dadosRelatorio.pdis.length > 0">
-                <div class="space-y-4">
-                  <div v-for="pdi in dadosRelatorio.pdis" :key="pdi.id" class="border rounded-lg p-4 hover:bg-gray-50">
-                    <div class="flex justify-between items-start mb-3">
-                      <h4 class="font-medium text-gray-900">PDI #{{ pdi.id }}</h4>
-                      <div class="text-xs"><span class="px-2 py-1 rounded-full text-xs" :class="pdi.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">{{ pdi.status || 'rascunho' }}</span></div>
+                <div class="space-y-6">
+                  <div v-for="pdi in dadosRelatorio.pdis" :key="pdi.id" class="border-2 border-green-200 rounded-lg p-5 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start mb-4">
+                      <h4 class="font-bold text-lg text-gray-900">PDI #{{ pdi.id }}</h4>
+                      <span class="px-3 py-1 rounded-full text-xs font-medium" :class="pdi.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">{{ pdi.status || 'rascunho' }}</span>
                     </div>
-                    <div class="space-y-3 text-sm">
-                      <div v-if="pdi.form_data?.nome_estudante" class="bg-blue-50 p-3 rounded">
-                        <span class="font-medium text-blue-900">Estudante:</span>
-                        <span class="text-blue-700 ml-2">{{ pdi.form_data.nome_estudante }}</span>
+                    
+                    <!-- Identificação -->
+                    <div v-if="pdi.form_data?.nome_estudante" class="bg-green-50 p-4 rounded-lg mb-4">
+                      <div class="font-semibold text-green-900 text-lg">{{ pdi.form_data.nome_estudante }}</div>
+                      <div class="text-sm text-green-700 mt-1">
+                        <span v-if="pdi.form_data?.ano_letivo">Ano Letivo: {{ pdi.form_data.ano_letivo }}</span>
+                        <span v-if="pdi.form_data?.turno" class="ml-3">Turno: {{ pdi.form_data.turno }}</span>
                       </div>
-                      <div v-if="pdi.form_data?.ano_letivo" class="flex items-center gap-4">
-                        <div><span class="font-medium text-gray-700">Ano Letivo:</span> <span class="text-gray-600">{{ pdi.form_data.ano_letivo }}</span></div>
-                        <div v-if="pdi.form_data?.serie_ano"><span class="font-medium text-gray-700">Série:</span> <span class="text-gray-600">{{ pdi.form_data.serie_ano }}</span></div>
+                    </div>
+
+                    <!-- Objetivos -->
+                    <div v-if="pdi.form_data?.objetivo_geral" class="mb-4">
+                      <h5 class="font-semibold text-gray-800 mb-2 flex items-center"><i class="fas fa-bullseye text-green-600 mr-2"></i>Objetivo Geral</h5>
+                      <p class="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{{ pdi.form_data.objetivo_geral }}</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4 mb-4">
+                      <div v-if="pdi.form_data?.objetivos_cognitivo">
+                        <h5 class="font-semibold text-gray-800 mb-2 text-sm">Objetivos Cognitivos</h5>
+                        <p class="text-gray-700 text-sm bg-blue-50 p-2 rounded whitespace-pre-wrap">{{ pdi.form_data.objetivos_cognitivo }}</p>
                       </div>
-                      <div v-if="pdi.form_data?.objetivos_especificos">
-                        <span class="font-medium text-gray-700">Objetivos:</span>
-                        <p class="text-gray-600 mt-1 whitespace-pre-wrap">{{ pdi.form_data.objetivos_especificos }}</p>
+                      <div v-if="pdi.form_data?.objetivos_comunicacao">
+                        <h5 class="font-semibold text-gray-800 mb-2 text-sm">Objetivos de Comunicação</h5>
+                        <p class="text-gray-700 text-sm bg-blue-50 p-2 rounded whitespace-pre-wrap">{{ pdi.form_data.objetivos_comunicacao }}</p>
                       </div>
-                      <div v-if="pdi.form_data?.diretor" class="text-xs text-gray-500 mt-2 pt-2 border-t">
-                        Diretor: {{ pdi.form_data.diretor }} | Criado em {{ formatarData(pdi.created_at) }}
+                      <div v-if="pdi.form_data?.objetivos_psicomotor">
+                        <h5 class="font-semibold text-gray-800 mb-2 text-sm">Objetivos Psicomotores</h5>
+                        <p class="text-gray-700 text-sm bg-blue-50 p-2 rounded whitespace-pre-wrap">{{ pdi.form_data.objetivos_psicomotor }}</p>
                       </div>
+                      <div v-if="pdi.form_data?.objetivos_socioemocional">
+                        <h5 class="font-semibold text-gray-800 mb-2 text-sm">Objetivos Socioemocionais</h5>
+                        <p class="text-gray-700 text-sm bg-blue-50 p-2 rounded whitespace-pre-wrap">{{ pdi.form_data.objetivos_socioemocional }}</p>
+                      </div>
+                    </div>
+
+                    <!-- Estratégias -->
+                    <div v-if="pdi.form_data?.estrategias_metodologias" class="mb-4">
+                      <h5 class="font-semibold text-gray-800 mb-2 flex items-center"><i class="fas fa-lightbulb text-yellow-600 mr-2"></i>Estratégias e Metodologias</h5>
+                      <p class="text-gray-700 bg-yellow-50 p-3 rounded whitespace-pre-wrap">{{ pdi.form_data.estrategias_metodologias }}</p>
+                    </div>
+
+                    <!-- Datas e Avaliação -->
+                    <div class="grid md:grid-cols-3 gap-4 mb-4 text-sm">
+                      <div v-if="pdi.form_data?.data_inicio" class="bg-gray-50 p-3 rounded">
+                        <span class="font-semibold text-gray-700">Data Início:</span>
+                        <div class="text-gray-600 mt-1">{{ formatarData(pdi.form_data.data_inicio) }}</div>
+                      </div>
+                      <div v-if="pdi.form_data?.data_termino" class="bg-gray-50 p-3 rounded">
+                        <span class="font-semibold text-gray-700">Data Término:</span>
+                        <div class="text-gray-600 mt-1">{{ formatarData(pdi.form_data.data_termino) }}</div>
+                      </div>
+                      <div v-if="pdi.form_data?.frequencia_atendimento" class="bg-gray-50 p-3 rounded">
+                        <span class="font-semibold text-gray-700">Frequência:</span>
+                        <div class="text-gray-600 mt-1">{{ pdi.form_data.frequencia_atendimento }}</div>
+                      </div>
+                    </div>
+
+                    <!-- Equipe -->
+                    <div class="border-t pt-3 text-xs text-gray-500">
+                      <div v-if="pdi.form_data?.diretor">Diretor: {{ pdi.form_data.diretor }}</div>
+                      <div v-if="pdi.form_data?.professor_aee">Professor AEE: {{ pdi.form_data.professor_aee }}</div>
+                      <div class="mt-1">Criado em {{ formatarData(pdi.created_at) }}</div>
                     </div>
                   </div>
                 </div>
@@ -5195,34 +5241,104 @@ const Relatorios = {
             <div class="bg-white border rounded-lg p-6">
               <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center"><i class="fas fa-file-alt text-purple-600 mr-2"></i>Planos de Atendimento Individualizados (PAIs)</h3>
               <div v-if="dadosRelatorio.pais && dadosRelatorio.pais.length > 0">
-                <div class="space-y-4">
-                  <div v-for="pai in dadosRelatorio.pais" :key="pai.id" class="border rounded-lg p-4 hover:bg-gray-50">
-                    <div class="flex justify-between items-start mb-3">
-                      <h4 class="font-medium text-gray-900">PAI #{{ pai.id }}</h4>
-                      <div class="text-xs"><span class="px-2 py-1 rounded-full text-xs" :class="pai.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">{{ pai.status || 'em uso' }}</span></div>
+                <div class="space-y-6">
+                  <div v-for="pai in dadosRelatorio.pais" :key="pai.id" class="border-2 border-purple-200 rounded-lg p-5 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start mb-4">
+                      <h4 class="font-bold text-lg text-gray-900">PAI #{{ pai.id }}</h4>
+                      <span class="px-3 py-1 rounded-full text-xs font-medium" :class="pai.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800'">{{ pai.status || 'em uso' }}</span>
                     </div>
-                    <div class="space-y-3 text-sm">
-                      <div v-if="pai.form_data?.nome_estudante" class="bg-purple-50 p-3 rounded">
-                        <span class="font-medium text-purple-900">Estudante:</span>
-                        <span class="text-purple-700 ml-2">{{ pai.form_data.nome_estudante }}</span>
+                    
+                    <!-- Identificação -->
+                    <div v-if="pai.form_data?.nome_estudante" class="bg-purple-50 p-4 rounded-lg mb-4">
+                      <div class="font-semibold text-purple-900 text-lg">{{ pai.form_data.nome_estudante }}</div>
+                      <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-purple-700 mt-2">
+                        <div v-if="pai.form_data?.ano_letivo">Ano: {{ pai.form_data.ano_letivo }}</div>
+                        <div v-if="pai.form_data?.serie_ano">Série: {{ pai.form_data.serie_ano }}</div>
+                        <div v-if="pai.form_data?.turno">Turno: {{ pai.form_data.turno }}</div>
+                        <div v-if="pai.form_data?.data_nascimento">Nasc: {{ formatarData(pai.form_data.data_nascimento) }}</div>
                       </div>
-                      <div class="grid grid-cols-2 gap-4">
-                        <div v-if="pai.form_data?.ano_letivo"><span class="font-medium text-gray-700">Ano Letivo:</span> <span class="text-gray-600">{{ pai.form_data.ano_letivo }}</span></div>
-                        <div v-if="pai.form_data?.serie_ano"><span class="font-medium text-gray-700">Série:</span> <span class="text-gray-600">{{ pai.form_data.serie_ano }}</span></div>
-                        <div v-if="pai.form_data?.turno"><span class="font-medium text-gray-700">Turno:</span> <span class="text-gray-600">{{ pai.form_data.turno }}</span></div>
-                        <div v-if="pai.form_data?.data_nascimento"><span class="font-medium text-gray-700">Nascimento:</span> <span class="text-gray-600">{{ formatarData(pai.form_data.data_nascimento) }}</span></div>
+                    </div>
+
+                    <!-- Diagnóstico -->
+                    <div v-if="pai.form_data?.tipo_deficiencia || pai.form_data?.cid_laudo" class="mb-4 bg-red-50 p-3 rounded">
+                      <h5 class="font-semibold text-gray-800 mb-2 text-sm flex items-center"><i class="fas fa-medkit text-red-600 mr-2"></i>Informações Clínicas</h5>
+                      <div class="text-sm space-y-1">
+                        <div v-if="pai.form_data?.tipo_deficiencia"><span class="font-medium">Tipo:</span> {{ pai.form_data.tipo_deficiencia }}</div>
+                        <div v-if="pai.form_data?.cid_laudo"><span class="font-medium">CID/Laudo:</span> {{ pai.form_data.cid_laudo }}</div>
                       </div>
-                      <div v-if="pai.form_data?.objetivos_especificos">
-                        <span class="font-medium text-gray-700">Objetivos:</span>
-                        <p class="text-gray-600 mt-1 whitespace-pre-wrap">{{ pai.form_data.objetivos_especificos }}</p>
+                    </div>
+
+                    <!-- Objetivos -->
+                    <div v-if="pai.form_data?.objetivo_geral" class="mb-4">
+                      <h5 class="font-semibold text-gray-800 mb-2 flex items-center"><i class="fas fa-bullseye text-purple-600 mr-2"></i>Objetivo Geral</h5>
+                      <p class="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{{ pai.form_data.objetivo_geral }}</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4 mb-4">
+                      <div v-if="pai.form_data?.objetivos_comunicacao">
+                        <h5 class="font-semibold text-gray-800 mb-2 text-sm">Objetivos de Comunicação</h5>
+                        <p class="text-gray-700 text-sm bg-blue-50 p-2 rounded whitespace-pre-wrap">{{ pai.form_data.objetivos_comunicacao }}</p>
                       </div>
-                      <div v-if="pai.form_data?.data_inicio || pai.form_data?.data_fim" class="grid grid-cols-2 gap-4 pt-2 border-t">
-                        <div v-if="pai.form_data?.data_inicio"><span class="font-medium text-gray-700">Data Início:</span> <span class="text-gray-600">{{ formatarData(pai.form_data.data_inicio) }}</span></div>
-                        <div v-if="pai.form_data?.data_fim"><span class="font-medium text-gray-700">Data Fim:</span> <span class="text-gray-600">{{ formatarData(pai.form_data.data_fim) }}</span></div>
+                      <div v-if="pai.form_data?.objetivos_autonomia">
+                        <h5 class="font-semibold text-gray-800 mb-2 text-sm">Objetivos de Autonomia</h5>
+                        <p class="text-gray-700 text-sm bg-blue-50 p-2 rounded whitespace-pre-wrap">{{ pai.form_data.objetivos_autonomia }}</p>
                       </div>
-                      <div class="text-xs text-gray-500 mt-2 pt-2 border-t">
-                        Criado em {{ formatarData(pai.created_at) }}
+                      <div v-if="pai.form_data?.objetivos_academicos">
+                        <h5 class="font-semibold text-gray-800 mb-2 text-sm">Objetivos Acadêmicos</h5>
+                        <p class="text-gray-700 text-sm bg-blue-50 p-2 rounded whitespace-pre-wrap">{{ pai.form_data.objetivos_academicos }}</p>
                       </div>
+                      <div v-if="pai.form_data?.objetivos_socializacao">
+                        <h5 class="font-semibold text-gray-800 mb-2 text-sm">Objetivos de Socialização</h5>
+                        <p class="text-gray-700 text-sm bg-blue-50 p-2 rounded whitespace-pre-wrap">{{ pai.form_data.objetivos_socializacao }}</p>
+                      </div>
+                    </div>
+
+                    <!-- Estratégias -->
+                    <div v-if="pai.form_data?.estrategias_pedagogicas" class="mb-4">
+                      <h5 class="font-semibold text-gray-800 mb-2 flex items-center"><i class="fas fa-chalkboard-teacher text-yellow-600 mr-2"></i>Estratégias Pedagógicas</h5>
+                      <p class="text-gray-700 bg-yellow-50 p-3 rounded whitespace-pre-wrap">{{ pai.form_data.estrategias_pedagogicas }}</p>
+                    </div>
+
+                    <!-- Recursos -->
+                    <div v-if="pai.form_data?.recursos_tecnologia_assistiva || pai.form_data?.recursos_pedagogicos" class="mb-4">
+                      <h5 class="font-semibold text-gray-800 mb-2 flex items-center"><i class="fas fa-tools text-indigo-600 mr-2"></i>Recursos</h5>
+                      <div class="grid md:grid-cols-2 gap-3 text-sm">
+                        <div v-if="pai.form_data?.recursos_tecnologia_assistiva" class="bg-indigo-50 p-2 rounded">
+                          <span class="font-medium">Tecnologia Assistiva:</span>
+                          <div class="mt-1 text-gray-700">{{ pai.form_data.recursos_tecnologia_assistiva }}</div>
+                        </div>
+                        <div v-if="pai.form_data?.recursos_pedagogicos" class="bg-indigo-50 p-2 rounded">
+                          <span class="font-medium">Recursos Pedagógicos:</span>
+                          <div class="mt-1 text-gray-700">{{ pai.form_data.recursos_pedagogicos }}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Atendimento -->
+                    <div class="grid md:grid-cols-4 gap-4 mb-4 text-sm">
+                      <div v-if="pai.form_data?.data_inicio" class="bg-gray-50 p-3 rounded">
+                        <span class="font-semibold text-gray-700">Data Início:</span>
+                        <div class="text-gray-600 mt-1">{{ formatarData(pai.form_data.data_inicio) }}</div>
+                      </div>
+                      <div v-if="pai.form_data?.data_termino" class="bg-gray-50 p-3 rounded">
+                        <span class="font-semibold text-gray-700">Data Término:</span>
+                        <div class="text-gray-600 mt-1">{{ formatarData(pai.form_data.data_termino) }}</div>
+                      </div>
+                      <div v-if="pai.form_data?.frequencia_semanal" class="bg-gray-50 p-3 rounded">
+                        <span class="font-semibold text-gray-700">Frequência:</span>
+                        <div class="text-gray-600 mt-1">{{ pai.form_data.frequencia_semanal }}</div>
+                      </div>
+                      <div v-if="pai.form_data?.tipo_atendimento" class="bg-gray-50 p-3 rounded">
+                        <span class="font-semibold text-gray-700">Tipo:</span>
+                        <div class="text-gray-600 mt-1">{{ pai.form_data.tipo_atendimento }}</div>
+                      </div>
+                    </div>
+
+                    <!-- Equipe -->
+                    <div class="border-t pt-3 text-xs text-gray-500">
+                      <div v-if="pai.form_data?.professor_aee">Professor AEE: {{ pai.form_data.professor_aee }}</div>
+                      <div v-if="pai.form_data?.professor_sala_regular">Professor Sala Regular: {{ pai.form_data.professor_sala_regular }}</div>
+                      <div class="mt-1">Criado em {{ formatarData(pai.created_at) }}</div>
                     </div>
                   </div>
                 </div>

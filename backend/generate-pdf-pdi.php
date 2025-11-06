@@ -89,6 +89,12 @@ $filename = 'PDI_' . preg_replace('/[^a-zA-Z0-9]/', '_', $pdi['nome_aluno']) . '
 $filepath = __DIR__ . '/uploads/documentos/pdis/' . $filename;
 
 // Salvar arquivo
+// Garantir diretório de saída
+$dir = dirname($filepath);
+if (!is_dir($dir)) {
+    @mkdir($dir, 0777, true);
+}
+
 $mpdf->Output($filepath, Destination::FILE);
 
 // Calcular tamanho do arquivo

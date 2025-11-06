@@ -2488,37 +2488,33 @@ if ($action === 'pdi.pdf') {
     error_log('[PDF-PDI] ERROR: student_id nao fornecido');
     res(false, null, 'STUDENT_ID_REQUIRED', 400);
   }
-  
-  // Buscar o único PDI do aluno (1:1 com student)
-  $sql = 'SELECT id FROM pdi_forms WHERE student_id = ?';
+
+  // 1) Tentar via pdi_forms (modelo 1:1 + JSON)
+  $sqlForms = 'SELECT id FROM pdi_forms WHERE student_id = ?';
+  $paramsForms = [$student_id];
+  if ($u['role'] !== 'admin') { $sqlForms .= ' AND created_by_teacher_id = ?'; $paramsForms[] = $u['id']; }
+  $sqlForms .= ' ORDER BY updated_at DESC LIMIT 1';
+  error_log('[PDF-PDI] TENTANDO pdi_forms: ' . $sqlForms);
+  $stf = $pdo->prepare($sqlForms); $stf->execute($paramsForms); $pf = $stf->fetch(PDO::FETCH_ASSOC);
+  if ($pf && isset($pf['id'])) {
+    error_log('[PDF-PDI] OK pdi_forms id=' . $pf['id']);
+    $_GET['id'] = $pf['id']; $user = $u; include __DIR__ . '/generate-pdf-pdi-forms.php'; exit;
+  }
+
+  // 2) Fallback para pdi_conectaee (modelo legado/simplificado)
+  $sql = 'SELECT id FROM pdi_conectaee WHERE student_id = ?';
   $params = [$student_id];
-  
-  // Teacher-centric: professor só vê seus PDIs
-  if ($u['role'] !== 'admin') {
-    $sql .= ' AND created_by_teacher_id = ?';
-    $params[] = $u['id'];
+  if ($u['role'] !== 'admin') { $sql .= ' AND teacher_id = ?'; $params[] = $u['id']; }
+  $sql .= ' ORDER BY updated_at DESC LIMIT 1';
+  error_log('[PDF-PDI] FALLBACK pdi_conectaee: ' . $sql);
+  $stmt = $pdo->prepare($sql); $stmt->execute($params); $pdi = $stmt->fetch(PDO::FETCH_ASSOC);
+  if ($pdi && isset($pdi['id'])) {
+    error_log('[PDF-PDI] OK conectaee id=' . $pdi['id']);
+    $_GET['id'] = $pdi['id']; $user = $u; include __DIR__ . '/generate-pdf-pdi.php'; exit;
   }
-  
-  $sql .= ' LIMIT 1';
-  error_log('[PDF-PDI] SQL=' . $sql);
-  $stmt = $pdo->prepare($sql);
-  $stmt->execute($params);
-  $pdi = $stmt->fetch(PDO::FETCH_ASSOC);
-  
-  if (!$pdi) {
-    error_log('[PDF-PDI] ERROR: Nenhum PDI encontrado');
-    res(false, null, 'NO_PDI_FOUND', 404);
-  }
-  
-  error_log('[PDF-PDI] OK: Encontrado PDI id=' . $pdi['id']);
-  
-  // Passar variáveis para o gerador
-  $_GET['id'] = $pdi['id'];
-  $user = $u; // Disponibilizar para o gerador
-  
-  // Incluir o gerador e gerar PDF diretamente
-  include __DIR__ . '/generate-pdf-pdi.php';
-  exit;
+
+  error_log('[PDF-PDI] ERROR: Nenhum PDI encontrado em pdi_forms ou pdi_conectaee');
+  res(false, null, 'NO_PDI_FOUND', 404);
 }
 
 // GET /pai/pdf?student_id=X
@@ -2532,37 +2528,33 @@ if ($action === 'pai.pdf') {
     error_log('[PDF-PAI] ERROR: student_id nao fornecido');
     res(false, null, 'STUDENT_ID_REQUIRED', 400);
   }
-  
-  // Buscar o único PAI do aluno (1:1 com student)
-  $sql = 'SELECT id FROM plano_atendimento_forms WHERE student_id = ?';
+
+  // 1) Tentar via plano_atendimento_forms (modelo novo JSON)
+  $sqlForms = 'SELECT id FROM plano_atendimento_forms WHERE student_id = ?';
+  $paramsForms = [$student_id];
+  if ($u['role'] !== 'admin') { $sqlForms .= ' AND created_by_teacher_id = ?'; $paramsForms[] = $u['id']; }
+  $sqlForms .= ' ORDER BY updated_at DESC LIMIT 1';
+  error_log('[PDF-PAI] TENTANDO plano_atendimento_forms: ' . $sqlForms);
+  $stf = $pdo->prepare($sqlForms); $stf->execute($paramsForms); $pf = $stf->fetch(PDO::FETCH_ASSOC);
+  if ($pf && isset($pf['id'])) {
+    error_log('[PDF-PAI] OK plano_atendimento_forms id=' . $pf['id']);
+    $_GET['id'] = $pf['id']; $user = $u; include __DIR__ . '/generate-pdf-pai-forms.php'; exit;
+  }
+
+  // 2) Fallback para tabela legada planos_atendimento
+  $sql = 'SELECT id FROM planos_atendimento WHERE student_id = ?';
   $params = [$student_id];
-  
-  // Teacher-centric: professor só vê seus PAIs
-  if ($u['role'] !== 'admin') {
-    $sql .= ' AND created_by_teacher_id = ?';
-    $params[] = $u['id'];
+  if ($u['role'] !== 'admin') { $sql .= ' AND teacher_id = ?'; $params[] = $u['id']; }
+  $sql .= ' ORDER BY updated_at DESC LIMIT 1';
+  error_log('[PDF-PAI] FALLBACK planos_atendimento: ' . $sql);
+  $stmt = $pdo->prepare($sql); $stmt->execute($params); $pai = $stmt->fetch(PDO::FETCH_ASSOC);
+  if ($pai && isset($pai['id'])) {
+    error_log('[PDF-PAI] OK legado id=' . $pai['id']);
+    $_GET['id'] = $pai['id']; $user = $u; include __DIR__ . '/generate-pdf-pai.php'; exit;
   }
-  
-  $sql .= ' LIMIT 1';
-  error_log('[PDF-PAI] SQL=' . $sql);
-  $stmt = $pdo->prepare($sql);
-  $stmt->execute($params);
-  $pai = $stmt->fetch(PDO::FETCH_ASSOC);
-  
-  if (!$pai) {
-    error_log('[PDF-PAI] ERROR: Nenhum PAI encontrado');
-    res(false, null, 'NO_PAI_FOUND', 404);
-  }
-  
-  error_log('[PDF-PAI] OK: Encontrado PAI id=' . $pai['id']);
-  
-  // Passar variáveis para o gerador
-  $_GET['id'] = $pai['id'];
-  $user = $u; // Disponibilizar para o gerador
-  
-  // Incluir o gerador e gerar PDF diretamente
-  include __DIR__ . '/generate-pdf-pai.php';
-  exit;
+
+  error_log('[PDF-PAI] ERROR: Nenhum PAI encontrado em plano_atendimento_forms ou planos_atendimento');
+  res(false, null, 'NO_PAI_FOUND', 404);
 }
 
 // ========================================

@@ -8240,6 +8240,18 @@ const RelatorioAtendimento = {
             </div>
           </div>
 
+          <!-- Indicador de Auto-save -->
+          <div v-if="isSaving || lastSaved" class="mt-4 text-sm flex items-center justify-end">
+            <span v-if="isSaving" class="flex items-center text-amber-600">
+              <span class="animate-spin rounded-full h-3 w-3 border-b-2 border-amber-500 mr-2"></span>
+              Salvando automaticamente...
+            </span>
+            <span v-else-if="lastSaved" class="flex items-center text-green-600">
+              <i class="fas fa-check-circle mr-1"></i>
+              Salvo automaticamente
+            </span>
+          </div>
+
           <!-- Navegação -->
             <div class="flex justify-between pt-6 border-t">
             <button type="button" 
@@ -8366,7 +8378,10 @@ const RelatorioAtendimento = {
         objetivos: 'objetivosField',
         recursos: 'recursosField',
         observacoes: 'observacoesField'
-      }
+      },
+      autoSaveTimer: null,
+      isSaving: false,
+      lastSaved: null
     }
   },
   async mounted() {
@@ -8375,6 +8390,14 @@ const RelatorioAtendimento = {
     this.$nextTick(() => {
       this.ensureVoiceTarget();
     });
+  },
+  watch: {
+    'form.student_id'() { this.scheduleAutoSave(); },
+    'form.data_atendimento'() { this.scheduleAutoSave(); },
+    'form.descricao'() { this.scheduleAutoSave(); },
+    'form.objetivos'() { this.scheduleAutoSave(); },
+    'form.recursos'() { this.scheduleAutoSave(); },
+    'form.observacoes'() { this.scheduleAutoSave(); }
   },
   computed: {
     canProceed() {
@@ -8663,6 +8686,51 @@ const RelatorioAtendimento = {
       } finally {
         this.isProcessingAudio = false;
         this.activateVoiceHighlight(2000);
+      }
+    },
+
+    scheduleAutoSave() {
+      if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
+      this.autoSaveTimer = setTimeout(() => this.autoSave(), 2000);
+    },
+
+    async autoSave() {
+      // Não salva se não tiver os campos obrigatórios
+      if (!this.form.student_id || !this.form.data_atendimento || !this.form.descricao?.trim()) {
+        return;
+      }
+
+      // Não salva se já estiver salvando
+      if (this.isSaving) return;
+
+      this.isSaving = true;
+      try {
+        const { id, ...rest } = this.form || {};
+        const payload = { ...rest };
+        if (this.$parent.user && this.$parent.user.role !== 'admin') {
+          payload.teacher_id = this.$parent.user.id;
+        }
+
+        let r;
+        if (id) {
+          r = await api.post(`/atendimentos/${id}`, payload);
+        } else {
+          r = await api.post('/atendimentos', payload);
+        }
+        
+        if (r.data?.ok) {
+          this.lastSaved = new Date();
+          // Se era um novo relatório, atualiza o ID
+          if (!id && r.data?.data?.id) {
+            this.form.id = r.data.data.id;
+          }
+          // Recarrega a lista de relatórios em background
+          this.loadRelatorios();
+        }
+      } catch (e) {
+        console.error('Erro no auto-save:', e);
+      } finally {
+        this.isSaving = false;
       }
     },
 

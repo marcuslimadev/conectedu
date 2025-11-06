@@ -2241,6 +2241,195 @@ if ($action === 'student_notes.update') {
 }
 
 // ========================================
+// ATENDIMENTOS (Relatórios de Atendimento)
+// ========================================
+
+// GET /atendimentos - Lista atendimentos
+if ($action === 'atendimentos' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+  $u = require_auth();
+  
+  $page = max(1, (int)($_GET['page'] ?? 1));
+  $per_page = min(200, max(1, (int)($_GET['per_page'] ?? 50)));
+  $offset = ($page - 1) * $per_page;
+  
+  $where = [];
+  $params = [];
+  
+  // Teacher-centric: professor só vê seus atendimentos
+  if ($u['role'] !== 'admin') {
+    $where[] = 'a.teacher_id = ?';
+    $params[] = $u['id'];
+  }
+  
+  $whereClause = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+  
+  // Count total
+  $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM atendimentos a $whereClause");
+  $stmt->execute($params);
+  $total = (int)$stmt->fetchColumn();
+  
+  // Get records
+  $sql = "SELECT a.*, s.name as student_name, u.name as teacher_name
+          FROM atendimentos a
+          LEFT JOIN students s ON a.student_id = s.id
+          LEFT JOIN users u ON a.teacher_id = u.id
+          $whereClause
+          ORDER BY a.data_atendimento DESC, a.created_at DESC
+          LIMIT $per_page OFFSET $offset";
+  
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+  $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  
+  res(true, [
+    'rows' => $rows,
+    'total' => $total,
+    'page' => $page,
+    'per_page' => $per_page,
+    'total_pages' => ceil($total / $per_page)
+  ]);
+}
+
+// POST /atendimentos - Criar atendimento
+if ($action === 'atendimentos' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+  $u = require_auth();
+  
+  $student_id = (int)($B['student_id'] ?? 0);
+  $teacher_id = (int)($B['teacher_id'] ?? $u['id']);
+  $data_atendimento = trim($B['data_atendimento'] ?? '');
+  $descricao = trim($B['descricao'] ?? '');
+  $objetivos = trim($B['objetivos'] ?? '');
+  $recursos = trim($B['recursos'] ?? '');
+  $observacoes = trim($B['observacoes'] ?? '');
+  
+  // Validações
+  if (!$student_id) res(false, null, 'MISSING_STUDENT_ID', 422);
+  if (!$data_atendimento) res(false, null, 'MISSING_DATA_ATENDIMENTO', 422);
+  if (!$descricao) res(false, null, 'MISSING_DESCRICAO', 422);
+  
+  // Professor só pode criar para si mesmo
+  if ($u['role'] !== 'admin') {
+    $teacher_id = $u['id'];
+  }
+  
+  // Verificar acesso ao aluno
+  ensure_student_access($pdo, $u, $student_id);
+  
+  $stmt = $pdo->prepare('
+    INSERT INTO atendimentos (student_id, teacher_id, data_atendimento, descricao, objetivos, recursos, observacoes, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+  ');
+  
+  $stmt->execute([$student_id, $teacher_id, $data_atendimento, $descricao, $objetivos, $recursos, $observacoes]);
+  $id = $pdo->lastInsertId();
+  
+  // Retornar o registro criado
+  $stmt = $pdo->prepare('
+    SELECT a.*, s.name as student_name, u.name as teacher_name
+    FROM atendimentos a
+    LEFT JOIN students s ON a.student_id = s.id
+    LEFT JOIN users u ON a.teacher_id = u.id
+    WHERE a.id = ?
+  ');
+  $stmt->execute([$id]);
+  $atendimento = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  res(true, $atendimento);
+}
+
+// POST /atendimentos/{id} - Atualizar atendimento
+if (preg_match('#^atendimentos/(\d+)$#', $resource, $matches) && $_SERVER['REQUEST_METHOD'] === 'POST') {
+  $u = require_auth();
+  $id = (int)$matches[1];
+  
+  // Verificar se atendimento existe e pertence ao professor
+  $stmt = $pdo->prepare('SELECT * FROM atendimentos WHERE id = ?');
+  $stmt->execute([$id]);
+  $atendimento = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$atendimento) res(false, null, 'ATENDIMENTO_NOT_FOUND', 404);
+  
+  // Teacher-centric: professor só atualiza seus próprios atendimentos
+  if ($u['role'] !== 'admin' && $atendimento['teacher_id'] != $u['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  // Campos atualizáveis
+  $fields = [];
+  $params = [];
+  
+  if (isset($B['student_id'])) {
+    $fields[] = 'student_id = ?';
+    $params[] = (int)$B['student_id'];
+  }
+  if (isset($B['data_atendimento'])) {
+    $fields[] = 'data_atendimento = ?';
+    $params[] = trim($B['data_atendimento']);
+  }
+  if (isset($B['descricao'])) {
+    $fields[] = 'descricao = ?';
+    $params[] = trim($B['descricao']);
+  }
+  if (isset($B['objetivos'])) {
+    $fields[] = 'objetivos = ?';
+    $params[] = trim($B['objetivos']);
+  }
+  if (isset($B['recursos'])) {
+    $fields[] = 'recursos = ?';
+    $params[] = trim($B['recursos']);
+  }
+  if (isset($B['observacoes'])) {
+    $fields[] = 'observacoes = ?';
+    $params[] = trim($B['observacoes']);
+  }
+  
+  if ($fields) {
+    $fields[] = 'updated_at = NOW()';
+    $sql = 'UPDATE atendimentos SET ' . implode(', ', $fields) . ' WHERE id = ?';
+    $params[] = $id;
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+  }
+  
+  // Retornar o registro atualizado
+  $stmt = $pdo->prepare('
+    SELECT a.*, s.name as student_name, u.name as teacher_name
+    FROM atendimentos a
+    LEFT JOIN students s ON a.student_id = s.id
+    LEFT JOIN users u ON a.teacher_id = u.id
+    WHERE a.id = ?
+  ');
+  $stmt->execute([$id]);
+  $updated = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  res(true, $updated);
+}
+
+// DELETE /atendimentos/{id} - Excluir atendimento
+if (preg_match('#^atendimentos/(\d+)$#', $resource, $matches) && $_SERVER['REQUEST_METHOD'] === 'DELETE') {
+  $u = require_auth();
+  $id = (int)$matches[1];
+  
+  // Verificar se atendimento existe e pertence ao professor
+  $stmt = $pdo->prepare('SELECT * FROM atendimentos WHERE id = ?');
+  $stmt->execute([$id]);
+  $atendimento = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$atendimento) res(false, null, 'ATENDIMENTO_NOT_FOUND', 404);
+  
+  // Teacher-centric: professor só exclui seus próprios atendimentos
+  if ($u['role'] !== 'admin' && $atendimento['teacher_id'] != $u['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  $stmt = $pdo->prepare('DELETE FROM atendimentos WHERE id = ?');
+  $stmt->execute([$id]);
+  
+  res(true, ['message' => 'Atendimento excluído com sucesso']);
+}
+
+// ========================================
 // RELATÓRIO DO ALUNO (dashboard)
 // ========================================
 

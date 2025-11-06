@@ -8608,21 +8608,33 @@ const RelatorioAtendimento = {
           payload.teacher_id = this.$parent.user.id;
         }
 
+        console.log('🔍 SAVE - form.id:', id);
+        console.log('🔍 SAVE - payload:', payload);
+        console.log('🔍 SAVE - endpoint:', id ? `/atendimentos/${id}` : '/atendimentos');
+
         let r;
         if (id) {
           r = await api.post(`/atendimentos/${id}`, payload);
         } else {
           r = await api.post('/atendimentos', payload);
         }
+        
+        console.log('🔍 SAVE - response:', r);
+        console.log('🔍 SAVE - r.data:', r.data);
+        
         if (r.data?.ok) {
           this.$showToast('Sucesso', id ? 'Relatório atualizado com sucesso!' : 'Relatório salvo com sucesso!', 'success');
           this.cancel();
           await this.loadRelatorios();
         } else {
+          console.error('🔴 SAVE - Erro na resposta:', r.data?.error);
           this.$showToast('Erro', r.data?.error || 'Erro ao salvar relatório', 'error');
         }
       } catch (e) {
-        this.$showToast('Erro', 'Erro ao salvar relatório', 'error');
+        console.error('🔴 SAVE - Exception:', e);
+        console.error('🔴 SAVE - Exception response:', e.response);
+        const errorMsg = e.response?.data?.error || e.message || 'Erro ao salvar relatório';
+        this.$showToast('Erro', errorMsg, 'error');
       } finally {
         this.loading = false;
       }

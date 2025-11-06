@@ -1143,13 +1143,16 @@ const EntrevistaResponsavelCompleta = {
     form: {
       handler(newVal, oldVal) {
         if (this.isLoadingForm) {
+          console.log('⏸️ [ENTREVISTA COMPLETA] Auto-save pausado durante carregamento');
           return;
         }
         const oldStudentId = oldVal?.student_id ?? null;
         if (newVal.student_id !== oldStudentId) {
+          console.log('ℹ️ [ENTREVISTA COMPLETA] Mudança de aluno detectada, auto-save ignorado');
           return;
         }
         if (newVal.student_id && !this.autoSaving && !this.isLoadingForm) {
+          console.log('💾 [ENTREVISTA COMPLETA] Watch detectou mudança');
           this.triggerAutoSave();
         }
       },
@@ -1202,14 +1205,17 @@ const EntrevistaResponsavelCompleta = {
       if (this.autoSaveTimeout) {
         clearTimeout(this.autoSaveTimeout);
         this.autoSaveTimeout = null;
+        console.log('🛑 Timer de auto-save cancelado');
       }
     },
 
     triggerAutoSave() {
       if (this.isLoadingForm) {
+        console.log('🚫 [AUTO-SAVE] Ignorado porque formulário está carregando');
         return;
       }
       this.cancelAutoSaveTimer();
+      console.log('⏱️ Timer de 2 segundos iniciado');
       this.autoSaveTimeout = setTimeout(() => {
         this.performAutoSave();
       }, 2000);
@@ -1218,14 +1224,18 @@ const EntrevistaResponsavelCompleta = {
     async performAutoSave() {
       if (!this.form.student_id || this.autoSaving || this.isLoadingForm) {
         if (!this.form.student_id) {
+          console.log('🚫 [AUTO-SAVE] Nenhum aluno selecionado, cancelando');
         }
         if (this.autoSaving) {
+          console.log('🚫 [AUTO-SAVE] Já existe uma operação em andamento');
         }
         if (this.isLoadingForm) {
+          console.log('🚫 [AUTO-SAVE] Ignorado porque formulário está carregando');
         }
         return;
       }
       
+      console.log('🚀 [AUTO-SAVE] Salvando...', this.form.id ? `(UPDATE ID: ${this.form.id})` : '(CREATE)');
       this.autoSaving = true;
       
       try {
@@ -1241,14 +1251,18 @@ const EntrevistaResponsavelCompleta = {
         
         // LÓGICA 1:1 - Sempre usa .create que faz UPSERT (INSERT ou UPDATE automaticamente)
         response = await api.post('?action=entrevistas-responsavel.create', payload);
+        console.log('💾 Salvando entrevista (UPSERT)...');
         
+        console.log('📥 Resposta:', response.data);
         
         if (response.data?.ok) {
           // Armazenar ID se foi criado agora ou já existia
           if (response.data.data?.id && !this.form.id) {
             this.form.id = response.data.data.id;
+            console.log('🆔 ID criado:', this.form.id);
           }
           this.autoSaved = true;
+          console.log('✅ Salvo automaticamente! Action:', response.data.data?.action || 'unknown');
           setTimeout(() => { this.autoSaved = false; }, 3000);
         }
       } catch (error) {
@@ -1270,6 +1284,7 @@ const EntrevistaResponsavelCompleta = {
       try {
         // Usar endpoint de seleção dinâmica (já filtra por professor automaticamente via token)
         const response = await api.get('?action=students.options');
+        console.log('📚 Entrevista - Alunos carregados:', response.data);
         
         if (response.data.ok && response.data.data && response.data.data.options) {
           // Endpoint retorna {ok: true, data: {options: [{id, text}]}}
@@ -1282,6 +1297,7 @@ const EntrevistaResponsavelCompleta = {
           this.alunos = [];
         }
         
+        console.log('✅ Entrevista - Total de alunos (filtrado por professor):', this.alunos.length);
       } catch (error) {
         console.error('❌ Entrevista - Erro ao carregar alunos:', error);
         if (this.$root.showToast) {
@@ -1301,6 +1317,7 @@ const EntrevistaResponsavelCompleta = {
 
       try {
         const studentId = this.form.student_id;
+        console.log('🎓 Carregando dados completos do aluno:', studentId);
 
         const response = await api.get('?action=students.get', { params: { id: studentId } });
         const alunoData = response.data?.data;
@@ -1319,6 +1336,7 @@ const EntrevistaResponsavelCompleta = {
           this.form.telefone = alunoData.phone || '';
           this.form.responsavel_nome = alunoData.guardian_name || '';
 
+          console.log('✅ Dados do aluno preenchidos automaticamente');
         }
 
         await this.loadSavedInterview();
@@ -1333,11 +1351,13 @@ const EntrevistaResponsavelCompleta = {
       if (!this.form.student_id) return;
 
       try {
+        console.log('🔍 Buscando entrevista salva para aluno:', this.form.student_id);
 
         const response = await api.get('?action=entrevistas-responsavel.list', {
           params: { student_id: this.form.student_id }
         });
 
+        console.log('📥 Resposta da busca:', response.data);
 
         if (response.data?.ok) {
           const data = response.data.data;
@@ -1354,6 +1374,7 @@ const EntrevistaResponsavelCompleta = {
             });
 
             const ultima = entrevistasOrdenadas[0];
+            console.log('📄 Entrevista encontrada:', ultima);
 
             if (ultima.id) {
               this.form.id = ultima.id;
@@ -1366,6 +1387,7 @@ const EntrevistaResponsavelCompleta = {
                 }
               });
 
+              console.log('✅ Entrevista recuperada com sucesso! ID:', ultima.id);
 
               if (this.$root.showToast) {
                 this.$root.showToast('info', `Entrevista recuperada (ID: ${ultima.id})`);
@@ -1374,6 +1396,7 @@ const EntrevistaResponsavelCompleta = {
               this.autoSaved = false;
             }
           } else {
+            console.log('ℹ️ Nenhuma entrevista salva encontrada para este aluno');
           }
         }
       } catch (error) {
@@ -2389,15 +2412,18 @@ const PDICompleto = {
     form: {
       handler(newVal, oldVal) {
         if (this.isLoadingForm) {
+          console.log('⏸️ [PDI COMPLETO] Auto-save pausado durante carregamento');
           return;
         }
 
         const oldStudentId = oldVal?.student_id ?? null;
         if (newVal.student_id !== oldStudentId) {
+          console.log('ℹ️ [PDI COMPLETO] Mudança de aluno detectada, auto-save ignorado');
           return;
         }
 
         if (newVal.student_id && !this.autoSaving && !this.isLoadingForm) {
+          console.log('💾 [PDI COMPLETO] Watch detectou mudança');
           this.triggerAutoSave();
         }
       },
@@ -2448,15 +2474,18 @@ const PDICompleto = {
       if (this.autoSaveTimeout) {
         clearTimeout(this.autoSaveTimeout);
         this.autoSaveTimeout = null;
+        console.log('🛑 [PDI COMPLETO] Timer de auto-save cancelado');
       }
     },
 
     triggerAutoSave() {
       if (this.isLoadingForm) {
+        console.log('🚫 [PDI COMPLETO] Auto-save ignorado porque formulário está carregando');
         return;
       }
 
       this.cancelAutoSaveTimer();
+      console.log('⏱️ [PDI COMPLETO] Timer de 2 segundos iniciado');
       this.autoSaveTimeout = setTimeout(() => {
         this.performAutoSave();
       }, 2000);
@@ -2465,8 +2494,10 @@ const PDICompleto = {
     async performAutoSave(status = 'rascunho', options = {}) {
       if (!this.form.student_id || this.isLoadingForm) {
         if (!this.form.student_id) {
+          console.log('🚫 [PDI COMPLETO] Auto-save abortado: nenhum aluno selecionado');
         }
         if (this.isLoadingForm) {
+          console.log('🚫 [PDI COMPLETO] Auto-save abortado: formulário carregando');
         }
         return false;
       }
@@ -2474,6 +2505,7 @@ const PDICompleto = {
     const isAuto = status === 'rascunho' && !options.showToast;
     this.cancelAutoSaveTimer();
       if (isAuto && this.autoSaving) {
+        console.log('⏳ [PDI COMPLETO] Auto-save já em andamento, ignorando novo disparo');
         return false;
       }
 
@@ -2495,16 +2527,19 @@ const PDICompleto = {
         };
 
         // LÓGICA 1:1 - Sempre usa .create que faz UPSERT
+        console.log('💾 [PDI COMPLETO] Salvando PDI (UPSERT) - Status:', status);
         response = await api.post('?action=pdi.create', payload);
 
         if (response.data?.ok) {
           if (response.data.data?.id && !this.form.id) {
             this.form.id = response.data.data.id;
+            console.log('🆔 [PDI COMPLETO] ID:', this.form.id);
           }
 
           if (isAuto) {
             this.autoSaved = true;
             setTimeout(() => { this.autoSaved = false; }, 3000);
+            console.log('✅ [PDI COMPLETO] Salvo automaticamente! Action:', response.data.data?.action);
           }
 
           if (options.showToast && this.$root.showToast) {
@@ -2536,6 +2571,7 @@ const PDICompleto = {
       if (!studentId) return;
 
       try {
+        console.log('🔍 [PDI COMPLETO] Buscando PDI salvo para aluno:', studentId);
         const response = await api.get('?action=pdi.list', { params: { student_id: studentId } });
 
         const registros = Array.isArray(response.data?.data)
@@ -2543,6 +2579,7 @@ const PDICompleto = {
           : response.data?.data?.data || [];
 
         if (registros.length === 0) {
+          console.log('ℹ️ [PDI COMPLETO] Nenhum PDI salvo encontrado para este aluno');
           return;
         }
 
@@ -2556,6 +2593,7 @@ const PDICompleto = {
         });
 
         const ultimo = ordenados[0];
+        console.log('📄 [PDI COMPLETO] Registro recuperado:', ultimo);
 
         this.form.id = ultimo.id || null;
         this.form.data_inicio = ultimo.data_inicio || this.form.data_inicio;
@@ -2590,6 +2628,7 @@ const PDICompleto = {
       try {
         // Usar endpoint de seleção dinâmica (já filtra por professor automaticamente via token)
         const response = await api.get('?action=students.options');
+        console.log('📚 PDI - Alunos carregados:', response.data);
         
         if (response.data.ok && response.data.data && response.data.data.options) {
           // Endpoint retorna {ok: true, data: {options: [{id, text}]}}
@@ -2601,6 +2640,7 @@ const PDICompleto = {
           this.alunos = [];
         }
         
+        console.log('✅ PDI - Total de alunos:', this.alunos.length);
       } catch (error) {
         console.error('❌ PDI - Erro ao carregar alunos:', error);
         if (this.$root.showToast) {
@@ -2620,6 +2660,7 @@ const PDICompleto = {
 
       try {
         const studentId = this.form.student_id;
+        console.log('🎓 [PDI COMPLETO] Carregando dados completos do aluno:', studentId);
 
         const baseForm = JSON.parse(JSON.stringify(this.$options.data().form));
         this.form = { ...baseForm, student_id: studentId };
@@ -3425,15 +3466,18 @@ const PAICompleto = {
     form: {
       handler(newVal, oldVal) {
         if (this.isLoadingForm) {
+          console.log('⏸️ [PAI COMPLETO] Auto-save pausado durante carregamento');
           return;
         }
 
         const oldStudentId = oldVal?.student_id ?? null;
         if (newVal.student_id !== oldStudentId) {
+          console.log('ℹ️ [PAI COMPLETO] Mudança de aluno detectada, auto-save ignorado');
           return;
         }
 
         if (newVal.student_id && !this.autoSaving && !this.isLoadingForm) {
+          console.log('💾 [PAI COMPLETO] Watch detectou mudança');
           this.triggerAutoSave();
         }
       },
@@ -3482,15 +3526,18 @@ const PAICompleto = {
       if (this.autoSaveTimeout) {
         clearTimeout(this.autoSaveTimeout);
         this.autoSaveTimeout = null;
+        console.log('🛑 [PAI COMPLETO] Timer de auto-save cancelado');
       }
     },
 
     triggerAutoSave() {
       if (this.isLoadingForm) {
+        console.log('🚫 [PAI COMPLETO] Auto-save ignorado porque formulário está carregando');
         return;
       }
 
       this.cancelAutoSaveTimer();
+      console.log('⏱️ [PAI COMPLETO] Timer de 2 segundos iniciado');
       this.autoSaveTimeout = setTimeout(() => {
         this.performAutoSave();
       }, 2000);
@@ -3499,8 +3546,10 @@ const PAICompleto = {
     async performAutoSave(status = 'rascunho', options = {}) {
       if (!this.form.student_id || this.isLoadingForm) {
         if (!this.form.student_id) {
+          console.log('🚫 [PAI COMPLETO] Auto-save abortado: nenhum aluno selecionado');
         }
         if (this.isLoadingForm) {
+          console.log('🚫 [PAI COMPLETO] Auto-save abortado: formulário carregando');
         }
         return false;
       }
@@ -3509,6 +3558,7 @@ const PAICompleto = {
       this.cancelAutoSaveTimer();
 
       if (isAuto && this.autoSaving) {
+        console.log('⏳ [PAI COMPLETO] Auto-save em andamento, ignorando novo disparo');
         return false;
       }
 
@@ -3530,16 +3580,19 @@ const PAICompleto = {
         };
 
         // LÓGICA 1:1 - Sempre usa .create que faz UPSERT
+        console.log('💾 [PAI COMPLETO] Salvando PAI (UPSERT) - Status:', status);
         response = await api.post('?action=plano-atendimento.create', payload);
 
         if (response.data?.ok) {
           if (response.data.data?.id && !this.form.id) {
             this.form.id = response.data.data.id;
+            console.log('🆔 [PAI COMPLETO] ID:', this.form.id);
           }
 
           if (isAuto) {
             this.autoSaved = true;
             setTimeout(() => { this.autoSaved = false; }, 3000);
+            console.log('✅ [PAI COMPLETO] Salvo automaticamente! Action:', response.data.data?.action);
           }
 
           if (options.showToast && this.$root.showToast) {
@@ -3571,6 +3624,7 @@ const PAICompleto = {
       if (!studentId) return;
 
       try {
+        console.log('🔍 [PAI COMPLETO] Buscando PAI salvo para aluno:', studentId);
         const response = await api.get('?action=plano-atendimento.list', { params: { student_id: studentId } });
 
         const registros = Array.isArray(response.data?.data)
@@ -3578,6 +3632,7 @@ const PAICompleto = {
           : response.data?.data?.data || [];
 
         if (registros.length === 0) {
+          console.log('ℹ️ [PAI COMPLETO] Nenhum PAI salvo encontrado para este aluno');
           return;
         }
 
@@ -3591,6 +3646,7 @@ const PAICompleto = {
         });
 
         const ultimo = ordenados[0];
+        console.log('📄 [PAI COMPLETO] Registro recuperado:', ultimo);
 
         this.form.id = ultimo.id || null;
         this.form.data_inicio = ultimo.data_inicio || this.form.data_inicio;
@@ -3638,6 +3694,7 @@ const PAICompleto = {
       try {
         // Usar endpoint de seleção dinâmica (já filtra por professor automaticamente via token)
         const response = await api.get('?action=students.options');
+        console.log('📚 PAI - Alunos carregados:', response.data);
         
         if (response.data.ok && response.data.data && response.data.data.options) {
           // Endpoint retorna {ok: true, data: {options: [{id, text}]}}
@@ -3649,6 +3706,7 @@ const PAICompleto = {
           this.alunos = [];
         }
         
+        console.log('✅ PAI - Total de alunos:', this.alunos.length);
       } catch (error) {
         console.error('❌ PAI - Erro ao carregar alunos:', error);
         if (this.$root.showToast) {
@@ -3668,6 +3726,7 @@ const PAICompleto = {
 
       try {
         const studentId = this.form.student_id;
+        console.log('🎓 [PAI COMPLETO] Carregando dados completos do aluno:', studentId);
 
         const baseForm = JSON.parse(JSON.stringify(this.$options.data().form));
         this.form = { ...baseForm, student_id: studentId };

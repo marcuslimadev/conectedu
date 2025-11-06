@@ -1,37 +1,38 @@
 <?php
 /**
- * GERADOR DE PDF - ENTREVISTA COM RESPONSÁVEL (Refatorado e Inteligente)
+ * GERADOR DE PDF - ENTREVISTA COM RESPONSÁVEL (Refatorado)
  *
- * Utiliza o servico centralizado de geracao de PDF e prioriza os dados
- * do cadastro do aluno para garantir consistência.
+ * Gera documento PDF profissional utilizando a classe PdfGenerator e templates externos.
  */
 
-require_once 'functions.php';
-require_once __DIR__ . '/services/PdfGeneratorService.php';
+if (!function_exists('db')) {
+    require_once 'functions.php';
+}
+if (!class_exists('PdfGenerator')) {
+    require_once 'PdfGenerator.php';
+}
+
+// --- Inicialização e Autenticação ---
+header('Content-Type: application/json; charset=utf-8');
+cors();
+$user = require_auth();
+$pdo = db();
+
+// --- Validação de Entrada ---
+$entrevista_id = $_GET['id'] ?? null;
+if (!$entrevista_id) {
+    res(false, null, 'ID da entrevista não fornecido', 400);
+}
 
 try {
-    $user = require_auth();
-    $pdo = db();
+    // --- Busca de Dados ---
+    $sql = "SELECT e.*, s.name as student_name, s.photo_url, s.birth_date, sch.name as school_name
+            FROM entrevista_forms e
+            LEFT JOIN students s ON e.student_id = s.id
+            LEFT JOIN schools sch ON s.school_id = sch.id
+            WHERE e.id = :id";
 
-    $entrevista_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
-    if (!$entrevista_id) {
-        res(false, null, 'ID da entrevista inválido', 400);
-    }
-
-    // Busca dados da entrevista e os dados mais recentes do aluno e da escola
-    $stmt = $pdo->prepare("
-        SELECT
-            e.*,
-            s.name as student_name_from_db,
-            s.birth_date,
-            s.address as student_address,
-            s.photo_url,
-            sch.name as school_name_from_db
-        FROM entrevista_forms e
-        JOIN students s ON e.student_id = s.id
-        LEFT JOIN schools sch ON s.school_id = sch.id
-        WHERE e.id = :id
-    ");
+    $stmt = $pdo->prepare($sql);
     $stmt->execute([':id' => $entrevista_id]);
     $entrevista = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -39,41 +40,76 @@ try {
         res(false, null, 'Entrevista não encontrada', 404);
     }
 
+    // --- Verificação de Permissões ---
     if ($user['role'] !== 'admin' && $entrevista['created_by_teacher_id'] != $user['id']) {
-        res(false, null, 'Acesso não autorizado', 403);
+        res(false, null, 'Sem permissão para acessar esta entrevista', 403);
     }
 
-    $formData = json_decode($entrevista['form_data'], true) ?: [];
+    // --- Preparação dos Dados para o Template ---
+    $formData = json_decode($entrevista['form_data'], true) ?? [];
 
-    // Lógica de formulário inteligente:
-    // Os dados do formulário ($formData) são a base, mas os dados de identificação
-    // do aluno (nome, data de nasc., escola) são sobrescritos com os dados
-    // mais recentes do banco de dados.
     $data = array_merge($formData, [
-        'nome_estudante' => $entrevista['student_name_from_db'], // Prioridade
-        'data_nascimento_formatada' => !empty($entrevista['birth_date']) ? date('d/m/Y', strtotime($entrevista['birth_date'])) : '',
-        'nome_escola' => $entrevista['school_name_from_db'] ?? 'Não informado',
-        'endereco_completo' => $entrevista['student_address'],
-        'photo_url' => $entrevista['photo_url'] ? '../' . $entrevista['photo_url'] : null,
-        'data_entrevista_formatada' => !empty($formData['data_entrevista']) ? date('d/m/Y', strtotime($formData['data_entrevista'])) : date('d/m/Y'),
+        'id' => $entrevista['id'],
+        'student_id' => $entrevista['student_id'],
+        'student_name' => $entrevista['student_name'] ?? $formData['nome_estudante'] ?? '',
+        'photo_url' => $entrevista['photo_url'],
+        'birth_date' => $entrevista['birth_date'],
+        'school_name' => $entrevista['school_name'] ?? $formData['nome_escola'] ?? ''
     ]);
     
-    ob_start();
-    include __DIR__ . '/templates/pdf/entrevista_template.php';
-    $html = ob_get_clean();
-
-    $pdfService = new PdfGeneratorService($pdo, $user);
-    $pdfConfig = [
-        'document_type' => 'entrevista',
-        'title' => 'Entrevista com Responsável - ' . $data['nome_estudante'],
-        'student_name' => $data['nome_estudante'],
-        'form_id' => $entrevista_id,
-        'student_id' => $entrevista['student_id']
-    ];
+    // Fallbacks para dados essenciais
+    if (empty($data['nome_estudante']) && !empty($data['student_name'])) {
+        $data['nome_estudante'] = $data['student_name'];
+    }
+    if (empty($data['nome_escola']) && !empty($data['school_name'])) {
+        $data['nome_escola'] = $data['school_name'];
+    }
     
-    $pdfService->generate($html, $pdfConfig);
+    // Formatação de datas e títulos para o template
+    $data['data_entrevista_formatada'] = !empty($data['data_entrevista']) ? date('d/m/Y', strtotime($data['data_entrevista'])) : date('d/m/Y');
+    $data['data_nascimento_formatada'] = !empty($data['birth_date']) ? date('d/m/Y', strtotime($data['birth_date'])) : (!empty($data['data_nascimento']) ? date('d/m/Y', strtotime($data['data_nascimento'])) : '');
+    $data['main_title'] = 'ENTREVISTA COM O RESPONSÁVEL';
+    $data['document_date'] = $data['data_entrevista_formatada'];
+
+
+    // --- Geração do PDF ---
+    $pdfGenerator = new PdfGenerator($pdo);
+
+    $pdfGenerator->setMetadata(
+        'Entrevista com Responsável - ' . $data['student_name'],
+        'ConectEDU - Sistema AEE',
+        'Entrevista com Responsável',
+        'AEE, Entrevista, Educação Especial'
+    );
+
+    // Carregar o template HTML, passando os dados
+    $pdfGenerator->loadHtmlFromFile(__DIR__ . '/templates/entrevista-template.php', $data);
+
+    // --- Salvamento e Registro ---
+    $uploadDir = __DIR__ . '/uploads/documentos/entrevistas/';
+    $fileName = 'Entrevista_' . sanitizeFileName($data['student_name']) . '_' . date('Y-m-d') . '.pdf';
+    $filePath = $uploadDir . $fileName;
+    $relativeFilePath = 'backend/uploads/documentos/entrevistas/' . $fileName;
+
+    // Salvar o arquivo no servidor
+    $pdfGenerator->saveToFile($filePath);
+
+    // Registrar no banco de dados
+    $pdfGenerator->logDocument(
+        'entrevista',
+        $entrevista_id,
+        $data['student_id'],
+        $user['id'],
+        $relativeFilePath,
+        $fileName,
+        'Entrevista - ' . $data['student_name'] . ' - ' . date('d/m/Y')
+    );
+
+    // --- Resposta ---
+    // Enviar o PDF para download
+    $pdfGenerator->downloadFile($filePath, $fileName);
 
 } catch (Exception $e) {
-    error_log("Erro ao gerar PDF da entrevista: " . $e->getMessage());
-    res(false, null, 'Ocorreu um erro interno ao gerar o PDF.', 500);
+    error_log('Erro ao gerar PDF da entrevista (refatorado): ' . $e->getMessage());
+    res(false, null, 'Erro interno ao gerar o PDF.', 500);
 }

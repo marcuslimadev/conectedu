@@ -1,7 +1,5 @@
 // ConectAEE v5.0 - Sistema de Gestão Educacional com Tailwind CSS
 
-// Debug inicial
-
 // Configuração da API
 const api = axios.create({
   baseURL: CONFIG.API_BASE, 
@@ -1256,6 +1254,29 @@ const RegisterTW = {
     }
   },
   methods: {
+    onBuscaChange() {
+      this.showSugestoes = true;
+      this.sugIndex = -1;
+    },
+    fecharSugestoesComAtraso() {
+      setTimeout(() => { this.showSugestoes = false; }, 150);
+    },
+    moveSugestao(dir) {
+      if (!this.showSugestoes || !this.sugestoes.length) return;
+      const max = this.sugestoes.length - 1;
+      let idx = this.sugIndex + dir;
+      if (idx < 0) idx = max;
+      if (idx > max) idx = 0;
+      this.sugIndex = idx;
+    },
+    confirmSugestao() {
+      if (!this.showSugestoes) return;
+      const aluno = this.sugestoes[this.sugIndex] || this.sugestoes[0];
+      if (aluno) {
+        this.abrirFormulario('entrevista', aluno.id);
+        this.showSugestoes = false;
+      }
+    },
     async register() {
       this.loading = true;
       this.error = '';
@@ -3817,12 +3838,43 @@ const Dashboard = {
             <p class="text-sm text-gray-600 mt-1">Use os atalhos para atualizar formulários e acompanhar pendências.</p>
           </div>
           <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-            <input
-              v-model="filtros.busca"
-              type="text"
-              placeholder="Buscar aluno ou escola..."
-              class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
+            <div class="relative w-full">
+              <input
+                v-model="filtros.busca"
+                type="text"
+                placeholder="Buscar aluno ou escola..."
+                class="flex-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                @focus="showSugestoes = true"
+                @input="onBuscaChange"
+                @keydown.down.prevent="moveSugestao(1)"
+                @keydown.up.prevent="moveSugestao(-1)"
+                @keydown.enter.prevent="confirmSugestao"
+                @blur="fecharSugestoesComAtraso"
+              />
+              <!-- Dropdown de sugestões -->
+              <div v-if="showSugestoes && filtros.busca && sugestoes && sugestoes.length"
+                   class="absolute z-40 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-72 overflow-auto">
+       <div v-for="(aluno, idx) in sugestoes" :key="'sug-'+aluno.id"
+         @mousedown.prevent.stop="noop"
+         class="px-3 py-2 cursor-pointer flex items-center justify-between"
+         :class="idx===sugIndex ? 'bg-gray-100' : 'hover:bg-gray-50'"
+         @click="selecionarAluno(aluno)">
+                  <div class="min-w-0 pr-3">
+                    <p class="text-sm font-medium text-gray-900 truncate">{{ aluno.name || 'Sem nome' }}</p>
+                    <p class="text-xs text-gray-500 truncate">{{ aluno.school_name || 'Escola não informada' }}</p>
+                  </div>
+                  <div class="hidden sm:flex gap-1">
+                    <button type="button" class="px-2 py-1 text-[11px] bg-blue-50 text-blue-700 rounded hover:bg-blue-100"
+                            @mousedown.stop.prevent="abrirFormulario('entrevista', aluno.id)">Entrevista</button>
+                    <button type="button" class="px-2 py-1 text-[11px] bg-emerald-50 text-emerald-700 rounded hover:bg-emerald-100"
+                            @mousedown.stop.prevent="abrirFormulario('pdi', aluno.id)">PDI</button>
+                    <button type="button" class="px-2 py-1 text-[11px] bg-purple-50 text-purple-700 rounded hover:bg-purple-100"
+                            @mousedown.stop.prevent="abrirFormulario('pai', aluno.id)">PAI</button>
+                  </div>
+                </div>
+                <div v-if="sugestoes.length > 8" class="px-3 py-2 text-xs text-gray-500 border-t">Mostrando 8 de {{ sugestoes.length }} resultados</div>
+              </div>
+            </div>
             <button
               v-if="filtros.busca"
               type="button"
@@ -3840,6 +3892,7 @@ const Dashboard = {
             </button>
           </div>
         </div>
+        
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <div class="rounded-xl border border-blue-100 bg-blue-50/60 p-4">
             <p class="text-xs font-semibold text-blue-600 uppercase tracking-wide">Alunos ativos</p>
@@ -3953,12 +4006,61 @@ const Dashboard = {
       <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h2 class="text-xl font-bold text-gray-800">{{ isAdmin ? 'Andamento dos formulários (rede)' : 'Progresso dos meus formulários' }}</h2>
-            <p class="text-sm text-gray-500">{{ isAdmin ? 'Média considerando o filtro atual' : 'Média dos alunos vinculados a você' }}</p>
+            <h2 class="text-xl font-bold text-gray-800">
+              {{ selectedAluno ? 'Desempenho do aluno selecionado' : (isAdmin ? 'Andamento dos formulários (rede)' : 'Progresso dos meus formulários') }}
+            </h2>
+            <p class="text-sm text-gray-500">
+              {{ selectedAluno ? (selectedAluno.name || 'Aluno') : (isAdmin ? 'Média considerando o filtro atual' : 'Média dos alunos vinculados a você') }}
+            </p>
           </div>
           <span class="text-sm text-gray-400">Atualizado automaticamente</span>
         </div>
         <div :id="chartContainerId" class="w-full h-[320px]"></div>
+      </div>
+
+      <!-- Painel de detalhe do aluno selecionado -->
+      <div v-if="selectedAluno" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-4">
+        <div class="flex items-center justify-between mb-4">
+          <div class="min-w-0">
+            <h3 class="text-lg font-semibold text-gray-900 truncate">{{ selectedAluno.name }}</h3>
+            <p class="text-sm text-gray-500 truncate">{{ selectedAluno.school_name || 'Escola não informada' }}</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" @click="abrirFormulario('entrevista', selectedAluno.id)" class="px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100">Entrevista</button>
+            <button type="button" @click="abrirFormulario('pdi', selectedAluno.id)" class="px-3 py-1.5 text-xs font-medium bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100">PDI</button>
+            <button type="button" @click="abrirFormulario('pai', selectedAluno.id)" class="px-3 py-1.5 text-xs font-medium bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100">PAI</button>
+            <button type="button" @click="limparSelecaoAluno" class="px-3 py-1.5 text-xs font-medium border rounded-lg hover:bg-gray-50">Limpar seleção</button>
+          </div>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <div>
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="font-medium text-gray-700">Entrevista</span>
+              <span class="font-bold" :class="getPercentColor(selectedAluno.entrevista_percent)">{{ selectedAluno.entrevista_percent || 0 }}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+              <div class="h-2 rounded-full bg-gradient-to-r from-indigo-400 to-indigo-600" :style="{width: (selectedAluno.entrevista_percent || 0) + '%'}"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="font-medium text-gray-700">PDI</span>
+              <span class="font-bold" :class="getPercentColor(selectedAluno.pdi_percent)">{{ selectedAluno.pdi_percent || 0 }}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+              <div class="h-2 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600" :style="{width: (selectedAluno.pdi_percent || 0) + '%'}"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="font-medium text-gray-700">PAI</span>
+              <span class="font-bold" :class="getPercentColor(selectedAluno.pai_percent)">{{ selectedAluno.pai_percent || 0 }}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+              <div class="h-2 rounded-full bg-gradient-to-r from-purple-400 to-purple-600" :style="{width: (selectedAluno.pai_percent || 0) + '%'}"></div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div v-if="!isAdmin" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
@@ -4188,57 +4290,85 @@ const Dashboard = {
       alunos: [],
       professores: [],
       filtros: { busca: '', professorId: '' },
-      loading: false
+      loading: false,
+      forceUpdate: 0, // Flag para forçar re-render
+      showSugestoes: false,
+      sugIndex: -1,
+      selectedAlunoId: null
     }
   },
   computed: {
     isAdmin() {
       return this.$root && this.$root.user && this.$root.user.role === 'admin';
     },
+    selectedAluno() {
+      const id = this.selectedAlunoId;
+      if (!id) return null;
+      const arr = Array.isArray(this.alunos) ? this.alunos : [];
+      return arr.find(a => a.id === id) || null;
+    },
     chartContainerId() {
       return this.isAdmin ? 'chart-container-admin' : 'chart-container-prof';
     },
     alunosFiltrados() {
-      if (!Array.isArray(this.alunos)) {
+      // Flag para forçar reatividade
+      this.forceUpdate;
+      
+      console.log('🔍 [alunosFiltrados] ========== INICIANDO ==========');
+      console.log('🔍 [alunosFiltrados] this:', this);
+      console.log('🔍 [alunosFiltrados] this.alunos:', this.alunos);
+      console.log('🔍 [alunosFiltrados] typeof this.alunos:', typeof this.alunos);
+      console.log('🔍 [alunosFiltrados] Array.isArray(this.alunos):', Array.isArray(this.alunos));
+      console.log('🔍 [alunosFiltrados] this.alunos?.length:', this.alunos?.length);
+      console.log('🔍 [alunosFiltrados] this.filtros:', this.filtros);
+      console.log('🔍 [alunosFiltrados] this.filtros.busca:', this.filtros.busca);
+      
+      // TESTE SIMPLES: retorna todos os alunos sem filtro
+      if (!this.alunos || !Array.isArray(this.alunos)) {
+        console.error('❌ [alunosFiltrados] this.alunos não é array válido!');
         return [];
       }
-
-      let resultado = [...this.alunos];
-
-      if (this.isAdmin && this.filtros.professorId) {
-        resultado = resultado.filter(a => String(a.created_by_teacher_id) === String(this.filtros.professorId));
+      
+      if (this.alunos.length === 0) {
+        console.warn('⚠️ [alunosFiltrados] this.alunos está vazio!');
+        return [];
       }
-
+      
+      // Se não tem filtro de busca, retorna todos
       const busca = (this.filtros.busca || '').toLowerCase().trim();
-      if (busca) {
-        console.log('🔍 [alunosFiltrados] Buscando por:', busca);
-        console.log('🔍 [alunosFiltrados] Total antes da busca:', resultado.length);
-        console.log('🔍 [alunosFiltrados] Primeiro aluno:', resultado[0]);
-        
-        resultado = resultado.filter(a => {
-          const nome = (a.name || '').toLowerCase();
-          const escola = (a.school_name || '').toLowerCase();
-          const professor = (a.professor_nome || '').toLowerCase();
-          
-          const match = this.isAdmin
-            ? nome.includes(busca) || escola.includes(busca) || professor.includes(busca)
-            : nome.includes(busca) || escola.includes(busca);
-          
-          if (match) {
-            console.log('✅ Match:', a.name, '| Escola:', a.school_name, '| Prof:', a.professor_nome);
-          }
-          
-          return match;
-        });
-        
-        console.log('🔍 [alunosFiltrados] Total após busca:', resultado.length);
+      if (!busca) {
+        console.log('✅ [alunosFiltrados] SEM BUSCA - Retornando todos:', this.alunos.length);
+        return this.alunos;
       }
-
+      
+      // Com busca, filtra
+      console.log('🔍 [alunosFiltrados] COM BUSCA:', busca);
+      const resultado = this.alunos.filter(a => {
+        const nome = (a.name || '').toLowerCase();
+        const escola = (a.school_name || '').toLowerCase();
+        const match = nome.includes(busca) || escola.includes(busca);
+        
+        if (match) {
+          console.log('✅ Match:', a.name);
+        }
+        
+        return match;
+      });
+      
+      console.log('🔍 [alunosFiltrados] ========== RESULTADO:', resultado.length, '==========');
       return resultado;
     },
     alunosVisiveis() {
       const filtrados = Array.isArray(this.alunosFiltrados) ? this.alunosFiltrados : [];
-      return this.isAdmin ? filtrados : filtrados.slice(0, 8);
+      console.log('👁️ [alunosVisiveis] filtrados:', filtrados.length);
+      console.log('👁️ [alunosVisiveis] isAdmin:', this.isAdmin);
+      const resultado = this.isAdmin ? filtrados : filtrados.slice(0, 8);
+      console.log('👁️ [alunosVisiveis] resultado:', resultado.length);
+      return resultado;
+    },
+    sugestoes() {
+      const base = this.alunosFiltrados || [];
+      return base.slice(0, 8);
     },
     professorResumo() {
       const total = Array.isArray(this.alunos) ? this.alunos.length : 0;
@@ -4362,6 +4492,8 @@ const Dashboard = {
     console.log('🚀🚀🚀 DASHBOARD MOUNTED - INICIANDO 🚀🚀🚀');
     console.log('='.repeat(80));
     console.log('🔄 [Dashboard] Montando componente...');
+    console.log('🔄 [Dashboard] this.$root:', this.$root);
+    console.log('🔄 [Dashboard] this.$root?.user:', this.$root?.user);
     
     // Esperar o user estar disponível (max 5 segundos)
     let attempts = 0;
@@ -4373,7 +4505,19 @@ const Dashboard = {
     
     if (!this.$root?.user) {
       console.error('❌ [Dashboard] User não carregado após 5 segundos!');
+      console.error('❌ [Dashboard] this.$root:', this.$root);
+      console.error('❌ [Dashboard] localStorage.token:', localStorage.getItem('token'));
+      
+      // Tenta carregar mesmo assim para debug
+      console.warn('⚠️ [Dashboard] Tentando carregar dados mesmo sem user confirmado...');
       this.loading = false;
+      
+      try {
+        await this.loadData();
+        this.renderChart();
+      } catch (error) {
+        console.error('❌ [Dashboard] Erro ao tentar carregar sem user:', error);
+      }
       return;
     }
     
@@ -4410,17 +4554,24 @@ const Dashboard = {
         }
 
         console.log('📚 [Dashboard] Carregando alunos...');
-        const params = (!isAdminNow && this.$root?.user) ? { teacher_id: this.$root.user.id } : {};
-        console.log('📚 [Dashboard] Params:', params);
-        const alunosRes = await api.get('/students', { params });
+        // Não precisa passar teacher_id - o backend usa o user autenticado automaticamente
+        const alunosRes = await api.get('/students');
+        
+        console.log('📚 [Dashboard] Resposta da API completa:', alunosRes);
+        console.log('📚 [Dashboard] alunosRes.data:', alunosRes.data);
 
         let alunosData = [];
         if (alunosRes.data?.data?.rows) {
           alunosData = alunosRes.data.data.rows;
+          console.log('📚 [Dashboard] Usando data.rows:', alunosData.length);
         } else if (Array.isArray(alunosRes.data?.data)) {
           alunosData = alunosRes.data.data;
+          console.log('📚 [Dashboard] Usando data (array):', alunosData.length);
         } else if (Array.isArray(alunosRes.data)) {
           alunosData = alunosRes.data;
+          console.log('📚 [Dashboard] Usando data direto:', alunosData.length);
+        } else {
+          console.error('❌ [Dashboard] Formato de resposta inesperado!');
         }
 
         this.alunos = alunosData.map(aluno => {
@@ -4440,9 +4591,18 @@ const Dashboard = {
         });
 
         console.log('💾 [Dashboard] Alunos carregados:', this.alunos.length);
+        console.log('💾 [Dashboard] Primeiro aluno:', this.alunos[0]);
+        console.log('💾 [Dashboard] Todos os alunos:', this.alunos);
         this.loading = false;
         console.log('✅ [Dashboard] Loading finalizado:', this.loading);
+        
+        // Força atualização dos computeds
+        this.forceUpdate++;
         await this.$nextTick();
+        console.log('🔄 [Dashboard] Após nextTick - forceUpdate:', this.forceUpdate);
+        console.log('🔄 [Dashboard] Após nextTick - alunosFiltrados:', this.alunosFiltrados?.length);
+        console.log('🔄 [Dashboard] Após nextTick - alunosVisiveis:', this.alunosVisiveis?.length);
+        
         this.carregarPercentuais();
       } catch (error) {
         console.error('❌ [Dashboard] Erro ao carregar dados do dashboard:', error);
@@ -4471,36 +4631,76 @@ const Dashboard = {
       try {
         try {
           const entrevistaRes = await api.get('/entrevistas-responsavel/list', { params: { student_id: studentId } });
-          const entrevistas = entrevistaRes.data?.data?.rows || entrevistaRes.data?.data || [];
-          if (entrevistas.length > 0) {
+          // A API retorna: {ok, data: {data: [...]}, error}
+          const entrevistas = entrevistaRes.data?.data?.data || [];
+          if (Array.isArray(entrevistas) && entrevistas.length > 0) {
             const formData = typeof entrevistas[0].form_data === 'string'
               ? JSON.parse(entrevistas[0].form_data)
               : entrevistas[0].form_data;
             percentuais.entrevista = this.calcularPreenchimentoJSON(formData);
           }
-        } catch (_) {}
+        } catch (e) {
+          console.error('Erro ao buscar entrevistas:', e);
+        }
+        // Fallback de entrevista: se ainda 0, usar relatório do aluno (inclui anamneses/entrevistas)
+        if ((percentuais.entrevista || 0) === 0) {
+          try {
+            const rep = await api.get('/reports/student', { params: { student_id: studentId } });
+            const entrevistasRep = rep.data?.data?.entrevistas || rep.data?.entrevistas || [];
+            if (Array.isArray(entrevistasRep) && entrevistasRep.length > 0) {
+              percentuais.entrevista = 100;
+            }
+          } catch (_) {}
+        }
 
         try {
-          const pdiRes = await api.get('/pdi/list', { params: { student_id: studentId } });
-          const pdis = pdiRes.data?.data?.rows || pdiRes.data?.data || [];
-          if (pdis.length > 0) {
+          // Nota: o endpoint REST mapeia "/pdi" para pdi.list
+          const pdiRes = await api.get('/pdi', { params: { student_id: studentId } });
+          // A API retorna: {ok, data: {data: [...]}, error}
+          const pdis = pdiRes.data?.data?.data || [];
+          if (Array.isArray(pdis) && pdis.length > 0) {
             const formData = typeof pdis[0].form_data === 'string'
               ? JSON.parse(pdis[0].form_data)
               : pdis[0].form_data;
             percentuais.pdi = this.calcularPreenchimentoJSON(formData);
           }
-        } catch (_) {}
+          // Fallback: se não houver PDI nos formulários novos, verificar PDI legado (pdi_conectaee)
+          if ((percentuais.pdi || 0) === 0) {
+            try {
+              const pdiLegacy = await api.get('/pdi-conectaee/list', { params: { student_id: studentId } });
+              const leg = pdiLegacy.data?.data?.rows || pdiLegacy.data?.data || [];
+              if (leg.length > 0) {
+                percentuais.pdi = 100;
+              }
+            } catch (_) {}
+          }
+        } catch (e) {
+          console.error('Erro ao buscar PDI:', e);
+        }
 
         try {
           const paiRes = await api.get('/plano-atendimento/list', { params: { student_id: studentId } });
-          const pais = paiRes.data?.data?.rows || paiRes.data?.data || [];
-          if (pais.length > 0) {
+          // A API retorna: {ok, data: {data: [...]}, error}
+          const pais = paiRes.data?.data?.data || [];
+          if (Array.isArray(pais) && pais.length > 0) {
             const formData = typeof pais[0].form_data === 'string'
               ? JSON.parse(pais[0].form_data)
               : pais[0].form_data;
             percentuais.pai = this.calcularPreenchimentoJSON(formData);
           }
-        } catch (_) {}
+          // Fallback: se não houver PAI nos formulários novos, verificar PAI legado (planos_atendimento)
+          if ((percentuais.pai || 0) === 0) {
+            try {
+              const paiLegacy = await api.get('/planos-atendimento/list', { params: { student_id: studentId } });
+              const leg = paiLegacy.data?.data?.rows || paiLegacy.data?.data || [];
+              if (leg.length > 0) {
+                percentuais.pai = 100;
+              }
+            } catch (_) {}
+          }
+        } catch (e) {
+          console.error('Erro ao buscar PAI:', e);
+        }
       } catch (error) {
         console.error(`Erro ao calcular percentuais para aluno ${studentId}:`, error);
       }
@@ -4510,26 +4710,53 @@ const Dashboard = {
     calcularPreenchimentoJSON(formData) {
       if (!formData || typeof formData !== 'object') return 0;
 
-      let total = 0;
-      let preenchidos = 0;
+      const metaKeys = new Set([
+        'id', 'student_id', 'created_at', 'updated_at', 'status', 
+        'created_by_teacher_id', 'version_name', 'student_name', 
+        'modalidade', 'pdi_id', 'data_inicio', 'data_fim'
+      ]);
 
-      for (const key in formData) {
-        if (['id', 'student_id', 'created_at', 'updated_at', 'status', 'created_by_teacher_id'].includes(key)) {
-          continue;
+      const countDeep = (value, keyPath = []) => {
+        let total = 0;
+        let filled = 0;
+
+        if (value === null || value === undefined) {
+          return { total, filled };
         }
 
-        total++;
-        const valor = formData[key];
+        // Primitivos
+        if (typeof value !== 'object') {
+          total = 1;
+          const v = (typeof value === 'string') ? value.trim() : value;
+          // Considera vazio: string vazia, 0, false, null, undefined
+          const isEmpty = v === '' || v === 0 || v === false || v === null || v === undefined;
+          if (!isEmpty) filled = 1;
+          return { total, filled };
+        }
 
-        if (valor !== null && valor !== undefined && valor !== '') {
-          if (Array.isArray(valor) && valor.length === 0) {
-            continue;
+        // Arrays: considerar o campo como 1 unidade; preenchido se houver pelo menos um item não-vazio
+        if (Array.isArray(value)) {
+          total = 1;
+          let any = false;
+          for (const item of value) {
+            const r = countDeep(item, keyPath.concat(['[]']));
+            if (r.filled > 0) { any = true; break; }
           }
-          preenchidos++;
+          filled = any ? 1 : 0;
+          return { total, filled };
         }
-      }
 
-      return total > 0 ? Math.round((preenchidos / total) * 100) : 0;
+        // Objetos: somar filhos, ignorando metadados conhecidos
+        for (const k of Object.keys(value)) {
+          if (metaKeys.has(k)) continue;
+          const r = countDeep(value[k], keyPath.concat([k]));
+          total += r.total; filled += r.filled;
+        }
+        return { total, filled };
+      };
+
+      const { total, filled } = countDeep(formData);
+      return total > 0 ? Math.round((filled / total) * 100) : 0;
     },
     calcularMediaAluno(aluno) {
       if (!aluno) return 0;
@@ -4538,6 +4765,24 @@ const Dashboard = {
       const pdi = aluno?.pdi_percent || 0;
       const pai = aluno?.pai_percent || 0;
       return Math.round((entrevista + pdi + pai) / 3);
+    },
+    async atualizarPercentuaisAluno(alunoId) {
+      try {
+        const p = await this.calcularPercentuais(alunoId);
+        const idx = (this.alunos || []).findIndex(a => a.id === alunoId);
+        if (idx !== -1) {
+          const a = { ...this.alunos[idx] };
+          a.entrevista_percent = p.entrevista;
+          a.pdi_percent = p.pdi;
+          a.pai_percent = p.pai;
+          a.media_percent = Math.round((p.entrevista + p.pdi + p.pai) / 3);
+          this.alunos.splice(idx, 1, a);
+        }
+      } catch (e) {
+        console.error('Erro ao atualizar percentuais do aluno', alunoId, e);
+      } finally {
+        await this.renderChart();
+      }
     },
     getInitials(name) {
       if (!name) return '?';
@@ -4558,7 +4803,14 @@ const Dashboard = {
 
       const alunosFiltrados = Array.isArray(this.alunosFiltrados) ? this.alunosFiltrados : [];
       const alunos = Array.isArray(this.alunos) ? this.alunos : [];
-      const dados = alunosFiltrados.length ? alunosFiltrados : alunos;
+      let dados = [];
+      if (this.selectedAluno) {
+        dados = [this.selectedAluno];
+      } else if (alunosFiltrados.length) {
+        dados = alunosFiltrados;
+      } else {
+        dados = alunos;
+      }
 
       if (!dados || !dados.length) {
         container.innerHTML = '<div class="text-center text-gray-500 py-12">Nenhum dado dispon?vel para exibir no gr?fico</div>';
@@ -4572,7 +4824,7 @@ const Dashboard = {
 
       Highcharts.chart(this.chartContainerId, {
         chart: { type: 'column' },
-        title: { text: this.isAdmin ? 'M?dia geral dos formul?rios' : 'M?dia dos meus formul?rios' },
+        title: { text: this.selectedAluno ? 'Média do aluno selecionado' : (this.isAdmin ? 'Média geral dos formulários' : 'Média dos meus formulários') },
         xAxis: { categories: ['Entrevista', 'PDI', 'PAI'], crosshair: true },
         yAxis: { min: 0, max: 100, title: { text: 'Percentual de conclus?o (%)' } },
         tooltip: { valueSuffix: '%' },
@@ -4584,7 +4836,7 @@ const Dashboard = {
           }
         },
         series: [{
-          name: this.isAdmin ? 'Rede' : 'Minhas turmas',
+          name: this.selectedAluno ? (this.selectedAluno.name || 'Aluno') : (this.isAdmin ? 'Rede' : 'Minhas turmas'),
           data: [mediaEntrevista, mediaPDI, mediaPAI],
           colorByPoint: true,
           colors: this.isAdmin ? ['#7c3aed', '#2563eb', '#0f766e'] : ['#3b82f6', '#10b981', '#a855f7']
@@ -4603,15 +4855,27 @@ const Dashboard = {
       console.log('🔧 ===== DEBUG DASHBOARD =====');
       console.log('🔧 User:', this.$root?.user);
       console.log('🔧 isAdmin:', this.isAdmin);
+      console.log('🔧 loading:', this.loading);
       console.log('🔧 alunos.length:', this.alunos?.length);
       console.log('🔧 alunos:', this.alunos);
       console.log('🔧 alunosFiltrados.length:', this.alunosFiltrados?.length);
       console.log('🔧 alunosFiltrados:', this.alunosFiltrados);
+      console.log('🔧 alunosVisiveis.length:', this.alunosVisiveis?.length);
+      console.log('🔧 alunosVisiveis:', this.alunosVisiveis);
       console.log('🔧 filtros:', this.filtros);
       console.log('🔧 professorResumo:', this.professorResumo);
       console.log('🔧 Token:', localStorage.getItem('token'));
+      console.log('🔧 ===========================');
       
-      alert('Debug info logged to console. Press F12 to see.');
+      alert(`DEBUG DASHBOARD:
+      
+User: ${this.$root?.user?.name || 'N/A'} (${this.$root?.user?.role || 'N/A'})
+Loading: ${this.loading}
+Total alunos: ${this.alunos?.length || 0}
+Alunos filtrados: ${this.alunosFiltrados?.length || 0}
+Alunos visíveis: ${this.alunosVisiveis?.length || 0}
+
+Veja o console (F12) para mais detalhes.`);
     },
     irPara(segment) {
       if (!segment) return;
@@ -4627,6 +4891,48 @@ const Dashboard = {
       if (!base) return;
       const url = alunoId ? `${base}?student_id=${alunoId}` : base;
       this.$router.push(url);
+    },
+    noop() {
+      // no-op handler para eventos com modificadores (ex.: @mousedown.prevent)
+    },
+    // Handlers do campo de busca com modificadores de teclado
+    onBuscaChange() {
+      this.showSugestoes = true;
+      this.sugIndex = -1;
+    },
+    fecharSugestoesComAtraso() {
+      // Aguardar clique/mousedown nos botões da lista antes de fechar
+      setTimeout(() => { this.showSugestoes = false; }, 150);
+    },
+    moveSugestao(dir) {
+      if (!this.showSugestoes) return;
+      const total = Array.isArray(this.sugestoes) ? this.sugestoes.length : 0;
+      if (!total) return;
+      let idx = (this.sugIndex ?? -1) + dir;
+      if (idx < 0) idx = total - 1;
+      if (idx >= total) idx = 0;
+      this.sugIndex = idx;
+    },
+    confirmSugestao() {
+      if (!this.showSugestoes) return;
+      const lista = Array.isArray(this.sugestoes) ? this.sugestoes : [];
+      if (!lista.length) return;
+      const selecionado = lista[this.sugIndex] || lista[0];
+      if (selecionado) this.selecionarAluno(selecionado);
+    },
+    async selecionarAluno(aluno) {
+      if (!aluno) return;
+      // Mostra o nome no campo de busca e fecha sugestões primeiro
+      if (aluno.name) this.filtros.busca = aluno.name;
+      this.showSugestoes = false;
+      // Aguarda recálculo antes de trocar o selecionado, evitando flicker com 0%
+      await this.atualizarPercentuaisAluno(aluno.id);
+      this.selectedAlunoId = aluno.id;
+    },
+    limparSelecaoAluno() {
+      this.selectedAlunoId = null;
+      // Mantém a busca ou limpa, como preferir; aqui vamos manter o texto
+      this.$nextTick(() => this.renderChart());
     }
   },
   watch: {
@@ -4635,35 +4941,9 @@ const Dashboard = {
     },
     async isAdmin() {
       await this.renderChart();
-    }
-  },
-  computed:{
-    atividadesFiltradas(){
-      const now = new Date();
-      let de=null, ate=null;
-      if(this.filtros.periodo>0){ de=new Date(now); de.setDate(now.getDate()-this.filtros.periodo); }
-      if(this.filtros.periodo===0){ de=this.filtros.de?new Date(this.filtros.de):null; ate=this.filtros.ate?new Date(this.filtros.ate):null; if(ate){ ate.setHours(23,59,59,999);} }
-      const q=(this.filtros.q||'').toLowerCase();
-      const tipo=this.filtros.tipo||'';
-      let arr=this.atividadesRaw.filter(a=>{
-        const dt=new Date(a.created_at);
-        const okDe=!de || dt>=de;
-        const okAte=!ate || dt<=ate;
-        const okQ=!q || (a.descricao||'').toLowerCase().includes(q);
-        const okTipo=!tipo || a.tipo===tipo;
-        return okDe && okAte && okQ && okTipo;
-      });
-      switch(this.filtros.sort){
-        case 'data_asc': arr.sort((x,y)=>new Date(x.created_at)-new Date(y.created_at)); break;
-        case 'tipo_asc': arr.sort((x,y)=>String(x.tipo).localeCompare(String(y.tipo))); break;
-        case 'tipo_desc': arr.sort((x,y)=>String(y.tipo).localeCompare(String(x.tipo))); break;
-        default: arr.sort((x,y)=>new Date(y.created_at)-new Date(x.created_at));
-      }
-      return arr;
     },
-    totalPaginas(){ return Math.max(1, Math.ceil(this.atividadesFiltradas.length / this.paginacao.perPage)); },
-    atividadesPaginadas(){
-      const start=(this.paginacao.page-1)*this.paginacao.perPage; return this.atividadesFiltradas.slice(start,start+this.paginacao.perPage);
+    async selectedAlunoId() {
+      await this.renderChart();
     }
   }
 };
@@ -5942,12 +6222,18 @@ const EntrevistaResponsavel = {
   methods: {
     async carregarAlunos() {
       try {
-        let params = {};
-        if (this.$parent.user && this.$parent.user.role !== 'admin') {
-          params.teacher_id = this.$parent.user.id;
+        // Backend já aplica o filtro teacher-centric automaticamente
+        const response = await api.get('/students');
+        // Compatibilidade com diferentes formatos de resposta
+        let alunosData = [];
+        if (response.data?.data?.rows) {
+          alunosData = response.data.data.rows;
+        } else if (Array.isArray(response.data?.data)) {
+          alunosData = response.data.data;
+        } else if (Array.isArray(response.data)) {
+          alunosData = response.data;
         }
-        const response = await api.get('/students/options', { params });
-        this.alunos = response.data?.data?.rows || [];
+        this.alunos = alunosData;
       } catch (error) {
         console.error('❌ [Entrevista] Erro ao carregar alunos:', error);
         this.alunos = [];

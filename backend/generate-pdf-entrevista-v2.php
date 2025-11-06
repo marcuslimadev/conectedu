@@ -78,20 +78,52 @@ try {
         }
     }
     
-    // Configurar mPDF
+    // Configurar mPDF (margens maiores para header/footer)
     $mpdf = new Mpdf([
         'mode' => 'utf-8',
         'format' => 'A4',
         'margin_left' => 15,
         'margin_right' => 15,
-        'margin_top' => 15,
-        'margin_bottom' => 15,
+        'margin_top' => 28,
+        'margin_bottom' => 20,
     ]);
     
-    // Metadados
+        // Metadados
     $student_name = v($d, 'nome_estudante') ?: ($entrevista['student_name'] ?? 'Aluno');
     $mpdf->SetTitle('Entrevista com Responsável - ' . $student_name);
     $mpdf->SetAuthor('ConectEDU - Sistema AEE');
+
+        // Header com logo e nome da escola
+        $logoHtml = '';
+        $logoPaths = [
+                __DIR__ . '/../frontend/logo.png',
+                __DIR__ . '/../frontend/assets/logo.png',
+                __DIR__ . '/../frontend/img/logo.png',
+                __DIR__ . '/logo.png',
+                __DIR__ . '/assets/logo.png'
+        ];
+        foreach ($logoPaths as $p) {
+                if (file_exists($p)) {
+                        $logoRel = str_replace(__DIR__ . DIRECTORY_SEPARATOR, '', $p);
+                        $logoHtml = '<img src="' . htmlspecialchars($logoRel, ENT_QUOTES, 'UTF-8') . '" style="height:40px;">';
+                        break;
+                }
+        }
+
+        $schoolName = htmlspecialchars($entrevista['school_name'] ?? '', ENT_QUOTES, 'UTF-8');
+        $mpdf->SetHTMLHeader('<div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #ccc; padding:6px 0; font-family: DejaVu Sans, Arial, sans-serif; font-size:10pt;">
+                <div>' . $logoHtml . '</div>
+                <div style="text-align:right;">
+                    <div style="font-weight:bold;">ConectEDU - Sistema AEE</div>
+                    <div style="font-size:9pt;">' . $schoolName . '</div>
+                </div>
+            </div>');
+
+        // Footer com data e paginação
+        $mpdf->SetHTMLFooter('<div style="border-top:1px solid #ccc; font-size:9pt; color:#666; display:flex; align-items:center; justify-content:space-between; padding-top:6px; font-family: DejaVu Sans, Arial, sans-serif;">
+                <div>Gerado em ' . date('d/m/Y H:i') . '</div>
+                <div>Página {PAGENO} de {nbpg}</div>
+            </div>');
     
     // DATA DA ENTREVISTA
     $data_entrevista = data_br(v($d, 'data_entrevista'));
@@ -795,26 +827,42 @@ HTML;
 HTML;
 
     // COMPORTAMENTO
+    // Preparar marcadores de checkbox (verdadeiro/falso)
+    $comp_alegre = !empty($d['comp_alegre']) ? '☑' : '☐';
+    $comp_carinhoso = !empty($d['comp_carinhoso']) ? '☑' : '☐';
+    $comp_calmo = !empty($d['comp_calmo']) ? '☑' : '☐';
+    $comp_agitado = !empty($d['comp_agitado']) ? '☑' : '☐';
+    $comp_triste = !empty($d['comp_triste']) ? '☑' : '☐';
+    $comp_timido = !empty($d['comp_timido']) ? '☑' : '☐';
+    $comp_criativo = !empty($d['comp_criativo']) ? '☑' : '☐';
+    $comp_dependente = !empty($d['comp_dependente']) ? '☑' : '☐';
+    $comp_ciumento = !empty($d['comp_ciumento']) ? '☑' : '☐';
+    $comp_comunicativo = !empty($d['comp_comunicativo']) ? '☑' : '☐';
+    $comp_reservado = !empty($d['comp_reservado']) ? '☑' : '☐';
+    $comp_teimoso = !empty($d['comp_teimoso']) ? '☑' : '☐';
+    $comp_agressivo = !empty($d['comp_agressivo']) ? '☑' : '☐';
+    $comp_medroso = !empty($d['comp_medroso']) ? '☑' : '☐';
+
     $html .= <<<HTML
     <div class="secao">
         <div class="secao-titulo">COMPORTAMENTO</div>
         
         <div class="campo">
             <span class="label">Como descreveriam seu filho? (Marcar com X):</span><br>
-            <span class="checkbox">{$check($d['comp_alegre'])}</span> alegre
-            <span class="checkbox">{$check($d['comp_carinhoso'])}</span> carinhoso
-            <span class="checkbox">{$check($d['comp_calmo'])}</span> calmo
-            <span class="checkbox">{$check($d['comp_agitado'])}</span> agitado
-            <span class="checkbox">{$check($d['comp_triste'])}</span> triste<br>
-            <span class="checkbox">{$check($d['comp_timido'])}</span> tímido
-            <span class="checkbox">{$check($d['comp_criativo'])}</span> criativo
-            <span class="checkbox">{$check($d['comp_dependente'])}</span> dependente
-            <span class="checkbox">{$check($d['comp_ciumento'])}</span> ciumento
-            <span class="checkbox">{$check($d['comp_comunicativo'])}</span> comunicativo<br>
-            <span class="checkbox">{$check($d['comp_reservado'])}</span> reservado
-            <span class="checkbox">{$check($d['comp_teimoso'])}</span> teimoso
-            <span class="checkbox">{$check($d['comp_agressivo'])}</span> agressivo
-            <span class="checkbox">{$check($d['comp_medroso'])}</span> medroso
+            <span class="checkbox">{$comp_alegre}</span> alegre
+            <span class="checkbox">{$comp_carinhoso}</span> carinhoso
+            <span class="checkbox">{$comp_calmo}</span> calmo
+            <span class="checkbox">{$comp_agitado}</span> agitado
+            <span class="checkbox">{$comp_triste}</span> triste<br>
+            <span class="checkbox">{$comp_timido}</span> tímido
+            <span class="checkbox">{$comp_criativo}</span> criativo
+            <span class="checkbox">{$comp_dependente}</span> dependente
+            <span class="checkbox">{$comp_ciumento}</span> ciumento
+            <span class="checkbox">{$comp_comunicativo}</span> comunicativo<br>
+            <span class="checkbox">{$comp_reservado}</span> reservado
+            <span class="checkbox">{$comp_teimoso}</span> teimoso
+            <span class="checkbox">{$comp_agressivo}</span> agressivo
+            <span class="checkbox">{$comp_medroso}</span> medroso
         </div>
         
         <div class="campo">

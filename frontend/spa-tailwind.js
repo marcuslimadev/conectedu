@@ -5733,7 +5733,9 @@ const Relatorios = {
     },
     pretty(o){ try{ return JSON.stringify(o, null, 2); }catch(e){ return String(o); } }
   },
-  async mounted(){ await this.buscar(); }
+  async mounted(){ 
+    await this.buscar(); 
+  }
 };
 
 
@@ -8416,12 +8418,12 @@ const RelatorioAtendimento = {
     async loadStudents() {
       try {
         this.loadingStudents = true;
-        let params = {};
+        let params = { per_page: 200 };
         if (this.$parent.user && this.$parent.user.role !== 'admin') {
           params.teacher_id = this.$parent.user.id;
         }
-        const r = await api.get('/students/options', { params });
-        this.alunos = (r.data?.data) || [];
+        const r = await api.get('/students', { params });
+        this.alunos = (r.data?.data?.rows) || [];
       } catch (e) {
         console.error('Erro ao carregar alunos:', e);
       } finally {

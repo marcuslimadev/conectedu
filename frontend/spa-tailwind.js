@@ -5059,17 +5059,19 @@ const Relatorios = {
             <div class="bg-white border rounded-lg p-6">
               <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                 <i class="fas fa-clipboard-list text-blue-600 mr-2"></i>
-                Anamneses e Entrevistas
+                Entrevistas com o Responsável
               </h3>
               <div v-if="dadosRelatorio.anamneses && dadosRelatorio.anamneses.length > 0">
-                <div class="space-y-4">
-                  <div v-for="anamnese in dadosRelatorio.anamneses" :key="anamnese.id" class="border rounded-lg p-4 hover:bg-gray-50">
-                    <div class="flex justify-between items-start mb-3">
-                      <h4 class="font-medium text-gray-900">{{ anamnese.tipo === 'entrevista_responsavel' ? 'Entrevista com Responsável' : 'Anamnese' }}</h4>
-                      <div class="text-xs text-gray-500">
+                <div class="space-y-6">
+                  <div v-for="anamnese in dadosRelatorio.anamneses" :key="anamnese.id" class="border-2 border-blue-200 rounded-lg p-5 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start mb-4">
+                      <h4 class="font-bold text-lg text-gray-900 flex items-center">
+                        <i class="fas fa-comments text-blue-600 mr-2"></i>
+                        {{ anamnese.tipo === 'entrevista_responsavel' ? 'Entrevista com Responsável' : 'Anamnese' }} #{{ anamnese.id }}
+                      </h4>
+                      <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
                         {{ formatarData(anamnese.created_at) }}
-                        <span v-if="anamnese.tipo === 'entrevista_responsavel'" class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">Entrevista</span>
-                      </div>
+                      </span>
                     </div>
                     <div v-if="anamnese.tipo !== 'entrevista_responsavel'" class="space-y-2">
                       <div v-for="(value, key) in anamnese.answers" :key="key" class="text-sm">
@@ -5077,77 +5079,95 @@ const Relatorios = {
                         <span class="text-gray-600 ml-1">{{ value }}</span>
                       </div>
                     </div>
-                    <div v-else class="space-y-3">
-                      <!-- Seção 1: Dados Básicos -->
-                      <div class="bg-blue-50 rounded-lg p-3">
-                        <h5 class="text-xs font-semibold text-blue-900 mb-2 uppercase">Dados Básicos</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                          <div v-if="anamnese.answers.escola"><span class="font-medium text-gray-700">Escola:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.escola }}</span></div>
-                          <div v-if="anamnese.answers.serie"><span class="font-medium text-gray-700">Série/Ano:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.serie }}</span></div>
-                          <div v-if="anamnese.answers.turno"><span class="font-medium text-gray-700">Turno:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.turno }}</span></div>
+                    <div v-else class="space-y-4">
+                      <!-- Dados Escolares e Responsável em Grid -->
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Dados Escolares -->
+                        <div class="bg-blue-50 rounded-lg p-4">
+                          <h5 class="font-semibold text-blue-900 mb-3 flex items-center text-sm">
+                            <i class="fas fa-school text-blue-600 mr-2"></i>
+                            Dados Escolares
+                          </h5>
+                          <div class="space-y-2 text-sm">
+                            <div v-if="anamnese.answers.escola"><span class="font-medium text-gray-700">Escola:</span> <span class="text-gray-900">{{ anamnese.answers.escola }}</span></div>
+                            <div v-if="anamnese.answers.serie"><span class="font-medium text-gray-700">Série/Ano:</span> <span class="text-gray-900">{{ anamnese.answers.serie }}</span></div>
+                            <div v-if="anamnese.answers.turno"><span class="font-medium text-gray-700">Turno:</span> <span class="text-gray-900">{{ anamnese.answers.turno }}</span></div>
+                          </div>
+                        </div>
+                        
+                        <!-- Dados do Responsável -->
+                        <div class="bg-green-50 rounded-lg p-4">
+                          <h5 class="font-semibold text-green-900 mb-3 flex items-center text-sm">
+                            <i class="fas fa-user-friends text-green-600 mr-2"></i>
+                            Responsável
+                          </h5>
+                          <div class="space-y-2 text-sm">
+                            <div v-if="anamnese.answers.nome_responsavel"><span class="font-medium text-gray-700">Nome:</span> <span class="text-gray-900">{{ anamnese.answers.nome_responsavel }}</span></div>
+                            <div v-if="anamnese.answers.parentesco"><span class="font-medium text-gray-700">Parentesco:</span> <span class="text-gray-900">{{ anamnese.answers.parentesco }}</span></div>
+                            <div v-if="anamnese.answers.telefone"><span class="font-medium text-gray-700">Telefone:</span> <span class="text-gray-900">{{ anamnese.answers.telefone }}</span></div>
+                            <div v-if="anamnese.answers.email"><span class="font-medium text-gray-700">Email:</span> <span class="text-gray-900">{{ anamnese.answers.email }}</span></div>
+                          </div>
                         </div>
                       </div>
                       
-                      <!-- Seção 2: Responsável -->
-                      <div class="bg-green-50 rounded-lg p-3">
-                        <h5 class="text-xs font-semibold text-green-900 mb-2 uppercase">Dados do Responsável</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                          <div v-if="anamnese.answers.nome_responsavel"><span class="font-medium text-gray-700">Nome:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_responsavel }}</span></div>
-                          <div v-if="anamnese.answers.parentesco"><span class="font-medium text-gray-700">Parentesco:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.parentesco }}</span></div>
-                          <div v-if="anamnese.answers.telefone"><span class="font-medium text-gray-700">Telefone:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.telefone }}</span></div>
-                          <div v-if="anamnese.answers.email"><span class="font-medium text-gray-700">Email:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.email }}</span></div>
-                        </div>
-                      </div>
-                      
-                      <!-- Seção 3: Histórico Médico -->
-                      <div v-if="anamnese.answers.diagnostico || anamnese.answers.medicamentos || anamnese.answers.profissionais" class="bg-red-50 rounded-lg p-3">
-                        <h5 class="text-xs font-semibold text-red-900 mb-2 uppercase">Histórico Médico</h5>
-                        <div class="space-y-2 text-sm">
+                      <!-- Histórico Médico -->
+                      <div v-if="anamnese.answers.diagnostico || anamnese.answers.medicamentos || anamnese.answers.profissionais" class="bg-red-50 rounded-lg p-4">
+                        <h5 class="font-semibold text-red-900 mb-3 flex items-center text-sm">
+                          <i class="fas fa-heartbeat text-red-600 mr-2"></i>
+                          Histórico Médico
+                        </h5>
+                        <div class="space-y-3 text-sm">
                           <div v-if="anamnese.answers.diagnostico">
-                            <span class="font-medium text-gray-700">Diagnóstico:</span>
-                            <p class="text-gray-600 mt-1">{{ anamnese.answers.diagnostico }}</p>
+                            <div class="font-medium text-gray-700 mb-1"><i class="fas fa-stethoscope text-red-500 mr-1"></i> Diagnóstico:</div>
+                            <p class="text-gray-900 pl-5">{{ anamnese.answers.diagnostico }}</p>
                           </div>
                           <div v-if="anamnese.answers.medicamentos">
-                            <span class="font-medium text-gray-700">Medicamentos:</span>
-                            <p class="text-gray-600 mt-1">{{ anamnese.answers.medicamentos }}</p>
+                            <div class="font-medium text-gray-700 mb-1"><i class="fas fa-pills text-red-500 mr-1"></i> Medicamentos:</div>
+                            <p class="text-gray-900 pl-5">{{ anamnese.answers.medicamentos }}</p>
                           </div>
                           <div v-if="anamnese.answers.profissionais">
-                            <span class="font-medium text-gray-700">Profissionais que acompanham:</span>
-                            <p class="text-gray-600 mt-1">{{ anamnese.answers.profissionais }}</p>
+                            <div class="font-medium text-gray-700 mb-1"><i class="fas fa-user-md text-red-500 mr-1"></i> Profissionais:</div>
+                            <p class="text-gray-900 pl-5">{{ anamnese.answers.profissionais }}</p>
                           </div>
                         </div>
                       </div>
                       
-                      <!-- Seção 4: Desenvolvimento e Comportamento -->
-                      <div v-if="anamnese.answers.comportamento_casa || anamnese.answers.dificuldades || anamnese.answers.habilidades" class="bg-purple-50 rounded-lg p-3">
-                        <h5 class="text-xs font-semibold text-purple-900 mb-2 uppercase">Desenvolvimento e Comportamento</h5>
-                        <div class="space-y-2 text-sm">
+                      <!-- Desenvolvimento e Comportamento -->
+                      <div v-if="anamnese.answers.comportamento_casa || anamnese.answers.dificuldades || anamnese.answers.habilidades" class="bg-purple-50 rounded-lg p-4">
+                        <h5 class="font-semibold text-purple-900 mb-3 flex items-center text-sm">
+                          <i class="fas fa-child text-purple-600 mr-2"></i>
+                          Desenvolvimento e Comportamento
+                        </h5>
+                        <div class="space-y-3 text-sm">
                           <div v-if="anamnese.answers.comportamento_casa">
-                            <span class="font-medium text-gray-700">Comportamento em casa:</span>
-                            <p class="text-gray-600 mt-1">{{ anamnese.answers.comportamento_casa }}</p>
+                            <div class="font-medium text-gray-700 mb-1"><i class="fas fa-home text-purple-500 mr-1"></i> Comportamento em casa:</div>
+                            <p class="text-gray-900 pl-5">{{ anamnese.answers.comportamento_casa }}</p>
                           </div>
                           <div v-if="anamnese.answers.dificuldades">
-                            <span class="font-medium text-gray-700">Dificuldades observadas:</span>
-                            <p class="text-gray-600 mt-1">{{ anamnese.answers.dificuldades }}</p>
+                            <div class="font-medium text-gray-700 mb-1"><i class="fas fa-exclamation-circle text-orange-500 mr-1"></i> Dificuldades:</div>
+                            <p class="text-gray-900 pl-5">{{ anamnese.answers.dificuldades }}</p>
                           </div>
                           <div v-if="anamnese.answers.habilidades">
-                            <span class="font-medium text-gray-700">Habilidades e potencialidades:</span>
-                            <p class="text-gray-600 mt-1">{{ anamnese.answers.habilidades }}</p>
+                            <div class="font-medium text-gray-700 mb-1"><i class="fas fa-star text-yellow-500 mr-1"></i> Habilidades:</div>
+                            <p class="text-gray-900 pl-5">{{ anamnese.answers.habilidades }}</p>
                           </div>
                         </div>
                       </div>
                       
-                      <!-- Seção 5: Expectativas -->
-                      <div v-if="anamnese.answers.expectativas || anamnese.answers.informacoes_adicionais" class="bg-yellow-50 rounded-lg p-3">
-                        <h5 class="text-xs font-semibold text-yellow-900 mb-2 uppercase">Expectativas e Informações Adicionais</h5>
-                        <div class="space-y-2 text-sm">
+                      <!-- Expectativas -->
+                      <div v-if="anamnese.answers.expectativas || anamnese.answers.informacoes_adicionais" class="bg-amber-50 rounded-lg p-4">
+                        <h5 class="font-semibold text-amber-900 mb-3 flex items-center text-sm">
+                          <i class="fas fa-lightbulb text-amber-600 mr-2"></i>
+                          Expectativas e Observações
+                        </h5>
+                        <div class="space-y-3 text-sm">
                           <div v-if="anamnese.answers.expectativas">
-                            <span class="font-medium text-gray-700">Expectativas:</span>
-                            <p class="text-gray-600 mt-1">{{ anamnese.answers.expectativas }}</p>
+                            <div class="font-medium text-gray-700 mb-1"><i class="fas fa-bullseye text-amber-500 mr-1"></i> Expectativas:</div>
+                            <p class="text-gray-900 pl-5">{{ anamnese.answers.expectativas }}</p>
                           </div>
                           <div v-if="anamnese.answers.informacoes_adicionais">
-                            <span class="font-medium text-gray-700">Informações adicionais:</span>
-                            <p class="text-gray-600 mt-1">{{ anamnese.answers.informacoes_adicionais }}</p>
+                            <div class="font-medium text-gray-700 mb-1"><i class="fas fa-info-circle text-amber-500 mr-1"></i> Informações adicionais:</div>
+                            <p class="text-gray-900 pl-5">{{ anamnese.answers.informacoes_adicionais }}</p>
                           </div>
                         </div>
                       </div>

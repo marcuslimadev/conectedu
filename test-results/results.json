@@ -1,0 +1,701 @@
+{
+  "config": {
+    "configFile": "C:\\xampp\\htdocs\\conectedu\\playwright.config.js",
+    "rootDir": "C:/xampp/htdocs/conectedu/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFolder": "playwright-report"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/results.json"
+        }
+      ],
+      [
+        "list",
+        null
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "C:/xampp/htdocs/conectedu/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/xampp/htdocs/conectedu/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "C:/xampp/htdocs/conectedu/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "C:/xampp/htdocs/conectedu/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "C:/xampp/htdocs/conectedu/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "C:/xampp/htdocs/conectedu/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "C:/xampp/htdocs/conectedu/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "Mobile Chrome",
+        "name": "Mobile Chrome",
+        "testDir": "C:/xampp/htdocs/conectedu/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.56.1",
+    "workers": 2,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "full-system-test.spec.js",
+      "file": "full-system-test.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "ConectEDU - Testes Completos de Formulários e PDFs",
+          "file": "full-system-test.spec.js",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "1. Deve criar um novo aluno",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 20978,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✅ Página de alunos carregada! (criaria aluno: Teste Playwright 1762862673592)\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-11T12:04:09.313Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3d1d68bcad61ced4810c-eda3f304e9973fcffc93",
+              "file": "full-system-test.spec.js",
+              "line": 18,
+              "column": 3
+            },
+            {
+              "title": "2. Deve acessar formulário de Entrevista",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 8907,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✅ Formulário de Entrevista acessível com dropdown de alunos!\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-11T12:04:33.780Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3d1d68bcad61ced4810c-1df9d7507a84982503b4",
+              "file": "full-system-test.spec.js",
+              "line": 34,
+              "column": 3
+            },
+            {
+              "title": "3. Deve acessar e validar formulário PDI",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 8557,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✅ Formulário PDI acessível e validado!\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-11T12:04:42.703Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3d1d68bcad61ced4810c-287475ba2028dd965c01",
+              "file": "full-system-test.spec.js",
+              "line": 56,
+              "column": 3
+            },
+            {
+              "title": "4. Deve acessar e validar formulário PAI",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 8584,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✅ Formulário PAI acessível e validado!\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-11T12:04:51.276Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3d1d68bcad61ced4810c-0d2df40881c3c599e572",
+              "file": "full-system-test.spec.js",
+              "line": 77,
+              "column": 3
+            },
+            {
+              "title": "5. Deve acessar página de relatórios",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 6501,
+                      "error": {
+                        "message": "ReferenceError: page is not defined",
+                        "stack": "ReferenceError: page is not defined\n    at C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js:99:5",
+                        "location": {
+                          "file": "C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js",
+                          "column": 5,
+                          "line": 99
+                        },
+                        "snippet": "\u001b[0m \u001b[90m  97 |\u001b[39m\n \u001b[90m  98 |\u001b[39m   test(\u001b[32m'5. Deve acessar página de relatórios'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m  99 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'http://localhost/conectedu/frontend/#/relatorios'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 100 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m3000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 101 |\u001b[39m     \n \u001b[90m 102 |\u001b[39m     \u001b[90m// Verificar se página carregou\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js",
+                            "column": 5,
+                            "line": 99
+                          },
+                          "message": "ReferenceError: page is not defined\n\n\u001b[0m \u001b[90m  97 |\u001b[39m\n \u001b[90m  98 |\u001b[39m   test(\u001b[32m'5. Deve acessar página de relatórios'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m  99 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'http://localhost/conectedu/frontend/#/relatorios'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 100 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m3000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 101 |\u001b[39m     \n \u001b[90m 102 |\u001b[39m     \u001b[90m// Verificar se página carregou\u001b[39m\u001b[0m\n\u001b[2m    at C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js:99:5\u001b[22m"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-11T12:04:59.877Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\xampp\\htdocs\\conectedu\\test-results\\full-system-test-ConectEDU-5a57d-cessar-página-de-relatórios-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\xampp\\htdocs\\conectedu\\test-results\\full-system-test-ConectEDU-5a57d-cessar-página-de-relatórios-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\xampp\\htdocs\\conectedu\\test-results\\full-system-test-ConectEDU-5a57d-cessar-página-de-relatórios-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js",
+                        "column": 5,
+                        "line": 99
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "3d1d68bcad61ced4810c-59f3bf6f57140525bf71",
+              "file": "full-system-test.spec.js",
+              "line": 98,
+              "column": 3
+            },
+            {
+              "title": "6. Deve selecionar aluno e ver dados nos relatórios",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 11921,
+                      "error": {
+                        "message": "ReferenceError: page is not defined",
+                        "stack": "ReferenceError: page is not defined\n    at C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js:110:5",
+                        "location": {
+                          "file": "C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js",
+                          "column": 5,
+                          "line": 110
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 108 |\u001b[39m\n \u001b[90m 109 |\u001b[39m   test(\u001b[32m'6. Deve selecionar aluno e ver dados nos relatórios'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 110 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'http://localhost/conectedu/frontend/#/relatorios'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 111 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m2000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 112 |\u001b[39m     \n \u001b[90m 113 |\u001b[39m     \u001b[90m// Selecionar aluno\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js",
+                            "column": 5,
+                            "line": 110
+                          },
+                          "message": "ReferenceError: page is not defined\n\n\u001b[0m \u001b[90m 108 |\u001b[39m\n \u001b[90m 109 |\u001b[39m   test(\u001b[32m'6. Deve selecionar aluno e ver dados nos relatórios'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 110 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'http://localhost/conectedu/frontend/#/relatorios'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 111 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m2000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 112 |\u001b[39m     \n \u001b[90m 113 |\u001b[39m     \u001b[90m// Selecionar aluno\u001b[39m\u001b[0m\n\u001b[2m    at C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js:110:5\u001b[22m"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-11T12:05:08.241Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\xampp\\htdocs\\conectedu\\test-results\\full-system-test-ConectEDU-31d23--e-ver-dados-nos-relatórios-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\xampp\\htdocs\\conectedu\\test-results\\full-system-test-ConectEDU-31d23--e-ver-dados-nos-relatórios-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\xampp\\htdocs\\conectedu\\test-results\\full-system-test-ConectEDU-31d23--e-ver-dados-nos-relatórios-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js",
+                        "column": 5,
+                        "line": 110
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "3d1d68bcad61ced4810c-72f71996943bdb851c3f",
+              "file": "full-system-test.spec.js",
+              "line": 109,
+              "column": 3
+            },
+            {
+              "title": "7. Deve validar se seções de formulários aparecem",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 11874,
+                      "error": {
+                        "message": "ReferenceError: page is not defined",
+                        "stack": "ReferenceError: page is not defined\n    at C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js:134:5",
+                        "location": {
+                          "file": "C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js",
+                          "column": 5,
+                          "line": 134
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 132 |\u001b[39m\n \u001b[90m 133 |\u001b[39m   test(\u001b[32m'7. Deve validar se seções de formulários aparecem'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 134 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'http://localhost/conectedu/frontend/#/relatorios'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 135 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m2000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 136 |\u001b[39m     \n \u001b[90m 137 |\u001b[39m     \u001b[36mconst\u001b[39m select \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'select'\u001b[39m)\u001b[33m.\u001b[39mfirst()\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js",
+                            "column": 5,
+                            "line": 134
+                          },
+                          "message": "ReferenceError: page is not defined\n\n\u001b[0m \u001b[90m 132 |\u001b[39m\n \u001b[90m 133 |\u001b[39m   test(\u001b[32m'7. Deve validar se seções de formulários aparecem'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 134 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'http://localhost/conectedu/frontend/#/relatorios'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 135 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m2000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 136 |\u001b[39m     \n \u001b[90m 137 |\u001b[39m     \u001b[36mconst\u001b[39m select \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'select'\u001b[39m)\u001b[33m.\u001b[39mfirst()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js:134:5\u001b[22m"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-11T12:05:24.281Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\xampp\\htdocs\\conectedu\\test-results\\full-system-test-ConectEDU-5fba7-ões-de-formulários-aparecem-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\xampp\\htdocs\\conectedu\\test-results\\full-system-test-ConectEDU-5fba7-ões-de-formulários-aparecem-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\xampp\\htdocs\\conectedu\\test-results\\full-system-test-ConectEDU-5fba7-ões-de-formulários-aparecem-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js",
+                        "column": 5,
+                        "line": 134
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "3d1d68bcad61ced4810c-acb0df0f97258b87b01b",
+              "file": "full-system-test.spec.js",
+              "line": 133,
+              "column": 3
+            },
+            {
+              "title": "8. Deve verificar botões de PDF",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 11885,
+                      "error": {
+                        "message": "ReferenceError: page is not defined",
+                        "stack": "ReferenceError: page is not defined\n    at C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js:164:5",
+                        "location": {
+                          "file": "C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js",
+                          "column": 5,
+                          "line": 164
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 162 |\u001b[39m\n \u001b[90m 163 |\u001b[39m   test(\u001b[32m'8. Deve verificar botões de PDF'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 164 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'http://localhost/conectedu/frontend/#/relatorios'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 165 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m2000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 166 |\u001b[39m     \n \u001b[90m 167 |\u001b[39m     \u001b[36mconst\u001b[39m select \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'select'\u001b[39m)\u001b[33m.\u001b[39mfirst()\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js",
+                            "column": 5,
+                            "line": 164
+                          },
+                          "message": "ReferenceError: page is not defined\n\n\u001b[0m \u001b[90m 162 |\u001b[39m\n \u001b[90m 163 |\u001b[39m   test(\u001b[32m'8. Deve verificar botões de PDF'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 164 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'http://localhost/conectedu/frontend/#/relatorios'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 165 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m2000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 166 |\u001b[39m     \n \u001b[90m 167 |\u001b[39m     \u001b[36mconst\u001b[39m select \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'select'\u001b[39m)\u001b[33m.\u001b[39mfirst()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js:164:5\u001b[22m"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-11T12:05:40.425Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\xampp\\htdocs\\conectedu\\test-results\\full-system-test-ConectEDU-8f7ac-eve-verificar-botões-de-PDF-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\xampp\\htdocs\\conectedu\\test-results\\full-system-test-ConectEDU-8f7ac-eve-verificar-botões-de-PDF-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\xampp\\htdocs\\conectedu\\test-results\\full-system-test-ConectEDU-8f7ac-eve-verificar-botões-de-PDF-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js",
+                        "column": 5,
+                        "line": 164
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "3d1d68bcad61ced4810c-bca8177be673fccc9cbb",
+              "file": "full-system-test.spec.js",
+              "line": 163,
+              "column": 3
+            },
+            {
+              "title": "9. Deve acessar página de relatório de atendimento",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 14042,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✅ Página de relatório de atendimento acessível!\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-11T12:05:56.562Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3d1d68bcad61ced4810c-78725f5fe3bdb4ca89f2",
+              "file": "full-system-test.spec.js",
+              "line": 183,
+              "column": 3
+            },
+            {
+              "title": "10. Deve navegar pelo dashboard",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 6635,
+                      "error": {
+                        "message": "ReferenceError: page is not defined",
+                        "stack": "ReferenceError: page is not defined\n    at C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js:205:5",
+                        "location": {
+                          "file": "C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js",
+                          "column": 5,
+                          "line": 205
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 203 |\u001b[39m\n \u001b[90m 204 |\u001b[39m   test(\u001b[32m'10. Deve navegar pelo dashboard'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 205 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'http://localhost/conectedu/frontend/#/'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 206 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m2000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 207 |\u001b[39m     \n \u001b[90m 208 |\u001b[39m     \u001b[36mconst\u001b[39m pageContent \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mtextContent(\u001b[32m'body'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js",
+                            "column": 5,
+                            "line": 205
+                          },
+                          "message": "ReferenceError: page is not defined\n\n\u001b[0m \u001b[90m 203 |\u001b[39m\n \u001b[90m 204 |\u001b[39m   test(\u001b[32m'10. Deve navegar pelo dashboard'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 205 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'http://localhost/conectedu/frontend/#/'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 206 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m2000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 207 |\u001b[39m     \n \u001b[90m 208 |\u001b[39m     \u001b[36mconst\u001b[39m pageContent \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mtextContent(\u001b[32m'body'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js:205:5\u001b[22m"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-11T12:06:13.411Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\xampp\\htdocs\\conectedu\\test-results\\full-system-test-ConectEDU-47f9e-Deve-navegar-pelo-dashboard-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\xampp\\htdocs\\conectedu\\test-results\\full-system-test-ConectEDU-47f9e-Deve-navegar-pelo-dashboard-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\xampp\\htdocs\\conectedu\\test-results\\full-system-test-ConectEDU-47f9e-Deve-navegar-pelo-dashboard-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\xampp\\htdocs\\conectedu\\tests\\full-system-test.spec.js",
+                        "column": 5,
+                        "line": 205
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "3d1d68bcad61ced4810c-f9570070cf7521dec187",
+              "file": "full-system-test.spec.js",
+              "line": 204,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-11-11T12:04:07.252Z",
+    "duration": 132954.021,
+    "expected": 5,
+    "skipped": 0,
+    "unexpected": 5,
+    "flaky": 0
+  }
+}

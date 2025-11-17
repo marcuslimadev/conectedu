@@ -1,6 +1,7 @@
 <?php
 // backend/templates/pai-template.php
 
+include __DIR__ . '/partials/document-start.php';
 include __DIR__ . '/partials/header.php';
 
 $pai = $data['pai'];
@@ -194,4 +195,5 @@ if ($photo_path && file_exists($photo_path)) {
 
 <?php
 include __DIR__ . '/partials/footer.php';
+include __DIR__ . '/partials/document-end.php';
 ?>

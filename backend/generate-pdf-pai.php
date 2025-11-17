@@ -26,9 +26,10 @@ if (!$pai_id || !is_numeric($pai_id)) {
 
 try {
     // --- Busca de Dados ---
-    $sql = "SELECT p.*, s.name as student_name, s.photo_url
-            FROM planos_atendimento p
+    $sql = "SELECT p.*, s.name as student_name, s.photo_url, sch.name AS school_name
+            FROM plano_atendimento_forms p
             LEFT JOIN students s ON p.student_id = s.id
+            LEFT JOIN schools sch ON s.school_id = sch.id
             WHERE p.id = :id";
 
     $stmt = $pdo->prepare($sql);
@@ -40,14 +41,28 @@ try {
     }
 
     // --- Verificação de Permissões ---
-    if ($user['role'] !== 'admin' && $pai['teacher_id'] != $user['id']) {
+    if ($user['role'] !== 'admin' && $pai['created_by_teacher_id'] != $user['id']) {
         res(false, null, 'Sem permissão para gerar este PDF', 403);
     }
 
-    // --- Preparação dos Dados para o Template ---
+    $formData = json_decode($pai['form_data'] ?? '{}', true);
+    if (!is_array($formData)) {
+        $formData = [];
+    }
+
+    if (empty($formData['nome_aluno']) && !empty($pai['student_name'])) {
+        $formData['nome_aluno'] = $pai['student_name'];
+    }
+
+    $studentName = $pai['student_name'] ?? ($formData['nome_aluno'] ?? 'Estudante');
+
+    if (empty($formData['nome_escola']) && !empty($pai['school_name'])) {
+        $formData['nome_escola'] = $pai['school_name'];
+    }
+
     $data = [
-        'pai' => $pai,
-        'photo_path' => $pai['photo_url'] ? __DIR__ . '/../' . $pai['photo_url'] : null,
+        'pai' => $formData,
+        'photo_path' => !empty($pai['photo_url']) ? __DIR__ . '/../' . $pai['photo_url'] : null,
         'main_title' => 'PLANO DE ATENDIMENTO INDIVIDUAL',
         'document_date' => date('d/m/Y'),
     ];
@@ -56,7 +71,7 @@ try {
     $pdfGenerator = new PdfGenerator($pdo);
 
     $pdfGenerator->setMetadata(
-        'PAI - ' . $pai['student_name'],
+        'PAI - ' . $studentName,
         'ConectEDU - Sistema AEE',
         'Plano de Atendimento Individual (PAI)',
         'AEE, PAI, Educação Especial'
@@ -67,7 +82,7 @@ try {
 
     // --- Salvamento e Registro ---
     $uploadDir = __DIR__ . '/uploads/documentos/pais/';
-    $fileName = 'PAI_' . sanitizeFileName($pai['student_name']) . '_' . date('Y-m-d') . '.pdf';
+    $fileName = 'PAI_' . sanitizeFileName($studentName) . '_' . date('Y-m-d') . '.pdf';
     $filePath = $uploadDir . $fileName;
     $relativeFilePath = 'backend/uploads/documentos/pais/' . $fileName;
 
@@ -80,7 +95,7 @@ try {
         $user['id'],
         $relativeFilePath,
         $fileName,
-        'PAI - ' . $pai['student_name'] . ' - ' . date('d/m/Y')
+        'PAI - ' . $studentName . ' - ' . date('d/m/Y')
     );
 
     // --- Resposta ---

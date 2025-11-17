@@ -2,6 +2,7 @@
 // backend/templates/pdi-template.php
 
 // --- INCLUDES E HELPERS ---
+include_once __DIR__ . '/partials/document-start.php';
 include_once __DIR__ . '/partials/header.php';
 
 // Helper function específica para este template
@@ -174,4 +175,5 @@ if ($photo_path && file_exists($photo_path)) {
 <?php
 // Incluir o rodapé
 include __DIR__ . '/partials/footer.php';
+include __DIR__ . '/partials/document-end.php';
 ?>

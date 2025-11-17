@@ -27,7 +27,7 @@ if (!$pdi_id || !is_numeric($pdi_id)) {
 try {
     // --- Busca de Dados ---
     $sql = "SELECT p.*, s.name as student_name, s.photo_url, s.birth_date, sch.name as school_name
-            FROM pdi_conectaee p
+            FROM pdi_forms p
             LEFT JOIN students s ON p.student_id = s.id
             LEFT JOIN schools sch ON s.school_id = sch.id
             WHERE p.id = :id";
@@ -41,17 +41,32 @@ try {
     }
 
     // --- Verificação de Permissões ---
-    if ($user['role'] !== 'admin' && $pdi['teacher_id'] != $user['id']) {
+    if ($user['role'] !== 'admin' && $pdi['created_by_teacher_id'] != $user['id']) {
         res(false, null, 'Sem permissão para gerar este PDF', 403);
     }
 
+    $formData = json_decode($pdi['form_data'] ?? '{}', true);
+    if (!is_array($formData)) {
+        $formData = [];
+    }
+
+    if (empty($formData['nome_aluno']) && !empty($pdi['student_name'])) {
+        $formData['nome_aluno'] = $pdi['student_name'];
+    }
+
+    if (empty($formData['nome_escola']) && !empty($pdi['school_name'])) {
+        $formData['nome_escola'] = $pdi['school_name'];
+    }
+
+    $studentName = $pdi['student_name'] ?? ($formData['nome_aluno'] ?? 'Estudante');
+
     // --- Preparação dos Dados para o Template ---
     $data = [
-        'pdi' => $pdi,
-        'aspectos_psicomotores' => json_decode($pdi['aspectos_psicomotores'] ?? '{}', true) ?: [],
-        'aspectos_pedagogicos' => json_decode($pdi['aspectos_pedagogicos'] ?? '{}', true) ?: [],
-        'planejamento_bimestral' => json_decode($pdi['planejamento_bimestral'] ?? '{}', true) ?: [],
-        'photo_path' => $pdi['photo_url'] ? __DIR__ . '/../' . $pdi['photo_url'] : null,
+        'pdi' => $formData,
+        'aspectos_psicomotores' => $formData['aspectos_psicomotores'] ?? [],
+        'aspectos_pedagogicos' => $formData['aspectos_pedagogicos'] ?? [],
+        'planejamento_bimestral' => $formData['planejamento_bimestral'] ?? [],
+        'photo_path' => !empty($pdi['photo_url']) ? __DIR__ . '/../' . $pdi['photo_url'] : null,
         // Passando as listas de itens para o template
         'psicomotores_items' => get_psicomotores_items(),
         'pedagogicos_items' => get_pedagogicos_items(),
@@ -63,7 +78,7 @@ try {
     $pdfGenerator = new PdfGenerator($pdo);
 
     $pdfGenerator->setMetadata(
-        'PDI - ' . $pdi['student_name'],
+        'PDI - ' . $studentName,
         'ConectEDU - Sistema AEE',
         'Plano de Desenvolvimento Individual (PDI)',
         'AEE, PDI, Educação Especial'
@@ -74,7 +89,7 @@ try {
 
     // --- Salvamento e Registro ---
     $uploadDir = __DIR__ . '/uploads/documentos/pdis/';
-    $fileName = 'PDI_' . sanitizeFileName($pdi['student_name']) . '_' . date('Y-m-d') . '.pdf';
+    $fileName = 'PDI_' . sanitizeFileName($studentName) . '_' . date('Y-m-d') . '.pdf';
     $filePath = $uploadDir . $fileName;
     $relativeFilePath = 'backend/uploads/documentos/pdis/' . $fileName;
 
@@ -87,7 +102,7 @@ try {
         $user['id'],
         $relativeFilePath,
         $fileName,
-        'PDI - ' . $pdi['student_name'] . ' - ' . date('d/m/Y')
+        'PDI - ' . $studentName . ' - ' . date('d/m/Y')
     );
 
     // --- Resposta ---

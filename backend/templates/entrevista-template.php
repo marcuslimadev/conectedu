@@ -2,6 +2,7 @@
 // backend/templates/entrevista-template.php
 
 // Incluir o cabeçalho
+include __DIR__ . '/partials/document-start.php';
 include __DIR__ . '/partials/header.php';
 
 // --- Preparação de dados específicos do template ---
@@ -245,4 +246,5 @@ if (!empty($data['photo_url'])) {
 <?php
 // Incluir o rodapé
 include __DIR__ . '/partials/footer.php';
+include __DIR__ . '/partials/document-end.php';
 ?>

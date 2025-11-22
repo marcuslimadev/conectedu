@@ -4,8 +4,8 @@
   "description": "Sistema de AEE ConectEDU - Frontend",
   "main": "index.js",
   "scripts": {
-    "build-css": "tailwindcss -i ./frontend/tailwind-src.css -o ./frontend/tailwind-local.css --watch",
-    "build-css-prod": "tailwindcss -i ./frontend/tailwind-src.css -o ./frontend/tailwind-local.css --minify",
+    "build-css": "node ./node_modules/tailwindcss/lib/cli.js -i ./frontend/tailwind-src.css -o ./frontend/tailwind-local.css --watch",
+    "build-css-prod": "node ./node_modules/tailwindcss/lib/cli.js -i ./frontend/tailwind-src.css -o ./frontend/tailwind-local.css --minify",
     "dev": "npm run build-css",
     "build": "npm run build-css-prod"
   },

@@ -1142,19 +1142,31 @@ const AlunosTW = {
 // Tela de Registro
 const RegisterTW = {
   template: `
-  <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative">
+    <!-- Botão Dark Mode -->
+    <button 
+      @click="$root.toggleDarkMode()"
+      class="absolute top-4 right-4 p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+      :title="$root.darkMode ? 'Ativar Modo Claro' : 'Ativar Modo Escuro'">
+      <svg v-if="!$root.darkMode" class="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+      </svg>
+      <svg v-else class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+      </svg>
+    </button>
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
       <div class="text-center">
         <div class="mx-auto h-40 w-40 flex items-center justify-center mb-4">
           <img src="./icons/logo-icon.png" alt="ConectAEE" class="h-36 w-36">
         </div>
-        <h2 class="text-3xl font-bold text-gray-900">Cadastro de Professor</h2>
-        <p class="mt-2 text-sm text-gray-600">Cadastre-se como professor no ConectAEE</p>
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Cadastro de Professor</h2>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Cadastre-se como professor no ConectAEE</p>
       </div>
     </div>
 
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-      <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+      <div class="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
         <form @submit.prevent="register" class="space-y-6">
           <div>
             <label class="text-sm font-medium text-gray-700 mb-1 block" for="reg-name">Nome Completo</label>
@@ -3196,16 +3208,16 @@ const Layout = {
       
       <!-- Sidebar -->
       <aside 
-        :class="['fixed lg:static inset-y-0 left-0 z-50 w-72 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out flex flex-col', sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0']">
+        :class="['fixed lg:static inset-y-0 left-0 z-50 w-72 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transform transition-transform duration-300 ease-in-out flex flex-col', sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0']">
         
         <!-- Header da Sidebar -->
-        <div class="flex-shrink-0 p-4 lg:p-6 border-b border-gray-200">
+        <div class="flex-shrink-0 p-4 lg:p-6 border-b border-gray-200 dark:border-gray-700">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <img src="./icons/logo-icon.png" alt="ConectAEE" class="h-12 w-12 lg:h-16 lg:w-16">
               <div class="hidden sm:block">
-                <h5 class="text-lg lg:text-xl font-bold text-gray-900">ConectAEE</h5>
-                <p class="text-xs lg:text-sm text-gray-600">Sistema AEE</p>
+                <h5 class="text-lg lg:text-xl font-bold text-gray-900 dark:text-white">ConectAEE</h5>
+                <p class="text-xs lg:text-sm text-gray-600 dark:text-gray-400">Sistema AEE</p>
               </div>
             </div>
             <button 
@@ -3219,7 +3231,7 @@ const Layout = {
         <!-- Navegação Scrollable -->
         <nav class="flex-1 overflow-y-auto p-3 space-y-4">
           <div>
-            <h6 class="mb-2 text-xs font-semibold text-gray-700 uppercase tracking-wider">
+            <h6 class="mb-2 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
               Dashboard
             </h6>
             <router-link to="/" class="nav-link-tw" @click="closeMobileSidebar">
@@ -3234,7 +3246,7 @@ const Layout = {
           </div>
           
           <div>
-            <h6 class="mb-2 text-xs font-semibold text-gray-700 uppercase tracking-wider">
+            <h6 class="mb-2 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
               Gestão
             </h6>
             <!-- Alunos - Oculto para admin -->
@@ -3273,7 +3285,7 @@ const Layout = {
           
           <!-- Formulários AEE - Oculto apenas de admin -->
           <div v-if="user && user.role !== 'admin'">
-            <h6 class="mb-2 text-xs font-semibold text-gray-700 uppercase tracking-wider">
+            <h6 class="mb-2 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
               Formulários AEE
             </h6>
             <router-link to="entrevista-completa" class="nav-link-tw bg-indigo-50 border-l-4 border-indigo-600" @click="closeMobileSidebar" title="Formulário completo com 180+ campos">
@@ -3300,7 +3312,7 @@ const Layout = {
           </div>
           
           <div>
-            <h6 class="mb-2 text-xs font-semibold text-gray-700 uppercase tracking-wider">
+            <h6 class="mb-2 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
               Relatórios
             </h6>
             <router-link to="relatorios" class="nav-link-tw" @click="closeMobileSidebar">
@@ -3316,7 +3328,7 @@ const Layout = {
           </div>
           
           <div>
-            <h6 class="mb-2 text-xs font-semibold text-gray-700 uppercase tracking-wider">
+            <h6 class="mb-2 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
               Recursos
             </h6>
             <router-link to="legislacoes" class="nav-link-tw" @click="closeMobileSidebar">
@@ -3337,6 +3349,16 @@ const Layout = {
               </svg>
               Documentos Gerados
             </router-link>
+            <!-- Toggle Dark Mode -->
+            <button type="button" class="nav-link-tw w-full text-left" @click.prevent="$root.toggleDarkMode()">
+              <svg v-if="!$root.darkMode" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+              </svg>
+              <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+              </svg>
+              {{ $root.darkMode ? 'Modo Claro' : 'Modo Escuro' }}
+            </button>
             <button type="button" class="nav-link-tw logout-link w-full text-left" @click.prevent="$logout()">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M17 16l4-4m0 0l-4-4m4 4H7"/>
@@ -3350,7 +3372,7 @@ const Layout = {
       </aside>
       
       <!-- Conteúdo principal -->
-      <main class="flex-1 flex flex-col overflow-hidden lg:ml-0">
+      <main class="flex-1 flex flex-col overflow-hidden lg:ml-0 bg-gray-50 dark:bg-gray-900">
         <!-- Header melhorado com gradiente e informações úteis -->
         <header style="display:none" class="flex-shrink-0 bg-blue-600   shadow-lg">
           <div class="px-4 py-3 lg:px-6">
@@ -3410,6 +3432,18 @@ const Layout = {
                     <p class="text-xs text-white/90 capitalize">{{ user?.role || 'Professor' }}</p>
                   </div>
                 </div>
+                <!-- Toggle Dark Mode -->
+                <button 
+                  @click="$root.toggleDarkMode()"
+                  class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white/30"
+                  :title="$root.darkMode ? 'Ativar Modo Claro' : 'Ativar Modo Escuro'">
+                  <svg v-if="!$root.darkMode" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+                  </svg>
+                  <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+                  </svg>
+                </button>
                 <!-- Botão Sair -->
                 <button 
                   class="px-3 py-1.5 rounded border border-red-200 text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300"
@@ -3644,17 +3678,29 @@ const Login = {
       </div>
 
       <!-- Painel de login à direita -->
-      <div class="relative bg-gray-50 flex items-center justify-center p-6 sm:p-10">
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_10%_10%,rgba(99,102,241,0.08),transparent_40%),radial-gradient(circle_at_90%_20%,rgba(59,130,246,0.06),transparent_35%)]"></div>
+      <div class="relative bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-6 sm:p-10">
+        <!-- Botão Dark Mode -->
+        <button 
+          @click="$root.toggleDarkMode()"
+          class="absolute top-4 right-4 p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+          :title="$root.darkMode ? 'Ativar Modo Claro' : 'Ativar Modo Escuro'">
+          <svg v-if="!$root.darkMode" class="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+          </svg>
+          <svg v-else class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+          </svg>
+        </button>
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_10%_10%,rgba(99,102,241,0.08),transparent_40%),radial-gradient(circle_at_90%_20%,rgba(59,130,246,0.06),transparent_35%)] dark:opacity-20"></div>
         <div class="relative w-full max-w-md">
-          <div class="bg-white/90 backdrop-blur-xl border border-gray-200 shadow-xl rounded-2xl p-6 sm:p-8">
+          <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl border border-gray-200 dark:border-gray-700 shadow-xl rounded-2xl p-6 sm:p-8">
             <div class="flex items-center gap-3 mb-6">
               <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-md">
                 <img src="./icons/logo-icon.png" alt="ConectAEE" class="w-7 h-7">
               </div>
               <div>
-                <h2 class="text-xl font-semibold text-gray-900">Bem-vindo(a)</h2>
-                <p class="text-sm text-gray-600">Entre com suas credenciais</p>
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Bem-vindo(a)</h2>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Entre com suas credenciais</p>
               </div>
             </div>
 
@@ -9341,6 +9387,26 @@ const app = createApp({
   components: {
     // PainelDesenvolvimento: window.PainelDesenvolvimento
   },
+  mounted() {
+    // Carregar preferência de dark mode do localStorage
+    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+    this.darkMode = savedDarkMode;
+    this.applyDarkMode();
+  },
+  methods: {
+    toggleDarkMode() {
+      this.darkMode = !this.darkMode;
+      localStorage.setItem('darkMode', this.darkMode);
+      this.applyDarkMode();
+    },
+    applyDarkMode() {
+      if (this.darkMode) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    },
+  },
   template: `
     <div>
       <!-- <PainelDesenvolvimento /> -->
@@ -9393,6 +9459,7 @@ const app = createApp({
     return {
       user: null, // User global - será preenchido pelo Layout
       loading: true,
+      darkMode: false, // Dark mode toggle
       toasts: [],
       toastIdCounter: 0,
       // Voice modal (reutilizável)

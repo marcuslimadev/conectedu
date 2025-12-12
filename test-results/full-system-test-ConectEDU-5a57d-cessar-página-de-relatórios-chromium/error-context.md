@@ -1,0 +1,465 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - navigation "Links de navegação rápida":
+    - list
+  - generic [ref=e4]:
+    - complementary [ref=e5]:
+      - generic [ref=e8]:
+        - img "ConectAEE" [ref=e9]
+        - generic [ref=e10]:
+          - heading "ConectAEE" [level=5] [ref=e11]
+          - paragraph [ref=e12]: Sistema AEE
+      - navigation [ref=e13]:
+        - generic [ref=e14]:
+          - heading "Dashboard" [level=6] [ref=e15]
+          - link "Visão Geral" [ref=e16] [cursor=pointer]:
+            - /url: "#/"
+            - img [ref=e17]
+            - text: Visão Geral
+        - generic [ref=e22]:
+          - heading "Gestão" [level=6] [ref=e23]
+          - link "Usuários" [ref=e24] [cursor=pointer]:
+            - /url: "#/usuarios"
+            - img [ref=e25]
+            - text: Usuários
+          - link "Supervisão de Professores" [ref=e28] [cursor=pointer]:
+            - /url: "#/supervisao"
+            - img [ref=e29]
+            - text: Supervisão de Professores
+        - generic [ref=e32]:
+          - heading "Relatórios" [level=6] [ref=e33]
+          - link "Relatórios" [ref=e34] [cursor=pointer]:
+            - /url: "#/relatorios"
+            - img [ref=e35]
+            - text: Relatórios
+        - generic [ref=e38]:
+          - heading "Recursos" [level=6] [ref=e39]
+          - link "Legislações" [ref=e40] [cursor=pointer]:
+            - /url: "#/legislacoes"
+            - img [ref=e41]
+            - text: Legislações
+          - link "Documentos Gerados" [ref=e44] [cursor=pointer]:
+            - /url: "#/documentos"
+            - img [ref=e45]
+            - text: Documentos Gerados
+          - button "Sair" [ref=e49] [cursor=pointer]:
+            - img [ref=e50]
+            - text: Sair
+    - main [ref=e54]:
+      - generic [ref=e55]:
+        - generic [ref=e56]:
+          - generic [ref=e57]:
+            - generic [ref=e58]:
+              - generic [ref=e59]:
+                - heading "Painel administrativo" [level=1] [ref=e60]
+                - paragraph [ref=e61]: Resumo do engajamento das equipes e dos formulários AEE.
+              - generic [ref=e62]:
+                - textbox "Buscar aluno, escola ou professor..." [ref=e63]
+                - combobox [ref=e64]:
+                  - option "Todos os professores" [selected]
+                  - option "Professor"
+                  - option "Ana Paula Costa"
+                  - option "João Silva Atualizado"
+                  - option "Marcus Lima"
+                  - option "Teste Usuario Sistema"
+                  - option "Professor"
+                  - option "Maria Santos"
+                  - option "Marcelo Souza"
+            - generic [ref=e65]:
+              - generic [ref=e66]:
+                - paragraph [ref=e67]: Alunos cadastrados
+                - paragraph [ref=e68]: "7"
+                - paragraph [ref=e69]: Distribuídos por toda a rede
+              - generic [ref=e70]:
+                - paragraph [ref=e71]: Professores ativos
+                - paragraph [ref=e72]: "8"
+                - paragraph [ref=e73]: Usuários com perfil professor
+              - generic [ref=e74]:
+                - paragraph [ref=e75]: Escolas atendidas
+                - paragraph [ref=e76]: "4"
+                - paragraph [ref=e77]: Com alunos cadastrados
+              - generic [ref=e78]:
+                - paragraph [ref=e79]: Pendências críticas
+                - paragraph [ref=e80]: "6"
+                - paragraph [ref=e81]: Alunos com média abaixo de 80%
+            - generic [ref=e82]:
+              - button "Gerenciar usuários" [ref=e83] [cursor=pointer]:
+                - generic [ref=e84]: Gerenciar usuários
+              - button "Supervisão de professores" [ref=e85] [cursor=pointer]:
+                - generic [ref=e86]: Supervisão de professores
+              - button "Relatórios consolidados" [ref=e87] [cursor=pointer]:
+                - generic [ref=e88]: Relatórios consolidados
+          - generic [ref=e89]:
+            - generic [ref=e90]:
+              - generic [ref=e91]:
+                - heading "Andamento dos formulários (rede)" [level=2] [ref=e92]
+                - paragraph [ref=e93]: Média considerando o filtro atual
+              - generic [ref=e94]: Atualizado automaticamente
+            - img "Média geral dos formulários" [ref=e97]:
+              - generic [ref=e104]: Percentual de conclus?o (%)
+              - generic [ref=e110]: Média geral dos formulários
+              - generic [ref=e112]:
+                - generic [ref=e114]:
+                  - generic [ref=e115]: 13%
+                  - text: 13%
+                - generic [ref=e117]:
+                  - generic [ref=e118]: 14%
+                  - text: 14%
+                - generic [ref=e120]:
+                  - generic [ref=e121]: 14%
+                  - text: 14%
+              - generic [ref=e127] [cursor=pointer]: Rede
+              - generic [ref=e129]:
+                - generic [ref=e130]: Entrevista
+                - generic [ref=e131]: PDI
+                - generic [ref=e132]: PAI
+              - generic [ref=e133]:
+                - generic [ref=e134]: "0"
+                - generic [ref=e135]: "25"
+                - generic [ref=e136]: "50"
+                - generic [ref=e137]: "75"
+                - generic [ref=e138]: "100"
+          - generic [ref=e139]:
+            - generic [ref=e140]:
+              - generic [ref=e141]:
+                - heading "Professores e engajamento" [level=2] [ref=e142]
+                - generic [ref=e143]: Ordenado por número de alunos
+              - table [ref=e145]:
+                - rowgroup [ref=e146]:
+                  - row "Professor Alunos Média Completos Pendências críticas" [ref=e147]:
+                    - columnheader "Professor" [ref=e148]
+                    - columnheader "Alunos" [ref=e149]
+                    - columnheader "Média" [ref=e150]
+                    - columnheader "Completos" [ref=e151]
+                    - columnheader "Pendências críticas" [ref=e152]
+                - rowgroup [ref=e153]:
+                  - row "Professor professor@teste.com 7 14% 1 6" [ref=e154]:
+                    - cell "Professor professor@teste.com" [ref=e155]:
+                      - generic [ref=e156]: Professor
+                      - generic [ref=e157]: professor@teste.com
+                    - cell "7" [ref=e158]
+                    - cell "14%" [ref=e159]
+                    - cell "1" [ref=e160]
+                    - cell "6" [ref=e161]
+                  - row "Ana Paula Costa ana.costa@teste.com 0 0% 0 0" [ref=e162]:
+                    - cell "Ana Paula Costa ana.costa@teste.com" [ref=e163]:
+                      - generic [ref=e164]: Ana Paula Costa
+                      - generic [ref=e165]: ana.costa@teste.com
+                    - cell "0" [ref=e166]
+                    - cell "0%" [ref=e167]
+                    - cell "0" [ref=e168]
+                    - cell "0" [ref=e169]
+                  - row "João Silva Atualizado joao.teste@conectedu.com 0 0% 0 0" [ref=e170]:
+                    - cell "João Silva Atualizado joao.teste@conectedu.com" [ref=e171]:
+                      - generic [ref=e172]: João Silva Atualizado
+                      - generic [ref=e173]: joao.teste@conectedu.com
+                    - cell "0" [ref=e174]
+                    - cell "0%" [ref=e175]
+                    - cell "0" [ref=e176]
+                    - cell "0" [ref=e177]
+                  - row "Marcus Lima marcusabagnale@gmail.com 0 0% 0 0" [ref=e178]:
+                    - cell "Marcus Lima marcusabagnale@gmail.com" [ref=e179]:
+                      - generic [ref=e180]: Marcus Lima
+                      - generic [ref=e181]: marcusabagnale@gmail.com
+                    - cell "0" [ref=e182]
+                    - cell "0%" [ref=e183]
+                    - cell "0" [ref=e184]
+                    - cell "0" [ref=e185]
+                  - row "Teste Usuario Sistema teste.usuario@teste.com 0 0% 0 0" [ref=e186]:
+                    - cell "Teste Usuario Sistema teste.usuario@teste.com" [ref=e187]:
+                      - generic [ref=e188]: Teste Usuario Sistema
+                      - generic [ref=e189]: teste.usuario@teste.com
+                    - cell "0" [ref=e190]
+                    - cell "0%" [ref=e191]
+                    - cell "0" [ref=e192]
+                    - cell "0" [ref=e193]
+                  - row "Professor professor@conectedu.local 0 0% 0 0" [ref=e194]:
+                    - cell "Professor professor@conectedu.local" [ref=e195]:
+                      - generic [ref=e196]: Professor
+                      - generic [ref=e197]: professor@conectedu.local
+                    - cell "0" [ref=e198]
+                    - cell "0%" [ref=e199]
+                    - cell "0" [ref=e200]
+                    - cell "0" [ref=e201]
+                  - row "Maria Santos maria.santos@teste.com 0 0% 0 0" [ref=e202]:
+                    - cell "Maria Santos maria.santos@teste.com" [ref=e203]:
+                      - generic [ref=e204]: Maria Santos
+                      - generic [ref=e205]: maria.santos@teste.com
+                    - cell "0" [ref=e206]
+                    - cell "0%" [ref=e207]
+                    - cell "0" [ref=e208]
+                    - cell "0" [ref=e209]
+                  - row "Marcelo Souza marcelo.souza@gmail.com 0 0% 0 0" [ref=e210]:
+                    - cell "Marcelo Souza marcelo.souza@gmail.com" [ref=e211]:
+                      - generic [ref=e212]: Marcelo Souza
+                      - generic [ref=e213]: marcelo.souza@gmail.com
+                    - cell "0" [ref=e214]
+                    - cell "0%" [ref=e215]
+                    - cell "0" [ref=e216]
+                    - cell "0" [ref=e217]
+            - generic [ref=e218]:
+              - generic [ref=e219]:
+                - heading "Alunos com menor avanço" [level=2] [ref=e220]
+                - button "Ir para alunos" [ref=e221] [cursor=pointer]
+              - generic [ref=e222]:
+                - generic [ref=e223]:
+                  - generic [ref=e224]:
+                    - generic [ref=e225]:
+                      - paragraph [ref=e226]: Aluno Teste
+                      - paragraph [ref=e227]: Escola Estadual Professor Carlos Lima - Professor
+                    - generic [ref=e228]: 0%
+                  - generic [ref=e229]:
+                    - generic [ref=e230]: "Entrevista: 0%"
+                    - generic [ref=e231]: "PDI: 0%"
+                    - generic [ref=e232]: "PAI: 0%"
+                  - generic [ref=e233]:
+                    - button "Acompanhar entrevista" [ref=e234] [cursor=pointer]
+                    - button "Revisar PDI" [ref=e235] [cursor=pointer]
+                    - button "Ajustar PAI" [ref=e236] [cursor=pointer]
+                - generic [ref=e237]:
+                  - generic [ref=e238]:
+                    - generic [ref=e239]:
+                      - paragraph [ref=e240]: Aluno teste cadastro
+                      - paragraph [ref=e241]: Escola Estadual Professor Carlos Lima - Professor
+                    - generic [ref=e242]: 0%
+                  - generic [ref=e243]:
+                    - generic [ref=e244]: "Entrevista: 0%"
+                    - generic [ref=e245]: "PDI: 0%"
+                    - generic [ref=e246]: "PAI: 0%"
+                  - generic [ref=e247]:
+                    - button "Acompanhar entrevista" [ref=e248] [cursor=pointer]
+                    - button "Revisar PDI" [ref=e249] [cursor=pointer]
+                    - button "Ajustar PAI" [ref=e250] [cursor=pointer]
+                - generic [ref=e251]:
+                  - generic [ref=e252]:
+                    - generic [ref=e253]:
+                      - paragraph [ref=e254]: Jean Cassio
+                      - paragraph [ref=e255]: Escola Estadual Professor Carlos Lima - Professor
+                    - generic [ref=e256]: 0%
+                  - generic [ref=e257]:
+                    - generic [ref=e258]: "Entrevista: 0%"
+                    - generic [ref=e259]: "PDI: 0%"
+                    - generic [ref=e260]: "PAI: 0%"
+                  - generic [ref=e261]:
+                    - button "Acompanhar entrevista" [ref=e262] [cursor=pointer]
+                    - button "Revisar PDI" [ref=e263] [cursor=pointer]
+                    - button "Ajustar PAI" [ref=e264] [cursor=pointer]
+                - generic [ref=e265]:
+                  - generic [ref=e266]:
+                    - generic [ref=e267]:
+                      - paragraph [ref=e268]: João Pedro Silva Santos
+                      - paragraph [ref=e269]: EMEF Maria Santos - Professor
+                    - generic [ref=e270]: 0%
+                  - generic [ref=e271]:
+                    - generic [ref=e272]: "Entrevista: 0%"
+                    - generic [ref=e273]: "PDI: 0%"
+                    - generic [ref=e274]: "PAI: 0%"
+                  - generic [ref=e275]:
+                    - button "Acompanhar entrevista" [ref=e276] [cursor=pointer]
+                    - button "Revisar PDI" [ref=e277] [cursor=pointer]
+                    - button "Ajustar PAI" [ref=e278] [cursor=pointer]
+                - generic [ref=e279]:
+                  - generic [ref=e280]:
+                    - generic [ref=e281]:
+                      - paragraph [ref=e282]: Pedro Henrique
+                      - paragraph [ref=e283]: Escola Menino Feliz - Professor
+                    - generic [ref=e284]: 0%
+                  - generic [ref=e285]:
+                    - generic [ref=e286]: "Entrevista: 0%"
+                    - generic [ref=e287]: "PDI: 0%"
+                    - generic [ref=e288]: "PAI: 0%"
+                  - generic [ref=e289]:
+                    - button "Acompanhar entrevista" [ref=e290] [cursor=pointer]
+                    - button "Revisar PDI" [ref=e291] [cursor=pointer]
+                    - button "Ajustar PAI" [ref=e292] [cursor=pointer]
+                - generic [ref=e293]:
+                  - generic [ref=e294]:
+                    - generic [ref=e295]:
+                      - paragraph [ref=e296]: Zezinho da Esquina
+                      - paragraph [ref=e297]: EMEF Maria Santos - Professor
+                    - generic [ref=e298]: 0%
+                  - generic [ref=e299]:
+                    - generic [ref=e300]: "Entrevista: 0%"
+                    - generic [ref=e301]: "PDI: 0%"
+                    - generic [ref=e302]: "PAI: 0%"
+                  - generic [ref=e303]:
+                    - button "Acompanhar entrevista" [ref=e304] [cursor=pointer]
+                    - button "Revisar PDI" [ref=e305] [cursor=pointer]
+                    - button "Ajustar PAI" [ref=e306] [cursor=pointer]
+        - generic [ref=e307]:
+          - heading "Alunos (visão completa) (7 registros)" [level=2] [ref=e308]
+          - generic [ref=e309]:
+            - generic [ref=e310]:
+              - generic [ref=e311]:
+                - generic [ref=e312]: AT
+                - generic [ref=e313]:
+                  - heading "Aluno Teste" [level=3] [ref=e314]
+                  - paragraph [ref=e315]: Escola Estadual Professor Carlos Lima
+                  - paragraph [ref=e316]: "Prof: Professor"
+              - generic [ref=e317]:
+                - generic [ref=e319]:
+                  - generic [ref=e320]: Entrevista
+                  - generic [ref=e321]: 0%
+                - generic [ref=e324]:
+                  - generic [ref=e325]: PDI
+                  - generic [ref=e326]: 0%
+                - generic [ref=e329]:
+                  - generic [ref=e330]: PAI
+                  - generic [ref=e331]: 0%
+              - generic [ref=e334]:
+                - generic [ref=e335]: Média Geral
+                - generic [ref=e336]: 0%
+              - generic [ref=e337]:
+                - button "Entrevista" [ref=e338] [cursor=pointer]
+                - button "PDI" [ref=e339] [cursor=pointer]
+                - button "PAI" [ref=e340] [cursor=pointer]
+            - generic [ref=e341]:
+              - generic [ref=e342]:
+                - generic [ref=e343]: AC
+                - generic [ref=e344]:
+                  - heading "Aluno teste cadastro" [level=3] [ref=e345]
+                  - paragraph [ref=e346]: Escola Estadual Professor Carlos Lima
+                  - paragraph [ref=e347]: "Prof: Professor"
+              - generic [ref=e348]:
+                - generic [ref=e350]:
+                  - generic [ref=e351]: Entrevista
+                  - generic [ref=e352]: 0%
+                - generic [ref=e355]:
+                  - generic [ref=e356]: PDI
+                  - generic [ref=e357]: 0%
+                - generic [ref=e360]:
+                  - generic [ref=e361]: PAI
+                  - generic [ref=e362]: 0%
+              - generic [ref=e365]:
+                - generic [ref=e366]: Média Geral
+                - generic [ref=e367]: 0%
+              - generic [ref=e368]:
+                - button "Entrevista" [ref=e369] [cursor=pointer]
+                - button "PDI" [ref=e370] [cursor=pointer]
+                - button "PAI" [ref=e371] [cursor=pointer]
+            - generic [ref=e372]:
+              - generic [ref=e373]:
+                - generic [ref=e374]: JC
+                - generic [ref=e375]:
+                  - heading "Jean Cassio" [level=3] [ref=e376]
+                  - paragraph [ref=e377]: Escola Estadual Professor Carlos Lima
+                  - paragraph [ref=e378]: "Prof: Professor"
+              - generic [ref=e379]:
+                - generic [ref=e381]:
+                  - generic [ref=e382]: Entrevista
+                  - generic [ref=e383]: 0%
+                - generic [ref=e386]:
+                  - generic [ref=e387]: PDI
+                  - generic [ref=e388]: 0%
+                - generic [ref=e391]:
+                  - generic [ref=e392]: PAI
+                  - generic [ref=e393]: 0%
+              - generic [ref=e396]:
+                - generic [ref=e397]: Média Geral
+                - generic [ref=e398]: 0%
+              - generic [ref=e399]:
+                - button "Entrevista" [ref=e400] [cursor=pointer]
+                - button "PDI" [ref=e401] [cursor=pointer]
+                - button "PAI" [ref=e402] [cursor=pointer]
+            - generic [ref=e403]:
+              - generic [ref=e404]:
+                - generic [ref=e405]: JS
+                - generic [ref=e406]:
+                  - heading "João Pedro Silva Santos" [level=3] [ref=e407]
+                  - paragraph [ref=e408]: EMEF Maria Santos
+                  - paragraph [ref=e409]: "Prof: Professor"
+              - generic [ref=e410]:
+                - generic [ref=e412]:
+                  - generic [ref=e413]: Entrevista
+                  - generic [ref=e414]: 0%
+                - generic [ref=e417]:
+                  - generic [ref=e418]: PDI
+                  - generic [ref=e419]: 0%
+                - generic [ref=e422]:
+                  - generic [ref=e423]: PAI
+                  - generic [ref=e424]: 0%
+              - generic [ref=e427]:
+                - generic [ref=e428]: Média Geral
+                - generic [ref=e429]: 0%
+              - generic [ref=e430]:
+                - button "Entrevista" [ref=e431] [cursor=pointer]
+                - button "PDI" [ref=e432] [cursor=pointer]
+                - button "PAI" [ref=e433] [cursor=pointer]
+            - generic [ref=e434]:
+              - generic [ref=e435]:
+                - generic [ref=e436]: JS
+                - generic [ref=e437]:
+                  - heading "João Penca da Silva Souza" [level=3] [ref=e438]
+                  - paragraph [ref=e439]: Teste W
+                  - paragraph [ref=e440]: "Prof: Professor"
+              - generic [ref=e441]:
+                - generic [ref=e443]:
+                  - generic [ref=e444]: Entrevista
+                  - generic [ref=e445]: 93%
+                - generic [ref=e449]:
+                  - generic [ref=e450]: PDI
+                  - generic [ref=e451]: 99%
+                - generic [ref=e455]:
+                  - generic [ref=e456]: PAI
+                  - generic [ref=e457]: 100%
+              - generic [ref=e461]:
+                - generic [ref=e462]: Média Geral
+                - generic [ref=e463]: 97%
+              - generic [ref=e464]:
+                - button "Entrevista" [ref=e465] [cursor=pointer]
+                - button "PDI" [ref=e466] [cursor=pointer]
+                - button "PAI" [ref=e467] [cursor=pointer]
+            - generic [ref=e468]:
+              - generic [ref=e469]:
+                - generic [ref=e470]: PH
+                - generic [ref=e471]:
+                  - heading "Pedro Henrique" [level=3] [ref=e472]
+                  - paragraph [ref=e473]: Escola Menino Feliz
+                  - paragraph [ref=e474]: "Prof: Professor"
+              - generic [ref=e475]:
+                - generic [ref=e477]:
+                  - generic [ref=e478]: Entrevista
+                  - generic [ref=e479]: 0%
+                - generic [ref=e482]:
+                  - generic [ref=e483]: PDI
+                  - generic [ref=e484]: 0%
+                - generic [ref=e487]:
+                  - generic [ref=e488]: PAI
+                  - generic [ref=e489]: 0%
+              - generic [ref=e492]:
+                - generic [ref=e493]: Média Geral
+                - generic [ref=e494]: 0%
+              - generic [ref=e495]:
+                - button "Entrevista" [ref=e496] [cursor=pointer]
+                - button "PDI" [ref=e497] [cursor=pointer]
+                - button "PAI" [ref=e498] [cursor=pointer]
+            - generic [ref=e499]:
+              - generic [ref=e500]:
+                - generic [ref=e501]: ZE
+                - generic [ref=e502]:
+                  - heading "Zezinho da Esquina" [level=3] [ref=e503]
+                  - paragraph [ref=e504]: EMEF Maria Santos
+                  - paragraph [ref=e505]: "Prof: Professor"
+              - generic [ref=e506]:
+                - generic [ref=e508]:
+                  - generic [ref=e509]: Entrevista
+                  - generic [ref=e510]: 0%
+                - generic [ref=e513]:
+                  - generic [ref=e514]: PDI
+                  - generic [ref=e515]: 0%
+                - generic [ref=e518]:
+                  - generic [ref=e519]: PAI
+                  - generic [ref=e520]: 0%
+              - generic [ref=e523]:
+                - generic [ref=e524]: Média Geral
+                - generic [ref=e525]: 0%
+              - generic [ref=e526]:
+                - button "Entrevista" [ref=e527] [cursor=pointer]
+                - button "PDI" [ref=e528] [cursor=pointer]
+                - button "PAI" [ref=e529] [cursor=pointer]
+  - button "🎤" [ref=e531] [cursor=pointer]:
+    - generic [ref=e532]: 🎤
+  - generic [ref=e533]: Sistema ConectAEE carregado e pronto para uso
+```

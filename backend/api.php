@@ -1273,7 +1273,7 @@ if ($action === 'entrevistas-responsavel.create') {
   
   $student_id = (int)($B['student_id'] ?? 0);
   $form_data = $B['form_data'] ?? [];
-
+  
   if (!$student_id || empty($form_data)) {
     res(false, null, 'MISSING_REQUIRED_FIELDS - student_id e form_data são obrigatórios', 422);
   }
@@ -1304,9 +1304,9 @@ if ($action === 'entrevistas-responsavel.create') {
     res(true, ['id' => $existing['id'], 'message' => 'Entrevista atualizada com sucesso', 'action' => 'updated']);
   } else {
     // Se não existe, criar nova
-    $sql = 'INSERT INTO entrevista_forms (student_id, created_by_teacher_id, form_data, status, created_at, updated_at)
+    $sql = 'INSERT INTO entrevista_forms (student_id, created_by_teacher_id, form_data, status, created_at, updated_at) 
             VALUES (?, ?, ?, ?, NOW(), NOW())';
-
+    
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
       $student_id,
@@ -1314,7 +1314,7 @@ if ($action === 'entrevistas-responsavel.create') {
       json_encode($form_data, JSON_UNESCAPED_UNICODE),
       $B['status'] ?? 'rascunho'
     ]);
-
+    
     $id = $pdo->lastInsertId();
     res(true, ['id' => $id, 'message' => 'Entrevista criada com sucesso', 'action' => 'created']);
   }
@@ -1441,7 +1441,7 @@ if ($action === 'pdi.create') {
   
   $student_id = (int)($B['student_id'] ?? 0);
   $form_data = $B['form_data'] ?? [];
-
+  
   if (!$student_id || empty($form_data)) {
     res(false, null, 'MISSING_REQUIRED_FIELDS', 422);
   }
@@ -1473,9 +1473,9 @@ if ($action === 'pdi.create') {
     res(true, ['id' => $existing['id'], 'message' => 'PDI atualizado com sucesso', 'action' => 'updated']);
   } else {
     // Se não existe, criar novo
-    $sql = 'INSERT INTO pdi_forms (student_id, created_by_teacher_id, form_data, data_inicio, data_fim, status, created_at, updated_at)
+    $sql = 'INSERT INTO pdi_forms (student_id, created_by_teacher_id, form_data, data_inicio, data_fim, status, created_at, updated_at) 
             VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())';
-
+    
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
       $student_id,
@@ -1485,7 +1485,7 @@ if ($action === 'pdi.create') {
       $B['data_fim'] ?? null,
       $B['status'] ?? 'rascunho'
     ]);
-
+    
     $id = $pdo->lastInsertId();
     res(true, ['id' => $id, 'message' => 'PDI criado com sucesso', 'action' => 'created']);
   }
@@ -1589,7 +1589,7 @@ if ($action === 'plano-atendimento.create') {
   
   $student_id = (int)($B['student_id'] ?? 0);
   $form_data = $B['form_data'] ?? [];
-
+  
   if (!$student_id || empty($form_data)) {
     res(false, null, 'MISSING_REQUIRED_FIELDS', 422);
   }
@@ -1622,9 +1622,9 @@ if ($action === 'plano-atendimento.create') {
     res(true, ['id' => $existing['id'], 'message' => 'Plano de Atendimento atualizado com sucesso', 'action' => 'updated']);
   } else {
     // Se não existe, criar novo
-    $sql = 'INSERT INTO plano_atendimento_forms (student_id, created_by_teacher_id, pdi_id, form_data, data_inicio, data_fim, status, created_at, updated_at)
+    $sql = 'INSERT INTO plano_atendimento_forms (student_id, created_by_teacher_id, pdi_id, form_data, data_inicio, data_fim, status, created_at, updated_at) 
             VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())';
-
+    
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
       $student_id,
@@ -1635,7 +1635,7 @@ if ($action === 'plano-atendimento.create') {
       $B['data_fim'] ?? null,
       $B['status'] ?? 'rascunho'
     ]);
-
+    
     $id = $pdo->lastInsertId();
     res(true, ['id' => $id, 'message' => 'Plano de Atendimento criado com sucesso', 'action' => 'created']);
   }
@@ -2241,6 +2241,195 @@ if ($action === 'student_notes.update') {
 }
 
 // ========================================
+// ATENDIMENTOS (Relatórios de Atendimento)
+// ========================================
+
+// GET /atendimentos - Lista atendimentos
+if ($action === 'atendimentos' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+  $u = require_auth();
+  
+  $page = max(1, (int)($_GET['page'] ?? 1));
+  $per_page = min(200, max(1, (int)($_GET['per_page'] ?? 50)));
+  $offset = ($page - 1) * $per_page;
+  
+  $where = [];
+  $params = [];
+  
+  // Teacher-centric: professor só vê seus atendimentos
+  if ($u['role'] !== 'admin') {
+    $where[] = 'a.teacher_id = ?';
+    $params[] = $u['id'];
+  }
+  
+  $whereClause = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+  
+  // Count total
+  $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM atendimentos a $whereClause");
+  $stmt->execute($params);
+  $total = (int)$stmt->fetchColumn();
+  
+  // Get records
+  $sql = "SELECT a.*, s.name as student_name, u.name as teacher_name
+          FROM atendimentos a
+          LEFT JOIN students s ON a.student_id = s.id
+          LEFT JOIN users u ON a.teacher_id = u.id
+          $whereClause
+          ORDER BY a.data_atendimento DESC, a.created_at DESC
+          LIMIT $per_page OFFSET $offset";
+  
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+  $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  
+  res(true, [
+    'rows' => $rows,
+    'total' => $total,
+    'page' => $page,
+    'per_page' => $per_page,
+    'total_pages' => ceil($total / $per_page)
+  ]);
+}
+
+// POST /atendimentos - Criar atendimento
+if ($action === 'atendimentos' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+  $u = require_auth();
+  
+  $student_id = (int)($B['student_id'] ?? 0);
+  $teacher_id = (int)($B['teacher_id'] ?? $u['id']);
+  $data_atendimento = trim($B['data_atendimento'] ?? '');
+  $descricao = trim($B['descricao'] ?? '');
+  $objetivos = trim($B['objetivos'] ?? '');
+  $recursos = trim($B['recursos'] ?? '');
+  $observacoes = trim($B['observacoes'] ?? '');
+  
+  // Validações
+  if (!$student_id) res(false, null, 'MISSING_STUDENT_ID', 422);
+  if (!$data_atendimento) res(false, null, 'MISSING_DATA_ATENDIMENTO', 422);
+  if (!$descricao) res(false, null, 'MISSING_DESCRICAO', 422);
+  
+  // Professor só pode criar para si mesmo
+  if ($u['role'] !== 'admin') {
+    $teacher_id = $u['id'];
+  }
+  
+  // Verificar acesso ao aluno
+  ensure_student_access($pdo, $u, $student_id);
+  
+  $stmt = $pdo->prepare('
+    INSERT INTO atendimentos (student_id, teacher_id, data_atendimento, descricao, objetivos, recursos, observacoes, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+  ');
+  
+  $stmt->execute([$student_id, $teacher_id, $data_atendimento, $descricao, $objetivos, $recursos, $observacoes]);
+  $id = $pdo->lastInsertId();
+  
+  // Retornar o registro criado
+  $stmt = $pdo->prepare('
+    SELECT a.*, s.name as student_name, u.name as teacher_name
+    FROM atendimentos a
+    LEFT JOIN students s ON a.student_id = s.id
+    LEFT JOIN users u ON a.teacher_id = u.id
+    WHERE a.id = ?
+  ');
+  $stmt->execute([$id]);
+  $atendimento = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  res(true, $atendimento);
+}
+
+// POST /atendimentos/{id} - Atualizar atendimento
+if (preg_match('#^atendimentos/(\d+)$#', $resource, $matches) && $_SERVER['REQUEST_METHOD'] === 'POST') {
+  $u = require_auth();
+  $id = (int)$matches[1];
+  
+  // Verificar se atendimento existe e pertence ao professor
+  $stmt = $pdo->prepare('SELECT * FROM atendimentos WHERE id = ?');
+  $stmt->execute([$id]);
+  $atendimento = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$atendimento) res(false, null, 'ATENDIMENTO_NOT_FOUND', 404);
+  
+  // Teacher-centric: professor só atualiza seus próprios atendimentos
+  if ($u['role'] !== 'admin' && $atendimento['teacher_id'] != $u['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  // Campos atualizáveis
+  $fields = [];
+  $params = [];
+  
+  if (isset($B['student_id'])) {
+    $fields[] = 'student_id = ?';
+    $params[] = (int)$B['student_id'];
+  }
+  if (isset($B['data_atendimento'])) {
+    $fields[] = 'data_atendimento = ?';
+    $params[] = trim($B['data_atendimento']);
+  }
+  if (isset($B['descricao'])) {
+    $fields[] = 'descricao = ?';
+    $params[] = trim($B['descricao']);
+  }
+  if (isset($B['objetivos'])) {
+    $fields[] = 'objetivos = ?';
+    $params[] = trim($B['objetivos']);
+  }
+  if (isset($B['recursos'])) {
+    $fields[] = 'recursos = ?';
+    $params[] = trim($B['recursos']);
+  }
+  if (isset($B['observacoes'])) {
+    $fields[] = 'observacoes = ?';
+    $params[] = trim($B['observacoes']);
+  }
+  
+  if ($fields) {
+    $fields[] = 'updated_at = NOW()';
+    $sql = 'UPDATE atendimentos SET ' . implode(', ', $fields) . ' WHERE id = ?';
+    $params[] = $id;
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+  }
+  
+  // Retornar o registro atualizado
+  $stmt = $pdo->prepare('
+    SELECT a.*, s.name as student_name, u.name as teacher_name
+    FROM atendimentos a
+    LEFT JOIN students s ON a.student_id = s.id
+    LEFT JOIN users u ON a.teacher_id = u.id
+    WHERE a.id = ?
+  ');
+  $stmt->execute([$id]);
+  $updated = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  res(true, $updated);
+}
+
+// DELETE /atendimentos/{id} - Excluir atendimento
+if (preg_match('#^atendimentos/(\d+)$#', $resource, $matches) && $_SERVER['REQUEST_METHOD'] === 'DELETE') {
+  $u = require_auth();
+  $id = (int)$matches[1];
+  
+  // Verificar se atendimento existe e pertence ao professor
+  $stmt = $pdo->prepare('SELECT * FROM atendimentos WHERE id = ?');
+  $stmt->execute([$id]);
+  $atendimento = $stmt->fetch(PDO::FETCH_ASSOC);
+  
+  if (!$atendimento) res(false, null, 'ATENDIMENTO_NOT_FOUND', 404);
+  
+  // Teacher-centric: professor só exclui seus próprios atendimentos
+  if ($u['role'] !== 'admin' && $atendimento['teacher_id'] != $u['id']) {
+    res(false, null, 'FORBIDDEN', 403);
+  }
+  
+  $stmt = $pdo->prepare('DELETE FROM atendimentos WHERE id = ?');
+  $stmt->execute([$id]);
+  
+  res(true, ['message' => 'Atendimento excluído com sucesso']);
+}
+
+// ========================================
 // RELATÓRIO DO ALUNO (dashboard)
 // ========================================
 
@@ -2447,33 +2636,33 @@ if ($action === 'forms.anamnese.pdf') {
   // Buscar a única entrevista do aluno (1:1 com student)
   $sql = 'SELECT id FROM entrevista_forms WHERE student_id = ?';
   $params = [$student_id];
-
+  
   // Teacher-centric: professor só vê suas entrevistas
   if ($u['role'] !== 'admin') {
     $sql .= ' AND created_by_teacher_id = ?';
     $params[] = $u['id'];
   }
-
+  
   $sql .= ' LIMIT 1';
   error_log('[PDF-Entrevista] SQL=' . $sql);
   $stmt = $pdo->prepare($sql);
   $stmt->execute($params);
   $entrevista = $stmt->fetch(PDO::FETCH_ASSOC);
-
+  
   if (!$entrevista) {
     error_log('[PDF-Entrevista] ERROR: Nenhuma entrevista encontrada');
     res(false, null, 'NO_ENTREVISTA_FOUND', 404);
   }
-
+  
   error_log('[PDF-Entrevista] OK: Encontrada entrevista id=' . $entrevista['id']);
-
+  
   // Passar variáveis para o gerador
   $_GET['id'] = $entrevista['id'];
   $user = $u; // Disponibilizar para o gerador
   // $pdo já está disponível globalmente
   
-  // Incluir o gerador V2 simplificado
-  include __DIR__ . '/generate-pdf-entrevista-v2.php';
+  // Incluir o gerador V3 (layout oficial)
+  include __DIR__ . '/generate-pdf-entrevista-v3.php';
   exit;
 }
 
@@ -2483,42 +2672,38 @@ if ($action === 'pdi.pdf') {
   $u = require_auth();
   $student_id = (int)($_GET['student_id'] ?? 0);
   error_log('[PDF-PDI] student_id=' . $student_id . ', user_id=' . $u['id']);
-
+  
   if (!$student_id) {
     error_log('[PDF-PDI] ERROR: student_id nao fornecido');
     res(false, null, 'STUDENT_ID_REQUIRED', 400);
   }
-  
-  // Buscar o único PDI do aluno (1:1 com student)
-  $sql = 'SELECT id FROM pdi_forms WHERE student_id = ?';
+
+  // 1) Tentar via pdi_forms (modelo 1:1 + JSON)
+  $sqlForms = 'SELECT id FROM pdi_forms WHERE student_id = ?';
+  $paramsForms = [$student_id];
+  if ($u['role'] !== 'admin') { $sqlForms .= ' AND created_by_teacher_id = ?'; $paramsForms[] = $u['id']; }
+  $sqlForms .= ' ORDER BY updated_at DESC LIMIT 1';
+  error_log('[PDF-PDI] TENTANDO pdi_forms: ' . $sqlForms);
+  $stf = $pdo->prepare($sqlForms); $stf->execute($paramsForms); $pf = $stf->fetch(PDO::FETCH_ASSOC);
+  if ($pf && isset($pf['id'])) {
+    error_log('[PDF-PDI] OK pdi_forms id=' . $pf['id']);
+    $_GET['id'] = $pf['id']; $user = $u; include __DIR__ . '/generate-pdf-pdi-v2.php'; exit;
+  }
+
+  // 2) Fallback para pdi_conectaee (modelo legado/simplificado)
+  $sql = 'SELECT id FROM pdi_conectaee WHERE student_id = ?';
   $params = [$student_id];
-  
-  // Teacher-centric: professor só vê seus PDIs
-  if ($u['role'] !== 'admin') {
-    $sql .= ' AND created_by_teacher_id = ?';
-    $params[] = $u['id'];
+  if ($u['role'] !== 'admin') { $sql .= ' AND teacher_id = ?'; $params[] = $u['id']; }
+  $sql .= ' ORDER BY updated_at DESC LIMIT 1';
+  error_log('[PDF-PDI] FALLBACK pdi_conectaee: ' . $sql);
+  $stmt = $pdo->prepare($sql); $stmt->execute($params); $pdi = $stmt->fetch(PDO::FETCH_ASSOC);
+  if ($pdi && isset($pdi['id'])) {
+    error_log('[PDF-PDI] OK conectaee id=' . $pdi['id']);
+    $_GET['id'] = $pdi['id']; $user = $u; include __DIR__ . '/generate-pdf-pdi.php'; exit;
   }
 
-  $sql .= ' LIMIT 1';
-  error_log('[PDF-PDI] SQL=' . $sql);
-  $stmt = $pdo->prepare($sql);
-  $stmt->execute($params);
-  $pdi = $stmt->fetch(PDO::FETCH_ASSOC);
-
-  if (!$pdi) {
-    error_log('[PDF-PDI] ERROR: Nenhum PDI encontrado');
-    res(false, null, 'NO_PDI_FOUND', 404);
-  }
-
-  error_log('[PDF-PDI] OK: Encontrado PDI id=' . $pdi['id']);
-
-  // Passar variáveis para o gerador
-  $_GET['id'] = $pdi['id'];
-  $user = $u; // Disponibilizar para o gerador
-
-  // Incluir o gerador e gerar PDF diretamente
-  include __DIR__ . '/generate-pdf-pdi.php';
-  exit;
+  error_log('[PDF-PDI] ERROR: Nenhum PDI encontrado em pdi_forms ou pdi_conectaee');
+  res(false, null, 'NO_PDI_FOUND', 404);
 }
 
 // GET /pai/pdf?student_id=X
@@ -2527,42 +2712,38 @@ if ($action === 'pai.pdf') {
   $u = require_auth();
   $student_id = (int)($_GET['student_id'] ?? 0);
   error_log('[PDF-PAI] student_id=' . $student_id . ', user_id=' . $u['id']);
-
+  
   if (!$student_id) {
     error_log('[PDF-PAI] ERROR: student_id nao fornecido');
     res(false, null, 'STUDENT_ID_REQUIRED', 400);
   }
-  
-  // Buscar o único PAI do aluno (1:1 com student)
-  $sql = 'SELECT id FROM plano_atendimento_forms WHERE student_id = ?';
+
+  // 1) Tentar via plano_atendimento_forms (modelo novo JSON)
+  $sqlForms = 'SELECT id FROM plano_atendimento_forms WHERE student_id = ?';
+  $paramsForms = [$student_id];
+  if ($u['role'] !== 'admin') { $sqlForms .= ' AND created_by_teacher_id = ?'; $paramsForms[] = $u['id']; }
+  $sqlForms .= ' ORDER BY updated_at DESC LIMIT 1';
+  error_log('[PDF-PAI] TENTANDO plano_atendimento_forms: ' . $sqlForms);
+  $stf = $pdo->prepare($sqlForms); $stf->execute($paramsForms); $pf = $stf->fetch(PDO::FETCH_ASSOC);
+  if ($pf && isset($pf['id'])) {
+    error_log('[PDF-PAI] OK plano_atendimento_forms id=' . $pf['id']);
+    $_GET['id'] = $pf['id']; $user = $u; include __DIR__ . '/generate-pdf-pai-v2.php'; exit;
+  }
+
+  // 2) Fallback para tabela legada planos_atendimento
+  $sql = 'SELECT id FROM planos_atendimento WHERE student_id = ?';
   $params = [$student_id];
-
-  // Teacher-centric: professor só vê seus PAIs
-  if ($u['role'] !== 'admin') {
-    $sql .= ' AND created_by_teacher_id = ?';
-    $params[] = $u['id'];
+  if ($u['role'] !== 'admin') { $sql .= ' AND teacher_id = ?'; $params[] = $u['id']; }
+  $sql .= ' ORDER BY updated_at DESC LIMIT 1';
+  error_log('[PDF-PAI] FALLBACK planos_atendimento: ' . $sql);
+  $stmt = $pdo->prepare($sql); $stmt->execute($params); $pai = $stmt->fetch(PDO::FETCH_ASSOC);
+  if ($pai && isset($pai['id'])) {
+    error_log('[PDF-PAI] OK legado id=' . $pai['id']);
+    $_GET['id'] = $pai['id']; $user = $u; include __DIR__ . '/generate-pdf-pai.php'; exit;
   }
 
-  $sql .= ' LIMIT 1';
-  error_log('[PDF-PAI] SQL=' . $sql);
-  $stmt = $pdo->prepare($sql);
-  $stmt->execute($params);
-  $pai = $stmt->fetch(PDO::FETCH_ASSOC);
-
-  if (!$pai) {
-    error_log('[PDF-PAI] ERROR: Nenhum PAI encontrado');
-    res(false, null, 'NO_PAI_FOUND', 404);
-  }
-
-  error_log('[PDF-PAI] OK: Encontrado PAI id=' . $pai['id']);
-
-  // Passar variáveis para o gerador
-  $_GET['id'] = $pai['id'];
-  $user = $u; // Disponibilizar para o gerador
-  
-  // Incluir o gerador e gerar PDF diretamente
-  include __DIR__ . '/generate-pdf-pai.php';
-  exit;
+  error_log('[PDF-PAI] ERROR: Nenhum PAI encontrado em plano_atendimento_forms ou planos_atendimento');
+  res(false, null, 'NO_PAI_FOUND', 404);
 }
 
 // ========================================

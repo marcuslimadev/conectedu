@@ -1,7 +1,5 @@
 // ConectAEE v5.0 - Sistema de Gestão Educacional com Tailwind CSS
 
-// Debug inicial
-
 // Configuração da API
 const api = axios.create({
   baseURL: CONFIG.API_BASE, 
@@ -114,7 +112,7 @@ const AlunosTW = {
   <div class="space-y-4" role="main">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold text-gray-900" id="alunos-heading">Alunos</h1>
-      <button @click="newAluno"
+      <button @click="newAluno" 
               class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
               aria-label="Adicionar novo aluno">Novo Aluno</button>
     </div>
@@ -124,14 +122,14 @@ const AlunosTW = {
       <div class="hidden md:block">
         <div>
           <label class="sr-only" for="alunos-busca">Buscar por nome</label>
-          <input id="alunos-busca" v-model="filters.q" @keyup.enter="load"
-                 class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+          <input id="alunos-busca" v-model="filters.q" @keyup.enter="load" 
+                 class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent" 
                  placeholder="Buscar por nome">
         </div>
       </div>
       <div class="hidden md:block">
         <label class="sr-only" for="alunos-status">Status</label>
-        <select id="alunos-status" v-model="filters.status"
+        <select id="alunos-status" v-model="filters.status" 
                 class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent">
           <option value="">Todos os status</option>
           <option value="ativo">Ativo</option>
@@ -140,14 +138,14 @@ const AlunosTW = {
       </div>
       <div class="hidden md:block">
         <label class="sr-only" for="alunos-modalidade">Modalidade</label>
-        <select id="alunos-modalidade" v-model="filters.modalidade"
+        <select id="alunos-modalidade" v-model="filters.modalidade" 
                 class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent">
           <option value="">Todas modalidades</option>
           <option value="apoio">Apoio</option>
           <option value="srm">SRM</option>
         </select>
       </div>
-      <button @click="load"
+      <button @click="load" 
               class="hidden md:block px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
               aria-label="Aplicar filtros de busca">
         <i class="fas fa-search mr-2" aria-hidden="true"></i>Filtrar
@@ -158,14 +156,14 @@ const AlunosTW = {
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">🔍 Buscar Aluno</label>
-            <input v-model="filters.q" @keyup.enter="load"
-                   class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+            <input v-model="filters.q" @keyup.enter="load" 
+                   class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent" 
                    placeholder="Digite o nome do aluno...">
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-              <select v-model="filters.status"
+              <select v-model="filters.status" 
                       class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent">
                 <option value="">Todos</option>
                 <option value="ativo">✅ Ativo</option>
@@ -174,7 +172,7 @@ const AlunosTW = {
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Modalidade</label>
-              <select v-model="filters.modalidade"
+              <select v-model="filters.modalidade" 
                       class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent">
                 <option value="">Todas</option>
                 <option value="apoio">👨‍🏫 Apoio</option>
@@ -182,7 +180,7 @@ const AlunosTW = {
               </select>
             </div>
           </div>
-          <button @click="load" class="w-full px-4 py-3 bg-brand-primary text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+          <button @click="load" class="w-full px-4 py-3 bg-brand-primary text-white rounded-lg hover:bg-brand-primary-dark transition-colors font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary">
             🔍 Buscar Alunos
           </button>
         </div>
@@ -295,7 +293,7 @@ const AlunosTW = {
             <span :class="['px-2 py-1 rounded text-xs font-medium', s.status==='ativo'?'bg-green-100 text-green-700':'bg-gray-100 text-gray-600']">{{ s.status }}</span>
           </div>
         </div>
-
+        
         <div class="space-y-2 text-sm">
           <div class="flex justify-between">
             <span class="text-gray-700">Modalidade:</span>
@@ -309,7 +307,7 @@ const AlunosTW = {
             </span>
           </div>
         </div>
-
+        
         <div class="flex space-x-2 mt-4 pt-3 border-t">
           <button class="flex-1 px-3 py-2 text-sm border rounded hover:bg-gray-50 transition-colors" @click="edit(s)">
             📝 Editar
@@ -398,12 +396,12 @@ const AlunosTW = {
 
       <!-- Indicadores de Etapas -->
       <div class="flex justify-between mb-8">
-        <div v-for="(step, index) in stepsAluno" :key="index"
+        <div v-for="(step, index) in stepsAluno" :key="index" 
              class="flex flex-col items-center cursor-pointer transition-all duration-200"
              @click="goToStepAluno(index)">
           <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-200"
-               :class="index < currentStepAluno ? 'bg-blue-500 border-blue-500 text-white' :
-                       index === currentStepAluno ? 'bg-blue-100 border-blue-500 text-blue-700' :
+               :class="index < currentStepAluno ? 'bg-blue-500 border-blue-500 text-white' : 
+                       index === currentStepAluno ? 'bg-blue-100 border-blue-500 text-blue-700' : 
                        'bg-gray-100 border-gray-300 text-gray-600'">
             <i :class="step.icon"></i>
           </div>
@@ -1256,6 +1254,29 @@ const RegisterTW = {
     }
   },
   methods: {
+    onBuscaChange() {
+      this.showSugestoes = true;
+      this.sugIndex = -1;
+    },
+    fecharSugestoesComAtraso() {
+      setTimeout(() => { this.showSugestoes = false; }, 150);
+    },
+    moveSugestao(dir) {
+      if (!this.showSugestoes || !this.sugestoes.length) return;
+      const max = this.sugestoes.length - 1;
+      let idx = this.sugIndex + dir;
+      if (idx < 0) idx = max;
+      if (idx > max) idx = 0;
+      this.sugIndex = idx;
+    },
+    confirmSugestao() {
+      if (!this.showSugestoes) return;
+      const aluno = this.sugestoes[this.sugIndex] || this.sugestoes[0];
+      if (aluno) {
+        this.abrirFormulario('entrevista', aluno.id);
+        this.showSugestoes = false;
+      }
+    },
     async register() {
       this.loading = true;
       this.error = '';
@@ -1289,7 +1310,7 @@ const UsuariosTW = {
   <div class="space-y-4" role="main">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold text-gray-900" id="usuarios-heading">Usuários</h1>
-      <button @click="novo"
+      <button @click="novo" 
               class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
               aria-label="Adicionar novo usuário">Novo Usuário</button>
     </div>
@@ -1320,13 +1341,13 @@ const UsuariosTW = {
     <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
       <div>
         <label class="sr-only" for="u-busca">Buscar por nome ou email</label>
-        <input id="u-busca" v-model="filters.q" @keyup.enter="load"
-               class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+        <input id="u-busca" v-model="filters.q" @keyup.enter="load" 
+               class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent" 
                placeholder="Buscar por nome ou email">
       </div>
       <div>
         <label class="sr-only" for="u-role">Perfil</label>
-        <select id="u-role" v-model="filters.role"
+        <select id="u-role" v-model="filters.role" 
                 class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent">
           <option value="">Todos os perfis</option>
           <option value="admin">Administrador</option>
@@ -1336,14 +1357,14 @@ const UsuariosTW = {
       </div>
       <div>
         <label class="sr-only" for="u-status">Status</label>
-        <select id="u-status" v-model="filters.status"
+        <select id="u-status" v-model="filters.status" 
                 class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent">
           <option value="">Todos os status</option>
           <option value="ativo">Ativo</option>
           <option value="inativo">Inativo</option>
         </select>
       </div>
-      <button @click="load"
+      <button @click="load" 
               class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
               aria-label="Aplicar filtros de busca">
         <i class="fas fa-search mr-2" aria-hidden="true"></i>Filtrar
@@ -1509,13 +1530,13 @@ const UsuariosTW = {
         </div>
       </div>
       <div class="flex gap-2 justify-end p-4 border-t bg-gray-50 sticky bottom-0">
-        <button class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 transition-colors"
-                @click="cancel"
+        <button class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 transition-colors" 
+                @click="cancel" 
                 :disabled="savingForm">
           Cancelar
         </button>
-        <button class="px-4 py-2 bg-brand-primary text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
-                @click="save"
+        <button class="px-4 py-2 bg-brand-primary text-white rounded hover:bg-brand-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary" 
+                @click="save" 
                 :disabled="savingForm">
           <i v-if="savingForm" class="fas fa-spinner fa-spin mr-2"></i>
           <i v-else :class="form.id ? 'fas fa-save' : 'fas fa-plus'" class="mr-2"></i>
@@ -1684,7 +1705,7 @@ const EscolasTW = {
     <div class="space-y-4" role="main">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold text-gray-900" id="escolas-heading">Escolas</h1>
-        <button @click="newEscola"
+        <button @click="newEscola" 
                 class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
                 aria-label="Adicionar nova escola">
           <i class="fas fa-plus mr-2"></i>Nova Escola
@@ -1694,18 +1715,18 @@ const EscolasTW = {
       <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
         <div>
           <label class="sr-only" for="escolas-busca">Buscar por nome</label>
-          <input id="escolas-busca" v-model="searchTerm" @keyup.enter="goToPage(1)"
-                 class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+          <input id="escolas-busca" v-model="searchTerm" @keyup.enter="goToPage(1)" 
+                 class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent" 
                  placeholder="Buscar por nome">
         </div>
         <div>
           <label class="sr-only" for="escolas-cidade">Cidade</label>
-          <input id="escolas-cidade" v-model="cityFilter" @keyup.enter="goToPage(1)"
-                 class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+          <input id="escolas-cidade" v-model="cityFilter" @keyup.enter="goToPage(1)" 
+                 class="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent" 
                  placeholder="Filtrar por cidade">
         </div>
         <div></div>
-        <button @click="goToPage(1)"
+        <button @click="goToPage(1)" 
                 class="px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-white rounded transition-colors"
                 aria-label="Aplicar filtros de busca">
           <i class="fas fa-search mr-2" aria-hidden="true"></i>Filtrar
@@ -1817,42 +1838,42 @@ const EscolasTW = {
             <h2 class="text-lg font-semibold">{{ editingId ? 'Editar Escola' : 'Nova Escola' }}</h2>
             <button @click="closeModal" class="text-gray-500 hover:text-gray-700" aria-label="Fechar"><i class="fas fa-times text-xl"></i></button>
           </div>
-
+          
           <div class="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="md:col-span-2">
               <label class="block text-sm font-medium text-gray-700 mb-2">Nome *</label>
-              <input
-                v-model="form.name"
-                type="text"
+              <input 
+                v-model="form.name" 
+                type="text" 
                 required
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </div>
-
+            
             <div class="md:col-span-2">
               <label class="block text-sm font-medium text-gray-700 mb-2">Endereço</label>
-              <textarea
-                v-model="form.address"
+              <textarea 
+                v-model="form.address" 
                 rows="2"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
             </div>
-
+            
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Cidade</label>
-              <input
-                v-model="form.city"
+              <input 
+                v-model="form.city" 
                 type="text"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </div>
-
+            
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Telefone</label>
-              <input
-                v-model="form.phone"
+              <input 
+                v-model="form.phone" 
                 type="tel"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </div>
           </div>
-
+          
           <div class="flex justify-end space-x-3 p-4 border-t">
             <button @click="closeModal" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
               Cancelar
@@ -3817,12 +3838,43 @@ const Dashboard = {
             <p class="text-sm text-gray-600 mt-1">Use os atalhos para atualizar formulários e acompanhar pendências.</p>
           </div>
           <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-            <input
-              v-model="filtros.busca"
-              type="text"
-              placeholder="Buscar aluno ou escola..."
-              class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
+            <div class="relative w-full">
+              <input
+                v-model="filtros.busca"
+                type="text"
+                placeholder="Buscar aluno ou escola..."
+                class="flex-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                @focus="showSugestoes = true"
+                @input="onBuscaChange"
+                @keydown.down.prevent="moveSugestao(1)"
+                @keydown.up.prevent="moveSugestao(-1)"
+                @keydown.enter.prevent="confirmSugestao"
+                @blur="fecharSugestoesComAtraso"
+              />
+              <!-- Dropdown de sugestões -->
+              <div v-if="showSugestoes && filtros.busca && sugestoes && sugestoes.length"
+                   class="absolute z-40 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-72 overflow-auto">
+       <div v-for="(aluno, idx) in sugestoes" :key="'sug-'+aluno.id"
+         @mousedown.prevent.stop="noop"
+         class="px-3 py-2 cursor-pointer flex items-center justify-between"
+         :class="idx===sugIndex ? 'bg-gray-100' : 'hover:bg-gray-50'"
+         @click="selecionarAluno(aluno)">
+                  <div class="min-w-0 pr-3">
+                    <p class="text-sm font-medium text-gray-900 truncate">{{ aluno.name || 'Sem nome' }}</p>
+                    <p class="text-xs text-gray-500 truncate">{{ aluno.school_name || 'Escola não informada' }}</p>
+                  </div>
+                  <div class="hidden sm:flex gap-1">
+                    <button type="button" class="px-2 py-1 text-[11px] bg-blue-50 text-blue-700 rounded hover:bg-blue-100"
+                            @mousedown.stop.prevent="abrirFormulario('entrevista', aluno.id)">Entrevista</button>
+                    <button type="button" class="px-2 py-1 text-[11px] bg-emerald-50 text-emerald-700 rounded hover:bg-emerald-100"
+                            @mousedown.stop.prevent="abrirFormulario('pdi', aluno.id)">PDI</button>
+                    <button type="button" class="px-2 py-1 text-[11px] bg-purple-50 text-purple-700 rounded hover:bg-purple-100"
+                            @mousedown.stop.prevent="abrirFormulario('pai', aluno.id)">PAI</button>
+                  </div>
+                </div>
+                <div v-if="sugestoes.length > 8" class="px-3 py-2 text-xs text-gray-500 border-t">Mostrando 8 de {{ sugestoes.length }} resultados</div>
+              </div>
+            </div>
             <button
               v-if="filtros.busca"
               type="button"
@@ -3840,6 +3892,7 @@ const Dashboard = {
             </button>
           </div>
         </div>
+        
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <div class="rounded-xl border border-blue-100 bg-blue-50/60 p-4">
             <p class="text-xs font-semibold text-blue-600 uppercase tracking-wide">Alunos ativos</p>
@@ -3953,12 +4006,61 @@ const Dashboard = {
       <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h2 class="text-xl font-bold text-gray-800">{{ isAdmin ? 'Andamento dos formulários (rede)' : 'Progresso dos meus formulários' }}</h2>
-            <p class="text-sm text-gray-500">{{ isAdmin ? 'Média considerando o filtro atual' : 'Média dos alunos vinculados a você' }}</p>
+            <h2 class="text-xl font-bold text-gray-800">
+              {{ selectedAluno ? 'Desempenho do aluno selecionado' : (isAdmin ? 'Andamento dos formulários (rede)' : 'Progresso dos meus formulários') }}
+            </h2>
+            <p class="text-sm text-gray-500">
+              {{ selectedAluno ? (selectedAluno.name || 'Aluno') : (isAdmin ? 'Média considerando o filtro atual' : 'Média dos alunos vinculados a você') }}
+            </p>
           </div>
           <span class="text-sm text-gray-400">Atualizado automaticamente</span>
         </div>
         <div :id="chartContainerId" class="w-full h-[320px]"></div>
+      </div>
+
+      <!-- Painel de detalhe do aluno selecionado -->
+      <div v-if="selectedAluno" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-4">
+        <div class="flex items-center justify-between mb-4">
+          <div class="min-w-0">
+            <h3 class="text-lg font-semibold text-gray-900 truncate">{{ selectedAluno.name }}</h3>
+            <p class="text-sm text-gray-500 truncate">{{ selectedAluno.school_name || 'Escola não informada' }}</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" @click="abrirFormulario('entrevista', selectedAluno.id)" class="px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100">Entrevista</button>
+            <button type="button" @click="abrirFormulario('pdi', selectedAluno.id)" class="px-3 py-1.5 text-xs font-medium bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100">PDI</button>
+            <button type="button" @click="abrirFormulario('pai', selectedAluno.id)" class="px-3 py-1.5 text-xs font-medium bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100">PAI</button>
+            <button type="button" @click="limparSelecaoAluno" class="px-3 py-1.5 text-xs font-medium border rounded-lg hover:bg-gray-50">Limpar seleção</button>
+          </div>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <div>
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="font-medium text-gray-700">Entrevista</span>
+              <span class="font-bold" :class="getPercentColor(selectedAluno.entrevista_percent)">{{ selectedAluno.entrevista_percent || 0 }}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+              <div class="h-2 rounded-full bg-gradient-to-r from-indigo-400 to-indigo-600" :style="{width: (selectedAluno.entrevista_percent || 0) + '%'}"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="font-medium text-gray-700">PDI</span>
+              <span class="font-bold" :class="getPercentColor(selectedAluno.pdi_percent)">{{ selectedAluno.pdi_percent || 0 }}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+              <div class="h-2 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600" :style="{width: (selectedAluno.pdi_percent || 0) + '%'}"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="font-medium text-gray-700">PAI</span>
+              <span class="font-bold" :class="getPercentColor(selectedAluno.pai_percent)">{{ selectedAluno.pai_percent || 0 }}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+              <div class="h-2 rounded-full bg-gradient-to-r from-purple-400 to-purple-600" :style="{width: (selectedAluno.pai_percent || 0) + '%'}"></div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div v-if="!isAdmin" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
@@ -4188,57 +4290,85 @@ const Dashboard = {
       alunos: [],
       professores: [],
       filtros: { busca: '', professorId: '' },
-      loading: false
+      loading: false,
+      forceUpdate: 0, // Flag para forçar re-render
+      showSugestoes: false,
+      sugIndex: -1,
+      selectedAlunoId: null
     }
   },
   computed: {
     isAdmin() {
       return this.$root && this.$root.user && this.$root.user.role === 'admin';
     },
+    selectedAluno() {
+      const id = this.selectedAlunoId;
+      if (!id) return null;
+      const arr = Array.isArray(this.alunos) ? this.alunos : [];
+      return arr.find(a => a.id === id) || null;
+    },
     chartContainerId() {
       return this.isAdmin ? 'chart-container-admin' : 'chart-container-prof';
     },
     alunosFiltrados() {
-      if (!Array.isArray(this.alunos)) {
+      // Flag para forçar reatividade
+      this.forceUpdate;
+      
+      console.log('🔍 [alunosFiltrados] ========== INICIANDO ==========');
+      console.log('🔍 [alunosFiltrados] this:', this);
+      console.log('🔍 [alunosFiltrados] this.alunos:', this.alunos);
+      console.log('🔍 [alunosFiltrados] typeof this.alunos:', typeof this.alunos);
+      console.log('🔍 [alunosFiltrados] Array.isArray(this.alunos):', Array.isArray(this.alunos));
+      console.log('🔍 [alunosFiltrados] this.alunos?.length:', this.alunos?.length);
+      console.log('🔍 [alunosFiltrados] this.filtros:', this.filtros);
+      console.log('🔍 [alunosFiltrados] this.filtros.busca:', this.filtros.busca);
+      
+      // TESTE SIMPLES: retorna todos os alunos sem filtro
+      if (!this.alunos || !Array.isArray(this.alunos)) {
+        console.error('❌ [alunosFiltrados] this.alunos não é array válido!');
         return [];
       }
-
-      let resultado = [...this.alunos];
-
-      if (this.isAdmin && this.filtros.professorId) {
-        resultado = resultado.filter(a => String(a.created_by_teacher_id) === String(this.filtros.professorId));
+      
+      if (this.alunos.length === 0) {
+        console.warn('⚠️ [alunosFiltrados] this.alunos está vazio!');
+        return [];
       }
-
+      
+      // Se não tem filtro de busca, retorna todos
       const busca = (this.filtros.busca || '').toLowerCase().trim();
-      if (busca) {
-        console.log('🔍 [alunosFiltrados] Buscando por:', busca);
-        console.log('🔍 [alunosFiltrados] Total antes da busca:', resultado.length);
-        console.log('🔍 [alunosFiltrados] Primeiro aluno:', resultado[0]);
-        
-        resultado = resultado.filter(a => {
-          const nome = (a.name || '').toLowerCase();
-          const escola = (a.school_name || '').toLowerCase();
-          const professor = (a.professor_nome || '').toLowerCase();
-          
-          const match = this.isAdmin
-            ? nome.includes(busca) || escola.includes(busca) || professor.includes(busca)
-            : nome.includes(busca) || escola.includes(busca);
-          
-          if (match) {
-            console.log('✅ Match:', a.name, '| Escola:', a.school_name, '| Prof:', a.professor_nome);
-          }
-          
-          return match;
-        });
-        
-        console.log('🔍 [alunosFiltrados] Total após busca:', resultado.length);
+      if (!busca) {
+        console.log('✅ [alunosFiltrados] SEM BUSCA - Retornando todos:', this.alunos.length);
+        return this.alunos;
       }
-
+      
+      // Com busca, filtra
+      console.log('🔍 [alunosFiltrados] COM BUSCA:', busca);
+      const resultado = this.alunos.filter(a => {
+        const nome = (a.name || '').toLowerCase();
+        const escola = (a.school_name || '').toLowerCase();
+        const match = nome.includes(busca) || escola.includes(busca);
+        
+        if (match) {
+          console.log('✅ Match:', a.name);
+        }
+        
+        return match;
+      });
+      
+      console.log('🔍 [alunosFiltrados] ========== RESULTADO:', resultado.length, '==========');
       return resultado;
     },
     alunosVisiveis() {
       const filtrados = Array.isArray(this.alunosFiltrados) ? this.alunosFiltrados : [];
-      return this.isAdmin ? filtrados : filtrados.slice(0, 8);
+      console.log('👁️ [alunosVisiveis] filtrados:', filtrados.length);
+      console.log('👁️ [alunosVisiveis] isAdmin:', this.isAdmin);
+      const resultado = this.isAdmin ? filtrados : filtrados.slice(0, 8);
+      console.log('👁️ [alunosVisiveis] resultado:', resultado.length);
+      return resultado;
+    },
+    sugestoes() {
+      const base = this.alunosFiltrados || [];
+      return base.slice(0, 8);
     },
     professorResumo() {
       const total = Array.isArray(this.alunos) ? this.alunos.length : 0;
@@ -4362,6 +4492,8 @@ const Dashboard = {
     console.log('🚀🚀🚀 DASHBOARD MOUNTED - INICIANDO 🚀🚀🚀');
     console.log('='.repeat(80));
     console.log('🔄 [Dashboard] Montando componente...');
+    console.log('🔄 [Dashboard] this.$root:', this.$root);
+    console.log('🔄 [Dashboard] this.$root?.user:', this.$root?.user);
     
     // Esperar o user estar disponível (max 5 segundos)
     let attempts = 0;
@@ -4373,7 +4505,19 @@ const Dashboard = {
     
     if (!this.$root?.user) {
       console.error('❌ [Dashboard] User não carregado após 5 segundos!');
+      console.error('❌ [Dashboard] this.$root:', this.$root);
+      console.error('❌ [Dashboard] localStorage.token:', localStorage.getItem('token'));
+      
+      // Tenta carregar mesmo assim para debug
+      console.warn('⚠️ [Dashboard] Tentando carregar dados mesmo sem user confirmado...');
       this.loading = false;
+      
+      try {
+        await this.loadData();
+        this.renderChart();
+      } catch (error) {
+        console.error('❌ [Dashboard] Erro ao tentar carregar sem user:', error);
+      }
       return;
     }
     
@@ -4410,17 +4554,24 @@ const Dashboard = {
         }
 
         console.log('📚 [Dashboard] Carregando alunos...');
-        const params = (!isAdminNow && this.$root?.user) ? { teacher_id: this.$root.user.id } : {};
-        console.log('📚 [Dashboard] Params:', params);
-        const alunosRes = await api.get('/students', { params });
+        // Não precisa passar teacher_id - o backend usa o user autenticado automaticamente
+        const alunosRes = await api.get('/students');
+        
+        console.log('📚 [Dashboard] Resposta da API completa:', alunosRes);
+        console.log('📚 [Dashboard] alunosRes.data:', alunosRes.data);
 
         let alunosData = [];
         if (alunosRes.data?.data?.rows) {
           alunosData = alunosRes.data.data.rows;
+          console.log('📚 [Dashboard] Usando data.rows:', alunosData.length);
         } else if (Array.isArray(alunosRes.data?.data)) {
           alunosData = alunosRes.data.data;
+          console.log('📚 [Dashboard] Usando data (array):', alunosData.length);
         } else if (Array.isArray(alunosRes.data)) {
           alunosData = alunosRes.data;
+          console.log('📚 [Dashboard] Usando data direto:', alunosData.length);
+        } else {
+          console.error('❌ [Dashboard] Formato de resposta inesperado!');
         }
 
         this.alunos = alunosData.map(aluno => {
@@ -4440,9 +4591,18 @@ const Dashboard = {
         });
 
         console.log('💾 [Dashboard] Alunos carregados:', this.alunos.length);
+        console.log('💾 [Dashboard] Primeiro aluno:', this.alunos[0]);
+        console.log('💾 [Dashboard] Todos os alunos:', this.alunos);
         this.loading = false;
         console.log('✅ [Dashboard] Loading finalizado:', this.loading);
+        
+        // Força atualização dos computeds
+        this.forceUpdate++;
         await this.$nextTick();
+        console.log('🔄 [Dashboard] Após nextTick - forceUpdate:', this.forceUpdate);
+        console.log('🔄 [Dashboard] Após nextTick - alunosFiltrados:', this.alunosFiltrados?.length);
+        console.log('🔄 [Dashboard] Após nextTick - alunosVisiveis:', this.alunosVisiveis?.length);
+        
         this.carregarPercentuais();
       } catch (error) {
         console.error('❌ [Dashboard] Erro ao carregar dados do dashboard:', error);
@@ -4471,36 +4631,76 @@ const Dashboard = {
       try {
         try {
           const entrevistaRes = await api.get('/entrevistas-responsavel/list', { params: { student_id: studentId } });
-          const entrevistas = entrevistaRes.data?.data?.rows || entrevistaRes.data?.data || [];
-          if (entrevistas.length > 0) {
+          // A API retorna: {ok, data: {data: [...]}, error}
+          const entrevistas = entrevistaRes.data?.data?.data || [];
+          if (Array.isArray(entrevistas) && entrevistas.length > 0) {
             const formData = typeof entrevistas[0].form_data === 'string'
               ? JSON.parse(entrevistas[0].form_data)
               : entrevistas[0].form_data;
             percentuais.entrevista = this.calcularPreenchimentoJSON(formData);
           }
-        } catch (_) {}
+        } catch (e) {
+          console.error('Erro ao buscar entrevistas:', e);
+        }
+        // Fallback de entrevista: se ainda 0, usar relatório do aluno (inclui anamneses/entrevistas)
+        if ((percentuais.entrevista || 0) === 0) {
+          try {
+            const rep = await api.get('/reports/student', { params: { student_id: studentId } });
+            const entrevistasRep = rep.data?.data?.entrevistas || rep.data?.entrevistas || [];
+            if (Array.isArray(entrevistasRep) && entrevistasRep.length > 0) {
+              percentuais.entrevista = 100;
+            }
+          } catch (_) {}
+        }
 
         try {
-          const pdiRes = await api.get('/pdi/list', { params: { student_id: studentId } });
-          const pdis = pdiRes.data?.data?.rows || pdiRes.data?.data || [];
-          if (pdis.length > 0) {
+          // Nota: o endpoint REST mapeia "/pdi" para pdi.list
+          const pdiRes = await api.get('/pdi', { params: { student_id: studentId } });
+          // A API retorna: {ok, data: {data: [...]}, error}
+          const pdis = pdiRes.data?.data?.data || [];
+          if (Array.isArray(pdis) && pdis.length > 0) {
             const formData = typeof pdis[0].form_data === 'string'
               ? JSON.parse(pdis[0].form_data)
               : pdis[0].form_data;
             percentuais.pdi = this.calcularPreenchimentoJSON(formData);
           }
-        } catch (_) {}
+          // Fallback: se não houver PDI nos formulários novos, verificar PDI legado (pdi_conectaee)
+          if ((percentuais.pdi || 0) === 0) {
+            try {
+              const pdiLegacy = await api.get('/pdi-conectaee/list', { params: { student_id: studentId } });
+              const leg = pdiLegacy.data?.data?.rows || pdiLegacy.data?.data || [];
+              if (leg.length > 0) {
+                percentuais.pdi = 100;
+              }
+            } catch (_) {}
+          }
+        } catch (e) {
+          console.error('Erro ao buscar PDI:', e);
+        }
 
         try {
           const paiRes = await api.get('/plano-atendimento/list', { params: { student_id: studentId } });
-          const pais = paiRes.data?.data?.rows || paiRes.data?.data || [];
-          if (pais.length > 0) {
+          // A API retorna: {ok, data: {data: [...]}, error}
+          const pais = paiRes.data?.data?.data || [];
+          if (Array.isArray(pais) && pais.length > 0) {
             const formData = typeof pais[0].form_data === 'string'
               ? JSON.parse(pais[0].form_data)
               : pais[0].form_data;
             percentuais.pai = this.calcularPreenchimentoJSON(formData);
           }
-        } catch (_) {}
+          // Fallback: se não houver PAI nos formulários novos, verificar PAI legado (planos_atendimento)
+          if ((percentuais.pai || 0) === 0) {
+            try {
+              const paiLegacy = await api.get('/planos-atendimento/list', { params: { student_id: studentId } });
+              const leg = paiLegacy.data?.data?.rows || paiLegacy.data?.data || [];
+              if (leg.length > 0) {
+                percentuais.pai = 100;
+              }
+            } catch (_) {}
+          }
+        } catch (e) {
+          console.error('Erro ao buscar PAI:', e);
+        }
       } catch (error) {
         console.error(`Erro ao calcular percentuais para aluno ${studentId}:`, error);
       }
@@ -4510,26 +4710,53 @@ const Dashboard = {
     calcularPreenchimentoJSON(formData) {
       if (!formData || typeof formData !== 'object') return 0;
 
-      let total = 0;
-      let preenchidos = 0;
+      const metaKeys = new Set([
+        'id', 'student_id', 'created_at', 'updated_at', 'status', 
+        'created_by_teacher_id', 'version_name', 'student_name', 
+        'modalidade', 'pdi_id', 'data_inicio', 'data_fim'
+      ]);
 
-      for (const key in formData) {
-        if (['id', 'student_id', 'created_at', 'updated_at', 'status', 'created_by_teacher_id'].includes(key)) {
-          continue;
+      const countDeep = (value, keyPath = []) => {
+        let total = 0;
+        let filled = 0;
+
+        if (value === null || value === undefined) {
+          return { total, filled };
         }
 
-        total++;
-        const valor = formData[key];
+        // Primitivos
+        if (typeof value !== 'object') {
+          total = 1;
+          const v = (typeof value === 'string') ? value.trim() : value;
+          // Considera vazio: string vazia, 0, false, null, undefined
+          const isEmpty = v === '' || v === 0 || v === false || v === null || v === undefined;
+          if (!isEmpty) filled = 1;
+          return { total, filled };
+        }
 
-        if (valor !== null && valor !== undefined && valor !== '') {
-          if (Array.isArray(valor) && valor.length === 0) {
-            continue;
+        // Arrays: considerar o campo como 1 unidade; preenchido se houver pelo menos um item não-vazio
+        if (Array.isArray(value)) {
+          total = 1;
+          let any = false;
+          for (const item of value) {
+            const r = countDeep(item, keyPath.concat(['[]']));
+            if (r.filled > 0) { any = true; break; }
           }
-          preenchidos++;
+          filled = any ? 1 : 0;
+          return { total, filled };
         }
-      }
 
-      return total > 0 ? Math.round((preenchidos / total) * 100) : 0;
+        // Objetos: somar filhos, ignorando metadados conhecidos
+        for (const k of Object.keys(value)) {
+          if (metaKeys.has(k)) continue;
+          const r = countDeep(value[k], keyPath.concat([k]));
+          total += r.total; filled += r.filled;
+        }
+        return { total, filled };
+      };
+
+      const { total, filled } = countDeep(formData);
+      return total > 0 ? Math.round((filled / total) * 100) : 0;
     },
     calcularMediaAluno(aluno) {
       if (!aluno) return 0;
@@ -4538,6 +4765,24 @@ const Dashboard = {
       const pdi = aluno?.pdi_percent || 0;
       const pai = aluno?.pai_percent || 0;
       return Math.round((entrevista + pdi + pai) / 3);
+    },
+    async atualizarPercentuaisAluno(alunoId) {
+      try {
+        const p = await this.calcularPercentuais(alunoId);
+        const idx = (this.alunos || []).findIndex(a => a.id === alunoId);
+        if (idx !== -1) {
+          const a = { ...this.alunos[idx] };
+          a.entrevista_percent = p.entrevista;
+          a.pdi_percent = p.pdi;
+          a.pai_percent = p.pai;
+          a.media_percent = Math.round((p.entrevista + p.pdi + p.pai) / 3);
+          this.alunos.splice(idx, 1, a);
+        }
+      } catch (e) {
+        console.error('Erro ao atualizar percentuais do aluno', alunoId, e);
+      } finally {
+        await this.renderChart();
+      }
     },
     getInitials(name) {
       if (!name) return '?';
@@ -4558,7 +4803,14 @@ const Dashboard = {
 
       const alunosFiltrados = Array.isArray(this.alunosFiltrados) ? this.alunosFiltrados : [];
       const alunos = Array.isArray(this.alunos) ? this.alunos : [];
-      const dados = alunosFiltrados.length ? alunosFiltrados : alunos;
+      let dados = [];
+      if (this.selectedAluno) {
+        dados = [this.selectedAluno];
+      } else if (alunosFiltrados.length) {
+        dados = alunosFiltrados;
+      } else {
+        dados = alunos;
+      }
 
       if (!dados || !dados.length) {
         container.innerHTML = '<div class="text-center text-gray-500 py-12">Nenhum dado dispon?vel para exibir no gr?fico</div>';
@@ -4572,7 +4824,7 @@ const Dashboard = {
 
       Highcharts.chart(this.chartContainerId, {
         chart: { type: 'column' },
-        title: { text: this.isAdmin ? 'M?dia geral dos formul?rios' : 'M?dia dos meus formul?rios' },
+        title: { text: this.selectedAluno ? 'Média do aluno selecionado' : (this.isAdmin ? 'Média geral dos formulários' : 'Média dos meus formulários') },
         xAxis: { categories: ['Entrevista', 'PDI', 'PAI'], crosshair: true },
         yAxis: { min: 0, max: 100, title: { text: 'Percentual de conclus?o (%)' } },
         tooltip: { valueSuffix: '%' },
@@ -4584,7 +4836,7 @@ const Dashboard = {
           }
         },
         series: [{
-          name: this.isAdmin ? 'Rede' : 'Minhas turmas',
+          name: this.selectedAluno ? (this.selectedAluno.name || 'Aluno') : (this.isAdmin ? 'Rede' : 'Minhas turmas'),
           data: [mediaEntrevista, mediaPDI, mediaPAI],
           colorByPoint: true,
           colors: this.isAdmin ? ['#7c3aed', '#2563eb', '#0f766e'] : ['#3b82f6', '#10b981', '#a855f7']
@@ -4603,15 +4855,27 @@ const Dashboard = {
       console.log('🔧 ===== DEBUG DASHBOARD =====');
       console.log('🔧 User:', this.$root?.user);
       console.log('🔧 isAdmin:', this.isAdmin);
+      console.log('🔧 loading:', this.loading);
       console.log('🔧 alunos.length:', this.alunos?.length);
       console.log('🔧 alunos:', this.alunos);
       console.log('🔧 alunosFiltrados.length:', this.alunosFiltrados?.length);
       console.log('🔧 alunosFiltrados:', this.alunosFiltrados);
+      console.log('🔧 alunosVisiveis.length:', this.alunosVisiveis?.length);
+      console.log('🔧 alunosVisiveis:', this.alunosVisiveis);
       console.log('🔧 filtros:', this.filtros);
       console.log('🔧 professorResumo:', this.professorResumo);
       console.log('🔧 Token:', localStorage.getItem('token'));
+      console.log('🔧 ===========================');
       
-      alert('Debug info logged to console. Press F12 to see.');
+      alert(`DEBUG DASHBOARD:
+      
+User: ${this.$root?.user?.name || 'N/A'} (${this.$root?.user?.role || 'N/A'})
+Loading: ${this.loading}
+Total alunos: ${this.alunos?.length || 0}
+Alunos filtrados: ${this.alunosFiltrados?.length || 0}
+Alunos visíveis: ${this.alunosVisiveis?.length || 0}
+
+Veja o console (F12) para mais detalhes.`);
     },
     irPara(segment) {
       if (!segment) return;
@@ -4627,6 +4891,48 @@ const Dashboard = {
       if (!base) return;
       const url = alunoId ? `${base}?student_id=${alunoId}` : base;
       this.$router.push(url);
+    },
+    noop() {
+      // no-op handler para eventos com modificadores (ex.: @mousedown.prevent)
+    },
+    // Handlers do campo de busca com modificadores de teclado
+    onBuscaChange() {
+      this.showSugestoes = true;
+      this.sugIndex = -1;
+    },
+    fecharSugestoesComAtraso() {
+      // Aguardar clique/mousedown nos botões da lista antes de fechar
+      setTimeout(() => { this.showSugestoes = false; }, 150);
+    },
+    moveSugestao(dir) {
+      if (!this.showSugestoes) return;
+      const total = Array.isArray(this.sugestoes) ? this.sugestoes.length : 0;
+      if (!total) return;
+      let idx = (this.sugIndex ?? -1) + dir;
+      if (idx < 0) idx = total - 1;
+      if (idx >= total) idx = 0;
+      this.sugIndex = idx;
+    },
+    confirmSugestao() {
+      if (!this.showSugestoes) return;
+      const lista = Array.isArray(this.sugestoes) ? this.sugestoes : [];
+      if (!lista.length) return;
+      const selecionado = lista[this.sugIndex] || lista[0];
+      if (selecionado) this.selecionarAluno(selecionado);
+    },
+    async selecionarAluno(aluno) {
+      if (!aluno) return;
+      // Mostra o nome no campo de busca e fecha sugestões primeiro
+      if (aluno.name) this.filtros.busca = aluno.name;
+      this.showSugestoes = false;
+      // Aguarda recálculo antes de trocar o selecionado, evitando flicker com 0%
+      await this.atualizarPercentuaisAluno(aluno.id);
+      this.selectedAlunoId = aluno.id;
+    },
+    limparSelecaoAluno() {
+      this.selectedAlunoId = null;
+      // Mantém a busca ou limpa, como preferir; aqui vamos manter o texto
+      this.$nextTick(() => this.renderChart());
     }
   },
   watch: {
@@ -4635,35 +4941,9 @@ const Dashboard = {
     },
     async isAdmin() {
       await this.renderChart();
-    }
-  },
-  computed:{
-    atividadesFiltradas(){
-      const now = new Date();
-      let de=null, ate=null;
-      if(this.filtros.periodo>0){ de=new Date(now); de.setDate(now.getDate()-this.filtros.periodo); }
-      if(this.filtros.periodo===0){ de=this.filtros.de?new Date(this.filtros.de):null; ate=this.filtros.ate?new Date(this.filtros.ate):null; if(ate){ ate.setHours(23,59,59,999);} }
-      const q=(this.filtros.q||'').toLowerCase();
-      const tipo=this.filtros.tipo||'';
-      let arr=this.atividadesRaw.filter(a=>{
-        const dt=new Date(a.created_at);
-        const okDe=!de || dt>=de;
-        const okAte=!ate || dt<=ate;
-        const okQ=!q || (a.descricao||'').toLowerCase().includes(q);
-        const okTipo=!tipo || a.tipo===tipo;
-        return okDe && okAte && okQ && okTipo;
-      });
-      switch(this.filtros.sort){
-        case 'data_asc': arr.sort((x,y)=>new Date(x.created_at)-new Date(y.created_at)); break;
-        case 'tipo_asc': arr.sort((x,y)=>String(x.tipo).localeCompare(String(y.tipo))); break;
-        case 'tipo_desc': arr.sort((x,y)=>String(y.tipo).localeCompare(String(x.tipo))); break;
-        default: arr.sort((x,y)=>new Date(y.created_at)-new Date(x.created_at));
-      }
-      return arr;
     },
-    totalPaginas(){ return Math.max(1, Math.ceil(this.atividadesFiltradas.length / this.paginacao.perPage)); },
-    atividadesPaginadas(){
-      const start=(this.paginacao.page-1)*this.paginacao.perPage; return this.atividadesFiltradas.slice(start,start+this.paginacao.perPage);
+    async selectedAlunoId() {
+      await this.renderChart();
     }
   }
 };
@@ -4779,17 +5059,19 @@ const Relatorios = {
             <div class="bg-white border rounded-lg p-6">
               <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                 <i class="fas fa-clipboard-list text-blue-600 mr-2"></i>
-                Anamneses e Entrevistas
+                Entrevistas com o Responsável
               </h3>
               <div v-if="dadosRelatorio.anamneses && dadosRelatorio.anamneses.length > 0">
-                <div class="space-y-4">
-                  <div v-for="anamnese in dadosRelatorio.anamneses" :key="anamnese.id" class="border rounded-lg p-4 hover:bg-gray-50">
-                    <div class="flex justify-between items-start mb-3">
-                      <h4 class="font-medium text-gray-900">{{ anamnese.tipo === 'entrevista_responsavel' ? 'Entrevista com Responsável' : 'Anamnese' }}</h4>
-                      <div class="text-xs text-gray-500">
+                <div class="space-y-6">
+                  <div v-for="anamnese in dadosRelatorio.anamneses" :key="anamnese.id" class="border-2 border-blue-200 rounded-lg p-5 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start mb-4">
+                      <h4 class="font-bold text-lg text-gray-900 flex items-center">
+                        <i class="fas fa-comments text-blue-600 mr-2"></i>
+                        {{ anamnese.tipo === 'entrevista_responsavel' ? 'Entrevista com Responsável' : 'Anamnese' }} #{{ anamnese.id }}
+                      </h4>
+                      <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
                         {{ formatarData(anamnese.created_at) }}
-                        <span v-if="anamnese.tipo === 'entrevista_responsavel'" class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">Entrevista</span>
-                      </div>
+                      </span>
                     </div>
                     <div v-if="anamnese.tipo !== 'entrevista_responsavel'" class="space-y-2">
                       <div v-for="(value, key) in anamnese.answers" :key="key" class="text-sm">
@@ -4797,77 +5079,95 @@ const Relatorios = {
                         <span class="text-gray-600 ml-1">{{ value }}</span>
                       </div>
                     </div>
-                    <div v-else class="space-y-3">
-                      <!-- Seção 1: Dados Básicos -->
-                      <div class="bg-blue-50 rounded-lg p-3">
-                        <h5 class="text-xs font-semibold text-blue-900 mb-2 uppercase">Dados Básicos</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                          <div v-if="anamnese.answers.escola"><span class="font-medium text-gray-700">Escola:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.escola }}</span></div>
-                          <div v-if="anamnese.answers.serie"><span class="font-medium text-gray-700">Série/Ano:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.serie }}</span></div>
-                          <div v-if="anamnese.answers.turno"><span class="font-medium text-gray-700">Turno:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.turno }}</span></div>
+                    <div v-else class="space-y-4">
+                      <!-- Dados Escolares e Responsável em Grid -->
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Dados Escolares -->
+                        <div class="bg-blue-50 rounded-lg p-4">
+                          <h5 class="font-semibold text-blue-900 mb-3 flex items-center text-sm">
+                            <i class="fas fa-school text-blue-600 mr-2"></i>
+                            Dados Escolares
+                          </h5>
+                          <div class="space-y-2 text-sm">
+                            <div v-if="anamnese.answers.escola"><span class="font-medium text-gray-700">Escola:</span> <span class="text-gray-900">{{ anamnese.answers.escola }}</span></div>
+                            <div v-if="anamnese.answers.serie"><span class="font-medium text-gray-700">Série/Ano:</span> <span class="text-gray-900">{{ anamnese.answers.serie }}</span></div>
+                            <div v-if="anamnese.answers.turno"><span class="font-medium text-gray-700">Turno:</span> <span class="text-gray-900">{{ anamnese.answers.turno }}</span></div>
+                          </div>
+                        </div>
+                        
+                        <!-- Dados do Responsável -->
+                        <div class="bg-green-50 rounded-lg p-4">
+                          <h5 class="font-semibold text-green-900 mb-3 flex items-center text-sm">
+                            <i class="fas fa-user-friends text-green-600 mr-2"></i>
+                            Responsável
+                          </h5>
+                          <div class="space-y-2 text-sm">
+                            <div v-if="anamnese.answers.nome_responsavel"><span class="font-medium text-gray-700">Nome:</span> <span class="text-gray-900">{{ anamnese.answers.nome_responsavel }}</span></div>
+                            <div v-if="anamnese.answers.parentesco"><span class="font-medium text-gray-700">Parentesco:</span> <span class="text-gray-900">{{ anamnese.answers.parentesco }}</span></div>
+                            <div v-if="anamnese.answers.telefone"><span class="font-medium text-gray-700">Telefone:</span> <span class="text-gray-900">{{ anamnese.answers.telefone }}</span></div>
+                            <div v-if="anamnese.answers.email"><span class="font-medium text-gray-700">Email:</span> <span class="text-gray-900">{{ anamnese.answers.email }}</span></div>
+                          </div>
                         </div>
                       </div>
                       
-                      <!-- Seção 2: Responsável -->
-                      <div class="bg-green-50 rounded-lg p-3">
-                        <h5 class="text-xs font-semibold text-green-900 mb-2 uppercase">Dados do Responsável</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                          <div v-if="anamnese.answers.nome_responsavel"><span class="font-medium text-gray-700">Nome:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.nome_responsavel }}</span></div>
-                          <div v-if="anamnese.answers.parentesco"><span class="font-medium text-gray-700">Parentesco:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.parentesco }}</span></div>
-                          <div v-if="anamnese.answers.telefone"><span class="font-medium text-gray-700">Telefone:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.telefone }}</span></div>
-                          <div v-if="anamnese.answers.email"><span class="font-medium text-gray-700">Email:</span> <span class="text-gray-600 ml-1">{{ anamnese.answers.email }}</span></div>
-                        </div>
-                      </div>
-                      
-                      <!-- Seção 3: Histórico Médico -->
-                      <div v-if="anamnese.answers.diagnostico || anamnese.answers.medicamentos || anamnese.answers.profissionais" class="bg-red-50 rounded-lg p-3">
-                        <h5 class="text-xs font-semibold text-red-900 mb-2 uppercase">Histórico Médico</h5>
-                        <div class="space-y-2 text-sm">
+                      <!-- Histórico Médico -->
+                      <div v-if="anamnese.answers.diagnostico || anamnese.answers.medicamentos || anamnese.answers.profissionais" class="bg-red-50 rounded-lg p-4">
+                        <h5 class="font-semibold text-red-900 mb-3 flex items-center text-sm">
+                          <i class="fas fa-heartbeat text-red-600 mr-2"></i>
+                          Histórico Médico
+                        </h5>
+                        <div class="space-y-3 text-sm">
                           <div v-if="anamnese.answers.diagnostico">
-                            <span class="font-medium text-gray-700">Diagnóstico:</span>
-                            <p class="text-gray-600 mt-1">{{ anamnese.answers.diagnostico }}</p>
+                            <div class="font-medium text-gray-700 mb-1"><i class="fas fa-stethoscope text-red-500 mr-1"></i> Diagnóstico:</div>
+                            <p class="text-gray-900 pl-5">{{ anamnese.answers.diagnostico }}</p>
                           </div>
                           <div v-if="anamnese.answers.medicamentos">
-                            <span class="font-medium text-gray-700">Medicamentos:</span>
-                            <p class="text-gray-600 mt-1">{{ anamnese.answers.medicamentos }}</p>
+                            <div class="font-medium text-gray-700 mb-1"><i class="fas fa-pills text-red-500 mr-1"></i> Medicamentos:</div>
+                            <p class="text-gray-900 pl-5">{{ anamnese.answers.medicamentos }}</p>
                           </div>
                           <div v-if="anamnese.answers.profissionais">
-                            <span class="font-medium text-gray-700">Profissionais que acompanham:</span>
-                            <p class="text-gray-600 mt-1">{{ anamnese.answers.profissionais }}</p>
+                            <div class="font-medium text-gray-700 mb-1"><i class="fas fa-user-md text-red-500 mr-1"></i> Profissionais:</div>
+                            <p class="text-gray-900 pl-5">{{ anamnese.answers.profissionais }}</p>
                           </div>
                         </div>
                       </div>
                       
-                      <!-- Seção 4: Desenvolvimento e Comportamento -->
-                      <div v-if="anamnese.answers.comportamento_casa || anamnese.answers.dificuldades || anamnese.answers.habilidades" class="bg-purple-50 rounded-lg p-3">
-                        <h5 class="text-xs font-semibold text-purple-900 mb-2 uppercase">Desenvolvimento e Comportamento</h5>
-                        <div class="space-y-2 text-sm">
+                      <!-- Desenvolvimento e Comportamento -->
+                      <div v-if="anamnese.answers.comportamento_casa || anamnese.answers.dificuldades || anamnese.answers.habilidades" class="bg-purple-50 rounded-lg p-4">
+                        <h5 class="font-semibold text-purple-900 mb-3 flex items-center text-sm">
+                          <i class="fas fa-child text-purple-600 mr-2"></i>
+                          Desenvolvimento e Comportamento
+                        </h5>
+                        <div class="space-y-3 text-sm">
                           <div v-if="anamnese.answers.comportamento_casa">
-                            <span class="font-medium text-gray-700">Comportamento em casa:</span>
-                            <p class="text-gray-600 mt-1">{{ anamnese.answers.comportamento_casa }}</p>
+                            <div class="font-medium text-gray-700 mb-1"><i class="fas fa-home text-purple-500 mr-1"></i> Comportamento em casa:</div>
+                            <p class="text-gray-900 pl-5">{{ anamnese.answers.comportamento_casa }}</p>
                           </div>
                           <div v-if="anamnese.answers.dificuldades">
-                            <span class="font-medium text-gray-700">Dificuldades observadas:</span>
-                            <p class="text-gray-600 mt-1">{{ anamnese.answers.dificuldades }}</p>
+                            <div class="font-medium text-gray-700 mb-1"><i class="fas fa-exclamation-circle text-orange-500 mr-1"></i> Dificuldades:</div>
+                            <p class="text-gray-900 pl-5">{{ anamnese.answers.dificuldades }}</p>
                           </div>
                           <div v-if="anamnese.answers.habilidades">
-                            <span class="font-medium text-gray-700">Habilidades e potencialidades:</span>
-                            <p class="text-gray-600 mt-1">{{ anamnese.answers.habilidades }}</p>
+                            <div class="font-medium text-gray-700 mb-1"><i class="fas fa-star text-yellow-500 mr-1"></i> Habilidades:</div>
+                            <p class="text-gray-900 pl-5">{{ anamnese.answers.habilidades }}</p>
                           </div>
                         </div>
                       </div>
                       
-                      <!-- Seção 5: Expectativas -->
-                      <div v-if="anamnese.answers.expectativas || anamnese.answers.informacoes_adicionais" class="bg-yellow-50 rounded-lg p-3">
-                        <h5 class="text-xs font-semibold text-yellow-900 mb-2 uppercase">Expectativas e Informações Adicionais</h5>
-                        <div class="space-y-2 text-sm">
+                      <!-- Expectativas -->
+                      <div v-if="anamnese.answers.expectativas || anamnese.answers.informacoes_adicionais" class="bg-amber-50 rounded-lg p-4">
+                        <h5 class="font-semibold text-amber-900 mb-3 flex items-center text-sm">
+                          <i class="fas fa-lightbulb text-amber-600 mr-2"></i>
+                          Expectativas e Observações
+                        </h5>
+                        <div class="space-y-3 text-sm">
                           <div v-if="anamnese.answers.expectativas">
-                            <span class="font-medium text-gray-700">Expectativas:</span>
-                            <p class="text-gray-600 mt-1">{{ anamnese.answers.expectativas }}</p>
+                            <div class="font-medium text-gray-700 mb-1"><i class="fas fa-bullseye text-amber-500 mr-1"></i> Expectativas:</div>
+                            <p class="text-gray-900 pl-5">{{ anamnese.answers.expectativas }}</p>
                           </div>
                           <div v-if="anamnese.answers.informacoes_adicionais">
-                            <span class="font-medium text-gray-700">Informações adicionais:</span>
-                            <p class="text-gray-600 mt-1">{{ anamnese.answers.informacoes_adicionais }}</p>
+                            <div class="font-medium text-gray-700 mb-1"><i class="fas fa-info-circle text-amber-500 mr-1"></i> Informações adicionais:</div>
+                            <p class="text-gray-900 pl-5">{{ anamnese.answers.informacoes_adicionais }}</p>
                           </div>
                         </div>
                       </div>
@@ -4882,43 +5182,183 @@ const Relatorios = {
             <div class="bg-white border rounded-lg p-6">
               <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center"><i class="fas fa-tasks text-green-600 mr-2"></i>Planos de Desenvolvimento Individual (PDIs)</h3>
               <div v-if="dadosRelatorio.pdis && dadosRelatorio.pdis.length > 0">
-                <div class="space-y-4">
-                  <div v-for="pdi in dadosRelatorio.pdis" :key="pdi.id" class="border rounded-lg p-4 hover:bg-gray-50">
-                    <div class="flex justify-between items-start mb-3">
-                      <h4 class="font-medium text-gray-900">PDI #{{ pdi.id }}</h4>
-                      <div class="text-xs"><span class="px-2 py-1 rounded-full text-xs" :class="pdi.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">{{ pdi.status }}</span></div>
+                <div class="space-y-6">
+                  <div v-for="pdi in dadosRelatorio.pdis" :key="pdi.id" class="border-2 border-green-200 rounded-lg p-5 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start mb-4">
+                      <h4 class="font-bold text-lg text-gray-900">PDI #{{ pdi.id }}</h4>
+                      <span class="px-3 py-1 rounded-full text-xs font-medium" :class="pdi.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">{{ pdi.status || 'rascunho' }}</span>
                     </div>
-                    <div class="space-y-2 text-sm">
-                      <div v-if="pdi.objectives"><span class="font-medium text-gray-700">Objetivos:</span><p class="text-gray-600 mt-1">{{ pdi.objectives }}</p></div>
-                      <div v-if="pdi.strategies"><span class="font-medium text-gray-700">Estratégias:</span><p class="text-gray-600 mt-1">{{ pdi.strategies }}</p></div>
-                      <div class="grid grid-cols-2 gap-4 mt-3">
-                        <div v-if="pdi.start_date"><span class="font-medium text-gray-700">Data Início:</span><span class="text-gray-600 ml-1">{{ formatarData(pdi.start_date) }}</span></div>
-                        <div v-if="pdi.end_date"><span class="font-medium text-gray-700">Data Fim:</span><span class="text-gray-600 ml-1">{{ formatarData(pdi.end_date) }}</span></div>
+                    
+                    <!-- Identificação -->
+                    <div v-if="pdi.form_data?.nome_estudante" class="bg-green-50 p-4 rounded-lg mb-4">
+                      <div class="font-semibold text-green-900 text-lg">{{ pdi.form_data.nome_estudante }}</div>
+                      <div class="text-sm text-green-700 mt-1">
+                        <span v-if="pdi.form_data?.ano_letivo">Ano Letivo: {{ pdi.form_data.ano_letivo }}</span>
+                        <span v-if="pdi.form_data?.turno" class="ml-3">Turno: {{ pdi.form_data.turno }}</span>
                       </div>
+                    </div>
+
+                    <!-- Objetivos -->
+                    <div v-if="pdi.form_data?.objetivo_geral" class="mb-4">
+                      <h5 class="font-semibold text-gray-800 mb-2 flex items-center"><i class="fas fa-bullseye text-green-600 mr-2"></i>Objetivo Geral</h5>
+                      <p class="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{{ pdi.form_data.objetivo_geral }}</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4 mb-4">
+                      <div v-if="pdi.form_data?.objetivos_cognitivo">
+                        <h5 class="font-semibold text-gray-800 mb-2 text-sm">Objetivos Cognitivos</h5>
+                        <p class="text-gray-700 text-sm bg-blue-50 p-2 rounded whitespace-pre-wrap">{{ pdi.form_data.objetivos_cognitivo }}</p>
+                      </div>
+                      <div v-if="pdi.form_data?.objetivos_comunicacao">
+                        <h5 class="font-semibold text-gray-800 mb-2 text-sm">Objetivos de Comunicação</h5>
+                        <p class="text-gray-700 text-sm bg-blue-50 p-2 rounded whitespace-pre-wrap">{{ pdi.form_data.objetivos_comunicacao }}</p>
+                      </div>
+                      <div v-if="pdi.form_data?.objetivos_psicomotor">
+                        <h5 class="font-semibold text-gray-800 mb-2 text-sm">Objetivos Psicomotores</h5>
+                        <p class="text-gray-700 text-sm bg-blue-50 p-2 rounded whitespace-pre-wrap">{{ pdi.form_data.objetivos_psicomotor }}</p>
+                      </div>
+                      <div v-if="pdi.form_data?.objetivos_socioemocional">
+                        <h5 class="font-semibold text-gray-800 mb-2 text-sm">Objetivos Socioemocionais</h5>
+                        <p class="text-gray-700 text-sm bg-blue-50 p-2 rounded whitespace-pre-wrap">{{ pdi.form_data.objetivos_socioemocional }}</p>
+                      </div>
+                    </div>
+
+                    <!-- Estratégias -->
+                    <div v-if="pdi.form_data?.estrategias_metodologias" class="mb-4">
+                      <h5 class="font-semibold text-gray-800 mb-2 flex items-center"><i class="fas fa-lightbulb text-yellow-600 mr-2"></i>Estratégias e Metodologias</h5>
+                      <p class="text-gray-700 bg-yellow-50 p-3 rounded whitespace-pre-wrap">{{ pdi.form_data.estrategias_metodologias }}</p>
+                    </div>
+
+                    <!-- Datas e Avaliação -->
+                    <div class="grid md:grid-cols-3 gap-4 mb-4 text-sm">
+                      <div v-if="pdi.form_data?.data_inicio" class="bg-gray-50 p-3 rounded">
+                        <span class="font-semibold text-gray-700">Data Início:</span>
+                        <div class="text-gray-600 mt-1">{{ formatarData(pdi.form_data.data_inicio) }}</div>
+                      </div>
+                      <div v-if="pdi.form_data?.data_termino" class="bg-gray-50 p-3 rounded">
+                        <span class="font-semibold text-gray-700">Data Término:</span>
+                        <div class="text-gray-600 mt-1">{{ formatarData(pdi.form_data.data_termino) }}</div>
+                      </div>
+                      <div v-if="pdi.form_data?.frequencia_atendimento" class="bg-gray-50 p-3 rounded">
+                        <span class="font-semibold text-gray-700">Frequência:</span>
+                        <div class="text-gray-600 mt-1">{{ pdi.form_data.frequencia_atendimento }}</div>
+                      </div>
+                    </div>
+
+                    <!-- Equipe -->
+                    <div class="border-t pt-3 text-xs text-gray-500">
+                      <div v-if="pdi.form_data?.diretor">Diretor: {{ pdi.form_data.diretor }}</div>
+                      <div v-if="pdi.form_data?.professor_aee">Professor AEE: {{ pdi.form_data.professor_aee }}</div>
+                      <div class="mt-1">Criado em {{ formatarData(pdi.created_at) }}</div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div v-else class="text-center text-gray-500 py-8"><i class="fas a-tasks text-3xl mb-2"></i><p>Nenhum PDI registrado para este aluno</p></div>
+              <div v-else class="text-center text-gray-500 py-8"><i class="fas fa-tasks text-3xl mb-2"></i><p>Nenhum PDI registrado para este aluno</p></div>
             </div>
 
             <!-- PAIs -->
             <div class="bg-white border rounded-lg p-6">
               <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center"><i class="fas fa-file-alt text-purple-600 mr-2"></i>Planos de Atendimento Individualizados (PAIs)</h3>
               <div v-if="dadosRelatorio.pais && dadosRelatorio.pais.length > 0">
-                <div class="space-y-4">
-                  <div v-for="pai in dadosRelatorio.pais" :key="pai.id" class="border rounded-lg p-4 hover:bg-gray-50">
-                    <div class="flex justify-between items-start mb-3">
-                      <h4 class="font-medium text-gray-900">PAI #{{ pai.id }}</h4>
-                      <div class="text-xs"><span class="px-2 py-1 rounded-full text-xs" :class="pai.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">{{ pai.status }}</span></div>
+                <div class="space-y-6">
+                  <div v-for="pai in dadosRelatorio.pais" :key="pai.id" class="border-2 border-purple-200 rounded-lg p-5 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start mb-4">
+                      <h4 class="font-bold text-lg text-gray-900">PAI #{{ pai.id }}</h4>
+                      <span class="px-3 py-1 rounded-full text-xs font-medium" :class="pai.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800'">{{ pai.status || 'em uso' }}</span>
                     </div>
-                    <div class="space-y-2 text-sm">
-                      <div v-if="pai.objectives"><span class="font-medium text-gray-700">Objetivos:</span><p class="text-gray-600 mt-1">{{ pai.objectives }}</p></div>
-                      <div v-if="pai.strategies"><span class="font-medium text-gray-700">Estratégias:</span><p class="text-gray-600 mt-1">{{ pai.strategies }}</p></div>
-                      <div class="grid grid-cols-2 gap-4 mt-3">
-                        <div v-if="pai.start_date"><span class="font-medium text-gray-700">Data Início:</span><span class="text-gray-600 ml-1">{{ formatarData(pai.start_date) }}</span></div>
-                        <div v-if="pai.end_date"><span class="font-medium text-gray-700">Data Fim:</span><span class="text-gray-600 ml-1">{{ formatarData(pai.end_date) }}</span></div>
+                    
+                    <!-- Identificação -->
+                    <div v-if="pai.form_data?.nome_estudante" class="bg-purple-50 p-4 rounded-lg mb-4">
+                      <div class="font-semibold text-purple-900 text-lg">{{ pai.form_data.nome_estudante }}</div>
+                      <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-purple-700 mt-2">
+                        <div v-if="pai.form_data?.ano_letivo">Ano: {{ pai.form_data.ano_letivo }}</div>
+                        <div v-if="pai.form_data?.serie_ano">Série: {{ pai.form_data.serie_ano }}</div>
+                        <div v-if="pai.form_data?.turno">Turno: {{ pai.form_data.turno }}</div>
+                        <div v-if="pai.form_data?.data_nascimento">Nasc: {{ formatarData(pai.form_data.data_nascimento) }}</div>
                       </div>
+                    </div>
+
+                    <!-- Diagnóstico -->
+                    <div v-if="pai.form_data?.tipo_deficiencia || pai.form_data?.cid_laudo" class="mb-4 bg-red-50 p-3 rounded">
+                      <h5 class="font-semibold text-gray-800 mb-2 text-sm flex items-center"><i class="fas fa-medkit text-red-600 mr-2"></i>Informações Clínicas</h5>
+                      <div class="text-sm space-y-1">
+                        <div v-if="pai.form_data?.tipo_deficiencia"><span class="font-medium">Tipo:</span> {{ pai.form_data.tipo_deficiencia }}</div>
+                        <div v-if="pai.form_data?.cid_laudo"><span class="font-medium">CID/Laudo:</span> {{ pai.form_data.cid_laudo }}</div>
+                      </div>
+                    </div>
+
+                    <!-- Objetivos -->
+                    <div v-if="pai.form_data?.objetivo_geral" class="mb-4">
+                      <h5 class="font-semibold text-gray-800 mb-2 flex items-center"><i class="fas fa-bullseye text-purple-600 mr-2"></i>Objetivo Geral</h5>
+                      <p class="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">{{ pai.form_data.objetivo_geral }}</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4 mb-4">
+                      <div v-if="pai.form_data?.objetivos_comunicacao">
+                        <h5 class="font-semibold text-gray-800 mb-2 text-sm">Objetivos de Comunicação</h5>
+                        <p class="text-gray-700 text-sm bg-blue-50 p-2 rounded whitespace-pre-wrap">{{ pai.form_data.objetivos_comunicacao }}</p>
+                      </div>
+                      <div v-if="pai.form_data?.objetivos_autonomia">
+                        <h5 class="font-semibold text-gray-800 mb-2 text-sm">Objetivos de Autonomia</h5>
+                        <p class="text-gray-700 text-sm bg-blue-50 p-2 rounded whitespace-pre-wrap">{{ pai.form_data.objetivos_autonomia }}</p>
+                      </div>
+                      <div v-if="pai.form_data?.objetivos_academicos">
+                        <h5 class="font-semibold text-gray-800 mb-2 text-sm">Objetivos Acadêmicos</h5>
+                        <p class="text-gray-700 text-sm bg-blue-50 p-2 rounded whitespace-pre-wrap">{{ pai.form_data.objetivos_academicos }}</p>
+                      </div>
+                      <div v-if="pai.form_data?.objetivos_socializacao">
+                        <h5 class="font-semibold text-gray-800 mb-2 text-sm">Objetivos de Socialização</h5>
+                        <p class="text-gray-700 text-sm bg-blue-50 p-2 rounded whitespace-pre-wrap">{{ pai.form_data.objetivos_socializacao }}</p>
+                      </div>
+                    </div>
+
+                    <!-- Estratégias -->
+                    <div v-if="pai.form_data?.estrategias_pedagogicas" class="mb-4">
+                      <h5 class="font-semibold text-gray-800 mb-2 flex items-center"><i class="fas fa-chalkboard-teacher text-yellow-600 mr-2"></i>Estratégias Pedagógicas</h5>
+                      <p class="text-gray-700 bg-yellow-50 p-3 rounded whitespace-pre-wrap">{{ pai.form_data.estrategias_pedagogicas }}</p>
+                    </div>
+
+                    <!-- Recursos -->
+                    <div v-if="pai.form_data?.recursos_tecnologia_assistiva || pai.form_data?.recursos_pedagogicos" class="mb-4">
+                      <h5 class="font-semibold text-gray-800 mb-2 flex items-center"><i class="fas fa-tools text-indigo-600 mr-2"></i>Recursos</h5>
+                      <div class="grid md:grid-cols-2 gap-3 text-sm">
+                        <div v-if="pai.form_data?.recursos_tecnologia_assistiva" class="bg-indigo-50 p-2 rounded">
+                          <span class="font-medium">Tecnologia Assistiva:</span>
+                          <div class="mt-1 text-gray-700">{{ pai.form_data.recursos_tecnologia_assistiva }}</div>
+                        </div>
+                        <div v-if="pai.form_data?.recursos_pedagogicos" class="bg-indigo-50 p-2 rounded">
+                          <span class="font-medium">Recursos Pedagógicos:</span>
+                          <div class="mt-1 text-gray-700">{{ pai.form_data.recursos_pedagogicos }}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Atendimento -->
+                    <div class="grid md:grid-cols-4 gap-4 mb-4 text-sm">
+                      <div v-if="pai.form_data?.data_inicio" class="bg-gray-50 p-3 rounded">
+                        <span class="font-semibold text-gray-700">Data Início:</span>
+                        <div class="text-gray-600 mt-1">{{ formatarData(pai.form_data.data_inicio) }}</div>
+                      </div>
+                      <div v-if="pai.form_data?.data_termino" class="bg-gray-50 p-3 rounded">
+                        <span class="font-semibold text-gray-700">Data Término:</span>
+                        <div class="text-gray-600 mt-1">{{ formatarData(pai.form_data.data_termino) }}</div>
+                      </div>
+                      <div v-if="pai.form_data?.frequencia_semanal" class="bg-gray-50 p-3 rounded">
+                        <span class="font-semibold text-gray-700">Frequência:</span>
+                        <div class="text-gray-600 mt-1">{{ pai.form_data.frequencia_semanal }}</div>
+                      </div>
+                      <div v-if="pai.form_data?.tipo_atendimento" class="bg-gray-50 p-3 rounded">
+                        <span class="font-semibold text-gray-700">Tipo:</span>
+                        <div class="text-gray-600 mt-1">{{ pai.form_data.tipo_atendimento }}</div>
+                      </div>
+                    </div>
+
+                    <!-- Equipe -->
+                    <div class="border-t pt-3 text-xs text-gray-500">
+                      <div v-if="pai.form_data?.professor_aee">Professor AEE: {{ pai.form_data.professor_aee }}</div>
+                      <div v-if="pai.form_data?.professor_sala_regular">Professor Sala Regular: {{ pai.form_data.professor_sala_regular }}</div>
+                      <div class="mt-1">Criado em {{ formatarData(pai.created_at) }}</div>
                     </div>
                   </div>
                 </div>
@@ -5302,7 +5742,7 @@ const Relatorios = {
             this.$showToast && this.$showToast('Erro', 'Tipo de PDF inválido', 'error');
             return;
         }
-
+        
         console.log('🔧 Endpoint:', endpoint);
         console.log('🔧 Fazendo requisição...');
         
@@ -5453,7 +5893,9 @@ const Relatorios = {
     },
     pretty(o){ try{ return JSON.stringify(o, null, 2); }catch(e){ return String(o); } }
   },
-  async mounted(){ await this.buscar(); }
+  async mounted(){ 
+    await this.buscar(); 
+  }
 };
 
 
@@ -5461,26 +5903,29 @@ const Relatorios = {
 const EntrevistaResponsavel = {
   template: `
     <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
-      <div class="max-w-6xl mx-auto px-4">
-        <!-- Header Compacto -->
-        <div class="mb-6">
+      <div class="max-w-4xl mx-auto px-4">
+        <!-- Header -->
+        <div class="mb-8">
           <div class="flex items-center justify-between">
             <div>
-              <h1 class="text-2xl font-bold text-gray-900">Entrevista com Responsável</h1>
+              <h1 class="text-3xl font-bold text-gray-900 mb-2">Entrevista com Responsável</h1>
+              <p class="text-gray-600">Complete as informações em etapas organizadas</p>
+              <!-- Indicador de Auto-Save -->
               <div v-if="savingAuto" class="flex items-center text-sm text-blue-600 mt-1">
                 <i class="fas fa-circle-notch fa-spin mr-2"></i>
-                Salvando...
+                Salvando automaticamente...
               </div>
               <div v-else-if="lastSaved" class="flex items-center text-sm text-green-600 mt-1">
                 <i class="fas fa-check-circle mr-2"></i>
-                Salvo {{ lastSaved.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) }}
+                Salvo às {{ lastSaved.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) }}
               </div>
             </div>
             
+            <!-- Botão Gerar PDF -->
             <button v-if="form.id" 
                     @click="generatePDF"
                     :disabled="generatingPDF"
-                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center space-x-2 disabled:opacity-50 transition-colors shadow-md">
+                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md">
               <i v-if="!generatingPDF" class="fas fa-file-pdf"></i>
               <i v-else class="fas fa-spinner fa-spin"></i>
               <span>{{ generatingPDF ? 'Gerando...' : 'Gerar PDF' }}</span>
@@ -5488,44 +5933,79 @@ const EntrevistaResponsavel = {
           </div>
         </div>
 
-        <!-- TabBar Navigation -->
-        <div class="bg-white rounded-lg shadow-md mb-6 overflow-hidden">
-          <div class="flex border-b border-gray-200 overflow-x-auto">
-            <button v-for="(step, index) in steps" :key="index"
-                    @click="goToStep(index + 1)"
-                    class="flex-1 min-w-[120px] px-6 py-4 text-sm font-medium transition-all duration-200 relative"
-                    :class="[
-                    index + 1 === currentStep 
-                      ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-600' 
-                      : index + 1 < currentStep 
-                        ? 'text-green-600 hover:bg-green-50' 
-                        : 'text-gray-500 hover:bg-gray-50'
-                  ]">
-              <div class="flex items-center justify-center space-x-2">
-                <i :class="[step.icon, index + 1 < currentStep ? 'fa-check-circle' : '']"></i>
-                <span>{{ step.title }}</span>
-              </div>
-              <div v-if="index + 1 === currentStep" class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"></div>
-            </button>
-          </div>
-          
-          <!-- Progress Indicator -->
-          <div class="px-6 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between text-sm">
-            <span class="text-gray-600">
-              <i class="fas fa-tasks mr-2"></i>
-              Etapa {{ currentStep }} de {{ totalSteps }}
-            </span>
-            <span class="font-medium text-blue-600">{{ Math.round(progressPercentage) }}% completo</span>
+        <!-- DEBUG: Banner de Auto-Save -->
+        <div class="mb-4 px-4 py-3 border-2 rounded-lg" :class="{
+          'bg-blue-50 border-blue-300': savingAuto,
+          'bg-green-50 border-green-300': lastSaved && !savingAuto,
+          'bg-gray-50 border-gray-300': !savingAuto && !lastSaved
+        }">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <i v-if="savingAuto" class="fas fa-circle-notch fa-spin text-blue-600 mr-2"></i>
+              <i v-else-if="lastSaved" class="fas fa-check-circle text-green-600 mr-2"></i>
+              <i v-else class="fas fa-info-circle text-gray-600 mr-2"></i>
+              
+              <span class="font-medium">
+                <span v-if="savingAuto" class="text-blue-700">Salvando automaticamente...</span>
+                <span v-else-if="lastSaved" class="text-green-700">✓ Salvo automaticamente às {{ lastSaved.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) }}</span>
+                <span v-else class="text-gray-700">Auto-save ativo - Digite e seus dados serão salvos automaticamente</span>
+              </span>
+            </div>
+            <span v-if="form.id" class="text-xs bg-white px-2 py-1 rounded border">ID: {{ form.id }}</span>
           </div>
         </div>
 
+        <!-- Progress Bar -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-sm font-medium text-gray-700">Progresso do Formulário</span>
+            <span class="text-sm text-gray-500">{{ currentStep }}/{{ totalSteps }}</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 rounded-full transition-all duration-500 ease-out" 
+                 :style="{ width: progressPercentage + '%' }"></div>
+          </div>
+          <div class="flex justify-between mt-2">
+            <span v-for="(step, index) in steps" :key="index" 
+                  class="text-xs font-medium transition-colors duration-300"
+                  :class="index < currentStep ? 'text-indigo-600' : index === currentStep - 1 ? 'text-indigo-500' : 'text-gray-400'">
+              {{ step.title }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Step Navigation Pills -->
+        <div class="flex flex-wrap justify-center gap-2 mb-8">
+          <button v-for="(step, index) in steps" :key="index"
+                  @click="goToStep(index + 1)"
+                  :disabled="index + 1 > maxCompletedStep"
+                  class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300"
+                  :class="[
+                    index + 1 === currentStep 
+                      ? 'bg-indigo-600 text-white shadow-lg' 
+                      : index + 1 <= maxCompletedStep 
+                        ? 'bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50' 
+                        : 'bg-gray-100 text-gray-600 cursor-not-allowed'
+                  ]">
+            <i :class="step.icon + ' mr-2'"></i>{{ step.title }}
+          </button>
+        </div>
+
         <!-- Form Card -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
           <form @submit.prevent="salvarEntrevista" class="relative">
             <!-- Step 1: Dados do Aluno -->
             <div v-show="currentStep === 1" class="step-content">
-              <div class="p-6">
-                <div class="max-w-4xl mx-auto space-y-6">
+              <div class="p-8">
+                <div class="text-center mb-8">
+                  <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user-graduate text-2xl text-blue-600"></i>
+                  </div>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Dados do Aluno</h2>
+                  <p class="text-gray-600">Vamos começar com as informações básicas do aluno</p>
+                </div>
+
+                <div class="max-w-2xl mx-auto space-y-6">
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                       Selecionar Aluno <span class="text-red-500">*</span>
@@ -5770,23 +6250,26 @@ const EntrevistaResponsavel = {
             </div>
 
             <!-- Navigation Buttons -->
-            <div class="border-t border-gray-200 px-6 py-4 flex justify-between items-center bg-white">
+            <div class="bg-gray-50 px-8 py-6 flex justify-between items-center">
               <button type="button" @click="previousStep" 
-                      v-if="currentStep > 1"
-                      class="flex items-center px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+                      :disabled="currentStep === 1"
+                      class="flex items-center px-6 py-3 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
                 <i class="fas fa-chevron-left mr-2"></i>
                 Anterior
               </button>
-              <div v-else></div>
+
+              <div class="flex items-center space-x-2">
+                <span class="text-sm text-gray-500">{{ currentStep }} de {{ totalSteps }}</span>
+              </div>
 
               <button v-if="currentStep < totalSteps" type="button" @click="nextStep"
-                      class="flex items-center px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+                      class="flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200">
                 Próximo
                 <i class="fas fa-chevron-right ml-2"></i>
               </button>
 
               <button v-else type="submit" :disabled="loading"
-                      class="flex items-center px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm">
+                      class="flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
                 <div v-if="loading" class="animate-spin -ml-1 mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
                 <i v-else class="fas fa-save mr-2"></i>
                 {{ loading ? 'Salvando...' : 'Finalizar Entrevista' }}
@@ -5860,7 +6343,7 @@ const EntrevistaResponsavel = {
   watch: {
     form: {
       handler(newVal, oldVal) {
-        console.log('👀 Watch detectou mudança!', {
+        console.log('👀 Watch detectou mudança!', { 
           student_id: newVal.student_id, 
           loading: this.loading,
           savingAuto: this.savingAuto,
@@ -5901,12 +6384,18 @@ const EntrevistaResponsavel = {
   methods: {
     async carregarAlunos() {
       try {
-        let params = {};
-        if (this.$parent.user && this.$parent.user.role !== 'admin') {
-          params.teacher_id = this.$parent.user.id;
+        // Backend já aplica o filtro teacher-centric automaticamente
+        const response = await api.get('/students');
+        // Compatibilidade com diferentes formatos de resposta
+        let alunosData = [];
+        if (response.data?.data?.rows) {
+          alunosData = response.data.data.rows;
+        } else if (Array.isArray(response.data?.data)) {
+          alunosData = response.data.data;
+        } else if (Array.isArray(response.data)) {
+          alunosData = response.data;
         }
-        const response = await api.get('/students/options', { params });
-        this.alunos = response.data?.data?.rows || [];
+        this.alunos = alunosData;
       } catch (error) {
         console.error('❌ [Entrevista] Erro ao carregar alunos:', error);
         this.alunos = [];
@@ -7711,12 +8200,12 @@ const RelatorioAtendimento = {
 
         <!-- Indicadores de Etapas -->
         <div class="flex justify-between mb-8">
-          <div v-for="(step, index) in steps" :key="index"
+          <div v-for="(step, index) in steps" :key="index" 
                class="flex flex-col items-center cursor-pointer transition-all duration-200"
                @click="goToStep(index)">
             <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-200"
-                 :class="index < currentStep ? 'bg-amber-500 border-amber-500 text-white' :
-                         index === currentStep ? 'bg-amber-100 border-amber-500 text-amber-700' :
+                 :class="index < currentStep ? 'bg-amber-500 border-amber-500 text-white' : 
+                         index === currentStep ? 'bg-amber-100 border-amber-500 text-amber-700' : 
                          'bg-gray-100 border-gray-300 text-gray-600'">
               <i :class="step.icon"></i>
             </div>
@@ -7778,43 +8267,15 @@ const RelatorioAtendimento = {
                 Descrição do Atendimento *
               </label>
               
-              <!-- Controles de gravação -->
-              <div class="mb-3 flex items-center space-x-3">
-                <button type="button" 
-                        @click="toggleRecording" 
-                        :disabled="isProcessingAudio"
-                        class="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                        :class="isRecording 
-                          ? 'bg-red-100 text-red-700 hover:bg-red-200' 
-                          : 'bg-amber-100 text-amber-700 hover:bg-amber-200'">
-                  <i :class="isRecording ? 'fas fa-stop' : 'fas fa-microphone'"></i>
-                  <span>{{ isRecording ? 'Parar Gravação' : 'Gravar Áudio' }}</span>
-                </button>
-                
-                <!-- Indicador de gravação -->
-                <div v-if="isRecording" class="flex items-center space-x-2 text-red-600">
-                  <div class="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div>
-                  <span class="text-sm font-medium">{{ Math.floor(recordingTime / 60) }}:{{ String(recordingTime % 60).padStart(2, '0') }}</span>
-                </div>
-                
-                <!-- Instruções -->
-                <div class="text-xs text-gray-500">
-                  Clique no microfone para gravar ou digite diretamente
-                </div>
-              </div>
-                
-              <!-- Status de processamento -->
-              <div v-if="isProcessingAudio" class="bg-amber-50 border border-amber-200 rounded p-3 mb-3">
-                <div class="flex items-center space-x-2">
-                  <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-amber-600"></div>
-                  <span class="text-sm text-amber-700">Convertendo áudio para texto...</span>
-                </div>
-              </div>
+              <p class="text-xs text-gray-500 mb-3">
+                <i class="fas fa-microphone text-amber-500 mr-1"></i>
+                Use o microfone flutuante no canto da tela para gravar áudio
+              </p>
               
               <!-- Textarea para descrição -->
               <textarea v-model="form.descricao"
                         rows="8"
-                        placeholder="Digite ou grave a descrição detalhada do atendimento..."
+                        placeholder="Digite a descrição detalhada do atendimento ou use o microfone flutuante para gravar..."
                         ref="descricaoField"
                         data-voice-field="descricao"
                         @focus="setVoiceTarget('descricao', $event)"
@@ -7824,9 +8285,9 @@ const RelatorioAtendimento = {
               <div class="flex justify-end mt-2">
                 <button type="button"
                         @click="speak(form.descricao)"
-                        :disabled="!form.descricao || isProcessingAudio"
+                        :disabled="!form.descricao"
                         class="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                        :class="(!form.descricao || isProcessingAudio)
+                        :class="!form.descricao
                           ? 'bg-gray-100 text-gray-600 cursor-not-allowed'
                           : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'">
                   <i class="fas fa-volume-up"></i>
@@ -7911,11 +8372,23 @@ const RelatorioAtendimento = {
             </div>
           </div>
 
+          <!-- Indicador de Auto-save -->
+          <div v-if="isSaving || lastSaved" class="mt-4 text-sm flex items-center justify-end">
+            <span v-if="isSaving" class="flex items-center text-amber-600">
+              <span class="animate-spin rounded-full h-3 w-3 border-b-2 border-amber-500 mr-2"></span>
+              Salvando automaticamente...
+            </span>
+            <span v-else-if="lastSaved" class="flex items-center text-green-600">
+              <i class="fas fa-check-circle mr-1"></i>
+              Salvo automaticamente
+            </span>
+          </div>
+
           <!-- Navegação -->
             <div class="flex justify-between pt-6 border-t">
             <button type="button" 
                     @click="previousStep" 
-                    :disabled="currentStep === 0 || loading || isProcessingAudio"
+                    :disabled="currentStep === 0 || loading"
                     class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
               <i class="fas fa-arrow-left mr-1"></i>
               Anterior
@@ -7924,7 +8397,7 @@ const RelatorioAtendimento = {
             <div class="flex space-x-3">
               <button type="button" 
                       @click="cancel" 
-                      :disabled="loading || isProcessingAudio"
+                      :disabled="loading"
                       class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
                 Cancelar
               </button>
@@ -7932,7 +8405,7 @@ const RelatorioAtendimento = {
               <button v-if="currentStep < totalSteps - 1" 
                       type="button" 
                       @click="nextStep"
-                      :disabled="!canProceed || loading || isProcessingAudio"
+                      :disabled="!canProceed || loading"
                       class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed">
                 Próximo
                 <i class="fas fa-arrow-right ml-1"></i>
@@ -7949,7 +8422,7 @@ const RelatorioAtendimento = {
               
               <!-- Botão PDF -->
               <button v-if="form.student_id" type="button" @click="exportarPDF"
-                      :disabled="loading || isProcessingAudio"
+                      :disabled="loading"
                       class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
                 <i class="fas fa-file-pdf mr-1"></i>
                 📄 Exportar PDF
@@ -7980,7 +8453,7 @@ const RelatorioAtendimento = {
                 <p class="text-sm text-gray-600 line-clamp-2">{{ r.descricao }}</p>
               </div>
               <div class="flex space-x-2">
-                <button @click="edit(r)" :disabled="loading || isProcessingAudio" class="text-blue-600 hover:text-blue-800 text-sm disabled:opacity-50 disabled:cursor-not-allowed">Editar</button>
+                <button @click="edit(r)" :disabled="loading" class="text-blue-600 hover:text-blue-800 text-sm disabled:opacity-50 disabled:cursor-not-allowed">Editar</button>
                 <button @click="deleteRelatorio(r)"
                         :disabled="deletingId===r.id || loading"
                         class="text-red-600 hover:text-red-800 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
@@ -8022,12 +8495,6 @@ const RelatorioAtendimento = {
       loadingRelatorios: false,
       loadingStudents: false,
       deletingId: null,
-      isRecording: false,
-      isProcessingAudio: false,
-      recordingTime: 0,
-      mediaRecorder: null,
-      audioChunks: [],
-      recordingTimer: null,
       voiceTargetField: 'descricao',
       voiceTargetElement: null,
       voiceHighlightActive: false,
@@ -8037,7 +8504,10 @@ const RelatorioAtendimento = {
         objetivos: 'objetivosField',
         recursos: 'recursosField',
         observacoes: 'observacoesField'
-      }
+      },
+      autoSaveTimer: null,
+      isSaving: false,
+      lastSaved: null
     }
   },
   async mounted() {
@@ -8046,6 +8516,14 @@ const RelatorioAtendimento = {
     this.$nextTick(() => {
       this.ensureVoiceTarget();
     });
+  },
+  watch: {
+    'form.student_id'() { this.scheduleAutoSave(); },
+    'form.data_atendimento'() { this.scheduleAutoSave(); },
+    'form.descricao'() { this.scheduleAutoSave(); },
+    'form.objetivos'() { this.scheduleAutoSave(); },
+    'form.recursos'() { this.scheduleAutoSave(); },
+    'form.observacoes'() { this.scheduleAutoSave(); }
   },
   computed: {
     canProceed() {
@@ -8089,12 +8567,12 @@ const RelatorioAtendimento = {
     async loadStudents() {
       try {
         this.loadingStudents = true;
-        let params = {};
+        let params = { per_page: 200 };
         if (this.$parent.user && this.$parent.user.role !== 'admin') {
           params.teacher_id = this.$parent.user.id;
         }
-        const r = await api.get('/students/options', { params });
-        this.alunos = (r.data?.data) || [];
+        const r = await api.get('/students', { params });
+        this.alunos = (r.data?.data?.rows) || [];
       } catch (e) {
         console.error('Erro ao carregar alunos:', e);
       } finally {
@@ -8236,109 +8714,21 @@ const RelatorioAtendimento = {
       }
     },
 
-    async toggleRecording() {
-      if (this.isRecording) {
-        await this.stopRecording();
-      } else {
-        await this.startRecording();
-      }
+    scheduleAutoSave() {
+      if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
+      this.autoSaveTimer = setTimeout(() => this.autoSave(), 2000);
     },
 
-    async startRecording() {
-      try {
-        this.ensureVoiceTarget();
-        this.activateVoiceHighlight();
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        this.mediaRecorder = new MediaRecorder(stream);
-        this.audioChunks = [];
-        this.recordingTime = 0;
-
-        this.mediaRecorder.ondataavailable = (event) => {
-          this.audioChunks.push(event.data);
-        };
-
-        this.mediaRecorder.onstop = async () => {
-          const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
-          await this.processAudio(audioBlob);
-
-          // Parar todas as tracks de áudio
-          stream.getTracks().forEach(track => track.stop());
-        };
-
-        this.mediaRecorder.start();
-        this.isRecording = true;
-        
-        // Timer para mostrar tempo de gravação
-        this.recordingTimer = setInterval(() => {
-          this.recordingTime++;
-        }, 1000);
-
-      } catch (error) {
-        console.error('Erro ao iniciar gravação:', error);
-        this.$showToast('Erro', 'Erro ao acessar o microfone. Verifique as permissões.', 'error');
-        this.deactivateVoiceHighlight();
+    async autoSave() {
+      // Não salva se não tiver os campos obrigatórios
+      if (!this.form.student_id || !this.form.data_atendimento || !this.form.descricao?.trim()) {
+        return;
       }
-    },
 
-    async stopRecording() {
-      if (this.mediaRecorder && this.isRecording) {
-        // Verificar se a gravação tem pelo menos 1 segundo
-        if (this.recordingTime < 1) {
-          this.$showToast('Atenção', 'Grave pelo menos 1 segundo de áudio para uma transcrição adequada.', 'info');
-          return;
-        }
-        
-        this.mediaRecorder.stop();
-        this.isRecording = false;
-        
-        if (this.recordingTimer) {
-          clearInterval(this.recordingTimer);
-          this.recordingTimer = null;
-        }
-      }
-    },
+      // Não salva se já estiver salvando
+      if (this.isSaving) return;
 
-    async processAudio(audioBlob) {
-      this.isProcessingAudio = true;
-      this.activateVoiceHighlight();
-
-      try {
-        // Validar tamanho do blob antes de enviar
-        if (audioBlob.size < 1000) { // Menos de 1KB
-          throw new Error('Áudio muito curto. Grave pelo menos 1 segundo.');
-        }
-        
-        // Integração real com backend (OpenAI Whisper via PHP):
-        const formData = new FormData();
-        formData.append('audio', audioBlob, 'recording.wav');
-
-        const { data } = await api.post('/voice/transcribe', formData, {
-          // Não definir Content-Type manualmente para permitir boundary automático
-          timeout: 120000
-        });
-
-        const transcricao = data?.data?.text || '';
-        if (!transcricao) {
-          throw new Error('Transcrição vazia - tente falar mais claramente');
-        }
-
-        this.ensureVoiceTarget();
-        this.insertTranscription(transcricao);
-
-        this.$showToast('Sucesso', 'Áudio transcrito com sucesso!', 'success');
-        
-      } catch (error) {
-        console.error('Erro ao processar áudio:', error);
-        const msg = error.response?.data?.error || error.message || 'Erro ao converter áudio para texto.';
-        this.$showToast('Erro', msg, 'error');
-      } finally {
-        this.isProcessingAudio = false;
-        this.activateVoiceHighlight(2000);
-      }
-    },
-
-    async save() {
-      this.loading = true;
+      this.isSaving = true;
       try {
         const { id, ...rest } = this.form || {};
         const payload = { ...rest };
@@ -8352,15 +8742,59 @@ const RelatorioAtendimento = {
         } else {
           r = await api.post('/atendimentos', payload);
         }
+        
+        if (r.data?.ok) {
+          this.lastSaved = new Date();
+          // Se era um novo relatório, atualiza o ID
+          if (!id && r.data?.data?.id) {
+            this.form.id = r.data.data.id;
+          }
+          // Recarrega a lista de relatórios em background
+          this.loadRelatorios();
+        }
+      } catch (e) {
+        console.error('Erro no auto-save:', e);
+      } finally {
+        this.isSaving = false;
+      }
+    },
+
+    async save() {
+      this.loading = true;
+      try {
+        const { id, ...rest } = this.form || {};
+        const payload = { ...rest };
+        if (this.$parent.user && this.$parent.user.role !== 'admin') {
+          payload.teacher_id = this.$parent.user.id;
+        }
+
+        console.log('🔍 SAVE - form.id:', id);
+        console.log('🔍 SAVE - payload:', payload);
+        console.log('🔍 SAVE - endpoint:', id ? `/atendimentos/${id}` : '/atendimentos');
+
+        let r;
+        if (id) {
+          r = await api.post(`/atendimentos/${id}`, payload);
+        } else {
+          r = await api.post('/atendimentos', payload);
+        }
+        
+        console.log('🔍 SAVE - response:', r);
+        console.log('🔍 SAVE - r.data:', r.data);
+        
         if (r.data?.ok) {
           this.$showToast('Sucesso', id ? 'Relatório atualizado com sucesso!' : 'Relatório salvo com sucesso!', 'success');
           this.cancel();
           await this.loadRelatorios();
         } else {
+          console.error('🔴 SAVE - Erro na resposta:', r.data?.error);
           this.$showToast('Erro', r.data?.error || 'Erro ao salvar relatório', 'error');
         }
       } catch (e) {
-        this.$showToast('Erro', 'Erro ao salvar relatório', 'error');
+        console.error('🔴 SAVE - Exception:', e);
+        console.error('🔴 SAVE - Exception response:', e.response);
+        const errorMsg = e.response?.data?.error || e.message || 'Erro ao salvar relatório';
+        this.$showToast('Erro', errorMsg, 'error');
       } finally {
         this.loading = false;
       }

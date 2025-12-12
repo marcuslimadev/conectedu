@@ -1,11 +1,11 @@
 <?php
 /**
- * GERADOR DE PDF - ENTREVISTA COM RESPONSÁVEL V2
- * Baseado no modelo oficial ENTREVISTA COM O RESPONSÁVEL.txt
- * Estrutura completa com todas as seções do formulário AEE
+ * GERADOR DE PDF - ENTREVISTA COM RESPONSÁVEL V3
+ * EXATAMENTE como o modelo oficial ENTREVISTA COM O RESPONSÁVEL.txt
+ * Layout oficial de formulário com campos, linhas, checkboxes
  */
 
-// Só carrega dependencies se não estiver sendo incluído
+// Dependências
 if (!function_exists('db')) {
     require_once 'functions.php';
 }
@@ -15,7 +15,7 @@ if (!class_exists('Mpdf\Mpdf')) {
 
 use Mpdf\Mpdf;
 
-// Se chamado diretamente (não via api.php)
+// Se chamado diretamente
 if (!isset($user) || !isset($pdo)) {
     header('Content-Type: application/json; charset=utf-8');
     cors();
@@ -23,9 +23,7 @@ if (!isset($user) || !isset($pdo)) {
     $pdo = db();
 }
 
-// Pegar ID da entrevista
 $entrevista_id = $_GET['id'] ?? null;
-
 if (!$entrevista_id) {
     res(false, null, 'ID da entrevista não fornecido', 400);
 }
@@ -55,20 +53,20 @@ try {
     // Decodificar form_data JSON
     $d = json_decode($entrevista['form_data'], true) ?? [];
     
-    error_log('[PDF-V2] Campos disponíveis: ' . implode(', ', array_keys($d)));
-    
-    // Helper para valores seguros
+    // Helpers
     function v($arr, $key, $default = '') {
         $val = $arr[$key] ?? $default;
         return htmlspecialchars($val, ENT_QUOTES, 'UTF-8');
     }
     
-    // Helper para checkbox
-    function check($arr, $key, $value) {
-        return ($arr[$key] ?? '') == $value ? '☑' : '☐';
+    function check($value) {
+        return $value ? '☑' : '☐';
     }
     
-    // Helper para data formatada
+    function linha($texto) {
+        return '<span style="border-bottom:1px solid #000; display:inline-block; min-width:100px;">' . ($texto ?: '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;') . '</span>';
+    }
+    
     function data_br($data) {
         if (empty($data) || $data == '0000-00-00') return '___/___/______';
         try {
@@ -78,76 +76,19 @@ try {
         }
     }
     
-    // Configurar mPDF (margens maiores para header/footer)
+    // Configurar mPDF
     $mpdf = new Mpdf([
         'mode' => 'utf-8',
         'format' => 'A4',
-        'margin_left' => 15,
-        'margin_right' => 15,
-        'margin_top' => 28,
-        'margin_bottom' => 20,
+        'margin_left' => 20,
+        'margin_right' => 20,
+        'margin_top' => 15,
+        'margin_bottom' => 15,
     ]);
     
-        // Metadados
     $student_name = v($d, 'nome_estudante') ?: ($entrevista['student_name'] ?? 'Aluno');
     $mpdf->SetTitle('Entrevista com Responsável - ' . $student_name);
     $mpdf->SetAuthor('ConectEDU - Sistema AEE');
-
-        // Header com logo e nome da escola
-        $logoHtml = '';
-        $logoPaths = [
-                __DIR__ . '/../frontend/logo.png',
-                __DIR__ . '/../frontend/assets/logo.png',
-                __DIR__ . '/../frontend/img/logo.png',
-                __DIR__ . '/logo.png',
-                __DIR__ . '/assets/logo.png'
-        ];
-        foreach ($logoPaths as $p) {
-                if (file_exists($p)) {
-                        $logoRel = str_replace(__DIR__ . DIRECTORY_SEPARATOR, '', $p);
-                        $logoHtml = '<img src="' . htmlspecialchars($logoRel, ENT_QUOTES, 'UTF-8') . '" style="height:40px;">';
-                        break;
-                }
-        }
-
-        $schoolName = htmlspecialchars($entrevista['school_name'] ?? '', ENT_QUOTES, 'UTF-8');
-        $mpdf->SetHTMLHeader('<div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #ccc; padding:6px 0; font-family: DejaVu Sans, Arial, sans-serif; font-size:10pt;">
-                <div>' . $logoHtml . '</div>
-                <div style="text-align:right;">
-                    <div style="font-weight:bold;">ConectEDU - Sistema AEE</div>
-                    <div style="font-size:9pt;">' . $schoolName . '</div>
-                </div>
-            </div>');
-
-        // Footer com data e paginação
-        $mpdf->SetHTMLFooter('<div style="border-top:1px solid #ccc; font-size:9pt; color:#666; display:flex; align-items:center; justify-content:space-between; padding-top:6px; font-family: DejaVu Sans, Arial, sans-serif;">
-                <div>Gerado em ' . date('d/m/Y H:i') . '</div>
-                <div>Página {PAGENO} de {nbpg}</div>
-            </div>');
-    
-    // DATA DA ENTREVISTA
-    $data_entrevista = data_br(v($d, 'data_entrevista'));
-    
-    // DADOS DE IDENTIFICAÇÃO
-    $nome_estudante = v($d, 'nome_estudante') ?: ($entrevista['student_name'] ?? '');
-    $data_nascimento = data_br(v($d, 'data_nascimento'));
-    $naturalidade = v($d, 'naturalidade');
-    $nome_escola = v($d, 'nome_escola') ?: ($entrevista['school_name'] ?? '');
-    $serie_ano = v($d, 'serie_ano');
-    $turno = v($d, 'turno');
-    
-    // PAIS
-    $nome_pai = v($d, 'nome_pai');
-    $idade_pai = v($d, 'idade_pai');
-    $escolaridade_pai = v($d, 'escolaridade_pai');
-    $nome_mae = v($d, 'nome_mae');
-    $idade_mae = v($d, 'idade_mae');
-    $escolaridade_mae = v($d, 'escolaridade_mae');
-    
-    // ENDEREÇO
-    $endereco = v($d, 'endereco');
-    $bairro = v($d, 'bairro');
-    $cidade = v($d, 'cidade');
     $telefone = v($d, 'telefone');
     
     // MOTIVO DA ENTREVISTA

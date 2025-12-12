@@ -180,7 +180,7 @@ const AlunosTW = {
               </select>
             </div>
           </div>
-          <button @click="load" class="w-full px-4 py-3 bg-brand-primary text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+          <button @click="load" class="w-full px-4 py-3 bg-brand-primary text-white rounded-lg hover:bg-brand-primary-dark transition-colors font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary">
             🔍 Buscar Alunos
           </button>
         </div>
@@ -1535,7 +1535,7 @@ const UsuariosTW = {
                 :disabled="savingForm">
           Cancelar
         </button>
-        <button class="px-4 py-2 bg-brand-primary text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center" 
+        <button class="px-4 py-2 bg-brand-primary text-white rounded hover:bg-brand-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary" 
                 @click="save" 
                 :disabled="savingForm">
           <i v-if="savingForm" class="fas fa-spinner fa-spin mr-2"></i>

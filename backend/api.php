@@ -2661,8 +2661,8 @@ if ($action === 'forms.anamnese.pdf') {
   $user = $u; // Disponibilizar para o gerador
   // $pdo já está disponível globalmente
   
-  // Incluir o gerador V2 simplificado
-  include __DIR__ . '/generate-pdf-entrevista-v2.php';
+  // Incluir o gerador V3 (layout oficial)
+  include __DIR__ . '/generate-pdf-entrevista-v3.php';
   exit;
 }
 
@@ -2687,7 +2687,7 @@ if ($action === 'pdi.pdf') {
   $stf = $pdo->prepare($sqlForms); $stf->execute($paramsForms); $pf = $stf->fetch(PDO::FETCH_ASSOC);
   if ($pf && isset($pf['id'])) {
     error_log('[PDF-PDI] OK pdi_forms id=' . $pf['id']);
-    $_GET['id'] = $pf['id']; $user = $u; include __DIR__ . '/generate-pdf-pdi-forms.php'; exit;
+    $_GET['id'] = $pf['id']; $user = $u; include __DIR__ . '/generate-pdf-pdi-v2.php'; exit;
   }
 
   // 2) Fallback para pdi_conectaee (modelo legado/simplificado)
@@ -2727,7 +2727,7 @@ if ($action === 'pai.pdf') {
   $stf = $pdo->prepare($sqlForms); $stf->execute($paramsForms); $pf = $stf->fetch(PDO::FETCH_ASSOC);
   if ($pf && isset($pf['id'])) {
     error_log('[PDF-PAI] OK plano_atendimento_forms id=' . $pf['id']);
-    $_GET['id'] = $pf['id']; $user = $u; include __DIR__ . '/generate-pdf-pai-forms.php'; exit;
+    $_GET['id'] = $pf['id']; $user = $u; include __DIR__ . '/generate-pdf-pai-v2.php'; exit;
   }
 
   // 2) Fallback para tabela legada planos_atendimento

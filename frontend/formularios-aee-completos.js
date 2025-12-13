@@ -3797,5 +3797,6 @@ const PAICompleto = {
 if (typeof window !== 'undefined') {
   window.EntrevistaResponsavelCompleta = EntrevistaResponsavelCompleta;
   window.PDICompleto = PDICompleto;
-  window.PAICompleto = PAICompleto;
+  // Mantido apenas para referência/legado (não usado pela rota #/pai-completo)
+  window.PAICompletoLegacy = PAICompleto;
 }

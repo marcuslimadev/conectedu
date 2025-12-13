@@ -9942,7 +9942,8 @@ const routes = [
       { path: 'pdi', component: PDI },
       { path: 'pdi-completo', component: window.PDICompleto || PDI },
       { path: 'plano-atendimento', component: PlanoAtendimento },
-      { path: 'pai-completo', component: window.PAICompleto || PlanoAtendimento },
+      // Força o formulário PAI alinhado ao documento original (76 campos) nesta rota
+      { path: 'pai-completo', component: PlanoAtendimento },
       { path: 'relatorios', component: Relatorios },
       { path: 'legislacoes', component: LegislacoesTW },
       { path: 'documentos', component: DocumentosGerados }

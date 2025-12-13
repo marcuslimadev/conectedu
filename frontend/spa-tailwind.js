@@ -8085,100 +8085,94 @@ const PlanoAtendimento = {
                 </div>
 
                 <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
-                  <h3 class="text-md font-bold text-gray-900 dark:text-white mb-4">Objetivos Específicos por Área</h3>
-                  <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Divididos por áreas de desenvolvimento (curto, médio e longo prazo)</p>
+                  <h3 class="text-md font-bold text-gray-900 dark:text-white mb-4">Objetivos Específicos:</h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">(Divididos por áreas de desenvolvimento, separe em curto, médio e longo prazo.)</p>
                   
                   <div class="space-y-6">
+                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">Exemplo:</p>
+
                     <!-- Área: Comunicação -->
                     <div class="border-l-4 border-blue-500 pl-4">
-                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">📢 Área: Comunicação</h4>
+                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Área: Comunicação</h4>
                       <div class="space-y-3">
                         <div>
-                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Objetivo</label>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Objetivo:</label>
                           <textarea v-model="form.obj_comunicacao_objetivo" rows="2"
-                            placeholder="Ex: O aluno será capaz de expressar suas necessidades básicas utilizando frases de 3 a 4 palavras."
+                            placeholder="O aluno será capaz de expressar suas necessidades básicas utilizando frases de 3 a 4 palavras."
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                         </div>
                         <div>
-                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meta</label>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meta:</label>
                           <textarea v-model="form.obj_comunicacao_meta" rows="2"
-                            placeholder="Ex: Em 2 meses, o aluno utilizará frases de 3 a 4 palavras em 80% das interações com o professor."
+                            placeholder="(Ex: Em 2 meses, o aluno utilizará frases de 3 a 4 palavras em 80% das interações com o professor.)"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                         </div>
                       </div>
                     </div>
 
-                    <!-- Área: Leitura -->
+                    <!-- Área: Acadêmica - Leitura -->
                     <div class="border-l-4 border-green-500 pl-4">
-                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">📚 Área: Acadêmica – Leitura</h4>
+                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Área: Acadêmica – Leitura</h4>
                       <div class="space-y-3">
                         <div>
-                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Objetivo</label>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Objetivo:</label>
                           <textarea v-model="form.obj_leitura_objetivo" rows="2"
-                            placeholder="Ex: O aluno será capaz de identificar e nomear as letras do alfabeto."
+                            placeholder="(Ex: O aluno será capaz de identificar e nomear as letras do alfabeto.)"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                         </div>
                         <div>
-                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meta</label>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meta:</label>
                           <textarea v-model="form.obj_leitura_meta" rows="2"
-                            placeholder="Ex: Até o final do semestre, o aluno identificará 20 letras do alfabeto em atividades de pareamento."
+                            placeholder="(Ex: Até o final do semestre, o aluno identificará 20 letras do alfabeto em atividades de pareamento.)"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                         </div>
                       </div>
                     </div>
 
-                    <!-- Área: Matemática -->
+                    <!-- Outras áreas podem ser adicionadas conforme necessário -->
                     <div class="border-l-4 border-purple-500 pl-4">
-                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">🔢 Área: Acadêmica – Matemática</h4>
+                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Área: Acadêmica – Matemática</h4>
                       <div class="space-y-3">
                         <div>
-                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Objetivo</label>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Objetivo:</label>
                           <textarea v-model="form.obj_matematica_objetivo" rows="2"
-                            placeholder="Ex: O aluno será capaz de realizar contagens simples até 10."
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                         </div>
                         <div>
-                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meta</label>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meta:</label>
                           <textarea v-model="form.obj_matematica_meta" rows="2"
-                            placeholder="Ex: Em 3 meses, o aluno contará de 1 a 10 com acerto de 90%."
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                         </div>
                       </div>
                     </div>
 
-                    <!-- Área: Socioemocional -->
                     <div class="border-l-4 border-pink-500 pl-4">
-                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">💝 Área: Socioemocional</h4>
+                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Área: Socioemocional</h4>
                       <div class="space-y-3">
                         <div>
-                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Objetivo</label>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Objetivo:</label>
                           <textarea v-model="form.obj_socioemocional_objetivo" rows="2"
-                            placeholder="Ex: O aluno desenvolverá habilidades de interação social com colegas."
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                         </div>
                         <div>
-                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meta</label>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meta:</label>
                           <textarea v-model="form.obj_socioemocional_meta" rows="2"
-                            placeholder="Ex: Em 2 meses, o aluno participará de atividades em grupo por 15 minutos."
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                         </div>
                       </div>
                     </div>
 
-                    <!-- Área: Autonomia -->
                     <div class="border-l-4 border-orange-500 pl-4">
-                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">🎯 Área: Autonomia</h4>
+                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Área: Autonomia</h4>
                       <div class="space-y-3">
                         <div>
-                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Objetivo</label>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Objetivo:</label>
                           <textarea v-model="form.obj_autonomia_objetivo" rows="2"
-                            placeholder="Ex: O aluno será capaz de realizar tarefas de autocuidado de forma independente."
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                         </div>
                         <div>
-                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meta</label>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meta:</label>
                           <textarea v-model="form.obj_autonomia_meta" rows="2"
-                            placeholder="Ex: Em 3 meses, o aluno organizará seus materiais escolares sem auxílio."
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                         </div>
                       </div>
@@ -8256,34 +8250,34 @@ const PlanoAtendimento = {
                 <div class="w-16 h-16 bg-cyan-100 dark:bg-cyan-900 rounded-full flex items-center justify-center mx-auto mb-4">
                   <i class="fas fa-chart-line text-2xl text-cyan-600 dark:text-cyan-400"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">6. Avaliação e Acompanhamento</h2>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Avaliação e Acompanhamento</h2>
                 <p class="text-gray-600 dark:text-gray-400">Critérios e registro de progresso</p>
               </div>
 
               <div class="max-w-3xl mx-auto space-y-6">
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Critérios de Avaliação</label>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Critérios de Avaliação:</label>
                   <textarea v-model="form.criterios_avaliacao" rows="4"
-                    placeholder="Como o progresso do aluno será medido? Observações, produções do aluno, participação, registros."
+                    placeholder="(Como o progresso do aluno será medido? Observações, produções do aluno, participação, registros.)"
                     class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                 </div>
 
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Periodicidade das Reavaliações</label>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Periodicidade das Reavaliações:</label>
+                  <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">(Mensal, bimestral, semestral – para ajustar o PAI)</p>
                   <select v-model="form.periodicidade_reavaliacoes"
                     class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
                     <option value="">Selecione</option>
                     <option value="mensal">Mensal</option>
                     <option value="bimestral">Bimestral</option>
                     <option value="semestral">Semestral</option>
-                    <option value="anual">Anual</option>
                   </select>
                 </div>
 
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Registro de Progresso</label>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Registro de Progresso:</label>
                   <textarea v-model="form.registro_progresso" rows="4"
-                    placeholder="Como o professor vai registrar os avanços e dificuldades do aluno – portfólio, relatórios de observação, diário de bordo."
+                    placeholder="(Como o professor vai registrar os avanços e dificuldades do aluno – portfólio, relatórios de observação, diário de bordo.)"
                     class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                 </div>
               </div>
@@ -8295,7 +8289,7 @@ const PlanoAtendimento = {
                 <div class="w-16 h-16 bg-emerald-100 dark:bg-emerald-900 rounded-full flex items-center justify-center mx-auto mb-4">
                   <i class="fas fa-file-signature text-2xl text-emerald-600 dark:text-emerald-400"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">7. Assinaturas e Consenso</h2>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Assinaturas e Consenso</h2>
                 <p class="text-gray-600 dark:text-gray-400">Validação e concordância de todos os envolvidos</p>
               </div>
 
@@ -8308,37 +8302,37 @@ const PlanoAtendimento = {
                 </div>
 
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Professor(a) Regente <span class="text-red-500">*</span></label>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Professor(a) Regente: <span class="text-red-500">*</span></label>
                   <input v-model="form.assinatura_professor_regente" type="text" required
-                    placeholder="Nome completo do professor regente"
+                    placeholder="Nome completo"
                     class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
                 </div>
 
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Professor(a) de AEE <span class="text-red-500">*</span></label>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Professor(a) de AEE: <span class="text-red-500">*</span></label>
                   <input v-model="form.assinatura_professor_aee" type="text" required
-                    placeholder="Nome completo do professor de AEE"
+                    placeholder="Nome completo"
                     class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
                 </div>
 
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Coordenação Pedagógica</label>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Coordenação Pedagógica:</label>
                   <input v-model="form.assinatura_coordenacao" type="text"
-                    placeholder="Nome completo do coordenador pedagógico"
+                    placeholder="Nome completo"
                     class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
                 </div>
 
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Direção Escolar</label>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Direção Escolar:</label>
                   <input v-model="form.assinatura_direcao" type="text"
-                    placeholder="Nome completo do diretor escolar"
+                    placeholder="Nome completo"
                     class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
                 </div>
 
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Responsável pelo Aluno <span class="text-red-500">*</span></label>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Responsável pelo Aluno: <span class="text-red-500">*</span></label>
                   <input v-model="form.assinatura_responsavel" type="text" required
-                    placeholder="Nome completo do responsável pelo aluno"
+                    placeholder="Nome completo"
                     class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
                 </div>
 
@@ -8495,13 +8489,13 @@ const PlanoAtendimento = {
         assinatura_responsavel: ''
       },
       steps: [
-        { title: 'Identificação', short: 'ID', icon: 'fas fa-id-card' },
-        { title: 'Histórico', short: 'Hist', icon: 'fas fa-history' },
-        { title: 'Avaliação', short: 'Aval', icon: 'fas fa-stethoscope' },
-        { title: 'Objetivos', short: 'Obj', icon: 'fas fa-bullseye' },
-        { title: 'Estratégias', short: 'Estr', icon: 'fas fa-tools' },
-        { title: 'Acompanhamento', short: 'Acomp', icon: 'fas fa-chart-line' },
-        { title: 'Assinaturas', short: 'Assin', icon: 'fas fa-file-signature' }
+        { title: '1. Identificação do Aluno e da Equipe', short: '1. ID', icon: 'fas fa-id-card' },
+        { title: '2. Histórico do Estudante e Contextualização', short: '2. Hist', icon: 'fas fa-history' },
+        { title: '3. Avaliação Diagnóstica e Levantamento de Necessidades', short: '3. Aval', icon: 'fas fa-stethoscope' },
+        { title: '4. Definição de Objetivos e Metas', short: '4. Obj', icon: 'fas fa-bullseye' },
+        { title: '5. Estratégias e Recursos Pedagógicos', short: '5. Estr', icon: 'fas fa-tools' },
+        { title: '6. Avaliação e Acompanhamento', short: '6. Aval', icon: 'fas fa-chart-line' },
+        { title: '7. Assinaturas e Consenso', short: '7. Assin', icon: 'fas fa-file-signature' }
       ]
     }
   },

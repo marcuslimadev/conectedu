@@ -43,6 +43,18 @@
         });
       });
     }
+    
+    // Forçar recarga se versão antiga detectada
+    const CURRENT_VERSION = '20251212-pai-titles-v2';
+    const storedVersion = sessionStorage.getItem('app_version');
+    if (storedVersion !== CURRENT_VERSION) {
+      console.log('🔄 Nova versão detectada, limpando cache...');
+      sessionStorage.setItem('app_version', CURRENT_VERSION);
+      // Força recarga sem cache
+      if (performance.navigation.type !== 1) {
+        window.location.reload(true);
+      }
+    }
   </script>
   <link rel="stylesheet" href="./tailwind-local.css">
   <script>

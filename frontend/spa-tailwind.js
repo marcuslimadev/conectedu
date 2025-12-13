@@ -10621,6 +10621,10 @@ if (typeof DatePickerComponent !== 'undefined') {
 app.component('FloatingMicrophone', FloatingMicrophone);
 console.log('✅ FloatingMicrophone registrado');
 
+// Registrar PlanoAtendimento globalmente para garantir que a rota pai-completo funcione
+app.component('PlanoAtendimento', PlanoAtendimento);
+console.log('✅ PlanoAtendimento registrado');
+
 // Usar router e montar aplicação
 console.log('🔧 Usando router...');
 app.use(router);

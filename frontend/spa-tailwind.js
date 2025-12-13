@@ -7563,6 +7563,1018 @@ const PDI = {
   }
 };
 
+// Componente: PDI (Modelo Oficial) - PLANO DE DESENVOLVIMENTO INDIVIDUAL – PDI
+// Este componente usa as mesmas chaves esperadas pelo gerador `backend/generate-pdf-pdi-v2.php`.
+const PDIPlanoDesenvolvimento = {
+  template: `
+    <div class="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-gray-900 dark:to-gray-800 py-8">
+      <div class="max-w-6xl mx-auto px-4">
+        <div class="mb-6">
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">PLANO DE DESENVOLVIMENTO INDIVIDUAL – PDI</h1>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Modelo para as Redes Públicas e Privadas de Ensino</p>
+            </div>
+            <button v-if="form.id" @click="exportarPDF" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center gap-2">
+              <i class="fas fa-file-pdf"></i>
+              <span>Exportar PDF</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm mb-6 overflow-x-auto">
+          <div class="flex border-b border-gray-200 dark:border-gray-700">
+            <button v-for="(s, idx) in steps" :key="idx" @click="goToStep(idx+1)"
+              class="flex-1 min-w-[130px] px-4 py-3 text-sm font-medium transition-all border-b-2"
+              :class="currentStep === idx+1 ? 'border-emerald-600 text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-gray-700' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'">
+              <span class="whitespace-nowrap">{{ s.title }}</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+          <form @submit.prevent="salvar" class="relative">
+
+            <!-- I. DADOS INSTITUCIONAIS -->
+            <div v-show="currentStep===1" class="p-6 sm:p-8 space-y-6">
+              <h2 class="text-xl font-bold text-gray-900 dark:text-white">I. DADOS INSTITUCIONAIS</h2>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Selecionar Aluno <span class="text-red-500">*</span></label>
+                <select v-model="form.student_id" @change="onSelectAluno" required
+                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg">
+                  <option value="">Selecione um aluno</option>
+                  <option v-for="aluno in alunos" :key="aluno.id" :value="aluno.id">{{ aluno.name }}</option>
+                </select>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">1. Data da elaboração:</label>
+                  <input v-model="form.data_elaboracao" type="date" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">2. SRE:</label>
+                  <input v-model="form.sre" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">4. Código:</label>
+                  <input v-model="form.codigo_escola" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">3. Nome da escola:</label>
+                  <input v-model="form.nome_escola" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">5. Endereço:</label>
+                  <input v-model="form.endereco_escola" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <div>
+                  <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">6. Etapas da Educação Básica oferecidas pela escola:</div>
+                  <div class="flex flex-wrap gap-4">
+                    <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.ef_anos_iniciais" /> ( ) EF anos iniciais</label>
+                    <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.ef_anos_finais" /> ( ) EF anos finais</label>
+                    <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.ensino_medio" /> ( ) Ensino Médio</label>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">7. A Escola possui acessibilidade física:</div>
+                  <div class="flex gap-6">
+                    <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="radio" name="acess_fisica" :checked="form.acessibilidade_fisica_sim" @change="setSimNao('acessibilidade_fisica','sim')" /> ( ) Sim</label>
+                    <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="radio" name="acess_fisica" :checked="form.acessibilidade_fisica_nao" @change="setSimNao('acessibilidade_fisica','nao')" /> ( ) Não</label>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">8. Possui Sala de recursos:</div>
+                  <div class="flex flex-wrap items-center gap-6">
+                    <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="radio" name="sala_rec" :checked="form.possui_sala_recursos_sim" @change="setSimNao('possui_sala_recursos','sim')" /> ( ) Sim</label>
+                    <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="radio" name="sala_rec" :checked="form.possui_sala_recursos_nao" @change="setSimNao('possui_sala_recursos','nao')" /> ( ) Não</label>
+                    <div class="flex-1 min-w-[240px]">
+                      <label class="block text-xs font-medium text-gray-600 dark:text-gray-400">Nome Escola encaminhada:</label>
+                      <input v-model="form.escola_encaminhada" type="text" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">9. Diretor(a):</label>
+                  <input v-model="form.diretor" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">10. Vice-diretor(a):</label>
+                  <input v-model="form.vice_diretor" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <div class="text-sm font-semibold text-gray-800 dark:text-gray-200">11. Responsáveis pela elaboração PDI: NOME – CARGO - MASP</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Especialista :</label>
+                    <input v-model="form.especialista" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Professor de Apoio (quando houver):</label>
+                    <input v-model="form.professor_apoio" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Guia Intérprete (quando houver) :</label>
+                    <input v-model="form.guia_interprete" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">TILS (quando houver) :</label>
+                    <input v-model="form.tils" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Professor de Sala de Recursos (quando houver) :</label>
+                    <input v-model="form.professor_sala_recursos" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Regente(s) de turma/aula :</label>
+                    <input v-model="form.regentes" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- II. DADOS DO(A) ESTUDANTE -->
+            <div v-show="currentStep===2" class="p-6 sm:p-8 space-y-6">
+              <h2 class="text-xl font-bold text-gray-900 dark:text-white">II. DADOS DO(A) ESTUDANTE</h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">1. Nome do Estudante:</label>
+                  <input v-model="form.nome_estudante" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">4. Ano de escolaridade:</label>
+                  <input v-model="form.ano_escolaridade" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">2. Data de nascimento:</label>
+                  <input v-model="form.data_nascimento" type="date" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Idade:</label>
+                  <input v-model="form.idade" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">3. Responsável pelo estudante/parentesco:</label>
+                  <input v-model="form.responsavel" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">5. Deficiência informada:</label>
+                  <input v-model="form.deficiencia_informada" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">6. É acompanhado por um profissional fora da escola?</label>
+                  <select v-model="form.acompanhado_profissional" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg">
+                    <option value=""></option>
+                    <option value="Sim">Sim</option>
+                    <option value="Não">Não</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Qual especialidade?</label>
+                  <input v-model="form.especialidade_profissional" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">7. Faz uso contínuo de medicamento?</label>
+                  <select v-model="form.uso_medicamento" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg">
+                    <option value=""></option>
+                    <option value="Sim">Sim</option>
+                    <option value="Não">Não</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Causa efeitos colaterais?</label>
+                  <select v-model="form.efeitos_colaterais" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg">
+                    <option value=""></option>
+                    <option value="Sim">Sim</option>
+                    <option value="Não">Não</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Quais?</label>
+                  <input v-model="form.quais_efeitos" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">8. Possui alguma necessidade específica:</label>
+                <input v-model="form.necessidade_especifica" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+              </div>
+
+              <div>
+                <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">9. Tipo de atendimento:</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.atendimento_guia_interprete" /> ( ) Guia Intérprete</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.atendimento_professor_libras" /> ( ) Professor de LIBRAS</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.atendimento_interprete_libras" /> ( ) Intérprete de LIBRAS</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.atendimento_sala_recursos" /> ( ) Sala de Recursos</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.atendimento_professor_apoio" /> ( ) Professor de apoio ACLTA</label>
+                  <div class="flex items-center gap-3">
+                    <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.atendimento_outro" /> ( ) Outro.</label>
+                    <input v-model="form.atendimento_outro_qual" type="text" placeholder="Qual?" class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">10. Utiliza recurso de Acessibilidade? Descreva:</label>
+                <input v-model="form.recurso_acessibilidade" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">11. Como gosta de se divertir? Descreva:</label>
+                <textarea v-model="form.como_divertir" rows="3" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg"></textarea>
+              </div>
+            </div>
+
+            <!-- III. CONSIDERAÇÕES DA FAMÍLIA -->
+            <div v-show="currentStep===3" class="p-6 sm:p-8 space-y-6">
+              <h2 class="text-xl font-bold text-gray-900 dark:text-white">III. CONSIDERAÇÕES DA FAMÍLIA:</h2>
+              <textarea v-model="form.consideracoes_familia" rows="10" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg"></textarea>
+            </div>
+
+            <!-- IV. HISTÓRICO DE ESCOLARIZAÇÃO -->
+            <div v-show="currentStep===4" class="p-6 sm:p-8 space-y-6">
+              <h2 class="text-xl font-bold text-gray-900 dark:text-white">IV. HISTÓRICO DE ESCOLARIZAÇÃO</h2>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">1. Com que idade o aluno começou a frequentar a escola?</label>
+                <input v-model="form.idade_comecou_escola" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">2. Onde e como foi o percurso escolar?</label>
+                <textarea v-model="form.percurso_escolar" rows="4" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg"></textarea>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">3. Frequenta sala de recursos?</label>
+                  <select v-model="form.frequenta_sala_recursos" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg">
+                    <option value=""></option>
+                    <option value="Sim">Sim</option>
+                    <option value="Não">Não</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Qual a frequência do atendimento (dia/horas)?</label>
+                  <input v-model="form.frequencia_sala_recursos" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">4. Frequenta Educação Integral?</label>
+                <select v-model="form.frequenta_educacao_integral" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg">
+                  <option value=""></option>
+                  <option value="Sim">Sim</option>
+                  <option value="Não">Não</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- V. LIMITES E AGRESSIVIDADE -->
+            <div v-show="currentStep===5" class="p-6 sm:p-8 space-y-6">
+              <h2 class="text-xl font-bold text-gray-900 dark:text-white">V. LIMITES E AGRESSIVIDADE</h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.autoagressividade" /> ( ) Apresenta Autoagressividade</label>
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.indisciplina" /> ( ) Apresenta indisciplina</label>
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.heteroagressividade" /> ( ) Apresenta Heteroagressividade</label>
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.desobediencia_regras" /> ( ) Apresenta desobediência às regras e/ou combinados</label>
+                <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.apatia" /> ( ) Apresenta apatia</label>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Obs.:</label>
+                <textarea v-model="form.limites_obs" rows="4" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg"></textarea>
+              </div>
+            </div>
+
+            <!-- VI. ASPECTOS PSICOMOTORES OBSERVADOS -->
+            <div v-show="currentStep===6" class="p-6 sm:p-8 space-y-6">
+              <h2 class="text-xl font-bold text-gray-900 dark:text-white">VI. ASPECTOS PSICOMOTORES OBSERVADOS:</h2>
+              <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                  <thead>
+                    <tr class="bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
+                      <th class="p-3 text-left border border-gray-200 dark:border-gray-600">ASPECTOS PSICOMOTORES</th>
+                      <th class="p-3 text-center border border-gray-200 dark:border-gray-600">APRESENTA</th>
+                      <th class="p-3 text-center border border-gray-200 dark:border-gray-600">APRESENTA COM AJUDA</th>
+                      <th class="p-3 text-center border border-gray-200 dark:border-gray-600">NÃO APRESENTA</th>
+                      <th class="p-3 text-center border border-gray-200 dark:border-gray-600">NÃO OBSERVADO</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="row in psicoRows" :key="row.key" class="bg-white dark:bg-gray-800">
+                      <td class="p-3 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-100">{{ row.label }}</td>
+                      <td class="p-3 border border-gray-200 dark:border-gray-600 text-center"><input type="radio" :name="'psico_'+row.key" :checked="isRowSelected('psico', row.key, 'apresenta')" @change="setRow('psico', row.key, 'apresenta')" /></td>
+                      <td class="p-3 border border-gray-200 dark:border-gray-600 text-center"><input type="radio" :name="'psico_'+row.key" :checked="isRowSelected('psico', row.key, 'com_ajuda')" @change="setRow('psico', row.key, 'com_ajuda')" /></td>
+                      <td class="p-3 border border-gray-200 dark:border-gray-600 text-center"><input type="radio" :name="'psico_'+row.key" :checked="isRowSelected('psico', row.key, 'nao_apresenta')" @change="setRow('psico', row.key, 'nao_apresenta')" /></td>
+                      <td class="p-3 border border-gray-200 dark:border-gray-600 text-center"><input type="radio" :name="'psico_'+row.key" :checked="isRowSelected('psico', row.key, 'nao_observado')" @change="setRow('psico', row.key, 'nao_observado')" /></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- VII. ASPECTOS PEDAGÓGICOS/COGNITIVOS OBSERVADOS -->
+            <div v-show="currentStep===7" class="p-6 sm:p-8 space-y-6">
+              <h2 class="text-xl font-bold text-gray-900 dark:text-white">VII. ASPECTOS PEDAGÓGICOS/COGNITIVOS OBSERVADOS:</h2>
+              <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                  <thead>
+                    <tr class="bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
+                      <th class="p-3 text-left border border-gray-200 dark:border-gray-600">ASPECTOS PEDAGÓGICOS/COGNITIVOS</th>
+                      <th class="p-3 text-center border border-gray-200 dark:border-gray-600">APRESENTA</th>
+                      <th class="p-3 text-center border border-gray-200 dark:border-gray-600">APRESENTA COM AJUDA</th>
+                      <th class="p-3 text-center border border-gray-200 dark:border-gray-600">NÃO APRESENTA</th>
+                      <th class="p-3 text-center border border-gray-200 dark:border-gray-600">NÃO OBSERVADO</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="row in cogRows" :key="row.key" class="bg-white dark:bg-gray-800">
+                      <td class="p-3 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-100">{{ row.label }}</td>
+                      <td class="p-3 border border-gray-200 dark:border-gray-600 text-center"><input type="radio" :name="'cog_'+row.key" :checked="isRowSelected('cog', row.key, 'apresenta')" @change="setRow('cog', row.key, 'apresenta')" /></td>
+                      <td class="p-3 border border-gray-200 dark:border-gray-600 text-center"><input type="radio" :name="'cog_'+row.key" :checked="isRowSelected('cog', row.key, 'com_ajuda')" @change="setRow('cog', row.key, 'com_ajuda')" /></td>
+                      <td class="p-3 border border-gray-200 dark:border-gray-600 text-center"><input type="radio" :name="'cog_'+row.key" :checked="isRowSelected('cog', row.key, 'nao_apresenta')" @change="setRow('cog', row.key, 'nao_apresenta')" /></td>
+                      <td class="p-3 border border-gray-200 dark:border-gray-600 text-center"><input type="radio" :name="'cog_'+row.key" :checked="isRowSelected('cog', row.key, 'nao_observado')" @change="setRow('cog', row.key, 'nao_observado')" /></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nos itens VI e VII, caso o estudante apresente 50% ou mais de marcações “ Não Apresenta” e “Não Observado” descreva as habilidades que ele demonstra:</label>
+                <textarea v-model="form.habilidades_demonstradas" rows="4" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg"></textarea>
+              </div>
+            </div>
+
+            <!-- VIII. COMUNICAÇÃO E LINGUAGEM -->
+            <div v-show="currentStep===8" class="p-6 sm:p-8 space-y-6">
+              <h2 class="text-xl font-bold text-gray-900 dark:text-white">VIII. COMUNICAÇÃO E LINGUAGEM</h2>
+
+              <div>
+                <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">1. Apresenta intenção comunicativa:</div>
+                <div class="flex gap-6">
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.intencao_comunicativa_sim" /> ( ) Sim</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.intencao_comunicativa_nao" /> ( ) Não</label>
+                </div>
+              </div>
+
+              <div>
+                <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">2. Utiliza a comunicação:</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.comunicacao_comentarios" /> ( ) para fazer comentários</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.comunicacao_solicitacoes" /> ( ) para fazer solicitações</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.comunicacao_necessidades" /> ( ) para necessidades básicas</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.comunicacao_atencao" /> ( ) para obter atenção</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.comunicacao_escolhas" /> ( ) realizar escolhas</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.comunicacao_narrativas" /> ( ) realizar pequenas narrativas</label>
+                </div>
+              </div>
+
+              <div>
+                <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">3. Recursos utilizados pelo estudante para Comunicação Suplementar Alternativa:</div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.recurso_alfabeto_movel" /> ( ) Alfabeto Móvel</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.recurso_alta_tecnologia" /> ( ) Alta Tecnologia</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.recurso_baixa_tecnologia" /> ( ) Baixa Tecnologia</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.recurso_figuras_avulsas" /> ( ) Figuras Avulsas</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.recurso_fotos" /> ( ) Fotos</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.recurso_numerais" /> ( ) Numerais</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.recurso_nenhum" /> ( ) Não Faz uso de nenhum recurso suplementar para a comunicação</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.recurso_pictograma" /> ( ) Pictograma</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.recurso_prancha_comunicacao" /> ( ) Prancha de Comunicação</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.recurso_prancha_tematica" /> ( ) Prancha Temática</label>
+                </div>
+              </div>
+
+              <div>
+                <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">4. Expressa-se por/como/com:</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <label v-for="opt in expressaoOpts" :key="opt.key" class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                    <input type="checkbox" v-model="form[opt.modelKey]" /> ( ) {{ opt.label }}
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">5. Escrita:</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <label v-for="opt in escritaOpts" :key="opt.key" class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                    <input type="checkbox" v-model="form[opt.modelKey]" /> ( ) {{ opt.label }}
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">6. Leitura</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.leitura_palavras" /> ( ) Lê palavras</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.leitura_frases" /> ( ) Lê frases</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.leitura_textos" /> ( ) Lê textos</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.leitura_global" /> ( ) Leitura global (compreensão, inferência, comparação)</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.leitura_fonetica" /> ( ) Leitura fonética (silabada) com dificuldade no entendimento da palavra</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.leitura_imita" /> ( ) É capaz de imitar a leitura a partir de um texto conhecido oralmente (música/parlenda/poesia)</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.leitura_nao" /> ( ) Não</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- IX. PLANEJAMENTO BIMESTRAL -->
+            <div v-show="currentStep===9" class="p-6 sm:p-8 space-y-6">
+              <h2 class="text-xl font-bold text-gray-900 dark:text-white">IX. PLANEJAMENTO BIMESTRAL:</h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">ESTUDANTE:</label>
+                  <input v-model="form.nome_estudante" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">TURMA:</label>
+                  <input v-model="form.turma" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
+                </div>
+              </div>
+
+              <div class="space-y-6">
+                <div v-for="disc in disciplinasPlanejamento" :key="disc.key" class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                  <div class="font-semibold text-gray-900 dark:text-white mb-3">DISCIPLINA: {{ disc.label }}</div>
+                  <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div v-for="b in [1,2,3,4]" :key="disc.key+'_'+b" class="bg-gray-50 dark:bg-gray-700 rounded p-3">
+                      <div class="flex items-center justify-between mb-2">
+                        <div class="text-sm font-medium text-gray-700 dark:text-gray-200">BIMESTRE: {{ b }}º</div>
+                        <label class="inline-flex items-center gap-2 text-xs text-gray-700 dark:text-gray-200">
+                          <input type="checkbox" v-model="form[planKey(disc.key,b,'ativo')]" /> Ativar
+                        </label>
+                      </div>
+                      <label class="block text-xs font-medium text-gray-600 dark:text-gray-300">PROFESSOR(A):</label>
+                      <input v-model="form[planKey(disc.key,b,'professor')]" type="text" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded mb-2" />
+                      <label class="block text-xs font-medium text-gray-600 dark:text-gray-300">Objetivo geral da disciplina para a turma:</label>
+                      <textarea v-model="form[planKey(disc.key,b,'objetivo_turma')]" rows="2" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded mb-2"></textarea>
+                      <label class="block text-xs font-medium text-gray-600 dark:text-gray-300">Objetivo geral da disciplina para o(a) estudante:</label>
+                      <textarea v-model="form[planKey(disc.key,b,'objetivo_estudante')]" rows="2" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded mb-2"></textarea>
+                      <label class="block text-xs font-medium text-gray-600 dark:text-gray-300">Qual o conteúdo será trabalhado na disciplina?</label>
+                      <textarea v-model="form[planKey(disc.key,b,'conteudo')]" rows="2" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded mb-2"></textarea>
+                      <label class="block text-xs font-medium text-gray-600 dark:text-gray-300">Qual a habilidade a ser construída/desenvolvida?</label>
+                      <textarea v-model="form[planKey(disc.key,b,'habilidade')]" rows="2" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded mb-2"></textarea>
+                      <label class="block text-xs font-medium text-gray-600 dark:text-gray-300">Descreva a metodologia de trabalho e os materiais a serem utilizados para que o estudante adquira a habilidade ou aprendizado.</label>
+                      <textarea v-model="form[planKey(disc.key,b,'metodologia')]" rows="2" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded mb-2"></textarea>
+                      <label class="block text-xs font-medium text-gray-600 dark:text-gray-300">Qual habilidade/aprendizado adquirida pelo(a) estudante no final deste bimestre em cada conteúdo?</label>
+                      <textarea v-model="form[planKey(disc.key,b,'aprendizado')]" rows="2" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded"></textarea>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- X. AVALIAÇÃO BIMESTRAL -->
+            <div v-show="currentStep===10" class="p-6 sm:p-8 space-y-6">
+              <h2 class="text-xl font-bold text-gray-900 dark:text-white">X. AVALIAÇÃO BIMESTRAL</h2>
+              <div v-for="b in [1,2,3,4]" :key="'av_'+b" class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                <div class="font-semibold text-gray-900 dark:text-white mb-3">{{ b }}º BIMESTRE</div>
+                <div class="overflow-x-auto">
+                  <table class="min-w-[1100px] w-full text-xs">
+                    <thead>
+                      <tr class="bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
+                        <th class="p-2 border border-gray-200 dark:border-gray-600">Disciplina</th>
+                        <th class="p-2 border border-gray-200 dark:border-gray-600">Valor</th>
+                        <th class="p-2 border border-gray-200 dark:border-gray-600">Nota alcançada</th>
+                        <th class="p-2 border border-gray-200 dark:border-gray-600">Grau de autonomia para realizar a atividade</th>
+                        <th class="p-2 border border-gray-200 dark:border-gray-600">Metodologia utilizada (descrever como foi realizada a avaliação)</th>
+                        <th class="p-2 border border-gray-200 dark:border-gray-600">Qual o diagnóstico pedagógico do estudante nessa habilidade? (descreva potenciais e desafios)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="d in disciplinasAvaliacao" :key="'av_'+b+'_'+d.key" class="bg-white dark:bg-gray-800">
+                        <td class="p-2 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-100">{{ d.label }}</td>
+                        <td class="p-2 border border-gray-200 dark:border-gray-600"><input v-model="form[avKey(b,d.key,'valor')]" class="w-24 px-2 py-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded" /></td>
+                        <td class="p-2 border border-gray-200 dark:border-gray-600"><input v-model="form[avKey(b,d.key,'nota')]" class="w-28 px-2 py-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded" /></td>
+                        <td class="p-2 border border-gray-200 dark:border-gray-600">
+                          <div class="grid grid-cols-1 gap-2">
+                            <select v-model="form[avKey(b,d.key,'suporte')]" class="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded">
+                              <option value=""></option>
+                              <option value="muito_suporte">muito suporte</option>
+                              <option value="pouco_suporte">pouco suporte</option>
+                            </select>
+                            <select v-model="form[avKey(b,d.key,'compreensao')]" class="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded">
+                              <option value=""></option>
+                              <option value="alta_compreensao">alta compreensão</option>
+                              <option value="pouca_compreensao">pouca compreensão</option>
+                            </select>
+                          </div>
+                        </td>
+                        <td class="p-2 border border-gray-200 dark:border-gray-600"><textarea v-model="form[avKey(b,d.key,'metodologia')]" rows="2" class="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded"></textarea></td>
+                        <td class="p-2 border border-gray-200 dark:border-gray-600"><textarea v-model="form[avKey(b,d.key,'diagnostico')]" rows="2" class="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded"></textarea></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- XI. RELATÓRIO PEDAGÓGICO DO DESENVOLVIMENTO DO ESTUDANTE / SEMESTRAL -->
+            <div v-show="currentStep===11" class="p-6 sm:p-8 space-y-6">
+              <h2 class="text-xl font-bold text-gray-900 dark:text-white">XI. RELATÓRIO PEDAGÓGICO DO DESENVOLVIMENTO DO ESTUDANTE / SEMESTRAL</h2>
+              <p class="text-sm text-gray-700 dark:text-gray-300">Relatório Pedagógico DESCRITIVO de até uma lauda, elencando os aspectos cognitivos, sociais, comunicacionais e motores de desenvolvimento do estudante durante o semestre:</p>
+              <textarea v-model="form.relatorio_semestral" rows="14" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg"></textarea>
+            </div>
+
+            <div class="bg-gray-50 dark:bg-gray-900/40 px-6 sm:px-8 py-5 flex items-center justify-between">
+              <button type="button" @click="prev" :disabled="currentStep===1" class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-200 disabled:opacity-50">
+                Anterior
+              </button>
+              <div class="text-sm text-gray-600 dark:text-gray-400">{{ currentStep }} de {{ totalSteps }}</div>
+              <div class="flex items-center gap-2">
+                <button v-if="currentStep<totalSteps" type="button" @click="next" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg">Próximo</button>
+                <button v-else type="submit" :disabled="saving" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg disabled:opacity-50">
+                  {{ saving ? 'Salvando...' : 'Salvar PDI' }}
+                </button>
+              </div>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  `,
+  data() {
+    const expressaoOpts = [
+      ['gestos_caseiros','Gestos caseiros'],
+      ['libras','Língua de Sinais Brasileira - Libras'],
+      ['palavras','Palavras'],
+      ['sons','Sons'],
+      ['timidez','Demonstra timidez ao se expressar'],
+      ['descreve_gravuras','Descreve gravuras'],
+      ['ecolalia','Ecolalia'],
+      ['clareza','Expressa-se com clareza'],
+      ['rapido','Expressa-se muito rápido'],
+      ['som_final','Expressa-se pelo som final das palavras'],
+      ['frases_completas','Frases completas'],
+      ['frases_curtas','Frases curtas'],
+      ['gagueira','Gagueira'],
+      ['lentidao','Lentidão na fala'],
+      ['nomeia_objetos','Nomeia objetos'],
+      ['omite_fonemas','Omite fonemas'],
+      ['troca_fonemas','Troca fonemas'],
+      ['distorce_fonemas','Distorce fonemas'],
+      ['conversa_espontanea','Conversa espontaneamente'],
+      ['reconta_historias','Reconta histórias'],
+      ['repete_adultos','Repete a fala dos adultos'],
+      ['entende_proposto','Demonstra entender o que é proposto'],
+      ['tom_baixo','Tom de voz baixo'],
+      ['tom_alto','Tom de voz alto'],
+    ].map(([key,label]) => ({ key, label, modelKey: 'expressao_' + key }));
+
+    const escritaOpts = [
+      ['garatujas','Garatujas'],
+      ['pre_silabica','Escrita pré-silábica'],
+      ['silabica','Escrita silábica'],
+      ['silabica_alfabetica','Escrita silábica-alfabética'],
+      ['alfabetica','Escrita alfabética'],
+      ['diferencia_desenho','Diferencia desenho da escrita e dos números'],
+      ['identifica_rotulos','Identifica rótulos'],
+      ['conhece_algumas_letras','Conhece algumas letras'],
+      ['conhece_todas_letras','Conhece todas as letras'],
+      ['identifica_letras_iguais','Identifica letras iguais'],
+      ['letra_inicial_nome','Reconhece a letra inicial do seu nome'],
+      ['nome_em_frases','Reconhece seu nome em frases'],
+      ['nome_pais_colegas','Reconhece o nome dos pais e colegas'],
+      ['escreve_nomes','Escreve nome de familiares e amigos'],
+      ['relaciona_nomes','Observa e relaciona parte dos nomes'],
+      ['forma_palavras','Procura formar palavras e tenta ler'],
+      ['escreve_frases','Escreve frases'],
+      ['escreve_textos','Escreve textos'],
+      ['letra_cursiva','Letra cursiva'],
+      ['letra_impressa','Letra impressa'],
+      ['letra_legivel','Letra legível'],
+      ['relaciona_tipos_letras','Relaciona letras de vários tipos e tamanhos'],
+      ['atribui_sentido','Tenta atribuir um sentido num texto por meio de pistas'],
+      ['escreve_apoio','Escreve com apoio/adaptação'],
+      ['recusa_escrever','Recusa escrever dizendo que não sabe'],
+    ].map(([key,label]) => ({ key, label, modelKey: 'escrita_' + key }));
+
+    const psicoRows = [
+      ['esquema_corporal','Esquema corporal – Conhece as partes e funções do corpo? Nomeia as partes do corpo?'],
+      ['consciencia_corporal','Consciência corporal –Sabe do uso específico de cada membro do corpo para a realização de atividades, mesmo nos casos em que haja limitações de movimento. Ex.: escreve com adaptação utilizando os pés, mas tem conhecimento que o membro comumente utilizado para esta atividade é a mão.'],
+      ['expressao_corporal','Expressão corporal – Realizar gestos expressivos (susto, grito, tristeza, raiva)?'],
+      ['imagem_corporal','Imagem corporal - Relação do próprio corpo com o espaço e as pessoas. Ex.: olhar no espelho e perceber o contorno do corpo.'],
+      ['tonus_hipertonico','Tônus Hipertônico – Apresenta rigidez muscular elevada?'],
+      ['tonus_hipotonico','Tônus Hipotônico - Apresenta flacidez muscular elevada?'],
+      ['coordenacao_motora_ampla','Coordenação motora ampla – Controla os movimentos amplos do corpo? Ex.: correr, andar, rolar, pular, engatinhar, agachar.'],
+      ['coordenacao_motora_fina','Coordenação motora fina – Controla os pequenos músculos para exercícios refinados? Ex.: recortar, colar, encaixar, pintar, pentear, jogar bola.'],
+      ['equilibrio_dinamico','Equilíbrio dinâmico – Ex.: andar na ponta dos pés, correr com copo cheio de água na mão, andar de joelhos.'],
+      ['equilibrio_estatico','Equilíbrio estático – Sustenta-se em diferentes situações? Ex.: ficar em pé parado com os olhos fechados, ficar em pé sobre um pé, ficar de cócoras.'],
+      ['lateralidade','Lateralidade – Tem capacidade motora de percepção integrada dos dois lados do corpo (direito e esquerdo)?'],
+      ['percepcao_gustativa','Percepção gustativa – Tem a capacidade de distinguir sabores? Ex.: reconhecer alimentos pelo gosto, distingue e expressa do que determinado alimento é feito.'],
+      ['percepcao_olfativa','Percepção olfativa – Tem a capacidade de distinguir odores? Ex.: discriminação de duas frutas ou mais, identificar odores agradáveis e desagradáveis.'],
+      ['percepcao_tatil','Percepção tátil – Sente as variações de pressão, temperatura, noções de peso, sem a ajuda da visão? Ex.: reconhecer diferentes texturas, identificar formas.'],
+      ['percepcao_visual','Percepção visual – Identifica formas geométricas, junta objetos iguais, compara objetos, monta cenas, diz o que falta em desenhos, realiza sequencias?'],
+      ['postura','Postura – Posição ou atitude do corpo ligada ao movimento. Ex.: sentar, deitar, ficar de pé.'],
+    ].map(([key,label]) => ({ key, label }));
+
+    const cogRows = [
+      ['memoria_curto_prazo','Memória de Curto Prazo – lembra-se de acontecimentos cotidianos ocorridos num período de até 6 horas?'],
+      ['memoria_longo_prazo','Memória de Longo Prazo – lembra-se de fatos ocorridos ao longo da vida e os utiliza no cotidiano? Ex.: reconhecer letras e números, pessoas.'],
+      ['memoria_auditiva','Memória Auditiva – memoriza o que escuta?'],
+      ['memoria_visual','Memória Visual – memoriza o que vê?'],
+      ['percepcao_auditiva','Percepção Auditiva – escuta e interpreta os estímulos sonoros?'],
+      ['percepcao_corporal','Percepção Corporal – tem consciência do próprio corpo?'],
+      ['percepcao_espacial','Percepção Espacial – compreende as dimensões do entorno e dos objetos?'],
+      ['percepcao_tatil_cog','Percepção Tátil – reconhece formas, texturas, tamanhos pelo tato?'],
+      ['percepcao_temporal','Percepção Temporal – Tem a capacidade de situar-se em função da sucessão dos acontecimentos? Ex.: ontem, hoje, amanhã, antes, durante, após, hora, semana, mês.'],
+      ['percepcao_visual_cog','Percepção Visual - enxerga e interpreta os estímulos visuais (claro, escuro, cores, formas, objetos)?'],
+      ['atencao_alerta','Atenção Alerta – responde imediatamente a um estímulo apresentado?'],
+      ['atencao_alternada','Atenção Alternada – realiza atividade proposta e conversa ao mesmo tempo?'],
+      ['atencao_seletiva','Atenção Seletiva – concentra-se em uma atividade ignorando os demais estímulos?'],
+      ['atencao_sustentada','Atenção Sustentada – concentra-se por um longo período de tempo na atividade proposta?'],
+      ['raciocinio_abdutivo','Raciocínio Lógico Abdutivo – busca novas ideias e conhecimentos que possam validar uma conclusão? Ex.: Pela manhã observo o telhado e ele está molhado. Logo, a noite deve ter chovido.'],
+      ['raciocinio_dedutivo','Raciocínio Lógico Dedutivo – parte de um fato geral para um particular, concluindo-o? Ex.: Todas as maçãs daquela caixa são verdes. Essas maçãs são daquela caixa. Logo, essas maçãs são verdes.'],
+      ['raciocinio_intuitivo','Raciocínio Lógico Intuitivo – parte de um fato específico para o geral, concluindo-o? A conclusão nem sempre será verdadeira. Ex.: Klaus é alemão de olhos azuis, Peter é alemão de olhos azuis, Tom é alemão de olhos azuis, Joseph é alemão de olhos azuis. Logo todo alemão tem olhos azuis.'],
+      ['pensamento_analitico','Pensamento Analítico – separa o todo em partes com as mesmas características? Ex.: Em uma caixa de brinquedos separa bolas, bonecas e carrinhos.'],
+      ['pensamento_criativo','Pensamento Criativo – baseado em seus conhecimentos cria ou modifica algo existente?'],
+      ['pensamento_critico','Pensamento Crítico – examina, analisa ou avalia?'],
+      ['pensamento_sintese','Pensamento de Síntese – sintetiza, resume histórias ou fatos em poucas palavras?'],
+      ['pensamento_questionador','Pensamento Questionador – propõe perguntas e busca respondê-las?'],
+      ['pensamento_sistemico','Pensamento Sistêmico – considera vários elementos e os relaciona? Ex.: Separa o material escolar do material de higiene pessoal.'],
+      ['compreende_ordens_simples','Compreende Ordens Simples? Ex.: Sentar, levantar, sair, entrar.'],
+      ['compreende_ordens_complexas','Compreende Ordens Complexas? Ex.: Transmitir um recado à alguém.'],
+      ['relata_situacoes_vividas','Relata situações vividas por ele?'],
+    ].map(([key,label]) => ({ key, label }));
+
+    const disciplinasPlanejamento = [
+      { key: 'arte', label: 'ARTE' },
+      { key: 'lingua_portuguesa', label: 'LÍNGUA PORTUGUESA' },
+      { key: 'matematica', label: 'MATEMÁTICA' },
+      { key: 'ciencias', label: 'CIÊNCIAS' },
+      { key: 'geografia', label: 'GEOGRAFIA' },
+      { key: 'historia', label: 'HISTÓRIA' },
+      { key: 'educacao_fisica', label: 'EDUCAÇÃO FÍSICA' },
+    ];
+
+    const disciplinasAvaliacao = [
+      { key: 'arte', label: 'ARTE' },
+      { key: 'lingua_portuguesa', label: 'LÍNGUA PORTUGUESA' },
+      { key: 'geografia', label: 'GEOGRAFIA' },
+      { key: 'historia', label: 'HISTÓRIA' },
+      { key: 'educacao_fisica', label: 'EDUCAÇÃO FÍSICA' },
+      { key: 'matematica', label: 'MATEMÁTICA' },
+      { key: 'biologia_ciencias', label: 'BIOLOGIA OU CIÊNCIAS' },
+      { key: 'fisica', label: 'FÍSICA' },
+      { key: 'quimica', label: 'QUIMÍCA' },
+      { key: 'sociologia', label: 'SOCIOLOGIA' },
+      { key: 'ensino_religioso', label: 'ENSINO RELIGIOSO' },
+      { key: 'itinerarios_p_vida', label: 'INTINERÁRIOS FORMATICOS P.VIDA' },
+      { key: 'itinerarios_1', label: 'INTINERÁRIOS FORMATICOS' },
+      { key: 'itinerarios_2', label: 'INTINERÁRIOS FORMATICOS' },
+      { key: 'itinerarios_3', label: 'INTINERÁRIOS FORMATICOS' },
+      { key: 'itinerarios_4', label: 'INTINERÁRIOS FORMATICOS' },
+    ];
+
+    const baseForm = {
+      id: null,
+      student_id: '',
+
+      // I
+      data_elaboracao: '',
+      sre: '',
+      nome_escola: '',
+      codigo_escola: '',
+      endereco_escola: '',
+      ef_anos_iniciais: false,
+      ef_anos_finais: false,
+      ensino_medio: false,
+      acessibilidade_fisica_sim: false,
+      acessibilidade_fisica_nao: false,
+      possui_sala_recursos_sim: false,
+      possui_sala_recursos_nao: false,
+      escola_encaminhada: '',
+      diretor: '',
+      vice_diretor: '',
+      especialista: '',
+      professor_apoio: '',
+      guia_interprete: '',
+      tils: '',
+      professor_sala_recursos: '',
+      regentes: '',
+
+      // II
+      nome_estudante: '',
+      data_nascimento: '',
+      idade: '',
+      responsavel: '',
+      ano_escolaridade: '',
+      deficiencia_informada: '',
+      acompanhado_profissional: '',
+      especialidade_profissional: '',
+      uso_medicamento: '',
+      efeitos_colaterais: '',
+      quais_efeitos: '',
+      necessidade_especifica: '',
+      atendimento_guia_interprete: false,
+      atendimento_professor_libras: false,
+      atendimento_interprete_libras: false,
+      atendimento_sala_recursos: false,
+      atendimento_professor_apoio: false,
+      atendimento_outro: false,
+      atendimento_outro_qual: '',
+      recurso_acessibilidade: '',
+      como_divertir: '',
+
+      // III
+      consideracoes_familia: '',
+
+      // IV
+      idade_comecou_escola: '',
+      percurso_escolar: '',
+      frequenta_sala_recursos: '',
+      frequencia_sala_recursos: '',
+      frequenta_educacao_integral: '',
+
+      // V
+      autoagressividade: false,
+      indisciplina: false,
+      heteroagressividade: false,
+      desobediencia_regras: false,
+      apatia: false,
+      limites_obs: '',
+
+      // VII
+      habilidades_demonstradas: '',
+
+      // VIII
+      intencao_comunicativa_sim: false,
+      intencao_comunicativa_nao: false,
+      comunicacao_comentarios: false,
+      comunicacao_solicitacoes: false,
+      comunicacao_necessidades: false,
+      comunicacao_atencao: false,
+      comunicacao_escolhas: false,
+      comunicacao_narrativas: false,
+      recurso_alfabeto_movel: false,
+      recurso_alta_tecnologia: false,
+      recurso_baixa_tecnologia: false,
+      recurso_figuras_avulsas: false,
+      recurso_fotos: false,
+      recurso_numerais: false,
+      recurso_nenhum: false,
+      recurso_pictograma: false,
+      recurso_prancha_comunicacao: false,
+      recurso_prancha_tematica: false,
+
+      leitura_palavras: false,
+      leitura_frases: false,
+      leitura_textos: false,
+      leitura_global: false,
+      leitura_fonetica: false,
+      leitura_imita: false,
+      leitura_nao: false,
+
+      // IX
+      turma: '',
+
+      // XI
+      relatorio_semestral: '',
+    };
+
+    // Inicializar flags de expressão/escrita
+    expressaoOpts.forEach(o => { baseForm[o.modelKey] = false; });
+    escritaOpts.forEach(o => { baseForm[o.modelKey] = false; });
+
+    // Inicializar radios VI/VII
+    psicoRows.forEach(r => {
+      baseForm['psico_' + r.key + '_apresenta'] = '';
+      baseForm['psico_' + r.key + '_com_ajuda'] = '';
+      baseForm['psico_' + r.key + '_nao_apresenta'] = '';
+      baseForm['psico_' + r.key + '_nao_observado'] = '';
+    });
+    cogRows.forEach(r => {
+      baseForm['cog_' + r.key + '_apresenta'] = '';
+      baseForm['cog_' + r.key + '_com_ajuda'] = '';
+      baseForm['cog_' + r.key + '_nao_apresenta'] = '';
+      baseForm['cog_' + r.key + '_nao_observado'] = '';
+    });
+
+    // Inicializar planejamento e avaliação
+    disciplinasPlanejamento.forEach(d => {
+      [1,2,3,4].forEach(b => {
+        baseForm['planejamento_' + d.key + '_bim' + b + '_ativo'] = false;
+        baseForm['planejamento_' + d.key + '_bim' + b + '_professor'] = '';
+        baseForm['planejamento_' + d.key + '_bim' + b + '_objetivo_turma'] = '';
+        baseForm['planejamento_' + d.key + '_bim' + b + '_objetivo_estudante'] = '';
+        baseForm['planejamento_' + d.key + '_bim' + b + '_conteudo'] = '';
+        baseForm['planejamento_' + d.key + '_bim' + b + '_habilidade'] = '';
+        baseForm['planejamento_' + d.key + '_bim' + b + '_metodologia'] = '';
+        baseForm['planejamento_' + d.key + '_bim' + b + '_aprendizado'] = '';
+      });
+    });
+    disciplinasAvaliacao.forEach(d => {
+      [1,2,3,4].forEach(b => {
+        baseForm['avaliacao_bim' + b + '_' + d.key + '_valor'] = '';
+        baseForm['avaliacao_bim' + b + '_' + d.key + '_nota'] = '';
+        baseForm['avaliacao_bim' + b + '_' + d.key + '_suporte'] = '';
+        baseForm['avaliacao_bim' + b + '_' + d.key + '_compreensao'] = '';
+        baseForm['avaliacao_bim' + b + '_' + d.key + '_metodologia'] = '';
+        baseForm['avaliacao_bim' + b + '_' + d.key + '_diagnostico'] = '';
+      });
+    });
+
+    return {
+      currentStep: 1,
+      totalSteps: 11,
+      saving: false,
+      alunos: [],
+      escolas: [],
+      form: baseForm,
+      steps: [
+        { title: 'I. Institucionais' },
+        { title: 'II. Estudante' },
+        { title: 'III. Família' },
+        { title: 'IV. Histórico' },
+        { title: 'V. Limites' },
+        { title: 'VI. Psicomotores' },
+        { title: 'VII. Cognitivos' },
+        { title: 'VIII. Comunicação' },
+        { title: 'IX. Planejamento' },
+        { title: 'X. Avaliação' },
+        { title: 'XI. Relatório' },
+      ],
+      expressaoOpts,
+      escritaOpts,
+      psicoRows,
+      cogRows,
+      disciplinasPlanejamento,
+      disciplinasAvaliacao,
+    };
+  },
+  async mounted() {
+    await Promise.all([this.carregarAlunos(), this.carregarEscolas()]);
+    // Se vier por querystring (modo leitura), carrega aluno
+    const qStudentId = this.$route?.query?.student_id;
+    if (qStudentId) {
+      this.form.student_id = String(qStudentId);
+      await this.onSelectAluno();
+    }
+  },
+  methods: {
+    planKey(discKey, bimestre, field) {
+      return `planejamento_${discKey}_bim${bimestre}_${field}`;
+    },
+    avKey(bimestre, discKey, field) {
+      return `avaliacao_bim${bimestre}_${discKey}_${field}`;
+    },
+    goToStep(step) {
+      if (step >= 1 && step <= this.totalSteps) {
+        this.currentStep = step;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    },
+    next() {
+      if (this.currentStep < this.totalSteps) {
+        this.currentStep++;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    },
+    prev() {
+      if (this.currentStep > 1) {
+        this.currentStep--;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    },
+    setSimNao(prefix, which) {
+      this.form[prefix + '_sim'] = which === 'sim';
+      this.form[prefix + '_nao'] = which === 'nao';
+    },
+    isRowSelected(group, key, option) {
+      const base = `${group}_${key}_`;
+      const map = {
+        apresenta: 'apresenta',
+        com_ajuda: 'com_ajuda',
+        nao_apresenta: 'nao_apresenta',
+        nao_observado: 'nao_observado'
+      };
+      return this.form[base + map[option]] === 'sim';
+    },
+    setRow(group, key, option) {
+      const base = `${group}_${key}_`;
+      ['apresenta','com_ajuda','nao_apresenta','nao_observado'].forEach(s => {
+        this.form[base + s] = '';
+      });
+      this.form[base + option] = 'sim';
+    },
+    async carregarAlunos() {
+      try {
+        let params = {};
+        if (this.$parent?.user && this.$parent.user.role !== 'admin') {
+          params.teacher_id = this.$parent.user.id;
+        }
+        const response = await api.get('/students/options', { params });
+        this.alunos = response.data?.data?.rows || [];
+      } catch (error) {
+        console.error('Erro ao carregar alunos:', error);
+        this.alunos = [];
+      }
+    },
+    async carregarEscolas() {
+      try {
+        const response = await api.get('/schools');
+        const d = response.data;
+        const rows = (d?.data?.rows) || (Array.isArray(d?.data) ? d.data : (Array.isArray(d) ? d : []));
+        this.escolas = Array.isArray(rows) ? rows : [];
+      } catch (e) {
+        console.warn('Falha ao carregar escolas:', e);
+        this.escolas = [];
+      }
+    },
+    async onSelectAluno() {
+      const aluno = this.alunos.find(a => a.id == this.form.student_id);
+      if (aluno) {
+        if (!this.form.nome_estudante) this.form.nome_estudante = aluno.name || '';
+        if (!this.form.ano_escolaridade) this.form.ano_escolaridade = aluno.grade || '';
+        if (!this.form.turma) this.form.turma = aluno.class_name || '';
+        if (!this.form.data_nascimento) this.form.data_nascimento = aluno.birth_date || '';
+        if (!this.form.nome_escola) this.form.nome_escola = aluno.school_name || '';
+        if (!this.form.endereco_escola) {
+          const sch = this.escolas.find(s => s.id == aluno.school_id);
+          if (sch?.address) this.form.endereco_escola = sch.address;
+        }
+      }
+
+      // carregar último pdi_forms (1:1) e preencher
+      try {
+        const r = await api.get('/pdi', { params: { student_id: this.form.student_id } });
+        const lista = (r.data?.data?.data && Array.isArray(r.data.data.data)) ? r.data.data.data : (Array.isArray(r.data?.data) ? r.data.data : []);
+        if (lista.length > 0) {
+          const ultimo = lista[0];
+          this.form.id = ultimo.id;
+          const det = ultimo.form_data || {};
+          Object.keys(det).forEach(k => {
+            if (k in this.form) this.form[k] = det[k];
+          });
+        } else {
+          this.form.id = null;
+        }
+      } catch (e) {
+        console.warn('Falha ao carregar PDI existente:', e);
+      }
+    },
+    async salvar() {
+      if (!this.form.student_id) {
+        this.$showToast && this.$showToast('Atenção', 'Selecione um aluno.', 'info');
+        this.currentStep = 1;
+        return;
+      }
+      this.saving = true;
+      try {
+        const formData = { ...this.form };
+        delete formData.id;
+        delete formData.student_id;
+        const payload = {
+          student_id: this.form.student_id,
+          form_data: formData,
+          data_inicio: this.form.data_elaboracao || null,
+          data_fim: null,
+          status: 'rascunho'
+        };
+        const response = await api.post('?action=pdi.create', payload);
+        if (response.data?.ok) {
+          if (response.data.data?.id) this.form.id = response.data.data.id;
+          this.$showToast && this.$showToast('Sucesso', 'PDI salvo com sucesso!', 'success');
+        } else {
+          this.$showToast && this.$showToast('Erro', response.data?.error || 'Erro ao salvar PDI', 'error');
+        }
+      } catch (error) {
+        this.$showToast && this.$showToast('Erro', 'Erro ao salvar PDI: ' + (error.response?.data?.message || error.message), 'error');
+      } finally {
+        this.saving = false;
+      }
+    },
+    exportarPDF() {
+      if (!this.form.student_id) {
+        this.$showToast && this.$showToast('Atenção', 'Selecione um aluno primeiro para gerar o PDF.', 'info');
+        return;
+      }
+      const token = localStorage.getItem('token');
+      if (!token) {
+        this.$showToast && this.$showToast('Erro', 'Token de autenticação não encontrado. Faça login novamente.', 'error');
+        return;
+      }
+      const url = buildApiUrl('/pdi/pdf', `student_id=${this.form.student_id}&token=${encodeURIComponent(token)}`);
+      window.open(url, '_blank');
+    }
+  }
+};
+
 // Componente para Plano de Atendimento Individual
 const PlanoAtendimento = {
   template: `
@@ -9940,7 +10952,8 @@ const routes = [
       { path: 'entrevista-responsavel', component: EntrevistaResponsavel },
       { path: 'entrevista-completa', component: window.EntrevistaResponsavelCompleta || EntrevistaResponsavel },
       { path: 'pdi', component: PDI },
-      { path: 'pdi-completo', component: window.PDICompleto || PDI },
+      // Força o PDI alinhado ao modelo oficial nesta rota
+      { path: 'pdi-completo', component: PDIPlanoDesenvolvimento },
       { path: 'plano-atendimento', component: PlanoAtendimento },
       // Força o formulário PAI alinhado ao documento original (76 campos) nesta rota
       { path: 'pai-completo', component: PlanoAtendimento },

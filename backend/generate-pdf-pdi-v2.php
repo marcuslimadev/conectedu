@@ -388,6 +388,19 @@ foreach ($disciplinas as $disc) {
         
         if (vv($D, $key_prefix . '_ativo')) {
             $html .= '<div style="margin-top:10px;"><strong>DISCIPLINA: ' . $disc . ' &nbsp;&nbsp;&nbsp; BIMESTRE: ' . $bim . 'º</strong></div>';
+
+                        // Campos adicionais do modelo (professor + objetivos)
+                        $prof = vv($D, $key_prefix . '_professor');
+                        $objTurma = vv($D, $key_prefix . '_objetivo_turma');
+                        $objEstud = vv($D, $key_prefix . '_objetivo_estudante');
+                        if ($prof || $objTurma || $objEstud) {
+                                $html .= '<table class="bordered" style="margin-top:4px;">';
+                                $html .= '<tr><td style="width:50%;">' . campo_pdi('PROFESSOR(A):', $prof) . '</td></tr>';
+                                $html .= '<tr><td>' . texto_pdi('Objetivo geral da disciplina para a turma:', $objTurma) . '</td></tr>';
+                                $html .= '<tr><td>' . texto_pdi('Objetivo geral da disciplina para o(a) estudante:', $objEstud) . '</td></tr>';
+                                $html .= '</table>';
+                        }
+
             $html .= '<table class="bordered" style="margin-top:4px;">';
             $html .= '<tr><th>Conteúdo</th><th>Habilidade</th><th>Metodologia</th><th>Aprendizado adquirido</th></tr>';
             $html .= '<tr>';
@@ -398,6 +411,69 @@ foreach ($disciplinas as $disc) {
             $html .= '</tr></table>';
         }
     }
+}
+
+// ==================== X. AVALIAÇÃO BIMESTRAL ====================
+$html .= '<div class="secao page-break">X. AVALIAÇÃO BIMESTRAL</div>';
+
+$disciplinas_av = [
+    ['arte','ARTE'],
+    ['lingua_portuguesa','LÍNGUA PORTUGUESA'],
+    ['geografia','GEOGRAFIA'],
+    ['historia','HISTÓRIA'],
+    ['educacao_fisica','EDUCAÇÃO FÍSICA'],
+    ['matematica','MATEMÁTICA'],
+    ['biologia_ciencias','BIOLOGIA OU CIÊNCIAS'],
+    ['fisica','FÍSICA'],
+    ['quimica','QUIMÍCA'],
+    ['sociologia','SOCIOLOGIA'],
+    ['ensino_religioso','ENSINO RELIGIOSO'],
+    ['itinerarios_p_vida','INTINERÁRIOS FORMATICOS P.VIDA'],
+    ['itinerarios_1','INTINERÁRIOS FORMATICOS'],
+    ['itinerarios_2','INTINERÁRIOS FORMATICOS'],
+    ['itinerarios_3','INTINERÁRIOS FORMATICOS'],
+    ['itinerarios_4','INTINERÁRIOS FORMATICOS'],
+];
+
+for ($bim = 1; $bim <= 4; $bim++) {
+    $html .= '<div style="margin-top:10px;"><strong>' . $bim . 'º BIMESTRE</strong></div>';
+    $html .= '<table class="bordered" style="margin-top:4px;">';
+    $html .= '<tr>';
+    $html .= '<th style="width:14%;">Disciplina</th>';
+    $html .= '<th style="width:6%;">Valor</th>';
+    $html .= '<th style="width:8%;">Nota alcançada</th>';
+    $html .= '<th style="width:14%;">Grau de autonomia para realizar a atividade</th>';
+    $html .= '<th style="width:28%;">Metodologia utilizada (descrever como foi realizada a avaliação)</th>';
+    $html .= '<th style="width:30%;">Qual o diagnóstico pedagógico do estudante nessa habilidade? (descreva potenciais e desafios)</th>';
+    $html .= '</tr>';
+
+    foreach ($disciplinas_av as $d) {
+        $k = $d[0]; $label = $d[1];
+        $prefix = 'avaliacao_bim' . $bim . '_' . $k . '_';
+        $valor = vv($D, $prefix . 'valor');
+        $nota = vv($D, $prefix . 'nota');
+        $suporte = vv($D, $prefix . 'suporte');
+        $comp = vv($D, $prefix . 'compreensao');
+        $met = vv($D, $prefix . 'metodologia');
+        $diag = vv($D, $prefix . 'diagnostico');
+
+        $autonomiaTxt = '';
+        if ($suporte === 'muito_suporte') $autonomiaTxt .= 'muito suporte';
+        if ($suporte === 'pouco_suporte') $autonomiaTxt .= ($autonomiaTxt ? ' / ' : '') . 'pouco suporte';
+        if ($comp === 'alta_compreensao') $autonomiaTxt .= ($autonomiaTxt ? ' / ' : '') . 'alta compreensão';
+        if ($comp === 'pouca_compreensao') $autonomiaTxt .= ($autonomiaTxt ? ' / ' : '') . 'pouca compreensão';
+
+        $html .= '<tr>';
+        $html .= '<td>' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '</td>';
+        $html .= '<td>' . nl2br($valor) . '</td>';
+        $html .= '<td>' . nl2br($nota) . '</td>';
+        $html .= '<td>' . nl2br(htmlspecialchars($autonomiaTxt, ENT_QUOTES, 'UTF-8')) . '</td>';
+        $html .= '<td>' . nl2br($met) . '</td>';
+        $html .= '<td>' . nl2br($diag) . '</td>';
+        $html .= '</tr>';
+    }
+
+    $html .= '</table>';
 }
 
 // ==================== XI. RELATÓRIO PEDAGÓGICO DO DESENVOLVIMENTO DO ESTUDANTE / SEMESTRAL ====================

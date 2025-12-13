@@ -7566,14 +7566,14 @@ const PDI = {
 // Componente para Plano de Atendimento Individual
 const PlanoAtendimento = {
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-purple-50 to-violet-100 py-8">
-      <div class="max-w-4xl mx-auto px-4">
+    <div class="min-h-screen bg-gradient-to-br from-purple-50 to-violet-100 dark:from-gray-900 dark:to-gray-800 py-8">
+      <div class="max-w-5xl mx-auto px-4">
         <!-- Header -->
         <div class="mb-8">
           <div class="flex items-center justify-between">
             <div>
-              <h1 class="text-3xl font-bold text-gray-900 mb-2">Plano de Atendimento Individual</h1>
-              <p class="text-gray-600">Planejamento detalhado do atendimento educacional especializado</p>
+              <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">📋 Plano de Atendimento Individual (PAI)</h1>
+              <p class="text-gray-600 dark:text-gray-400">Planejamento detalhado do atendimento educacional especializado</p>
             </div>
             
             <!-- Botão Gerar PDF -->
@@ -7588,299 +7588,779 @@ const PlanoAtendimento = {
           </div>
         </div>
 
-        <!-- Progress Bar -->
-        <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
-          <div class="flex items-center justify-between mb-4">
-            <span class="text-sm font-medium text-gray-700">Progresso do Plano</span>
-            <span class="text-sm text-gray-500">{{ currentStep }}/{{ totalSteps }}</span>
+        <!-- Tab Navigation -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm mb-6 overflow-x-auto">
+          <div class="flex border-b border-gray-200 dark:border-gray-700">
+            <button v-for="(step, index) in steps" :key="index"
+                    @click="goToStep(index + 1)"
+                    class="flex-1 min-w-[140px] px-4 py-4 text-sm font-medium transition-all duration-200 border-b-2"
+                    :class="[
+                      currentStep === index + 1
+                        ? 'border-violet-600 text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-gray-700'
+                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
+                    ]">
+              <i :class="step.icon + ' mr-2'"></i>
+              <span class="hidden sm:inline">{{ step.title }}</span>
+              <span class="sm:hidden">{{ step.short }}</span>
+            </button>
           </div>
-          <div class="w-full bg-gray-200 rounded-full h-3">
-            <div class="bg-gradient-to-r from-purple-500 to-violet-600 h-3 rounded-full transition-all duration-500 ease-out" 
-                 :style="{ width: progressPercentage + '%' }"></div>
-          </div>
-          <div class="flex justify-between mt-2">
-            <span v-for="(step, index) in steps" :key="index" 
-                  class="text-xs font-medium transition-colors duration-300"
-                  :class="index < currentStep ? 'text-violet-600' : index === currentStep - 1 ? 'text-violet-500' : 'text-gray-400'">
-              {{ step.title }}
-            </span>
-          </div>
-        </div>
-
-        <!-- Step Navigation Pills -->
-        <div class="flex flex-wrap justify-center gap-2 mb-8">
-          <button v-for="(step, index) in steps" :key="index"
-                  @click="goToStep(index + 1)"
-                  :disabled="index + 1 > maxCompletedStep"
-                  class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300"
-                  :class="[
-                    index + 1 === currentStep 
-                      ? 'bg-violet-600 text-white shadow-lg' 
-                      : index + 1 <= maxCompletedStep 
-                        ? 'bg-white text-violet-600 border border-violet-200 hover:bg-violet-50' 
-                        : 'bg-gray-100 text-gray-600 cursor-not-allowed'
-                  ]">
-            <i :class="step.icon + ' mr-2'"></i>{{ step.title }}
-          </button>
         </div>
 
         <!-- Form Card -->
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
           <form @submit.prevent="salvarPlano" class="relative">
-            <!-- Step 1: Identificação do Aluno -->
-            <div v-show="currentStep === 1" class="step-content">
-              <div class="p-8">
-                <div class="text-center mb-8">
-                  <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-user-circle text-2xl text-blue-600"></i>
-                  </div>
-                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Identificação do Aluno</h2>
-                  <p class="text-gray-600">Dados básicos e informações escolares</p>
+            
+            <!-- SEÇÃO 1: Identificação do Aluno e da Equipe -->
+            <div v-show="currentStep === 1" class="step-content p-8">
+              <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i class="fas fa-id-card text-2xl text-blue-600 dark:text-blue-400"></i>
                 </div>
-
-                <div class="max-w-2xl mx-auto space-y-6">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Selecionar Aluno <span class="text-red-500">*</span>
-                    </label>
-                    <select v-model="form.student_id" @change="preencherDadosAlunoPlano" required 
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
-                      <option value="">Selecione um aluno</option>
-                      <option v-for="aluno in alunos" :key="aluno.id" :value="aluno.id">{{ aluno.name }}</option>
-                    </select>
-                  </div>
-
-                  <!-- Dados preenchidos do perfil do aluno -->
-                  <div v-if="form.student_id" class="bg-violet-50 border border-violet-200 rounded-lg p-4">
-                    <h3 class="text-sm font-semibold text-violet-900 mb-3 flex items-center">
-                      <i class="fas fa-info-circle mr-2"></i>
-                      Dados do perfil do aluno
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-                      <div>
-                        <span class="font-medium text-violet-700">Escola:</span>
-                        <span class="text-violet-600 ml-1">{{ form.escola_origem || 'Não informado' }}</span>
-                      </div>
-                      <div>
-                        <span class="font-medium text-violet-700">Série/Ano:</span>
-                        <span class="text-violet-600 ml-1">{{ form.serie || 'Não informado' }}</span>
-                      </div>
-                      <div>
-                        <span class="font-medium text-violet-700">Turma:</span>
-                        <span class="text-violet-600 ml-1">{{ form.turma || 'Não informado' }}</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div class="mt-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Matrícula <span class="text-red-500">*</span></label>
-                    <input v-model="form.matricula" type="text" 
-                      placeholder="Número de matrícula do aluno"
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
-                  </div>
-                </div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">1. Identificação do Aluno e da Equipe</h2>
+                <p class="text-gray-600 dark:text-gray-400">Informações básicas do estudante e profissionais envolvidos</p>
               </div>
-            </div>
 
-            <!-- Step 2: Necessidades e Objetivos -->
-            <div v-show="currentStep === 2" class="step-content">
-              <div class="p-8">
-                <div class="text-center mb-8">
-                  <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-puzzle-piece text-2xl text-red-600"></i>
-                  </div>
-                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Necessidades e Objetivos</h2>
-                  <p class="text-gray-600">Defina as necessidades especiais e objetivos do atendimento</p>
+              <div class="max-w-3xl mx-auto space-y-6">
+                <!-- Aluno -->
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Selecionar Aluno <span class="text-red-500">*</span>
+                  </label>
+                  <select v-model="form.student_id" @change="preencherDadosAlunoPlano" required 
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                    <option value="">Selecione um aluno</option>
+                    <option v-for="aluno in alunos" :key="aluno.id" :value="aluno.id">{{ aluno.name }}</option>
+                  </select>
                 </div>
 
-                <div class="max-w-2xl mx-auto space-y-6">
+                <!-- Grid de Informações Básicas -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Deficiência/Transtorno <span class="text-red-500">*</span></label>
-                    <select v-model="form.tipo_necessidade" required 
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nome da Escola <span class="text-red-500">*</span></label>
+                    <input v-model="form.nome_escola" type="text" required
+                      class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nome do Estudante <span class="text-red-500">*</span></label>
+                    <input v-model="form.nome_estudante" type="text" required
+                      class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Data de Nascimento <span class="text-red-500">*</span></label>
+                    <input v-model="form.data_nascimento" type="date" required
+                      class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Idade <span class="text-red-500">*</span></label>
+                    <input v-model="form.idade" type="number" min="0" max="100" required
+                      class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Série/Ano <span class="text-red-500">*</span></label>
+                    <input v-model="form.serie_ano" type="text" required
+                      class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Turno <span class="text-red-500">*</span></label>
+                    <select v-model="form.turno" required
+                      class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
                       <option value="">Selecione</option>
-                      <option value="deficiencia_intelectual">Deficiência Intelectual</option>
-                      <option value="deficiencia_fisica">Deficiência Física</option>
-                      <option value="deficiencia_visual">Deficiência Visual</option>
-                      <option value="deficiencia_auditiva">Deficiência Auditiva</option>
-                      <option value="deficiencia_multipla">Deficiência Múltipla</option>
-                      <option value="tea">Transtorno do Espectro Autista</option>
-                      <option value="altas_habilidades">Altas Habilidades/Superdotação</option>
-                      <option value="outro">Outro</option>
+                      <option value="matutino">Matutino</option>
+                      <option value="vespertino">Vespertino</option>
+                      <option value="noturno">Noturno</option>
+                      <option value="integral">Integral</option>
                     </select>
                   </div>
-                  
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Descrição das Necessidades</label>
-                    <textarea v-model="form.descricao_necessidades" rows="4" 
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                      placeholder="Descreva detalhadamente as necessidades educacionais especiais..."></textarea>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nome do Responsável <span class="text-red-500">*</span></label>
+                    <input v-model="form.responsavel" type="text" required
+                      class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
                   </div>
+                </div>
 
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Objetivo Geral <span class="text-red-500">*</span></label>
-                    <textarea v-model="form.objetivo_geral" rows="3" 
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                      placeholder="Defina o objetivo principal do atendimento..."></textarea>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Telefone para Contato <span class="text-red-500">*</span></label>
+                    <input v-model="form.telefone" type="tel" required
+                      class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
                   </div>
-                  
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Objetivos Específicos <span class="text-red-500">*</span></label>
-                    <textarea v-model="form.objetivos_especificos" rows="5" 
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                      placeholder="Liste os objetivos específicos, um por linha..."></textarea>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Endereço Residencial <span class="text-red-500">*</span></label>
+                    <input v-model="form.endereco" type="text" required
+                      class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Diagnóstico/Caracterização da Necessidade Educacional Especial (PAEE) - CID <span class="text-red-500">*</span>
+                  </label>
+                  <input v-model="form.diagnostico_cid" type="text" required
+                    placeholder="Ex: F84.0 - Autismo Infantil"
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Professor(a) Regente <span class="text-red-500">*</span></label>
+                    <input v-model="form.professor_regente" type="text" required
+                      class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Professor(a) do AEE <span class="text-red-500">*</span></label>
+                    <input v-model="form.professor_aee" type="text" required
+                      class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Outros Profissionais Envolvidos
+                  </label>
+                  <textarea v-model="form.outros_profissionais" rows="3"
+                    placeholder="Ex: Psicólogo, Fonoaudiólogo, Terapeuta Ocupacional. Especifique a instituição e a frequência do atendimento, se houver."
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Data de Elaboração do PAI <span class="text-red-500">*</span></label>
+                    <input v-model="form.data_elaboracao" type="date" required
+                      class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Data da Avaliação Diagnóstica</label>
+                    <input v-model="form.data_avaliacao_diagnostica" type="date"
+                      class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Período de Vigência</label>
+                    <input v-model="form.periodo_vigencia" type="text"
+                      placeholder="Ex: 2024/1"
+                      class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Data Prevista para Reavaliação</label>
+                    <input v-model="form.data_reavaliacao" type="date"
+                      class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Step 3: Atividades e Metodologia -->
-            <div v-show="currentStep === 3" class="step-content">
-              <div class="p-8">
-                <div class="text-center mb-8">
-                  <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-clipboard-list text-2xl text-green-600"></i>
-                  </div>
-                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Atividades e Metodologia</h2>
-                  <p class="text-gray-600">Defina as atividades propostas e metodologia de ensino</p>
+            <!-- SEÇÃO 2: Histórico do Estudante e Contextualização -->
+            <div v-show="currentStep === 2" class="step-content p-8">
+              <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-amber-100 dark:bg-amber-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i class="fas fa-history text-2xl text-amber-600 dark:text-amber-400"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">2. Histórico do Estudante e Contextualização</h2>
+                <p class="text-gray-600 dark:text-gray-400">Percurso educacional, social e familiar do estudante</p>
+              </div>
+
+              <div class="max-w-3xl mx-auto space-y-6">
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Histórico Escolar</label>
+                  <textarea v-model="form.historico_escolar" rows="4"
+                    placeholder="Percurso educacional, adaptações anteriores, resultados e observações relevantes de anos anteriores."
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                 </div>
 
-                <div class="max-w-2xl mx-auto space-y-6">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Atividades Propostas <span class="text-red-500">*</span></label>
-                    <textarea v-model="form.atividades" rows="5" 
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                      placeholder="Descreva as atividades que serão desenvolvidas com o aluno..."></textarea>
-                  </div>
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Histórico Familiar e Social</label>
+                  <textarea v-model="form.historico_familiar_social" rows="4"
+                    placeholder="Breve descrição da estrutura familiar, apoio, expectativas da família em relação ao desenvolvimento do aluno. Informações relevantes sobre o convívio social fora da escola."
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Interesses e Preferências do Estudante</label>
+                  <textarea v-model="form.interesses_preferencias" rows="3"
+                    placeholder="O que o aluno gosta de fazer? Quais são seus pontos fortes e motivações?"
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Dificuldades</label>
+                  <textarea v-model="form.dificuldades" rows="3"
+                    placeholder="Descreva as principais dificuldades observadas"
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Potencialidades Observadas</label>
+                  <textarea v-model="form.potencialidades" rows="4"
+                    placeholder="Descreva as habilidades já consolidadas pelo estudante nas diferentes áreas de desenvolvimento: acadêmica, social, comunicacional e motora."
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- SEÇÃO 3: Avaliação Diagnóstica e Levantamento de Necessidades -->
+            <div v-show="currentStep === 3" class="step-content p-8">
+              <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i class="fas fa-stethoscope text-2xl text-green-600 dark:text-green-400"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">3. Avaliação Diagnóstica e Levantamento de Necessidades</h2>
+                <p class="text-gray-600 dark:text-gray-400">Esta seção é muito importante, pois detalha a situação atual do aluno</p>
+              </div>
+
+              <div class="max-w-4xl mx-auto space-y-8">
+                
+                <!-- I. Habilidades de Comunicação e Linguagem -->
+                <div class="bg-blue-50 dark:bg-gray-700 rounded-lg p-6">
+                  <h3 class="text-lg font-bold text-blue-900 dark:text-blue-300 mb-4">I. Habilidades de Comunicação e Linguagem</h3>
                   
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Metodologia de Ensino <span class="text-red-500">*</span></label>
-                    <textarea v-model="form.metodologia" rows="4" 
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                      placeholder="Explique a metodologia e estratégias pedagógicas..."></textarea>
+                  <div class="space-y-4">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Oralidade</label>
+                      <textarea v-model="form.avaliacao_oralidade" rows="2"
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Compreensão</label>
+                      <textarea v-model="form.avaliacao_compreensao" rows="2"
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Expressão Verbal</label>
+                      <textarea v-model="form.avaliacao_expressao_verbal" rows="2"
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Clareza</label>
+                      <textarea v-model="form.avaliacao_clareza" rows="2"
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Usa frases completas?</label>
+                        <select v-model="form.usa_frases_completas"
+                          class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg">
+                          <option value="">Selecione</option>
+                          <option value="sim">Sim</option>
+                          <option value="nao">Não</option>
+                          <option value="as_vezes">Às vezes</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Interage verbalmente?</label>
+                        <select v-model="form.interage_verbalmente"
+                          class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg">
+                          <option value="">Selecione</option>
+                          <option value="sim">Sim</option>
+                          <option value="nao">Não</option>
+                          <option value="as_vezes">Às vezes</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Escreve?</label>
+                        <select v-model="form.escreve"
+                          class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg">
+                          <option value="">Selecione</option>
+                          <option value="sim">Sim</option>
+                          <option value="nao">Não</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Grafia é legível?</label>
+                        <select v-model="form.grafia_legivel"
+                          class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg">
+                          <option value="">Selecione</option>
+                          <option value="sim">Sim</option>
+                          <option value="nao">Não</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Escreve certo?</label>
+                        <select v-model="form.escreve_certo"
+                          class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg">
+                          <option value="">Selecione</option>
+                          <option value="sim">Sim</option>
+                          <option value="nao">Não</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Produz textos?</label>
+                        <select v-model="form.produz_textos"
+                          class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg">
+                          <option value="">Selecione</option>
+                          <option value="sim">Sim</option>
+                          <option value="nao">Não</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Desenha?</label>
+                        <select v-model="form.desenha"
+                          class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg">
+                          <option value="">Selecione</option>
+                          <option value="sim">Sim</option>
+                          <option value="nao">Não</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Copia?</label>
+                        <select v-model="form.copia"
+                          class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg">
+                          <option value="">Selecione</option>
+                          <option value="sim">Sim</option>
+                          <option value="nao">Não</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Faz garatujas?</label>
+                        <select v-model="form.faz_garatujas"
+                          class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg">
+                          <option value="">Selecione</option>
+                          <option value="sim">Sim</option>
+                          <option value="nao">Não</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Leitura</label>
+                      <textarea v-model="form.avaliacao_leitura" rows="2"
+                        placeholder="Reconhecimento de letras/palavras, compreensão de textos, velocidade, fluência. Leitura funcional?"
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Comunicação Não-Verbal/Alternativa</label>
+                      <textarea v-model="form.comunicacao_nao_verbal" rows="3"
+                        placeholder="Uso de gestos, expressões faciais, Comunicação Alternativa e Ampliada – CAA, Libras, Braille. Há necessidade de uso de recursos?"
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                    </div>
                   </div>
+                </div>
+
+                <!-- II. Habilidades Cognitivas e Acadêmicas -->
+                <div class="bg-purple-50 dark:bg-gray-700 rounded-lg p-6">
+                  <h3 class="text-lg font-bold text-purple-900 dark:text-purple-300 mb-4">II. Habilidades Cognitivas e Acadêmicas</h3>
                   
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Recursos Didáticos <span class="text-red-500">*</span></label>
-                    <textarea v-model="form.recursos_didaticos" rows="3" 
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                      placeholder="Liste os recursos didáticos e materiais necessários..."></textarea>
+                  <div class="space-y-4">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Raciocínio Lógico-Matemático</label>
+                      <textarea v-model="form.raciocinio_logico" rows="3"
+                        placeholder="Contagem, reconhecimento de números, operações básicas, resolução de problemas, noções de grandeza, espaço, tempo."
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Conceitos Acadêmicos</label>
+                      <textarea v-model="form.conceitos_academicos" rows="3"
+                        placeholder="Compreensão de conteúdos curriculares – Português, Matemática, Ciências, História, Geografia. Nível de abstração."
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Atenção e Concentração</label>
+                      <textarea v-model="form.atencao_concentracao" rows="2"
+                        placeholder="Capacidade de focar em tarefas, tempo de permanência, distração."
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Memória</label>
+                      <textarea v-model="form.memoria" rows="2"
+                        placeholder="Memória de curto e longo prazo, recordação de informações."
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Organização e Planejamento</label>
+                      <textarea v-model="form.organizacao_planejamento" rows="2"
+                        placeholder="Capacidade de organizar materiais, sequenciar tarefas, planejar ações."
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- III. Habilidades Socioemocionais e Comportamentais -->
+                <div class="bg-pink-50 dark:bg-gray-700 rounded-lg p-6">
+                  <h3 class="text-lg font-bold text-pink-900 dark:text-pink-300 mb-4">III. Habilidades Socioemocionais e Comportamentais</h3>
+                  
+                  <div class="space-y-4">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Interação Social</label>
+                      <textarea v-model="form.interacao_social" rows="2"
+                        placeholder="Como o aluno se relaciona com colegas e adultos? Participação em atividades em grupo, iniciação de contato."
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Autonomia e Independência</label>
+                      <textarea v-model="form.autonomia_independencia" rows="2"
+                        placeholder="Higiene pessoal, alimentação, organização de pertences, deslocamento na escola, tomada de decisões simples."
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Manejo de Emoções</label>
+                      <textarea v-model="form.manejo_emocoes" rows="2"
+                        placeholder="Expressão de sentimentos, manejo de frustrações, impulsividade."
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Comportamento em Sala</label>
+                      <textarea v-model="form.comportamento_sala" rows="2"
+                        placeholder="Seguir regras, aceitar limites, respeito, persistência em tarefas."
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- IV. Habilidades Motoras e Perceptivas -->
+                <div class="bg-orange-50 dark:bg-gray-700 rounded-lg p-6">
+                  <h3 class="text-lg font-bold text-orange-900 dark:text-orange-300 mb-4">IV. Habilidades Motoras e Perceptivas</h3>
+                  
+                  <div class="space-y-4">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Coordenação Motora Fina</label>
+                      <textarea v-model="form.coordenacao_motora_fina" rows="2"
+                        placeholder="Escrita, recorte, manuseio de objetos pequenos."
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Coordenação Motora Grossa</label>
+                      <textarea v-model="form.coordenacao_motora_grossa" rows="2"
+                        placeholder="Equilíbrio, locomoção, pular, correr."
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Orientação Espacial e Temporal</label>
+                      <textarea v-model="form.orientacao_espacial_temporal" rows="2"
+                        placeholder="Noção de direita/esquerda, antes/depois, hoje/ontem, dias da semana, meses."
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Percepção Visual e Auditiva</label>
+                      <textarea v-model="form.percepcao_visual_auditiva" rows="2"
+                        placeholder="Discriminação de sons, imagens, formas, cores."
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- SEÇÃO 4: Definição de Objetivos e Metas -->
+            <div v-show="currentStep === 4" class="step-content p-8">
+              <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i class="fas fa-bullseye text-2xl text-indigo-600 dark:text-indigo-400"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">4. Definição de Objetivos e Metas</h2>
+                <p class="text-gray-600 dark:text-gray-400">Específicos, Mensuráveis, Atingíveis, Relevantes e com Prazo Definido</p>
+              </div>
+
+              <div class="max-w-3xl mx-auto space-y-6">
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Objetivo Geral do PAI <span class="text-red-500">*</span></label>
+                  <textarea v-model="form.objetivo_geral" rows="3" required
+                    placeholder="O que se espera que o aluno alcance ao final do período de vigência do PAI?"
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                </div>
+
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+                  <h3 class="text-md font-bold text-gray-900 dark:text-white mb-4">Objetivos Específicos por Área</h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Divididos por áreas de desenvolvimento (curto, médio e longo prazo)</p>
+                  
+                  <div class="space-y-6">
+                    <!-- Área: Comunicação -->
+                    <div class="border-l-4 border-blue-500 pl-4">
+                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">📢 Área: Comunicação</h4>
+                      <div class="space-y-3">
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Objetivo</label>
+                          <textarea v-model="form.obj_comunicacao_objetivo" rows="2"
+                            placeholder="Ex: O aluno será capaz de expressar suas necessidades básicas utilizando frases de 3 a 4 palavras."
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                        </div>
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meta</label>
+                          <textarea v-model="form.obj_comunicacao_meta" rows="2"
+                            placeholder="Ex: Em 2 meses, o aluno utilizará frases de 3 a 4 palavras em 80% das interações com o professor."
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Área: Leitura -->
+                    <div class="border-l-4 border-green-500 pl-4">
+                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">📚 Área: Acadêmica – Leitura</h4>
+                      <div class="space-y-3">
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Objetivo</label>
+                          <textarea v-model="form.obj_leitura_objetivo" rows="2"
+                            placeholder="Ex: O aluno será capaz de identificar e nomear as letras do alfabeto."
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                        </div>
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meta</label>
+                          <textarea v-model="form.obj_leitura_meta" rows="2"
+                            placeholder="Ex: Até o final do semestre, o aluno identificará 20 letras do alfabeto em atividades de pareamento."
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Área: Matemática -->
+                    <div class="border-l-4 border-purple-500 pl-4">
+                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">🔢 Área: Acadêmica – Matemática</h4>
+                      <div class="space-y-3">
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Objetivo</label>
+                          <textarea v-model="form.obj_matematica_objetivo" rows="2"
+                            placeholder="Ex: O aluno será capaz de realizar contagens simples até 10."
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                        </div>
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meta</label>
+                          <textarea v-model="form.obj_matematica_meta" rows="2"
+                            placeholder="Ex: Em 3 meses, o aluno contará de 1 a 10 com acerto de 90%."
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Área: Socioemocional -->
+                    <div class="border-l-4 border-pink-500 pl-4">
+                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">💝 Área: Socioemocional</h4>
+                      <div class="space-y-3">
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Objetivo</label>
+                          <textarea v-model="form.obj_socioemocional_objetivo" rows="2"
+                            placeholder="Ex: O aluno desenvolverá habilidades de interação social com colegas."
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                        </div>
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meta</label>
+                          <textarea v-model="form.obj_socioemocional_meta" rows="2"
+                            placeholder="Ex: Em 2 meses, o aluno participará de atividades em grupo por 15 minutos."
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Área: Autonomia -->
+                    <div class="border-l-4 border-orange-500 pl-4">
+                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">🎯 Área: Autonomia</h4>
+                      <div class="space-y-3">
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Objetivo</label>
+                          <textarea v-model="form.obj_autonomia_objetivo" rows="2"
+                            placeholder="Ex: O aluno será capaz de realizar tarefas de autocuidado de forma independente."
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                        </div>
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meta</label>
+                          <textarea v-model="form.obj_autonomia_meta" rows="2"
+                            placeholder="Ex: Em 3 meses, o aluno organizará seus materiais escolares sem auxílio."
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Step 4: Cronograma e Avaliação -->
-            <div v-show="currentStep === 4" class="step-content">
-              <div class="p-8">
-                <div class="text-center mb-8">
-                  <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-calendar-alt text-2xl text-yellow-600"></i>
-                  </div>
-                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Cronograma e Avaliação</h2>
-                  <p class="text-gray-600">Configure os horários e critérios de avaliação</p>
+            <!-- SEÇÃO 5: Estratégias e Recursos Pedagógicos -->
+            <div v-show="currentStep === 5" class="step-content p-8">
+              <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-teal-100 dark:bg-teal-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i class="fas fa-tools text-2xl text-teal-600 dark:text-teal-400"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">5. Estratégias e Recursos Pedagógicos</h2>
+                <p class="text-gray-600 dark:text-gray-400">Ações e suportes para alcançar os objetivos</p>
+              </div>
+
+              <div class="max-w-3xl mx-auto space-y-6">
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Adaptações Curriculares</label>
+                  <textarea v-model="form.adaptacoes_curriculares" rows="4"
+                    placeholder="Simplificação de conteúdos, flexibilização de atividades, priorização de habilidades."
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                 </div>
 
-                <div class="max-w-2xl mx-auto space-y-6">
-                  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Recursos Didáticos e Tecnologias Assistivas</label>
+                  <textarea v-model="form.recursos_tecnologias" rows="3"
+                    placeholder="Materiais manipuláveis, pranchas de comunicação, softwares educativos, lupa, cadeira adaptada."
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Estratégias de Ensino</label>
+                  <textarea v-model="form.estrategias_ensino" rows="3"
+                    placeholder="Aprendizagem cooperativa, instrução direta, ensino individualizado, modelagem, uso de rotinas visuais, pareamento."
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Adaptações no Ambiente Escolar</label>
+                  <textarea v-model="form.adaptacoes_ambiente" rows="3"
+                    placeholder="Organização da sala, redução de estímulos, sinalização visual, acessibilidade arquitetônica."
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Atendimento do AEE</label>
+                  <textarea v-model="form.atendimento_aee" rows="3"
+                    placeholder="Frequência, duração, tipo de atendimento – individual/grupo, atividades específicas que serão desenvolvidas na Sala de Recursos Multifuncional."
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Envolvimento da Família</label>
+                  <textarea v-model="form.envolvimento_familia" rows="3"
+                    placeholder="Orientações, atividades para fazer em casa, reuniões periódicas."
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Articulação com Outros Profissionais</label>
+                  <textarea v-model="form.articulacao_profissionais" rows="3"
+                    placeholder="Troca de informações, reuniões para alinhamento de estratégias."
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- SEÇÃO 6: Avaliação e Acompanhamento -->
+            <div v-show="currentStep === 6" class="step-content p-8">
+              <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-cyan-100 dark:bg-cyan-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i class="fas fa-chart-line text-2xl text-cyan-600 dark:text-cyan-400"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">6. Avaliação e Acompanhamento</h2>
+                <p class="text-gray-600 dark:text-gray-400">Critérios e registro de progresso</p>
+              </div>
+
+              <div class="max-w-3xl mx-auto space-y-6">
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Critérios de Avaliação</label>
+                  <textarea v-model="form.criterios_avaliacao" rows="4"
+                    placeholder="Como o progresso do aluno será medido? Observações, produções do aluno, participação, registros."
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Periodicidade das Reavaliações</label>
+                  <select v-model="form.periodicidade_reavaliacoes"
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
+                    <option value="">Selecione</option>
+                    <option value="mensal">Mensal</option>
+                    <option value="bimestral">Bimestral</option>
+                    <option value="semestral">Semestral</option>
+                    <option value="anual">Anual</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Registro de Progresso</label>
+                  <textarea v-model="form.registro_progresso" rows="4"
+                    placeholder="Como o professor vai registrar os avanços e dificuldades do aluno – portfólio, relatórios de observação, diário de bordo."
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- SEÇÃO 7: Assinaturas e Consenso -->
+            <div v-show="currentStep === 7" class="step-content p-8">
+              <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-emerald-100 dark:bg-emerald-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i class="fas fa-file-signature text-2xl text-emerald-600 dark:text-emerald-400"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">7. Assinaturas e Consenso</h2>
+                <p class="text-gray-600 dark:text-gray-400">Validação e concordância de todos os envolvidos</p>
+              </div>
+
+              <div class="max-w-3xl mx-auto space-y-6">
+                <div class="bg-amber-50 dark:bg-gray-700 border-l-4 border-amber-500 p-4 mb-6">
+                  <p class="text-sm text-amber-800 dark:text-amber-200">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    As assinaturas formalizarão o PAI. Preencha os nomes completos dos profissionais e responsável envolvidos.
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Professor(a) Regente <span class="text-red-500">*</span></label>
+                  <input v-model="form.assinatura_professor_regente" type="text" required
+                    placeholder="Nome completo do professor regente"
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
+                </div>
+
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Professor(a) de AEE <span class="text-red-500">*</span></label>
+                  <input v-model="form.assinatura_professor_aee" type="text" required
+                    placeholder="Nome completo do professor de AEE"
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
+                </div>
+
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Coordenação Pedagógica</label>
+                  <input v-model="form.assinatura_coordenacao" type="text"
+                    placeholder="Nome completo do coordenador pedagógico"
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
+                </div>
+
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Direção Escolar</label>
+                  <input v-model="form.assinatura_direcao" type="text"
+                    placeholder="Nome completo do diretor escolar"
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
+                </div>
+
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Responsável pelo Aluno <span class="text-red-500">*</span></label>
+                  <input v-model="form.assinatura_responsavel" type="text" required
+                    placeholder="Nome completo do responsável pelo aluno"
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
+                </div>
+
+                <!-- Resumo Final -->
+                <div class="bg-violet-50 dark:bg-gray-700 rounded-lg p-6 mt-8">
+                  <h3 class="text-lg font-semibold text-violet-900 dark:text-violet-300 mb-4">✅ Resumo do Plano de Atendimento Individual</h3>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Frequência Semanal <span class="text-red-500">*</span></label>
-                      <select v-model="form.frequencia_semanal" required 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
-                        <option value="">Selecione</option>
-                        <option value="1">1x por semana</option>
-                        <option value="2">2x por semana</option>
-                        <option value="3">3x por semana</option>
-                        <option value="4">4x por semana</option>
-                        <option value="5">5x por semana</option>
-                      </select>
+                      <span class="font-medium text-gray-700 dark:text-gray-300">Aluno:</span>
+                      <p class="text-gray-600 dark:text-gray-400">{{ form.nome_estudante || 'Não informado' }}</p>
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Duração da Sessão <span class="text-red-500">*</span></label>
-                      <select v-model="form.duracao_sessao" required 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
-                        <option value="">Selecione</option>
-                        <option value="30">30 minutos</option>
-                        <option value="45">45 minutos</option>
-                        <option value="60">60 minutos</option>
-                        <option value="90">90 minutos</option>
-                      </select>
+                      <span class="font-medium text-gray-700 dark:text-gray-300">Escola:</span>
+                      <p class="text-gray-600 dark:text-gray-400">{{ form.nome_escola || 'Não informado' }}</p>
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Período <span class="text-red-500">*</span></label>
-                      <select v-model="form.periodo_atendimento" required 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
-                        <option value="">Selecione</option>
-                        <option value="matutino">Matutino</option>
-                        <option value="vespertino">Vespertino</option>
-                        <option value="noite">Noturno</option>
-                      </select>
+                      <span class="font-medium text-gray-700 dark:text-gray-300">Professor AEE:</span>
+                      <p class="text-gray-600 dark:text-gray-400">{{ form.professor_aee || 'Não informado' }}</p>
                     </div>
-                  </div>
-
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Horários Específicos</label>
-                    <textarea v-model="form.horarios_especificos" rows="3" 
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                      placeholder="Ex: Segunda-feira: 14h às 15h, Quarta-feira: 14h às 15h"></textarea>
-                  </div>
-
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Instrumentos de Avaliação</label>
-                    <textarea v-model="form.instrumentos_avaliacao" rows="3" 
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                      placeholder="Descreva os instrumentos que serão utilizados para avaliação..."></textarea>
-                  </div>
-                  
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Critérios de Avaliação</label>
-                    <textarea v-model="form.criterios_avaliacao" rows="3" 
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                      placeholder="Defina os critérios para avaliar o progresso..."></textarea>
-                  </div>
-
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Periodicidade de Revisão</label>
-                      <select v-model="form.periodicidade_revisao" 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
-                        <option value="">Selecione</option>
-                        <option value="mensal">Mensal</option>
-                        <option value="bimestral">Bimestral</option>
-                        <option value="trimestral">Trimestral</option>
-                        <option value="semestral">Semestral</option>
-                        <option value="anual">Anual</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Observações Gerais</label>
-                    <textarea v-model="form.observacoes" rows="4" 
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                      placeholder="Informações adicionais relevantes para o atendimento..."></textarea>
-                  </div>
-
-                  <!-- Resumo do Plano -->
-                  <div class="bg-violet-50 rounded-lg p-6 mt-8">
-                    <h3 class="text-lg font-semibold text-violet-900 mb-4">📅 Resumo do Plano</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span class="font-medium text-gray-700">Aluno:</span>
-                        <p class="text-gray-600">{{ (alunos.find(a=>a.id==form.student_id)?.name) || 'Não informado' }}</p>
-                      </div>
-                      <div>
-                        <span class="font-medium text-gray-700">Escola:</span>
-                        <p class="text-gray-600">{{ form.escola_origem || 'Não informado' }}</p>
-                      </div>
-                      <div>
-                        <span class="font-medium text-gray-700">Frequência:</span>
-                        <p class="text-gray-600">{{ form.frequencia_semanal ? form.frequencia_semanal + 'x por semana' : 'Não informado' }}</p>
-                      </div>
-                      <div>
-                        <span class="font-medium text-gray-700">Duração:</span>
-                        <p class="text-gray-600">{{ form.duracao_sessao ? form.duracao_sessao + ' minutos' : 'Não informado' }}</p>
-                      </div>
+                      <span class="font-medium text-gray-700 dark:text-gray-300">Período de Vigência:</span>
+                      <p class="text-gray-600 dark:text-gray-400">{{ form.periodo_vigencia || 'Não informado' }}</p>
                     </div>
                   </div>
                 </div>
@@ -7921,7 +8401,7 @@ const PlanoAtendimento = {
   data() {
     return {
       currentStep: 1,
-      totalSteps: 4,
+      totalSteps: 7,
       maxCompletedStep: 1,
       loading: false,
       generatingPDF: false,
@@ -7930,30 +8410,98 @@ const PlanoAtendimento = {
       escolas: [],
       form: {
         student_id: '',
-        matricula: '',
-        escola_origem: '',
-        escola_origem_id: '',
-        tipo_necessidade: '',
-        descricao_necessidades: '',
+        // Seção 1: Identificação
+        nome_escola: '',
+        nome_estudante: '',
+        data_nascimento: '',
+        idade: '',
+        serie_ano: '',
+        turno: '',
+        responsavel: '',
+        telefone: '',
+        endereco: '',
+        diagnostico_cid: '',
+        professor_regente: '',
+        professor_aee: '',
+        outros_profissionais: '',
+        data_elaboracao: '',
+        data_avaliacao_diagnostica: '',
+        periodo_vigencia: '',
+        data_reavaliacao: '',
+        // Seção 2: Histórico
+        historico_escolar: '',
+        historico_familiar_social: '',
+        interesses_preferencias: '',
+        dificuldades: '',
+        potencialidades: '',
+        // Seção 3: Avaliação Diagnóstica
+        avaliacao_oralidade: '',
+        avaliacao_compreensao: '',
+        avaliacao_expressao_verbal: '',
+        avaliacao_clareza: '',
+        usa_frases_completas: '',
+        interage_verbalmente: '',
+        escreve: '',
+        grafia_legivel: '',
+        escreve_certo: '',
+        produz_textos: '',
+        desenha: '',
+        copia: '',
+        faz_garatujas: '',
+        avaliacao_leitura: '',
+        comunicacao_nao_verbal: '',
+        raciocinio_logico: '',
+        conceitos_academicos: '',
+        atencao_concentracao: '',
+        memoria: '',
+        organizacao_planejamento: '',
+        interacao_social: '',
+        autonomia_independencia: '',
+        manejo_emocoes: '',
+        comportamento_sala: '',
+        coordenacao_motora_fina: '',
+        coordenacao_motora_grossa: '',
+        orientacao_espacial_temporal: '',
+        percepcao_visual_auditiva: '',
+        // Seção 4: Objetivos e Metas
         objetivo_geral: '',
-        objetivos_especificos: '',
-        atividades: '',
-        metodologia: '',
-        recursos_didaticos: '',
-        frequencia_semanal: '',
-        duracao_sessao: '',
-        periodo_atendimento: '',
-        horarios_especificos: '',
-        instrumentos_avaliacao: '',
+        obj_comunicacao_objetivo: '',
+        obj_comunicacao_meta: '',
+        obj_leitura_objetivo: '',
+        obj_leitura_meta: '',
+        obj_matematica_objetivo: '',
+        obj_matematica_meta: '',
+        obj_socioemocional_objetivo: '',
+        obj_socioemocional_meta: '',
+        obj_autonomia_objetivo: '',
+        obj_autonomia_meta: '',
+        // Seção 5: Estratégias e Recursos
+        adaptacoes_curriculares: '',
+        recursos_tecnologias: '',
+        estrategias_ensino: '',
+        adaptacoes_ambiente: '',
+        atendimento_aee: '',
+        envolvimento_familia: '',
+        articulacao_profissionais: '',
+        // Seção 6: Avaliação e Acompanhamento
         criterios_avaliacao: '',
-        periodicidade_revisao: '',
-        observacoes: ''
+        periodicidade_reavaliacoes: '',
+        registro_progresso: '',
+        // Seção 7: Assinaturas
+        assinatura_professor_regente: '',
+        assinatura_professor_aee: '',
+        assinatura_coordenacao: '',
+        assinatura_direcao: '',
+        assinatura_responsavel: ''
       },
       steps: [
-        { title: 'Identificação', icon: 'fas fa-user-circle' },
-        { title: 'Necessidades', icon: 'fas fa-puzzle-piece' },
-        { title: 'Atividades', icon: 'fas fa-clipboard-list' },
-        { title: 'Cronograma', icon: 'fas fa-calendar-alt' }
+        { title: 'Identificação', short: 'ID', icon: 'fas fa-id-card' },
+        { title: 'Histórico', short: 'Hist', icon: 'fas fa-history' },
+        { title: 'Avaliação', short: 'Aval', icon: 'fas fa-stethoscope' },
+        { title: 'Objetivos', short: 'Obj', icon: 'fas fa-bullseye' },
+        { title: 'Estratégias', short: 'Estr', icon: 'fas fa-tools' },
+        { title: 'Acompanhamento', short: 'Acomp', icon: 'fas fa-chart-line' },
+        { title: 'Assinaturas', short: 'Assin', icon: 'fas fa-file-signature' }
       ]
     }
   },
@@ -7997,34 +8545,67 @@ const PlanoAtendimento = {
     async preencherDadosAlunoPlano() {
       const alunoSelecionado = this.alunos.find(aluno => aluno.id == this.form.student_id);
       if (alunoSelecionado) {
-        // Preenche dados automaticamente do perfil do aluno
-        if (alunoSelecionado.school_name) {
-          this.form.escola_origem = alunoSelecionado.school_name;
-        }
-        if (alunoSelecionado.school_id) {
-          this.form.escola_origem_id = alunoSelecionado.school_id;
-        }
-        if (alunoSelecionado.grade) {
-          this.form.serie = alunoSelecionado.grade;
-        }
-        if (alunoSelecionado.class_name) {
-          this.form.turma = alunoSelecionado.class_name;
-        }
-        // Tentar carregar último Plano de Atendimento deste aluno pelo nome
+        // Preenche dados automaticamente do perfil do aluno na Seção 1
+        this.form.nome_estudante = alunoSelecionado.name || '';
+        this.form.nome_escola = alunoSelecionado.school_name || '';
+        this.form.serie_ano = alunoSelecionado.grade || '';
+        
+        // Tentar carregar último Plano de Atendimento deste aluno
         try {
           const r = await api.get('/planos-atendimento/list', { params: { q: alunoSelecionado.name, per_page: 1 } });
           const rows = r.data?.data?.rows || r.data?.rows || [];
           const ultimo = Array.isArray(rows) && rows.length ? rows[0] : null;
+          
           if (ultimo && ultimo.nome_aluno === alunoSelecionado.name) {
             this.form.id = ultimo.id;
-            // Mapear campos conhecidos existentes no formulário
-            const map = ['matricula','escola_origem','tipo_necessidade','descricao_necessidades','objetivo_geral','objetivos_especificos','atividades','metodologia','recursos_didaticos','frequencia_semanal','duracao_sessao','periodo_atendimento','horarios_especificos','instrumentos_avaliacao','criterios_avaliacao','periodicidade_revisao','observacoes'];
-            map.forEach(k => { if (ultimo[k] != null) this.form[k] = ultimo[k]; });
+            
+            // Mapear TODOS os campos do novo formulário completo
+            const allFields = [
+              // Seção 1
+              'nome_escola', 'nome_estudante', 'data_nascimento', 'idade', 'serie_ano', 'turno',
+              'responsavel', 'telefone', 'endereco', 'diagnostico_cid', 'professor_regente',
+              'professor_aee', 'outros_profissionais', 'data_elaboracao', 'data_avaliacao_diagnostica',
+              'periodo_vigencia', 'data_reavaliacao',
+              // Seção 2
+              'historico_escolar', 'historico_familiar_social', 'interesses_preferencias',
+              'dificuldades', 'potencialidades',
+              // Seção 3
+              'avaliacao_oralidade', 'avaliacao_compreensao', 'avaliacao_expressao_verbal',
+              'avaliacao_clareza', 'usa_frases_completas', 'interage_verbalmente', 'escreve',
+              'grafia_legivel', 'escreve_certo', 'produz_textos', 'desenha', 'copia', 'faz_garatujas',
+              'avaliacao_leitura', 'comunicacao_nao_verbal', 'raciocinio_logico', 'conceitos_academicos',
+              'atencao_concentracao', 'memoria', 'organizacao_planejamento', 'interacao_social',
+              'autonomia_independencia', 'manejo_emocoes', 'comportamento_sala',
+              'coordenacao_motora_fina', 'coordenacao_motora_grossa', 'orientacao_espacial_temporal',
+              'percepcao_visual_auditiva',
+              // Seção 4
+              'objetivo_geral', 'obj_comunicacao_objetivo', 'obj_comunicacao_meta',
+              'obj_leitura_objetivo', 'obj_leitura_meta', 'obj_matematica_objetivo',
+              'obj_matematica_meta', 'obj_socioemocional_objetivo', 'obj_socioemocional_meta',
+              'obj_autonomia_objetivo', 'obj_autonomia_meta',
+              // Seção 5
+              'adaptacoes_curriculares', 'recursos_tecnologias', 'estrategias_ensino',
+              'adaptacoes_ambiente', 'atendimento_aee', 'envolvimento_familia',
+              'articulacao_profissionais',
+              // Seção 6
+              'criterios_avaliacao', 'periodicidade_reavaliacoes', 'registro_progresso',
+              // Seção 7
+              'assinatura_professor_regente', 'assinatura_professor_aee', 'assinatura_coordenacao',
+              'assinatura_direcao', 'assinatura_responsavel'
+            ];
+            
+            allFields.forEach(field => {
+              if (ultimo[field] != null) {
+                this.form[field] = ultimo[field];
+              }
+            });
+            
+            this.$showToast && this.$showToast('Info', 'PAI existente carregado para edição.', 'info');
           } else {
             delete this.form.id;
           }
         } catch (e) {
-          console.warn('Falha ao carregar Plano de Atendimento existente:', e);
+          console.warn('Falha ao carregar PAI existente:', e);
         }
       }
     },
@@ -8060,54 +8641,68 @@ const PlanoAtendimento = {
       this.validationErrors = {};
       let isValid = true;
       
+      // Seção 1: Identificação
       if (this.currentStep === 1) {
         if (!this.form.student_id) {
           this.validationErrors.student_id = 'Selecione um aluno';
           isValid = false;
         }
-        if (!this.form.matricula || String(this.form.matricula).trim().length < 2) {
-          this.validationErrors.matricula = 'Informe a matrícula (mín. 2 caracteres)';
+        const requiredFields = [
+          'nome_escola', 'nome_estudante', 'data_nascimento', 'idade',
+          'serie_ano', 'turno', 'responsavel', 'telefone', 'endereco',
+          'diagnostico_cid', 'professor_regente', 'professor_aee', 'data_elaboracao'
+        ];
+        requiredFields.forEach(field => {
+          if (!this.form[field] || String(this.form[field]).trim().length === 0) {
+            this.validationErrors[field] = 'Campo obrigatório';
+            isValid = false;
+          }
+        });
+      }
+      // Seção 2: Histórico (campos opcionais, sempre válida)
+      else if (this.currentStep === 2) {
+        // Todos campos opcionais, sempre válida
+        isValid = true;
+      }
+      // Seção 3: Avaliação Diagnóstica (campos opcionais, sempre válida)
+      else if (this.currentStep === 3) {
+        // Todos campos opcionais, sempre válida
+        isValid = true;
+      }
+      // Seção 4: Objetivos e Metas
+      else if (this.currentStep === 4) {
+        if (!this.form.objetivo_geral || String(this.form.objetivo_geral).trim().length < 10) {
+          this.validationErrors.objetivo_geral = 'Defina o objetivo geral do PAI (mín. 10 caracteres)';
           isValid = false;
         }
-      } else if (this.currentStep === 2) {
-        if (!this.form.tipo_necessidade) {
-          this.validationErrors.tipo_necessidade = 'Selecione o tipo de necessidade';
-          isValid = false;
-        }
-        if (!this.form.objetivo_geral || String(this.form.objetivo_geral).trim().length < 5) {
-          this.validationErrors.objetivo_geral = 'Defina o objetivo geral (mín. 5 caracteres)';
-          isValid = false;
-        }
-        if (!this.form.objetivos_especificos || String(this.form.objetivos_especificos).trim().length < 10) {
-          this.validationErrors.objetivos_especificos = 'Liste os objetivos específicos (mín. 10 caracteres)';
-          isValid = false;
-        }
-      } else if (this.currentStep === 3) {
-        if (!this.form.atividades || String(this.form.atividades).trim().length < 10) {
-          this.validationErrors.atividades = 'Descreva as atividades propostas (mín. 10 caracteres)';
-          isValid = false;
-        }
-        if (!this.form.metodologia || String(this.form.metodologia).trim().length < 10) {
-          this.validationErrors.metodologia = 'Explique a metodologia (mín. 10 caracteres)';
-          isValid = false;
-        }
-        if (!this.form.recursos_didaticos || String(this.form.recursos_didaticos).trim().length < 5) {
-          this.validationErrors.recursos_didaticos = 'Liste os recursos didáticos (mín. 5 caracteres)';
-          isValid = false;
-        }
-      } else if (this.currentStep === 4) {
-        if (!this.form.frequencia_semanal) {
-          this.validationErrors.frequencia_semanal = 'Selecione a frequência semanal';
-          isValid = false;
-        }
-        if (!this.form.duracao_sessao) {
-          this.validationErrors.duracao_sessao = 'Selecione a duração da sessão';
-          isValid = false;
-        }
-        if (!this.form.periodo_atendimento) {
-          this.validationErrors.periodo_atendimento = 'Selecione o período de atendimento';
-          isValid = false;
-        }
+      }
+      // Seção 5: Estratégias e Recursos (campos opcionais, sempre válida)
+      else if (this.currentStep === 5) {
+        // Todos campos opcionais, sempre válida
+        isValid = true;
+      }
+      // Seção 6: Avaliação e Acompanhamento (campos opcionais, sempre válida)
+      else if (this.currentStep === 6) {
+        // Todos campos opcionais, sempre válida
+        isValid = true;
+      }
+      // Seção 7: Assinaturas
+      else if (this.currentStep === 7) {
+        const requiredSignatures = [
+          'assinatura_professor_regente',
+          'assinatura_professor_aee',
+          'assinatura_responsavel'
+        ];
+        requiredSignatures.forEach(field => {
+          if (!this.form[field] || String(this.form[field]).trim().length === 0) {
+            this.validationErrors[field] = 'Assinatura obrigatória';
+            isValid = false;
+          }
+        });
+      }
+      
+      if (!isValid) {
+        this.$showToast && this.$showToast('Atenção', 'Preencha todos os campos obrigatórios desta seção.', 'warning');
       }
       
       return isValid;

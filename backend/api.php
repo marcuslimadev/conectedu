@@ -35,6 +35,7 @@ $restRoutes = [
     'auth/register' => 'auth.register', 
     'auth/logout' => 'auth.logout',
     'auth/me' => 'auth.me',
+    'user/preferences' => 'user.preferences',
     'user' => 'auth.me', // Alias para compatibilidade
     // Aliases simples
     'login' => 'auth.login',
@@ -428,7 +429,7 @@ if ($action === 'auth.register') {
   if ($q->fetch()) res(false, null, 'EMAIL_IN_USE', 409);
   
   $hash = password_hash($pass, PASSWORD_BCRYPT);
-  $role = 'aluno'; // Auto-registro sempre como aluno
+  $role = 'professor'; // Auto-registro apenas para professores
   $status = 'ativo'; // Status ativo imediatamente
   
   $pdo->prepare('INSERT INTO users (name,email,password_hash,role,status,created_at,updated_at) VALUES (?,?,?,?,?,NOW(),NOW())')->execute([$name, $email, $hash, $role, $status]);
@@ -457,6 +458,33 @@ if ($action === 'auth.logout') {
   $t = bearer();
   if ($t) $pdo->prepare('DELETE FROM sessions WHERE token=?')->execute([$t]);
   res(true, []);
+}
+
+// Preferências do usuário (tema/acessibilidade)
+if ($action === 'user.preferences') {
+  $u = require_auth();
+  $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+  
+  if ($method === 'GET') {
+    $stmt = $pdo->prepare('SELECT preferences FROM user_preferences WHERE user_id = ?');
+    $stmt->execute([$u['id']]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    $prefs = $row ? json_decode($row['preferences'], true) : null;
+    res(true, ['preferences' => $prefs]);
+  }
+  
+  $prefs = $B['preferences'] ?? $B;
+  if (!is_array($prefs)) {
+    res(false, null, 'INVALID_PREFERENCES', 422);
+  }
+  
+  $json = json_encode($prefs, JSON_UNESCAPED_UNICODE);
+  $stmt = $pdo->prepare('INSERT INTO user_preferences (user_id, preferences, created_at, updated_at) 
+                         VALUES (?, ?, NOW(), NOW()) 
+                         ON DUPLICATE KEY UPDATE preferences = VALUES(preferences), updated_at = NOW()');
+  $stmt->execute([$u['id'], $json]);
+  
+  res(true, ['message' => 'Preferências salvas com sucesso']);
 }
 
 

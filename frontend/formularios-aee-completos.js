@@ -89,15 +89,15 @@ const EntrevistaResponsavelCompleta = {
         <!-- Form Content -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
           <form @submit.prevent="handleSubmit">
-            <!-- STEP 1: IDENTIFICA√á√ÉO -->
+            <!-- STEP 1: IDENTIFICA«√O -->
             <div v-show="currentStep === 1" class="p-8">
               <div class="max-w-4xl mx-auto">
                 <div class="text-center mb-8">
                   <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-user-graduate text-3xl text-indigo-600"></i>
                   </div>
-                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Identifica√ß√£o do Estudante</h2>
-                  <p class="text-gray-600">Dados gerais do aluno e do respons√°vel pela entrevista</p>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">IdentificaÁ„o do Estudante</h2>
+                  <p class="text-gray-600">Dados do estudante e da escola conforme o modelo oficial</p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -122,22 +122,12 @@ const EntrevistaResponsavelCompleta = {
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
                   </div>
 
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Entrevistador(a)
-                    </label>
-                    <input type="text" v-model="form.nome_entrevistador"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                           placeholder="Ex: Profa. Ana Souza">
-                  </div>
-
                   <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Nome Completo do Estudante <span class="text-red-500">*</span>
+                      Nome do Estudante <span class="text-red-500">*</span>
                     </label>
                     <input type="text" v-model="form.nome_estudante" required
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                           placeholder="Ex: Jo√£o Pedro da Silva Santos">
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
                   </div>
 
                   <div>
@@ -145,8 +135,7 @@ const EntrevistaResponsavelCompleta = {
                       Data de Nascimento
                     </label>
                     <input type="date" v-model="form.data_nascimento"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                           title="Data de nascimento do estudante">
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
                   </div>
 
                   <div>
@@ -154,17 +143,23 @@ const EntrevistaResponsavelCompleta = {
                       Naturalidade
                     </label>
                     <input type="text" v-model="form.naturalidade"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                           placeholder="Ex: S√£o Paulo - SP">
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                  </div>
+
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Nome da Escola
+                    </label>
+                    <input type="text" v-model="form.nome_escola"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
                   </div>
 
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      S√©rie/Ano Escolar
+                      SÈrie/Ano
                     </label>
                     <input type="text" v-model="form.serie_ano"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                           placeholder="Ex: 5¬∫ ano do Ensino Fundamental">
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
                   </div>
 
                   <div>
@@ -174,456 +169,365 @@ const EntrevistaResponsavelCompleta = {
                     <select v-model="form.turno"
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
                       <option value="">Selecione</option>
-                      <option value="Manh√£">Manh√£</option>
+                      <option value="Manh„">Manh„</option>
                       <option value="Tarde">Tarde</option>
                       <option value="Noite">Noite</option>
                       <option value="Integral">Integral</option>
                     </select>
                   </div>
                 </div>
+
+                <hr class="my-6">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Nome do Pai
+                    </label>
+                    <input type="text" v-model="form.nome_pai"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Idade do Pai
+                    </label>
+                    <input type="number" v-model.number="form.idade_pai" min="18" max="100"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                  </div>
+
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Escolaridade do Pai
+                    </label>
+                    <select v-model="form.escolaridade_pai"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                      <option value="">Selecione</option>
+                      <option>Ensino Fundamental Incompleto</option>
+                      <option>Ensino Fundamental Completo</option>
+                      <option>Ensino MÈdio Incompleto</option>
+                      <option>Ensino MÈdio Completo</option>
+                      <option>Ensino Superior Incompleto</option>
+                      <option>Ensino Superior Completo</option>
+                      <option>PÛs-GraduaÁ„o</option>
+                    </select>
+                  </div>
+                </div>
+
+                <hr class="my-6">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Nome da M„e
+                    </label>
+                    <input type="text" v-model="form.nome_mae"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Idade da M„e
+                    </label>
+                    <input type="number" v-model.number="form.idade_mae" min="18" max="100"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                  </div>
+
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Escolaridade da M„e
+                    </label>
+                    <select v-model="form.escolaridade_mae"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                      <option value="">Selecione</option>
+                      <option>Ensino Fundamental Incompleto</option>
+                      <option>Ensino Fundamental Completo</option>
+                      <option>Ensino MÈdio Incompleto</option>
+                      <option>Ensino MÈdio Completo</option>
+                      <option>Ensino Superior Incompleto</option>
+                      <option>Ensino Superior Completo</option>
+                      <option>PÛs-GraduaÁ„o</option>
+                    </select>
+                  </div>
+                </div>
+
+                <hr class="my-6">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      EndereÁo
+                    </label>
+                    <input type="text" v-model="form.endereco"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Bairro
+                    </label>
+                    <input type="text" v-model="form.bairro"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Cidade
+                    </label>
+                    <input type="text" v-model="form.cidade"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Telefone
+                    </label>
+                    <input type="tel" v-model="form.telefone"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                  </div>
+                </div>
+
+                <hr class="my-6">
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Motivo da Entrevista
+                  </label>
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <label class="flex items-center">
+                      <input type="checkbox" v-model="form.motivo_primeira_entrevista" :true-value="1" :false-value="0" class="mr-2">
+                      Primeira entrevista
+                    </label>
+                    <label class="flex items-center">
+                      <input type="checkbox" v-model="form.motivo_atualizacao" :true-value="1" :false-value="0" class="mr-2">
+                      AtualizaÁ„o da entrevista
+                    </label>
+                    <label class="flex items-center">
+                      <input type="checkbox" v-model="form.motivo_outros" :true-value="1" :false-value="0" class="mr-2">
+                      Outros
+                    </label>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <!-- STEP 2: COMPOSI√á√ÉO FAMILIAR -->
+            <!-- STEP 2: INFORMA«’ES DA FAMÕLIA -->
             <div v-show="currentStep === 2" class="p-8">
               <div class="max-w-4xl mx-auto">
                 <div class="text-center mb-8">
                   <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-users text-3xl text-green-600"></i>
                   </div>
-                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Composi√ß√£o Familiar</h2>
-                  <p class="text-gray-600">Informa√ß√µes sobre a fam√≠lia do estudante</p>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">InformaÁıes da FamÌlia</h2>
+                  <p class="text-gray-600">ComposiÁ„o familiar e rotina do estudante</p>
                 </div>
 
                 <div class="space-y-6">
-                  <!-- Nome do Pai -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Como era composta a famÌlia na Època da concepÁ„o da crianÁa?
+                    </label>
+                    <textarea v-model="form.composicao_familiar" rows="3"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"></textarea>
+                  </div>
+
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Nome do Pai
+                        Tem irm„os?
                       </label>
-                      <input type="text" v-model="form.nome_pai"
-                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                             placeholder="Ex: Carlos Roberto Silva">
-                    </div>
-
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Idade do Pai
-                      </label>
-                      <input type="number" v-model.number="form.idade_pai" min="18" max="100"
-                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                             placeholder="Ex: 42 anos">
-                    </div>
-
-                    <div class="md:col-span-2">
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Escolaridade do Pai
-                      </label>
-                      <select v-model="form.escolaridade_pai"
+                      <select v-model="form.tem_irmaos"
                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
                         <option value="">Selecione</option>
-                        <option>Ensino Fundamental Incompleto</option>
-                        <option>Ensino Fundamental Completo</option>
-                        <option>Ensino M√©dio Incompleto</option>
-                        <option>Ensino M√©dio Completo</option>
-                        <option>Ensino Superior Incompleto</option>
-                        <option>Ensino Superior Completo</option>
-                        <option>P√≥s-Gradua√ß√£o</option>
+                        <option value="Sim">Sim</option>
+                        <option value="N„o">N„o</option>
                       </select>
                     </div>
-                  </div>
-
-                  <hr class="my-6">
-
-                  <!-- Nome da M√£e -->
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Nome da M√£e
-                      </label>
-                      <input type="text" v-model="form.nome_mae"
-                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                             placeholder="Ex: Ana Paula Santos Silva">
-                    </div>
 
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Idade da M√£e
+                        Quantos?
                       </label>
-                      <input type="number" v-model.number="form.idade_mae" min="18" max="100"
-                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                             placeholder="Ex: 38 anos">
-                    </div>
-
-                    <div class="md:col-span-2">
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Escolaridade da M√£e
-                      </label>
-                      <select v-model="form.escolaridade_mae"
-                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
-                        <option value="">Selecione</option>
-                        <option>Ensino Fundamental Incompleto</option>
-                        <option>Ensino Fundamental Completo</option>
-                        <option>Ensino M√©dio Incompleto</option>
-                        <option>Ensino M√©dio Completo</option>
-                        <option>Ensino Superior Incompleto</option>
-                        <option>Ensino Superior Completo</option>
-                        <option>P√≥s-Gradua√ß√£o</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <hr class="my-6">
-
-                  <!-- Endere√ßo -->
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="md:col-span-2">
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Endere√ßo Completo
-                      </label>
-                      <input type="text" v-model="form.endereco"
-                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                             placeholder="Ex: Rua das Flores, 123, Apto 45">
-                    </div>
-
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Bairro
-                      </label>
-                      <input type="text" v-model="form.bairro"
-                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                             placeholder="Ex: Jardim Primavera">
-                    </div>
-
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Cidade
-                      </label>
-                      <input type="text" v-model="form.cidade"
-                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                             placeholder="Ex: S√£o Paulo">
-                    </div>
-
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Telefone
-                      </label>
-                      <input type="tel" v-model="form.telefone"
-                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                             placeholder="Ex: (11) 98765-4321">
-                    </div>
-                  </div>
-
-                  <hr class="my-6">
-
-                  <!-- Informa√ß√µes Adicionais da Fam√≠lia -->
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Tem irm√£os?
-                      </label>
-                      <div class="flex gap-4">
-                        <label class="flex items-center">
-                          <input type="radio" v-model="form.tem_irmaos" :value="1" class="mr-2">
-                          Sim
-                        </label>
-                        <label class="flex items-center">
-                          <input type="radio" v-model="form.tem_irmaos" :value="0" class="mr-2">
-                          N√£o
-                        </label>
-                      </div>
-                    </div>
-
-                    <div v-if="form.tem_irmaos">
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Quantos irm√£os?
-                      </label>
-                      <input type="number" v-model.number="form.quantos_irmaos"
+                      <input type="text" v-model="form.quantos_irmaos"
                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
                     </div>
 
-                    <div v-if="form.tem_irmaos" class="md:col-span-2">
+                    <div class="md:col-span-2">
                       <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Idades dos irm√£os
+                        Quais as idades?
                       </label>
                       <input type="text" v-model="form.idades_irmaos"
-                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                             placeholder="Ex: 5 anos, 8 anos e 12 anos">
-                    </div>
-
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Pais s√£o casados?
-                      </label>
-                      <div class="flex gap-4">
-                        <label class="flex items-center">
-                          <input type="radio" v-model="form.pais_casados" :value="1" class="mr-2">
-                          Sim
-                        </label>
-                        <label class="flex items-center">
-                          <input type="radio" v-model="form.pais_casados" :value="0" class="mr-2">
-                          N√£o
-                        </label>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Pais presentes na educa√ß√£o?
-                      </label>
-                      <div class="flex gap-4">
-                        <label class="flex items-center">
-                          <input type="radio" v-model="form.pais_presentes" :value="1" class="mr-2">
-                          Sim
-                        </label>
-                        <label class="flex items-center">
-                          <input type="radio" v-model="form.pais_presentes" :value="0" class="mr-2">
-                          N√£o
-                        </label>
-                      </div>
+                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
                     </div>
                   </div>
 
-                  <!-- Observa√ß√µes -->
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Composi√ß√£o Familiar / Concep√ß√£o
+                      Os pais continuam casados? Se separados, s„o presentes?
                     </label>
-                    <textarea v-model="form.composicao_familia_concepcao" rows="3"
-                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                              placeholder="Descreva a estrutura familiar, como a crian√ßa foi concebida, contexto da fam√≠lia na √©poca..."></textarea>
+                    <input type="text" v-model="form.situacao_pais"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
                   </div>
 
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Vida Social da Fam√≠lia
+                      Vida social da famÌlia (amigos, festas, passeios, moradia, nÌvel econÙmico) - FaÁa um relato
                     </label>
-                    <textarea v-model="form.vida_social_familia" rows="2"
-                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                              placeholder="Ex: Frequenta igreja aos domingos, visita parentes mensalmente, participa de festas comunit√°rias..."></textarea>
+                    <textarea v-model="form.vida_social_familia" rows="3"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"></textarea>
                   </div>
 
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      H√°bito Familiar
+                      Como È o h·bito familiar do estudante? (Relatar como È o dia a dia)
                     </label>
-                    <textarea v-model="form.habito_familiar" rows="2"
-                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                              placeholder="Ex: Jantam juntos √†s 19h, assistem TV ap√≥s jantar, crian√ßa dorme √†s 21h..."></textarea>
+                    <textarea v-model="form.habito_familiar" rows="3"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"></textarea>
                   </div>
 
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Recebe benef√≠cios sociais?
+                      BenefÌcios sociais? (Bolsa FamÌlia, BPC, Passe Livre, outros)
                     </label>
-                    <input type="text" v-model="form.beneficios_sociais"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                           placeholder="Ex: Bolsa Fam√≠lia R$ 600,00, BPC/LOAS">
+                    <textarea v-model="form.beneficios_sociais" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"></textarea>
                   </div>
                 </div>
               </div>
-            </div>
-
-            <!-- STEP 3: GESTA√á√ÉO E NASCIMENTO -->
+            </div>            <!-- STEP 3: GESTA«√O E NASCIMENTO -->
             <div v-show="currentStep === 3" class="p-8">
               <div class="max-w-4xl mx-auto">
                 <div class="text-center mb-8">
                   <div class="w-20 h-20 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-baby text-3xl text-pink-600"></i>
                   </div>
-                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Gesta√ß√£o e Nascimento</h2>
-                  <p class="text-gray-600">Informa√ß√µes sobre a gesta√ß√£o e o parto</p>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">GestaÁ„o e Nascimento</h2>
+                  <p class="text-gray-600">InformaÁıes sobre a gestaÁ„o e o parto</p>
                 </div>
 
                 <div class="space-y-6">
-                  <!-- Gravidez Planejada -->
-                  <div class="bg-pink-50 border border-pink-200 rounded-lg p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                          A gravidez foi planejada?
-                        </label>
-                        <div class="flex gap-4">
-                          <label class="flex items-center">
-                            <input type="radio" v-model="form.gravidez_planejada" :value="1" class="mr-2">
-                            Sim
-                          </label>
-                          <label class="flex items-center">
-                            <input type="radio" v-model="form.gravidez_planejada" :value="0" class="mr-2">
-                            N√£o
-                          </label>
-                        </div>
-                      </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      A gravidez foi planejada pelos pais? (Relate)
+                    </label>
+                    <textarea v-model="form.gravidez_planejada" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"></textarea>
+                  </div>
 
-                      <div class="md:col-span-2" v-if="form.gravidez_planejada !== null">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                          Relato sobre o planejamento da gravidez
-                        </label>
-                        <textarea v-model="form.gravidez_planejada_relato" rows="2"
-                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"></textarea>
-                      </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      A gestaÁ„o foi uma experiÍncia agrad·vel para a m„e?
+                    </label>
+                    <textarea v-model="form.gestacao_agradavel" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"></textarea>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Como foi a sa˙de da m„e?
+                    </label>
+                    <textarea v-model="form.saude_mae" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"></textarea>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      E o estado emocional?
+                    </label>
+                    <input type="text" v-model="form.estado_emocional_mae"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Fez prÈ-natal?
+                      </label>
+                      <select v-model="form.fez_prenatal"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                        <option value="">Selecione</option>
+                        <option value="Sim">Sim</option>
+                        <option value="N„o">N„o</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        MÍs que comeÁou
+                      </label>
+                      <input type="text" v-model="form.mes_inicio_prenatal"
+                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Foi necess·rio algum tratamento?
+                      </label>
+                      <select v-model="form.tratamento_prenatal"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                        <option value="">Selecione</option>
+                        <option value="Sim">Sim</option>
+                        <option value="N„o">N„o</option>
+                      </select>
                     </div>
                   </div>
 
-                  <!-- Gesta√ß√£o -->
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        A gesta√ß√£o foi agrad√°vel?
-                      </label>
-                      <div class="flex gap-4">
-                        <label class="flex items-center">
-                          <input type="radio" v-model="form.gestacao_agradavel" :value="1" class="mr-2">
-                          Sim
-                        </label>
-                        <label class="flex items-center">
-                          <input type="radio" v-model="form.gestacao_agradavel" :value="0" class="mr-2">
-                          N√£o
-                        </label>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Sa√∫de da m√£e na gesta√ß√£o
-                      </label>
-                      <select v-model="form.saude_mae_gestacao"
-                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
-                        <option value="">Selecione</option>
-                        <option>Boa</option>
-                        <option>Regular</option>
-                        <option>Ruim</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Estado emocional da m√£e
-                      </label>
-                      <select v-model="form.estado_emocional_mae"
-                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
-                        <option value="">Selecione</option>
-                        <option>Est√°vel</option>
-                        <option>Ansiedade</option>
-                        <option>Depress√£o</option>
-                        <option>Outros</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Fez pr√©-natal?
-                      </label>
-                      <div class="flex gap-4">
-                        <label class="flex items-center">
-                          <input type="radio" v-model="form.fez_prenatal" :value="1" class="mr-2">
-                          Sim
-                        </label>
-                        <label class="flex items-center">
-                          <input type="radio" v-model="form.fez_prenatal" :value="0" class="mr-2">
-                          N√£o
-                        </label>
-                      </div>
-                    </div>
-
-                    <div v-if="form.fez_prenatal">
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        M√™s de in√≠cio do pr√©-natal
-                      </label>
-                      <input type="number" v-model.number="form.prenatal_mes_inicio" min="1" max="9"
-                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
-                             placeholder="Ex: 3 (terceiro m√™s de gesta√ß√£o)">
-                    </div>
-
-                    <div v-if="form.fez_prenatal">
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Necessitou tratamento no pr√©-natal?
-                      </label>
-                      <div class="flex gap-4">
-                        <label class="flex items-center">
-                          <input type="radio" v-model="form.prenatal_tratamento_necessario" :value="1" class="mr-2">
-                          Sim
-                        </label>
-                        <label class="flex items-center">
-                          <input type="radio" v-model="form.prenatal_tratamento_necessario" :value="0" class="mr-2">
-                          N√£o
-                        </label>
-                      </div>
-                    </div>
-
-                    <div v-if="form.prenatal_tratamento_necessario" class="md:col-span-2">
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Qual tratamento?
-                      </label>
-                      <input type="text" v-model="form.prenatal_qual_tratamento"
-                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
-                             placeholder="Ex: Suplementa√ß√£o de ferro, controle de press√£o alta, repouso absoluto...">
-                    </div>
+                  <div v-if="form.tratamento_prenatal === 'Sim'">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Qual?
+                    </label>
+                    <input type="text" v-model="form.qual_tratamento_prenatal"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
                   </div>
 
-                  <hr class="my-6">
-
-                  <!-- Parto -->
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Tipo de parto
+                        Nascimento - Tipo de parto
                       </label>
-                      <select v-model="form.tipo_parto"
-                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
-                        <option value="">Selecione</option>
-                        <option>Normal</option>
-                        <option>Ces√°rea</option>
-                        <option>F√≥rceps</option>
-                      </select>
+                      <input type="text" v-model="form.tipo_parto"
+                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
                     </div>
 
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">
                         Nasceu no tempo normal?
                       </label>
-                      <div class="flex gap-4">
-                        <label class="flex items-center">
-                          <input type="radio" v-model="form.nasceu_tempo_normal" :value="1" class="mr-2">
-                          Sim
-                        </label>
-                        <label class="flex items-center">
-                          <input type="radio" v-model="form.nasceu_tempo_normal" :value="0" class="mr-2">
-                          N√£o
-                        </label>
-                      </div>
-                    </div>
-
-                    <div class="md:col-span-2">
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Observa√ß√µes sobre o nascimento
-                      </label>
-                      <textarea v-model="form.observacoes_nascimento" rows="2"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
-                                placeholder="Ex: Parto demorou 12 horas, beb√™ nasceu de parto normal mas com cord√£o enrolado no pesco√ßo..."></textarea>
+                      <select v-model="form.nasceu_tempo_normal"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                        <option value="">Selecione</option>
+                        <option value="Sim">Sim</option>
+                        <option value="N„o">N„o</option>
+                      </select>
                     </div>
                   </div>
 
-                  <!-- Condi√ß√µes do Beb√™ ao Nascer -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      ObservaÁıes
+                    </label>
+                    <textarea v-model="form.observacoes_nascimento" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"></textarea>
+                  </div>
+
                   <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-                    <h3 class="font-semibold text-gray-900 mb-4">Condi√ß√µes do beb√™ ao nascer</h3>
+                    <h3 class="font-semibold text-gray-900 mb-4">O bebÍ ao nascer</h3>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <label class="flex items-center">
                         <input type="checkbox" v-model="form.bebe_necessitou_oxigenio" :true-value="1" :false-value="0" class="mr-2">
-                        Necessitou oxig√™nio
+                        Necessitou oxigÍnio
                       </label>
                       <label class="flex items-center">
                         <input type="checkbox" v-model="form.bebe_teve_convulsao" :true-value="1" :false-value="0" class="mr-2">
-                        Teve convuls√£o
+                        Teve convuls„o
                       </label>
                       <label class="flex items-center">
                         <input type="checkbox" v-model="form.bebe_ictericia" :true-value="1" :false-value="0" class="mr-2">
-                        Icter√≠cia
+                        IcterÌcia
                       </label>
                       <label class="flex items-center">
                         <input type="checkbox" v-model="form.bebe_incubadora" :true-value="1" :false-value="0" class="mr-2">
-                        Ficou em incubadora
+                        Incubadora
                       </label>
                     </div>
                   </div>
@@ -631,99 +535,246 @@ const EntrevistaResponsavelCompleta = {
               </div>
             </div>
 
-            <!-- STEP 4: ALIMENTA√á√ÉO -->
+            <!-- STEP 4: ALIMENTA«√O -->
             <div v-show="currentStep === 4" class="p-8">
               <div class="max-w-4xl mx-auto">
                 <div class="text-center mb-8">
                   <div class="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-utensils text-3xl text-orange-600"></i>
                   </div>
-                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Alimenta√ß√£o</h2>
-                  <p class="text-gray-600">H√°bitos alimentares do estudante</p>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">AlimentaÁ„o</h2>
+                  <p class="text-gray-600">H·bitos alimentares do estudante</p>
                 </div>
 
                 <div class="space-y-6">
-                  <!-- Amamenta√ß√£o -->
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">
                         Foi amamentado?
                       </label>
-                      <div class="flex gap-4">
-                        <label class="flex items-center">
-                          <input type="radio" v-model="form.foi_amamentado" :value="1" class="mr-2">
-                          Sim
-                        </label>
-                        <label class="flex items-center">
-                          <input type="radio" v-model="form.foi_amamentado" :value="0" class="mr-2">
-                          N√£o
-                        </label>
-                      </div>
+                      <select v-model="form.foi_amamentado"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                        <option value="">Selecione</option>
+                        <option value="Sim">Sim</option>
+                        <option value="N„o">N„o</option>
+                      </select>
                     </div>
 
-                    <div v-if="form.foi_amamentado">
+                    <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">
-                        At√© qual idade?
+                        AtÈ que idade?
                       </label>
-                      <input type="text" v-model="form.amamentacao_ate_idade"
-                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                             placeholder="Ex: 6 meses, 1 ano e 2 meses">
+                      <input type="text" v-model="form.amamentado_ate_idade"
+                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
                     </div>
+                  </div>
 
-                    <div class="md:col-span-2">
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Teve problemas na alimenta√ß√£o?
-                      </label>
-                      <textarea v-model="form.problemas_alimentacao" rows="2"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                                placeholder="Ex: Dificuldade para sugar, rejei√ß√£o de alimentos s√≥lidos, alergia a lactose, refluxo..."></textarea>
-                    </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Teve problemas com alimentaÁ„o?
+                    </label>
+                    <textarea v-model="form.problemas_alimentacao" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"></textarea>
+                  </div>
 
-                    <div class="md:col-span-2">
-                      <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Alimenta√ß√£o atual
-                      </label>
-                      <textarea v-model="form.alimentacao_atual" rows="3"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                                placeholder="Ex: Come de tudo, prefere arroz e feij√£o, n√£o gosta de verduras, come frutas somente se cortadas, necessita de ajuda para se alimentar, usa colher sozinho..."></textarea>
-                    </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      AlimentaÁ„o atual
+                    </label>
+                    <textarea v-model="form.alimentacao_atual" rows="3"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"></textarea>
                   </div>
                 </div>
               </div>
             </div>
-
-            <!-- STEP 5-12: CAMPOS RESTANTES (180 CAMPOS TOTAIS) -->
-            <!-- Por quest√µes de espa√ßo, os steps 5-12 seguem o mesmo padr√£o acima -->
-            <!-- Cada step agrupa ~15-20 campos relacionados -->
-            
+            <!-- STEP 5: SA⁄DE -->
             <div v-show="currentStep === 5" class="p-8">
               <div class="max-w-4xl mx-auto">
                 <div class="text-center mb-8">
                   <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-heartbeat text-3xl text-red-600"></i>
                   </div>
-                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Sa√∫de</h2>
-                  <p class="text-gray-600">Hist√≥rico de sa√∫de e acompanhamentos</p>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Sa˙de</h2>
+                  <p class="text-gray-600">HistÛrico de sa˙de e acompanhamentos</p>
                 </div>
+
                 <div class="space-y-6">
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Hist√≥rico de Sa√∫de
+                      DeficiÍncia informada
                     </label>
-                    <textarea v-model="form.historico_saude" rows="4" class="w-full px-4 py-3 border rounded-lg" 
-                              placeholder="Ex: Teve catapora aos 3 anos, pneumonia aos 5 anos, usa medica√ß√£o cont√≠nua para epilepsia (Gardenal 100mg 2x/dia), j√° foi internado 2 vezes..."></textarea>
+                    <input type="text" v-model="form.deficiencia_informada"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500">
                   </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Faz uso de medicamento?
+                      </label>
+                      <select v-model="form.uso_medicamento"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500">
+                        <option value="">Selecione</option>
+                        <option value="Sim">Sim</option>
+                        <option value="N„o">N„o</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Nome
+                      </label>
+                      <input type="text" v-model="form.nome_medicamento"
+                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500">
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Quais hor·rios
+                      </label>
+                      <input type="text" v-model="form.horarios_medicamento"
+                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500">
+                    </div>
+                  </div>
+
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Acompanhamentos M√©dicos e Terap√™uticos
+                      A vacinaÁ„o est· atualizada? (Relate)
                     </label>
-                    <textarea v-model="form.acompanhamentos_medicos" rows="3" class="w-full px-4 py-3 border rounded-lg" 
-                              placeholder="Ex: Neurologista Dr. Jo√£o Silva - controle de epilepsia (mensal), Fonoaudi√≥loga Dra. Maria - terapia de fala (semanal), Psic√≥loga Dra. Ana - atendimento comportamental (quinzenal)..."></textarea>
+                    <textarea v-model="form.vacinacao_atualizada" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"></textarea>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Teve alguma doenÁa infectocontagiosa na inf‚ncia? Qual?
+                    </label>
+                    <textarea v-model="form.doenca_infancia" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"></textarea>
+                  </div>
+
+                  <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+                    <h3 class="font-semibold text-gray-900 mb-4">HistÛrico de sa˙de</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.convulsoes" :true-value="1" :false-value="0" class="mr-2">
+                        Convulsıes
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.cirurgias" :true-value="1" :false-value="0" class="mr-2">
+                        Cirurgias
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.acidentes" :true-value="1" :false-value="0" class="mr-2">
+                        Acidentes
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.alergias" :true-value="1" :false-value="0" class="mr-2">
+                        Alergias
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.febre_alta" :true-value="1" :false-value="0" class="mr-2">
+                        Febre alta recorrente
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.problemas_audicao" :true-value="1" :false-value="0" class="mr-2">
+                        Problemas com audiÁ„o
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.problemas_visao" :true-value="1" :false-value="0" class="mr-2">
+                        Problemas de vis„o
+                      </label>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Algum tratamento: mÈdico respons·vel? Qual? Especialidade
+                    </label>
+                    <textarea v-model="form.tratamento_medico" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"></textarea>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Atualmente faz algum tratamento ou acompanhamento com profissional especÌfico? Qual?
+                    </label>
+                    <textarea v-model="form.acompanhamento_atual" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"></textarea>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Apresenta crises rotineiramente?
+                      </label>
+                      <select v-model="form.crises_rotineiramente"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500">
+                        <option value="">Selecione</option>
+                        <option value="Sim">Sim</option>
+                        <option value="N„o">N„o</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Tem convulsıes?
+                      </label>
+                      <select v-model="form.tem_convulsoes"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500">
+                        <option value="">Selecione</option>
+                        <option value="Sim">Sim</option>
+                        <option value="N„o">N„o</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div v-if="form.tem_convulsoes === 'Sim'" class="space-y-4">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Quando foi a primeira convuls„o?
+                      </label>
+                      <input type="text" v-model="form.primeira_convulsao_quando"
+                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500">
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Qual o ˙ltimo episÛdio?
+                      </label>
+                      <input type="text" v-model="form.ultima_convulsao"
+                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500">
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Acontece de quanto em quanto tempo?
+                      </label>
+                      <input type="text" v-model="form.frequencia_convulsoes"
+                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500">
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Como a famÌlia lida com os episÛdios?
+                      </label>
+                      <textarea v-model="form.familia_lida_convulsoes" rows="2"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"></textarea>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Caso tenha crises, quais as mudanÁas analisadas apÛs as convulsıes?
+                      </label>
+                      <textarea v-model="form.mudancas_apos_convulsoes" rows="2"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"></textarea>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
+            <!-- STEP 6: DESENVOLVIMENTO PREGRESSO -->
             <div v-show="currentStep === 6" class="p-8">
               <div class="max-w-4xl mx-auto">
                 <div class="text-center mb-8">
@@ -731,244 +782,524 @@ const EntrevistaResponsavelCompleta = {
                     <i class="fas fa-chart-line text-3xl text-purple-600"></i>
                   </div>
                   <h2 class="text-2xl font-bold text-gray-900 mb-2">Desenvolvimento Pregresso</h2>
-                  <p class="text-gray-600">Marcos do desenvolvimento na primeira inf√¢ncia</p>
+                  <p class="text-gray-600">Marcos do desenvolvimento na primeira inf‚ncia</p>
                 </div>
+
                 <div class="space-y-6">
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Idade em que Sentou
+                      Idade em que engatinhou
                     </label>
-                    <input type="text" v-model="form.idade_sentou" class="w-full px-4 py-3 border rounded-lg" 
-                           placeholder="Ex: 8 meses, 1 ano">
+                    <input type="text" v-model="form.idade_engatinhou"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                   </div>
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Idade em que Andou
+                      Idade em que andou
                     </label>
-                    <input type="text" v-model="form.idade_andou" class="w-full px-4 py-3 border rounded-lg" 
-                           placeholder="Ex: 1 ano e 3 meses, 2 anos">
+                    <input type="text" v-model="form.idade_andou"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                   </div>
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Idade em que Falou (Primeiras Palavras)
+                      Idade em que falou
                     </label>
-                    <input type="text" v-model="form.idade_falou" class="w-full px-4 py-3 border rounded-lg" 
-                           placeholder="Ex: 2 anos, 3 anos e meio, ainda n√£o fala">
+                    <input type="text" v-model="form.idade_falou"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                   </div>
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Observa√ß√µes sobre o Desenvolvimento
+                      Controle dos esfÌncteres
                     </label>
-                    <textarea v-model="form.observacoes_desenvolvimento" rows="3" class="w-full px-4 py-3 border rounded-lg" 
-                              placeholder="Ex: Demorou para andar devido a hipotonia muscular, fala com dificuldade de articula√ß√£o, teve acompanhamento de fisioterapeuta dos 6 meses aos 2 anos..."></textarea>
+                    <input type="text" v-model="form.controle_esfincteres"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                   </div>
                 </div>
               </div>
             </div>
-
+            <!-- STEP 7: DESENVOLVIMENTO ATUAL (COMUNICA«√O) -->
             <div v-show="currentStep === 7" class="p-8">
               <div class="max-w-4xl mx-auto">
                 <div class="text-center mb-8">
                   <div class="w-20 h-20 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-comments text-3xl text-teal-600"></i>
                   </div>
-                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Comunica√ß√£o</h2>
-                  <p class="text-gray-600">Formas de comunica√ß√£o e express√£o</p>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Desenvolvimento Atual (ComunicaÁ„o)</h2>
+                  <p class="text-gray-600">ComunicaÁ„o verbal e formas alternativas</p>
                 </div>
+
                 <div class="space-y-6">
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Como o Estudante se Comunica
+                      Apresenta comunicaÁ„o verbal?
                     </label>
-                    <textarea v-model="form.como_se_comunica" rows="3" class="w-full px-4 py-3 border rounded-lg" 
-                              placeholder="Ex: Usa palavras simples, faz gestos quando quer algo, aponta para objetos, usa LIBRAS b√°sico, comunica-se atrav√©s de prancha de comunica√ß√£o alternativa (CAA)..."></textarea>
+                    <textarea v-model="form.comunicacao_verbal" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500"></textarea>
                   </div>
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Compreens√£o de Linguagem
+                      Alguma dificuldade na fala?
                     </label>
-                    <textarea v-model="form.compreensao_linguagem" rows="3" class="w-full px-4 py-3 border rounded-lg" 
-                              placeholder="Ex: Compreende comandos simples, precisa de instru√ß√µes repetidas, entende melhor com apoio visual, responde ao nome, compreende perguntas fechadas (sim/n√£o)..."></textarea>
+                    <textarea v-model="form.dificuldade_fala" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500"></textarea>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Caso n„o seja oralizado apresenta outro tipo de comunicaÁ„o?
+                    </label>
+                    <textarea v-model="form.outro_tipo_comunicacao" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500"></textarea>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Como vocÍ se comunica com seu filho(a)
+                    </label>
+                    <textarea v-model="form.como_se_comunica" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500"></textarea>
                   </div>
                 </div>
               </div>
             </div>
 
+            <!-- STEP 8: ATIVIDADES DE VIDA DI¡RIA -->
             <div v-show="currentStep === 8" class="p-8">
               <div class="max-w-4xl mx-auto">
                 <div class="text-center mb-8">
                   <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-hands-helping text-3xl text-yellow-600"></i>
                   </div>
-                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Atividades de Vida Di√°ria (AVDs)</h2>
-                  <p class="text-gray-600">Autonomia nas atividades cotidianas</p>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Atividades de Vida Di·ria</h2>
+                  <p class="text-gray-600">Autonomia e rotina do estudante</p>
                 </div>
+
                 <div class="space-y-6">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Higiene Pessoal
-                    </label>
-                    <textarea v-model="form.higiene_pessoal" rows="2" class="w-full px-4 py-3 border rounded-lg" 
-                              placeholder="Ex: Toma banho sozinho mas precisa de supervis√£o, escova os dentes com ajuda, lava as m√£os sozinho ap√≥s uso do banheiro..."></textarea>
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Alimenta de forma independente?
+                      </label>
+                      <select v-model="form.alimenta_independente"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500">
+                        <option value="">Selecione</option>
+                        <option value="Sim">Sim</option>
+                        <option value="N„o">N„o</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Faz uso do banheiro de forma independente?
+                      </label>
+                      <select v-model="form.banheiro_independente"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500">
+                        <option value="">Selecione</option>
+                        <option value="Sim">Sim</option>
+                        <option value="N„o">N„o</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Gerencia coisas do dia a dia (material escolar, remÈdio etc.)?
+                      </label>
+                      <select v-model="form.gerencia_dia_a_dia"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500">
+                        <option value="">Selecione</option>
+                        <option value="Sim">Sim</option>
+                        <option value="N„o">N„o</option>
+                      </select>
+                    </div>
                   </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Autonomia na Alimenta√ß√£o
-                    </label>
-                    <textarea v-model="form.alimentacao_autonomia" rows="2" class="w-full px-4 py-3 border rounded-lg" 
-                              placeholder="Ex: Come sozinho usando colher, ainda n√£o usa garfo, necessita que a comida seja cortada, bebe √°gua sozinho em copo..."></textarea>
+
+                  <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                    <h3 class="font-semibold text-gray-900 mb-4">Sono</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.sono_dorme_bem" :true-value="1" :false-value="0" class="mr-2">
+                        Dorme bem, calmo (noite inteira)
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.sono_agitado" :true-value="1" :false-value="0" class="mr-2">
+                        Agitado, tem pesadelos
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.sono_contraturno" :true-value="1" :false-value="0" class="mr-2">
+                        Dorme no contraturno
+                      </label>
+                    </div>
                   </div>
+
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Vestu√°rio (Vestir-se)
+                      Gosta de brincar? Brinquedos e brincadeiras de preferÍncia
                     </label>
-                    <textarea v-model="form.vestuario" rows="2" class="w-full px-4 py-3 border rounded-lg" 
-                              placeholder="Ex: Veste-se sozinho mas tem dificuldade com bot√µes e z√≠peres, cal√ßa sapatos mas n√£o amarra os cadar√ßos, escolhe suas roupas..."></textarea>
+                    <textarea v-model="form.gosta_brincar" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500"></textarea>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Apresenta curiosidade sexual? Se masturba? Com frequÍncia? Recebe orientaÁ„o sexual?
+                    </label>
+                    <textarea v-model="form.curiosidade_sexual" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500"></textarea>
+                  </div>
+
+                  <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                    <h3 class="font-semibold text-gray-900 mb-4">Como a crianÁa È corrigida?</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.correcao_conversa" :true-value="1" :false-value="0" class="mr-2">
+                        Conversa
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.correcao_grita" :true-value="1" :false-value="0" class="mr-2">
+                        Grita
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.correcao_castigo" :true-value="1" :false-value="0" class="mr-2">
+                        Pıe de castigo
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.correcao_bate" :true-value="1" :false-value="0" class="mr-2">
+                        Bate
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.correcao_outro" :true-value="1" :false-value="0" class="mr-2">
+                        Outro
+                      </label>
+                    </div>
+                    <div class="mt-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Se outro, qual?
+                      </label>
+                      <input type="text" v-model="form.correcao_outro_qual"
+                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500">
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Como ela lida com a negativa/desejo imediatamente?
+                    </label>
+                    <textarea v-model="form.lida_negativa" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500"></textarea>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Tem preferÍncia por algum tipo de objeto/brinquedo/histÛria (hiperfoco)?
+                    </label>
+                    <textarea v-model="form.preferencia_hiperfoco" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500"></textarea>
                   </div>
                 </div>
               </div>
             </div>
-
+            <!-- STEP 9: SOCIALIZA«√O E PREFER NCIAS -->
             <div v-show="currentStep === 9" class="p-8">
-              <div class="max-w-4xl mx-auto">
-                <div class="text-center mb-8">
-                  <div class="w-20 h-20 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-user-shield text-3xl text-pink-600"></i>
-                  </div>
-                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Sexualidade</h2>
-                  <p class="text-gray-600">Desenvolvimento e orienta√ß√£o</p>
-                </div>
-                <div class="space-y-6">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Orienta√ß√£o sobre Sexualidade
-                    </label>
-                    <textarea v-model="form.orientacao_sexualidade" rows="4" class="w-full px-4 py-3 border rounded-lg" 
-                              placeholder="Ex: Fam√≠lia j√° conversou sobre diferen√ßas entre meninos e meninas, demonstra curiosidade natural sobre o corpo, recebeu orienta√ß√£o sobre privacidade e partes √≠ntimas, sabe dizer n√£o a toques inadequados..."></textarea>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div v-show="currentStep === 10" class="p-8">
               <div class="max-w-4xl mx-auto">
                 <div class="text-center mb-8">
                   <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-user-friends text-3xl text-green-600"></i>
                   </div>
-                  <h2 class="text-2xl font-bold text-gray-900 mb-2">Socializa√ß√£o</h2>
-                  <p class="text-gray-600">Intera√ß√µes sociais e relacionamentos</p>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">SocializaÁ„o e PreferÍncias</h2>
+                  <p class="text-gray-600">InteraÁıes sociais e interesses</p>
                 </div>
+
                 <div class="space-y-6">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Intera√ß√£o com Colegas
-                    </label>
-                    <textarea v-model="form.interacao_colegas" rows="3" class="w-full px-4 py-3 border rounded-lg" 
-                              placeholder="Ex: Brinca com outras crian√ßas mas prefere brincar sozinho, tem 2-3 amigos pr√≥ximos, √© t√≠mido no in√≠cio mas depois se solta, tem dificuldade em compartilhar brinquedos..."></textarea>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Faz amigos com facilidade?
+                      </label>
+                      <select v-model="form.faz_amigos_facilidade"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                        <option value="">Selecione</option>
+                        <option value="Sim">Sim</option>
+                        <option value="N„o">N„o</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Tem amigos na vizinhanÁa?
+                      </label>
+                      <select v-model="form.tem_amigos_vizinhanca"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                        <option value="">Selecione</option>
+                        <option value="Sim">Sim</option>
+                        <option value="N„o">N„o</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Interage com crianÁas da mesma idade?
+                      </label>
+                      <select v-model="form.interage_mesma_idade"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                        <option value="">Selecione</option>
+                        <option value="Sim">Sim</option>
+                        <option value="N„o">N„o</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Gosta de passeios e festas?
+                      </label>
+                      <select v-model="form.gosta_passeios_festas"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                        <option value="">Selecione</option>
+                        <option value="Sim">Sim</option>
+                        <option value="N„o">N„o</option>
+                      </select>
+                    </div>
                   </div>
+
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Brincadeiras Preferidas
+                      PreferÍncias de divers„o
                     </label>
-                    <textarea v-model="form.brincadeiras_preferidas" rows="2" class="w-full px-4 py-3 border rounded-lg" 
-                              placeholder="Ex: Gosta de jogar bola, montar quebra-cabe√ßas, brincar com carrinhos, jogos de videogame, desenhar..."></textarea>
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Atividades de Lazer
-                    </label>
-                    <textarea v-model="form.atividades_lazer" rows="2" class="w-full px-4 py-3 border rounded-lg" 
-                              placeholder="Ex: Assiste desenhos animados, vai ao parque aos finais de semana, pratica nata√ß√£o 2x por semana, frequenta a biblioteca municipal..."></textarea>
+                    <textarea v-model="form.preferencias_diversao" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"></textarea>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div v-show="currentStep === 11" class="p-8">
+            <!-- STEP 10: COMPORTAMENTO -->
+            <div v-show="currentStep === 10" class="p-8">
               <div class="max-w-4xl mx-auto">
                 <div class="text-center mb-8">
                   <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-smile text-3xl text-indigo-600"></i>
                   </div>
                   <h2 class="text-2xl font-bold text-gray-900 mb-2">Comportamento</h2>
-                  <p class="text-gray-600">Padr√µes comportamentais</p>
+                  <p class="text-gray-600">CaracterÌsticas comportamentais</p>
                 </div>
+
                 <div class="space-y-6">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Comportamento em Casa
-                    </label>
-                    <textarea v-model="form.comportamento_casa" rows="3" class="w-full px-4 py-3 border rounded-lg" 
-                              placeholder="Ex: √â calmo e obediente, ajuda nas tarefas dom√©sticas quando solicitado, √†s vezes tem birras quando contrariado, respeita hor√°rios de rotina..."></textarea>
+                  <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-6">
+                    <h3 class="font-semibold text-gray-900 mb-4">CaracterÌsticas comportamentais</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.comportamento_introvertido" :true-value="1" :false-value="0" class="mr-2">
+                        Introvertido
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.comportamento_afetuoso" :true-value="1" :false-value="0" class="mr-2">
+                        Afetuoso
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.comportamento_obediente" :true-value="1" :false-value="0" class="mr-2">
+                        Obediente
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.comportamento_resistente" :true-value="1" :false-value="0" class="mr-2">
+                        Resistente
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.comportamento_cooperador" :true-value="1" :false-value="0" class="mr-2">
+                        Cooperador
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.comportamento_medroso" :true-value="1" :false-value="0" class="mr-2">
+                        Medroso
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.comportamento_inseguro" :true-value="1" :false-value="0" class="mr-2">
+                        Inseguro
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" v-model="form.comportamento_outro" :true-value="1" :false-value="0" class="mr-2">
+                        Outro
+                      </label>
+                    </div>
+                    <div class="mt-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Se outro, qual?
+                      </label>
+                      <input type="text" v-model="form.comportamento_outro_qual"
+                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                    </div>
                   </div>
+
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Comportamento na Escola
+                      Tem algum h·bito/mania?
                     </label>
-                    <textarea v-model="form.comportamento_escola" rows="3" class="w-full px-4 py-3 border rounded-lg" 
-                              placeholder="Ex: Participa das atividades, precisa de lembretes para manter aten√ß√£o, levanta muito da carteira, conversa bastante com colegas, respeita os professores..."></textarea>
+                    <textarea v-model="form.habito_mania" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"></textarea>
                   </div>
+
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Dificuldades Comportamentais
+                      Como comporta diante da frustraÁ„o?
                     </label>
-                    <textarea v-model="form.dificuldades_comportamentais" rows="3" class="w-full px-4 py-3 border rounded-lg" 
-                              placeholder="Ex: Tem dificuldade em aceitar frustra√ß√£o, apresenta comportamento agressivo quando contrariado, dificuldade em seguir regras, agita√ß√£o motora excessiva..."></textarea>
+                    <textarea v-model="form.comporta_frustracao" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"></textarea>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div v-show="currentStep === 12" class="p-8">
+            <!-- STEP 11: VIDA ESCOLAR -->
+            <div v-show="currentStep === 11" class="p-8">
               <div class="max-w-4xl mx-auto">
                 <div class="text-center mb-8">
                   <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-school text-3xl text-blue-600"></i>
                   </div>
                   <h2 class="text-2xl font-bold text-gray-900 mb-2">Vida Escolar</h2>
-                  <p class="text-gray-600">Hist√≥rico e desempenho escolar</p>
+                  <p class="text-gray-600">Percurso escolar e participaÁ„o da famÌlia</p>
                 </div>
+
                 <div class="space-y-6">
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Hist√≥rico Escolar
+                      Idade em que entrou na escola
                     </label>
-                    <textarea v-model="form.historico_escolar" rows="3" class="w-full px-4 py-3 border rounded-lg" 
-                              placeholder="Ex: Cursou maternal e jardim I na Creche Municipal, repetiu o 3¬∫ ano devido a dificuldades de aprendizagem, mudou de escola em 2023..."></textarea>
+                    <input type="text" v-model="form.idade_entrou_escola"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                   </div>
+
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Disciplinas com Facilidade
+                      Como foi a adaptaÁ„o
                     </label>
-                    <textarea v-model="form.disciplinas_facilidade" rows="2" class="w-full px-4 py-3 border rounded-lg" 
-                              placeholder="Ex: Vai bem em Educa√ß√£o F√≠sica e Artes, gosta de Matem√°tica quando envolve manipula√ß√£o de objetos concretos..."></textarea>
+                    <textarea v-model="form.adaptacao_escola" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
                   </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        RepetÍncia
+                      </label>
+                      <select v-model="form.repetencia"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="">Selecione</option>
+                        <option value="Sim">Sim</option>
+                        <option value="N„o">N„o</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Se ressente quando muda o professor(a)?
+                      </label>
+                      <select v-model="form.ressente_muda_professor"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="">Selecione</option>
+                        <option value="Sim">Sim</option>
+                        <option value="N„o">N„o</option>
+                      </select>
+                    </div>
+                  </div>
+
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Disciplinas com Dificuldade
+                      FrequÍncia escolar
                     </label>
-                    <textarea v-model="form.disciplinas_dificuldade" rows="2" class="w-full px-4 py-3 border rounded-lg" 
-                              placeholder="Ex: Tem muita dificuldade em Portugu√™s (leitura e escrita), Matem√°tica abstrata, precisa de apoio individualizado em todas as disciplinas..."></textarea>
+                    <input type="text" v-model="form.frequencia_escolar"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                   </div>
+
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Rela√ß√£o com Professores
+                      A famÌlia participa da vida escolar do filho(a)?
                     </label>
-                    <textarea v-model="form.relacao_professores" rows="2" class="w-full px-4 py-3 border rounded-lg" 
-                              placeholder="Ex: Tem bom relacionamento com os professores, busca aten√ß√£o constantemente, responde melhor quando elogiado, professora de AEE faz atendimento 2x por semana..."></textarea>
+                    <textarea v-model="form.familia_participa_escola" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
                   </div>
+
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Expectativas da Fam√≠lia
+                      De que forma?
                     </label>
-                    <textarea v-model="form.expectativas_familia" rows="3" class="w-full px-4 py-3 border rounded-lg" 
-                              placeholder="Ex: Fam√≠lia espera que consiga ler e escrever pelo menos palavras simples, que desenvolva mais autonomia, que fa√ßa amigos e se socialize melhor, que consiga acompanhar a turma..."></textarea>
+                    <textarea v-model="form.forma_participacao_escola" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Quem ajuda no para casa?
+                    </label>
+                    <input type="text" v-model="form.quem_ajuda_para_casa"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      O que acha do atendimento da escola?
+                    </label>
+                    <textarea v-model="form.acha_atendimento_escola" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Acha que o desenvolvimento da crianÁa È compatÌvel com a idade?
+                    </label>
+                    <textarea v-model="form.desenvolvimento_compativel_idade" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      H· antecedentes familiares com problemas de sa˙de ou aprendizagem?
+                    </label>
+                    <textarea v-model="form.antecedentes_familiares" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Frequenta Sala de Recursos?
+                      </label>
+                      <select v-model="form.frequenta_sala_recursos"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="">Selecione</option>
+                        <option value="Sim">Sim</option>
+                        <option value="N„o">N„o</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Qual a frequÍncia do atendimento?
+                      </label>
+                      <input type="text" v-model="form.frequencia_sala_recursos"
+                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
+            <!-- STEP 12: INFORMA«’ES COMPLEMENTARES -->
+            <div v-show="currentStep === 12" class="p-8">
+              <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-8">
+                  <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-info-circle text-3xl text-gray-600"></i>
+                  </div>
+                  <h2 class="text-2xl font-bold text-gray-900 mb-2">InformaÁıes Complementares</h2>
+                  <p class="text-gray-600">ObservaÁıes do entrevistador</p>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    ObservaÁ„o: todas as informaÁıes, coment·rios espont‚neos que julgar importante devem ser anotados pelo entrevistador.
+                  </label>
+                  <textarea v-model="form.informacoes_complementares" rows="4"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500"></textarea>
+                </div>
+              </div>
+            </div>
             <!-- Navigation Buttons -->
             <div class="border-t border-gray-200 px-8 py-6 bg-gray-50 flex justify-between">
               <button type="button" @click="previousStep"
@@ -1021,30 +1352,29 @@ const EntrevistaResponsavelCompleta = {
   isLoadingForm: false,
       
       steps: [
-        { name: 'Identifica√ß√£o', icon: 'fas fa-user-graduate' },
-        { name: 'Fam√≠lia', icon: 'fas fa-users' },
-        { name: 'Gesta√ß√£o', icon: 'fas fa-baby' },
-        { name: 'Alimenta√ß√£o', icon: 'fas fa-utensils' },
-        { name: 'Sa√∫de', icon: 'fas fa-heartbeat' },
+        { name: 'IdentificaÁ„o', icon: 'fas fa-user-graduate' },
+        { name: 'FamÌlia', icon: 'fas fa-users' },
+        { name: 'GestaÁ„o', icon: 'fas fa-baby' },
+        { name: 'AlimentaÁ„o', icon: 'fas fa-utensils' },
+        { name: 'Sa˙de', icon: 'fas fa-heartbeat' },
         { name: 'Desenvolvimento', icon: 'fas fa-chart-line' },
-        { name: 'Comunica√ß√£o', icon: 'fas fa-comments' },
+        { name: 'ComunicaÁ„o', icon: 'fas fa-comments' },
         { name: 'AVDs', icon: 'fas fa-hands-helping' },
-        { name: 'Sexualidade', icon: 'fas fa-user-shield' },
-        { name: 'Socializa√ß√£o', icon: 'fas fa-user-friends' },
+        { name: 'SocializaÁ„o', icon: 'fas fa-user-friends' },
         { name: 'Comportamento', icon: 'fas fa-smile' },
         { name: 'Vida Escolar', icon: 'fas fa-school' },
+        { name: 'Complementares', icon: 'fas fa-info-circle' },
       ],
       
       form: {
         student_id: '',
         data_entrevista: new Date().toISOString().split('T')[0],
-        nome_entrevistador: '',
         nome_estudante: '',
         data_nascimento: '',
         naturalidade: '',
+        nome_escola: '',
         serie_ano: '',
         turno: '',
-        // Fam√≠lia
         nome_pai: '',
         idade_pai: null,
         escolaridade_pai: '',
@@ -1055,72 +1385,115 @@ const EntrevistaResponsavelCompleta = {
         bairro: '',
         cidade: '',
         telefone: '',
-        tem_irmaos: null,
-        quantos_irmaos: null,
+        motivo_primeira_entrevista: 0,
+        motivo_atualizacao: 0,
+        motivo_outros: 0,
+        composicao_familiar: '',
+        tem_irmaos: '',
+        quantos_irmaos: '',
         idades_irmaos: '',
-        pais_casados: null,
-        pais_presentes: null,
-        composicao_familia_concepcao: '',
+        situacao_pais: '',
         vida_social_familia: '',
         habito_familiar: '',
         beneficios_sociais: '',
-        // Gesta√ß√£o
-        gravidez_planejada: null,
-        gravidez_planejada_relato: '',
-        gestacao_agradavel: null,
-        saude_mae_gestacao: '',
+        gravidez_planejada: '',
+        gestacao_agradavel: '',
+        saude_mae: '',
         estado_emocional_mae: '',
-        fez_prenatal: null,
-        prenatal_mes_inicio: null,
-        prenatal_tratamento_necessario: null,
-        prenatal_qual_tratamento: '',
+        fez_prenatal: '',
+        mes_inicio_prenatal: '',
+        tratamento_prenatal: '',
+        qual_tratamento_prenatal: '',
         tipo_parto: '',
-        nasceu_tempo_normal: null,
+        nasceu_tempo_normal: '',
         observacoes_nascimento: '',
         bebe_necessitou_oxigenio: 0,
         bebe_teve_convulsao: 0,
         bebe_ictericia: 0,
         bebe_incubadora: 0,
-        // Alimenta√ß√£o
-        foi_amamentado: null,
-        amamentacao_ate_idade: '',
+        foi_amamentado: '',
+        amamentado_ate_idade: '',
         problemas_alimentacao: '',
         alimentacao_atual: '',
-        // Sa√∫de
-        historico_saude: '',
-        acompanhamentos_medicos: '',
-        // Desenvolvimento
-        idade_sentou: '',
+        deficiencia_informada: '',
+        uso_medicamento: '',
+        nome_medicamento: '',
+        horarios_medicamento: '',
+        vacinacao_atualizada: '',
+        doenca_infancia: '',
+        convulsoes: 0,
+        cirurgias: 0,
+        acidentes: 0,
+        alergias: 0,
+        febre_alta: 0,
+        problemas_audicao: 0,
+        problemas_visao: 0,
+        tratamento_medico: '',
+        acompanhamento_atual: '',
+        crises_rotineiramente: '',
+        tem_convulsoes: '',
+        primeira_convulsao_quando: '',
+        ultima_convulsao: '',
+        frequencia_convulsoes: '',
+        familia_lida_convulsoes: '',
+        mudancas_apos_convulsoes: '',
+        idade_engatinhou: '',
         idade_andou: '',
         idade_falou: '',
-        observacoes_desenvolvimento: '',
-        // Comunica√ß√£o
+        controle_esfincteres: '',
+        comunicacao_verbal: '',
+        dificuldade_fala: '',
+        outro_tipo_comunicacao: '',
         como_se_comunica: '',
-        compreensao_linguagem: '',
-        // AVDs
-        higiene_pessoal: '',
-        alimentacao_autonomia: '',
-        vestuario: '',
-        // Sexualidade
-        orientacao_sexualidade: '',
-        // Socializa√ß√£o
-        interacao_colegas: '',
-        brincadeiras_preferidas: '',
-        atividades_lazer: '',
-        // Comportamento
-        comportamento_casa: '',
-        comportamento_escola: '',
-        dificuldades_comportamentais: '',
-        // Vida Escolar
-        historico_escolar: '',
-        disciplinas_facilidade: '',
-        disciplinas_dificuldade: '',
-        relacao_professores: '',
-        expectativas_familia: ''
+        alimenta_independente: '',
+        banheiro_independente: '',
+        gerencia_dia_a_dia: '',
+        sono_dorme_bem: 0,
+        sono_agitado: 0,
+        sono_contraturno: 0,
+        gosta_brincar: '',
+        curiosidade_sexual: '',
+        correcao_conversa: 0,
+        correcao_grita: 0,
+        correcao_castigo: 0,
+        correcao_bate: 0,
+        correcao_outro: 0,
+        correcao_outro_qual: '',
+        lida_negativa: '',
+        preferencia_hiperfoco: '',
+        faz_amigos_facilidade: '',
+        tem_amigos_vizinhanca: '',
+        interage_mesma_idade: '',
+        gosta_passeios_festas: '',
+        preferencias_diversao: '',
+        comportamento_introvertido: 0,
+        comportamento_afetuoso: 0,
+        comportamento_obediente: 0,
+        comportamento_resistente: 0,
+        comportamento_cooperador: 0,
+        comportamento_medroso: 0,
+        comportamento_inseguro: 0,
+        comportamento_outro: 0,
+        comportamento_outro_qual: '',
+        habito_mania: '',
+        comporta_frustracao: '',
+        idade_entrou_escola: '',
+        adaptacao_escola: '',
+        repetencia: '',
+        ressente_muda_professor: '',
+        frequencia_escolar: '',
+        familia_participa_escola: '',
+        forma_participacao_escola: '',
+        quem_ajuda_para_casa: '',
+        acha_atendimento_escola: '',
+        desenvolvimento_compativel_idade: '',
+        antecedentes_familiares: '',
+        frequenta_sala_recursos: '',
+        frequencia_sala_recursos: '',
+        informacoes_complementares: ''
       }
     }
   },
-
   computed: {
     progressPercentage() {
       // Campos obrigat√≥rios/importantes que devem ser considerados
@@ -1162,7 +1535,6 @@ const EntrevistaResponsavelCompleta = {
 
   async mounted() {
     await this.loadAlunos();
-    this.setCurrentUser();
   },
 
   beforeUnmount() {
@@ -1209,6 +1581,98 @@ const EntrevistaResponsavelCompleta = {
       }
     },
 
+    normalizeYesNo(value) {
+      if (value === 1 || value === '1' || value === true) return 'Sim';
+      if (value === 0 || value === '0' || value === false) return 'N„o';
+      if (typeof value === 'string') {
+        const normalized = value.trim().toLowerCase();
+        if (normalized === 'sim') return 'Sim';
+        if (normalized === 'n„o' || normalized === 'nao') return 'N„o';
+      }
+      return value;
+    },
+
+    mapLegacyInterviewData(data) {
+      const mapped = { ...(data || {}) };
+      const renames = {
+        composicao_familia_concepcao: 'composicao_familiar',
+        amamentacao_ate_idade: 'amamentado_ate_idade',
+        prenatal_mes_inicio: 'mes_inicio_prenatal',
+        prenatal_tratamento_necessario: 'tratamento_prenatal',
+        prenatal_qual_tratamento: 'qual_tratamento_prenatal',
+        saude_mae_gestacao: 'saude_mae'
+      };
+
+      Object.entries(renames).forEach(([oldKey, newKey]) => {
+        if ((mapped[newKey] === undefined || mapped[newKey] === '') && mapped[oldKey] !== undefined) {
+          mapped[newKey] = mapped[oldKey];
+        }
+      });
+
+      if (!mapped.situacao_pais && (mapped.pais_casados !== undefined || mapped.pais_presentes !== undefined)) {
+        const casados = this.normalizeYesNo(mapped.pais_casados);
+        const presentes = this.normalizeYesNo(mapped.pais_presentes);
+        if (casados === 'Sim') {
+          mapped.situacao_pais = 'Sim, casados';
+        } else if (casados === 'N„o') {
+          mapped.situacao_pais = presentes === 'Sim'
+            ? 'Separados, mas presentes'
+            : 'Separados';
+        }
+      }
+
+      if (!mapped.gosta_brincar && mapped.brincadeiras_preferidas) {
+        mapped.gosta_brincar = mapped.brincadeiras_preferidas;
+      }
+      if (!mapped.preferencias_diversao && mapped.atividades_lazer) {
+        mapped.preferencias_diversao = mapped.atividades_lazer;
+      }
+      if (!mapped.curiosidade_sexual && mapped.orientacao_sexualidade) {
+        mapped.curiosidade_sexual = mapped.orientacao_sexualidade;
+      }
+      if (!mapped.acompanhamento_atual && mapped.acompanhamentos_medicos) {
+        mapped.acompanhamento_atual = mapped.acompanhamentos_medicos;
+      }
+      if (!mapped.tratamento_medico && mapped.historico_saude) {
+        mapped.tratamento_medico = mapped.historico_saude;
+      }
+
+      const yesNoFields = [
+        'tem_irmaos',
+        'fez_prenatal',
+        'tratamento_prenatal',
+        'nasceu_tempo_normal',
+        'foi_amamentado',
+        'uso_medicamento',
+        'crises_rotineiramente',
+        'tem_convulsoes',
+        'alimenta_independente',
+        'banheiro_independente',
+        'gerencia_dia_a_dia',
+        'faz_amigos_facilidade',
+        'tem_amigos_vizinhanca',
+        'interage_mesma_idade',
+        'gosta_passeios_festas',
+        'repetencia',
+        'ressente_muda_professor',
+        'frequenta_sala_recursos'
+      ];
+
+      yesNoFields.forEach((key) => {
+        if (mapped[key] !== undefined && mapped[key] !== '') {
+          mapped[key] = this.normalizeYesNo(mapped[key]);
+        }
+      });
+
+      if (mapped.gravidez_planejada_relato && !mapped.gravidez_planejada) {
+        mapped.gravidez_planejada = mapped.gravidez_planejada_relato;
+      }
+
+      mapped.gravidez_planejada = this.normalizeYesNo(mapped.gravidez_planejada);
+      mapped.gestacao_agradavel = this.normalizeYesNo(mapped.gestacao_agradavel);
+
+      return mapped;
+    },
     triggerAutoSave() {
       if (this.isLoadingForm) {
         console.log('üö´ [AUTO-SAVE] Ignorado porque formul√°rio est√° carregando');
@@ -1271,15 +1735,7 @@ const EntrevistaResponsavelCompleta = {
       } finally {
         this.autoSaving = false;
       }
-    },
-    
-    setCurrentUser() {
-      // Auto-preencher nome do entrevistador com usu√°rio logado
-      if (this.$root.user && this.$root.user.name) {
-        this.form.nome_entrevistador = this.$root.user.name;
-      }
-    },
-
+    },
     async loadAlunos() {
       try {
         // Usar endpoint de sele√ß√£o din√¢mica (j√° filtra por professor automaticamente via token)
@@ -1330,11 +1786,11 @@ const EntrevistaResponsavelCompleta = {
           this.form.id = alunoData.last_interview_id || null;
           this.form.nome_estudante = alunoData.name || '';
           this.form.data_nascimento = alunoData.birth_date || '';
+          this.form.nome_escola = alunoData.school_name || alunoData.school || '';
           this.form.serie_ano = alunoData.grade || '';
           this.form.turno = alunoData.shift || '';
           this.form.endereco = alunoData.address || '';
           this.form.telefone = alunoData.phone || '';
-          this.form.responsavel_nome = alunoData.guardian_name || '';
 
           console.log('‚úÖ Dados do aluno preenchidos automaticamente');
         }
@@ -1381,7 +1837,8 @@ const EntrevistaResponsavelCompleta = {
             }
 
             if (ultima.form_data) {
-              Object.entries(ultima.form_data).forEach(([key, value]) => {
+              const normalizedData = this.mapLegacyInterviewData(ultima.form_data);
+              Object.entries(normalizedData).forEach(([key, value]) => {
                 if (key !== 'student_id' && key in this.form) {
                   this.form[key] = value;
                 }
@@ -1434,7 +1891,7 @@ const EntrevistaResponsavelCompleta = {
           if (this.$root.showToast) {
             this.$root.showToast('success', 'Entrevista salva com sucesso!');
           }
-          this.$router.push('/dashboard');
+          this.$router.push('/app');
         }
       } catch (error) {
         console.error('Erro ao salvar entrevista:', error);
@@ -2433,7 +2890,6 @@ const PDICompleto = {
 
   async mounted() {
     await this.loadAlunos();
-    this.setCurrentUser();
   },
 
   beforeUnmount() {
@@ -2615,15 +3071,7 @@ const PDICompleto = {
       } catch (error) {
         console.error('‚ùå [PDI COMPLETO] Erro ao carregar PDI salvo:', error);
       }
-    },
-
-    setCurrentUser() {
-      // Auto-preencher professor AEE com usu√°rio logado
-      if (this.$root.user && this.$root.user.name) {
-        this.form.professor_aee = this.$root.user.name;
-      }
-    },
-
+    },
     async loadAlunos() {
       try {
         // Usar endpoint de sele√ß√£o din√¢mica (j√° filtra por professor automaticamente via token)
@@ -2714,7 +3162,7 @@ const PDICompleto = {
     async handleSubmit() {
       const sucesso = await this.performAutoSave('completo', { showToast: true });
       if (sucesso) {
-        this.$router.push('/dashboard');
+        this.$router.push('/app');
       }
     }
   }
@@ -3487,7 +3935,6 @@ const PAICompleto = {
 
   async mounted() {
     await this.loadAlunos();
-    this.setCurrentUser();
     this.setDefaultDates();
   },
 
@@ -3668,15 +4115,7 @@ const PAICompleto = {
       } catch (error) {
         console.error('‚ùå [PAI COMPLETO] Erro ao carregar PAI salvo:', error);
       }
-    },
-
-    setCurrentUser() {
-      // Auto-preencher professor AEE com usu√°rio logado
-      if (this.$root.user && this.$root.user.name) {
-        this.form.professor_aee = this.$root.user.name;
-      }
-    },
-
+    },
     setDefaultDates() {
       // Data de in√≠cio = hoje
       if (!this.form.data_inicio) {
@@ -3738,6 +4177,7 @@ const PAICompleto = {
         if (alunoData) {
           this.form.nome_estudante = alunoData.name || '';
           this.form.data_nascimento = alunoData.birth_date || '';
+          this.form.nome_escola = alunoData.school_name || alunoData.school || '';
           this.form.serie_ano = alunoData.grade || '';
           this.form.turno = alunoData.shift || '';
           this.form.tipo_deficiencia = alunoData.disability_type || this.form.tipo_deficiencia;
@@ -3784,7 +4224,7 @@ const PAICompleto = {
     async handleSubmit() {
       const sucesso = await this.performAutoSave('completo', { showToast: true });
       if (sucesso) {
-        this.$router.push('/dashboard');
+        this.$router.push('/app');
       }
     }
   }
@@ -3801,3 +4241,19 @@ if (typeof window !== 'undefined') {
   // Mantido apenas para refer√™ncia/legado (n√£o usado pela rota #/pai-completo)
   window.PAICompletoLegacy = PAICompleto;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

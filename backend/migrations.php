@@ -190,6 +190,20 @@ function run_migrations() {
                 log_migration("  ✓ Tabela atendimentos OK");
             },
             
+            'create_user_preferences_table' => function($pdo) {
+                log_migration("Verificando tabela user_preferences...");
+                
+                $pdo->exec("CREATE TABLE IF NOT EXISTS user_preferences (
+                    user_id INT NOT NULL PRIMARY KEY,
+                    preferences JSON NOT NULL,
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    CONSTRAINT fk_user_preferences_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                ) DEFAULT CHARSET=utf8mb4");
+                
+                log_migration("  ƒo" Tabela user_preferences OK");
+            },
+            
             'ensure_modalidade_not_null' => function($pdo) {
                 log_migration("Verificando constraint de modalidade...");
                 

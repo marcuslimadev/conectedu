@@ -88,8 +88,8 @@ api.interceptors.response.use(
   error => {
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('token');
-      if (location.hash !== '#/login') {
-        location.hash = '#/login';
+      if (location.hash !== '#/') {
+        location.hash = '#/';
       }
     }
     return Promise.reject(error);
@@ -99,11 +99,8 @@ api.interceptors.response.use(
 // Guard de autenticação
 const AuthGuard = (to, from, next) => {
   const token = localStorage.getItem('token');
-  if (!token && to.path !== '/login' && to.path !== '/register') {
-    next('/login');
-  } else {
-    next();
-  }
+  if (!token && to.path.startsWith('/app')) return next('/');
+  next();
 };
 
 // Alunos - CRUD completo
@@ -1222,7 +1219,7 @@ const RegisterTW = {
           <div class="text-center">
             <p class="text-sm text-gray-600">
               Já tem uma conta? 
-              <router-link to="/login" class="font-medium text-brand-primary hover:text-brand-primary-dark">
+              <router-link to="/?tab=login" class="font-medium text-brand-primary hover:text-brand-primary-dark">
                 Faça login
               </router-link>
             </p>
@@ -2315,13 +2312,13 @@ const SupervisaoTW = {
         
         /* TEMPORARIAMENTE DESABILITADO - endpoints não implementados
         try {
-          const entrevistaResp = await api.get(`/entrevista-completa/student/${aluno.id}`);
+          const entrevistaResp = await api.get(`/app/entrevista-completa/student/${aluno.id}`);
           aluno.has_entrevista = entrevistaResp.data?.ok && entrevistaResp.data.data?.length > 0;
           
-          const pdiResp = await api.get(`/pdi-completo/student/${aluno.id}`);
+          const pdiResp = await api.get(`/app/pdi-completo/student/${aluno.id}`);
           aluno.has_pdi = pdiResp.data?.ok && pdiResp.data.data?.length > 0;
           
-          const paiResp = await api.get(`/pai-completo/student/${aluno.id}`);
+          const paiResp = await api.get(`/app/pai-completo/student/${aluno.id}`);
           aluno.has_pai = paiResp.data?.ok && paiResp.data.data?.length > 0;
           
           const relatoriosResp = await api.get(`/relatorios-atendimento?student_id=${aluno.id}`);
@@ -2346,19 +2343,19 @@ const SupervisaoTW = {
     },
     
     viewEntrevista(studentId) {
-      this.$router.push(`/entrevista-completa?student_id=${studentId}&readonly=1`);
+      this.$router.push(`/app/entrevista-completa?student_id=${studentId}&readonly=1`);
     },
     
     viewPDI(studentId) {
-      this.$router.push(`/pdi-completo?student_id=${studentId}&readonly=1`);
+      this.$router.push(`/app/pdi-completo?student_id=${studentId}&readonly=1`);
     },
     
     viewPAI(studentId) {
-      this.$router.push(`/pai-completo?student_id=${studentId}&readonly=1`);
+      this.$router.push(`/app/pai-completo?student_id=${studentId}&readonly=1`);
     },
     
     viewRelatorio(relatorioId) {
-      this.$router.push(`/relatorio-atendimento?id=${relatorioId}&readonly=1`);
+      this.$router.push(`/app/relatorio-atendimento?id=${relatorioId}&readonly=1`);
     },
     
     formatDate(dateStr) {
@@ -3234,7 +3231,7 @@ const Layout = {
             <h6 class="mb-2 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
               Dashboard
             </h6>
-            <router-link to="/" class="nav-link-tw" @click="closeMobileSidebar">
+            <router-link to="/app" class="nav-link-tw" @click="closeMobileSidebar">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="3" y="3" width="7" height="7"/>
                 <rect x="14" y="3" width="7" height="7"/>
@@ -3543,13 +3540,13 @@ const Layout = {
           // Feedback visual
           if (this.$showToast) this.$showToast('Sessão encerrada', 'Você saiu da conta com segurança.', 'success', 3000);
           // Redireciona via router (suave)
-          if (this.$route.path !== '/login') {
-            await this.$router.push('/login').catch(() => {});
-            console.log('🔒 Logout: navegação para /login');
+          if (this.$route.path !== '/') {
+            await this.$router.push('/').catch(() => {});
+            console.log('🔒 Logout: navegação para /');
           }
           // Fallback hard caso algo impeça a navegação
           setTimeout(() => {
-            if (location.hash !== '#/login') location.hash = '#/login';
+            if (location.hash !== '#/') location.hash = '#/';
             this.loggingOut = false;
             console.log('🔒 Logout finalizado');
           }, 50);
@@ -3605,6 +3602,8 @@ const Layout = {
   methods: {
     // ... outros métodos já existem acima
     updatePageTitle() {
+      const rawPath = this.$route?.path || '';
+      const path = rawPath.startsWith('/app') ? (rawPath.slice(4) || '/') : rawPath;
       const titles = {
         '/': 'Dashboard',
         '/alunos': 'Gestão de Alunos',
@@ -3618,7 +3617,7 @@ const Layout = {
         '/legislacoes': 'Diretório de Legislações',
         '/relatorios-atendimento': 'Relatórios de Atendimento'
       };
-      this.currentPageTitle = titles[this.$route?.path] || 'ConectAEE';
+      this.currentPageTitle = titles[path] || 'ConectAEE';
     },
     handleResize() {
       const width = window.innerWidth;
@@ -3644,6 +3643,329 @@ const Layout = {
     }
     // Remover listener de resize
     window.removeEventListener('resize', this.handleResize);
+  }
+};
+
+// Página inicial com login embutido
+const HomeLanding = {
+  template: `
+    <div class="min-h-screen bg-slate-950 text-white relative overflow-hidden">
+      <div class="absolute inset-0">
+        <div class="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-emerald-400/20 blur-3xl"></div>
+        <div class="absolute top-1/3 -right-32 w-[28rem] h-[28rem] rounded-full bg-sky-500/20 blur-3xl"></div>
+        <div class="absolute bottom-0 left-1/4 w-[30rem] h-[30rem] rounded-full bg-orange-400/20 blur-3xl"></div>
+        <div class="absolute inset-0 opacity-30" aria-hidden="true" style="background-image: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08) 0, transparent 45%), radial-gradient(circle at 80% 40%, rgba(255,255,255,0.06) 0, transparent 40%);"></div>
+      </div>
+
+      <div class="relative z-10 max-w-6xl mx-auto px-6 py-10 lg:py-16 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+        <section>
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur flex items-center justify-center border border-white/20">
+              <img src="./icons/logo-icon.png" alt="ConectAEE" class="w-7 h-7">
+            </div>
+            <div class="text-sm uppercase tracking-[0.3em] text-white/70">ConectAEE</div>
+          </div>
+
+          <h1 class="mt-6 text-4xl lg:text-5xl font-bold leading-tight">
+            Gestão AEE centrada no professor, com documentos fiéis ao modelo oficial.
+          </h1>
+          <p class="mt-4 text-white/75 text-lg">
+            Cadastre, acompanhe e gere PDI/PAI/Entrevista com a mesma sequência dos documentos originais. 
+            Interface rápida, acessível e pronta para o dia a dia.
+          </p>
+
+          <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="rounded-2xl border border-white/15 bg-white/5 p-4">
+              <div class="text-sm text-white/60">Documentos</div>
+              <div class="text-xl font-semibold">Sequência oficial</div>
+              <div class="text-xs text-white/50 mt-2">PDI, PAI e Entrevista com ordem I, II, III preservada</div>
+            </div>
+            <div class="rounded-2xl border border-white/15 bg-white/5 p-4">
+              <div class="text-sm text-white/60">Relatórios</div>
+              <div class="text-xl font-semibold">PDFs otimizados</div>
+              <div class="text-xs text-white/50 mt-2">Layout melhorado sem perder nenhum dado</div>
+            </div>
+            <div class="rounded-2xl border border-white/15 bg-white/5 p-4">
+              <div class="text-sm text-white/60">Acesso</div>
+              <div class="text-xl font-semibold">Professor</div>
+              <div class="text-xs text-white/50 mt-2">Cadastro aberto para professores</div>
+            </div>
+            <div class="rounded-2xl border border-white/15 bg-white/5 p-4">
+              <div class="text-sm text-white/60">Administração</div>
+              <div class="text-xl font-semibold">Gestão de perfis</div>
+              <div class="text-xs text-white/50 mt-2">Administrador cria níveis e libera acessos</div>
+            </div>
+          </div>
+
+          <div class="mt-8 flex flex-wrap items-center gap-3 text-sm text-white/70">
+            <span class="px-3 py-1 rounded-full bg-white/10 border border-white/20">Acessibilidade integrada</span>
+            <button type="button" class="px-3 py-1 rounded-full bg-white/10 border border-white/20 hover:bg-white/20"
+                    @click="openA11y">
+              Ajustar acessibilidade
+            </button>
+          </div>
+        </section>
+
+        <section class="bg-white text-slate-900 rounded-3xl shadow-2xl p-6 sm:p-8">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h2 class="text-2xl font-semibold">Acesso ao sistema</h2>
+              <p class="text-sm text-slate-500">Login e cadastro no mesmo lugar.</p>
+            </div>
+            <span class="text-xs uppercase tracking-[0.3em] text-slate-400">Professor</span>
+          </div>
+
+          <div class="grid grid-cols-2 rounded-2xl bg-slate-100 p-1 text-sm font-medium mb-6">
+            <button type="button"
+                    class="py-2 rounded-2xl transition"
+                    :class="tab === 'login' ? 'bg-white shadow text-slate-900' : 'text-slate-500'"
+                    @click="tab = 'login'">
+              Entrar
+            </button>
+            <button type="button"
+                    class="py-2 rounded-2xl transition"
+                    :class="tab === 'register' ? 'bg-white shadow text-slate-900' : 'text-slate-500'"
+                    @click="tab = 'register'">
+              Registrar
+            </button>
+          </div>
+
+          <form v-show="tab === 'login'" @submit.prevent="login" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1" for="home-email">Email</label>
+              <input id="home-email" v-model.trim="loginForm.email" type="email" autocomplete="username" required
+                     class="w-full rounded-xl border border-slate-200 px-3 py-2.5 focus:ring-2 focus:ring-emerald-200 focus:border-emerald-500"
+                     placeholder="seu@email.com">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1" for="home-password">Senha</label>
+              <div class="relative">
+                <input id="home-password" :type="showLoginPassword ? 'text' : 'password'"
+                       v-model="loginForm.password" autocomplete="current-password" required
+                       class="w-full rounded-xl border border-slate-200 px-3 py-2.5 pr-10 focus:ring-2 focus:ring-emerald-200 focus:border-emerald-500"
+                       placeholder="••••••••">
+                <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400"
+                        @click="showLoginPassword = !showLoginPassword">
+                  <i :class="showLoginPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                </button>
+              </div>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <label class="inline-flex items-center gap-2 text-slate-600">
+                <input type="checkbox" v-model="loginForm.remember" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                Lembrar meu e-mail
+              </label>
+              <button type="button" class="text-emerald-700 hover:text-emerald-900"
+                      @click="$showToast && $showToast('Recuperação em breve', 'Estamos finalizando essa etapa.', 'info')">
+                Esqueci minha senha
+              </button>
+            </div>
+            <div v-if="loginError" class="rounded-xl bg-rose-50 border border-rose-200 p-3 text-sm text-rose-700">
+              {{ loginError }}
+            </div>
+            <button type="submit" :disabled="loginLoading"
+                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-60">
+              <span v-if="loginLoading" class="inline-flex items-center gap-2">
+                <span class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                Entrando...
+              </span>
+              <span v-else>Entrar</span>
+            </button>
+          </form>
+
+          <form v-show="tab === 'register'" @submit.prevent="register" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1" for="home-name">Nome completo</label>
+              <input id="home-name" v-model.trim="registerForm.name" type="text" required
+                     class="w-full rounded-xl border border-slate-200 px-3 py-2.5 focus:ring-2 focus:ring-emerald-200 focus:border-emerald-500"
+                     placeholder="Seu nome completo">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1" for="home-register-email">Email</label>
+              <input id="home-register-email" v-model.trim="registerForm.email" type="email" required
+                     class="w-full rounded-xl border border-slate-200 px-3 py-2.5 focus:ring-2 focus:ring-emerald-200 focus:border-emerald-500"
+                     placeholder="professor@escola.com">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1" for="home-register-password">Senha</label>
+              <div class="relative">
+                <input id="home-register-password" :type="showRegisterPassword ? 'text' : 'password'"
+                       v-model="registerForm.password" required
+                       class="w-full rounded-xl border border-slate-200 px-3 py-2.5 pr-10 focus:ring-2 focus:ring-emerald-200 focus:border-emerald-500"
+                       placeholder="Crie uma senha">
+                <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400"
+                        @click="showRegisterPassword = !showRegisterPassword">
+                  <i :class="showRegisterPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                </button>
+              </div>
+              <div class="mt-2 text-xs text-slate-600 grid grid-cols-2 gap-1">
+                <span :class="passwordChecks.length ? 'text-emerald-600' : ''">8+ caracteres</span>
+                <span :class="passwordChecks.uppercase ? 'text-emerald-600' : ''">1 maiúscula</span>
+                <span :class="passwordChecks.lowercase ? 'text-emerald-600' : ''">1 minúscula</span>
+                <span :class="passwordChecks.number ? 'text-emerald-600' : ''">1 número</span>
+                <span :class="passwordChecks.special ? 'text-emerald-600' : ''">1 especial</span>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1" for="home-register-confirm">Confirmar senha</label>
+              <input id="home-register-confirm" v-model="registerForm.confirm_password" type="password" required
+                     class="w-full rounded-xl border border-slate-200 px-3 py-2.5 focus:ring-2 focus:ring-emerald-200 focus:border-emerald-500"
+                     placeholder="Repita a senha">
+              <div v-if="registerForm.password && registerForm.confirm_password && registerForm.password !== registerForm.confirm_password"
+                   class="mt-1 text-xs text-rose-600">As senhas não coincidem</div>
+            </div>
+            <div v-if="registerError" class="rounded-xl bg-rose-50 border border-rose-200 p-3 text-sm text-rose-700">
+              {{ registerError }}
+            </div>
+            <div v-if="registerSuccess" class="rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-sm text-emerald-700">
+              {{ registerSuccess }}
+            </div>
+            <button type="submit" :disabled="registerLoading || !isRegisterValid"
+                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-white bg-slate-900 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-60">
+              <span v-if="registerLoading" class="inline-flex items-center gap-2">
+                <span class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                Criando conta...
+              </span>
+              <span v-else>Finalizar cadastro</span>
+            </button>
+            <p class="text-xs text-slate-500 text-center">
+              Administradores são cadastrados manualmente pelo gestor do sistema.
+            </p>
+          </form>
+        </section>
+      </div>
+    </div>
+  `,
+  data() {
+    return {
+      tab: 'login',
+      loginForm: {
+        email: '',
+        password: '',
+        remember: false
+      },
+      registerForm: {
+        name: '',
+        email: '',
+        password: '',
+        confirm_password: ''
+      },
+      loginLoading: false,
+      registerLoading: false,
+      loginError: '',
+      registerError: '',
+      registerSuccess: '',
+      showLoginPassword: false,
+      showRegisterPassword: false
+    };
+  },
+  computed: {
+    passwordChecks() {
+      const pass = this.registerForm.password || '';
+      return {
+        length: pass.length >= 8,
+        uppercase: /[A-Z]/.test(pass),
+        lowercase: /[a-z]/.test(pass),
+        number: /[0-9]/.test(pass),
+        special: /[^A-Za-z0-9]/.test(pass)
+      };
+    },
+    isRegisterValid() {
+      return this.registerForm.name &&
+        this.registerForm.email &&
+        this.registerForm.password &&
+        this.registerForm.confirm_password &&
+        this.registerForm.password === this.registerForm.confirm_password &&
+        Object.values(this.passwordChecks).every(check => check);
+    }
+  },
+  methods: {
+    openA11y() {
+      if (window.a11yManager && typeof window.a11yManager.togglePanel === 'function') {
+        window.a11yManager.togglePanel();
+      }
+    },
+    syncA11y() {
+      if (window.a11yManager && typeof window.a11yManager.syncFromServer === 'function') {
+        window.a11yManager.syncFromServer();
+      }
+    },
+    async login() {
+      this.loginLoading = true;
+      this.loginError = '';
+      try {
+        await ensureApiRouting();
+        const response = await api.post('/login', {
+          email: this.loginForm.email,
+          password: this.loginForm.password
+        });
+        const token = response.data?.data?.token || response.data?.token;
+        const user = response.data?.data?.user || response.data?.user;
+        if (!token) throw new Error('TOKEN_MISSING');
+        if (user && user.role === 'student') {
+          this.loginError = 'Acesso negado. Apenas professores e administradores podem fazer login.';
+          return;
+        }
+        localStorage.setItem('token', token);
+        if (this.loginForm.remember && this.loginForm.email) {
+          localStorage.setItem('remember_email', this.loginForm.email);
+        } else {
+          localStorage.removeItem('remember_email');
+        }
+        this.syncA11y();
+        this.$router.push('/app');
+      } catch (error) {
+        this.loginError = error.response?.data?.message || 'Erro ao fazer login';
+      } finally {
+        this.loginLoading = false;
+      }
+    },
+    async register() {
+      this.registerLoading = true;
+      this.registerError = '';
+      this.registerSuccess = '';
+      try {
+        await ensureApiRouting();
+        const response = await api.post('/register', {
+          name: this.registerForm.name,
+          email: this.registerForm.email,
+          password: this.registerForm.password,
+          confirm_password: this.registerForm.confirm_password
+        });
+        if (response.data?.ok) {
+          this.registerSuccess = response.data?.data?.message || response.data?.message || 'Cadastro realizado com sucesso! Faça login.';
+          this.loginForm.email = this.registerForm.email;
+          this.registerForm = { name: '', email: '', password: '', confirm_password: '' };
+          this.tab = 'login';
+        } else {
+          this.registerError = response.data?.error || 'Erro ao criar cadastro';
+        }
+      } catch (error) {
+        this.registerError = error.response?.data?.error || 'Erro ao criar cadastro';
+      } finally {
+        this.registerLoading = false;
+      }
+    }
+  },
+  mounted() {
+    const token = localStorage.getItem('token');
+    if (token) {
+      this.$router.push('/app');
+      return;
+    }
+    const remembered = localStorage.getItem('remember_email');
+    if (remembered) {
+      this.loginForm.email = remembered;
+      this.loginForm.remember = true;
+    }
+    const tab = this.$route?.query?.tab;
+    if (tab === 'register') this.tab = 'register';
+  },
+  watch: {
+    '$route.query.tab'(val) {
+      if (val === 'register') this.tab = 'register';
+      if (val === 'login') this.tab = 'login';
+    }
   }
 };
 
@@ -3774,7 +4096,7 @@ const Login = {
 
               <p class="text-center text-sm text-gray-600">
                 Não tem uma conta?
-                <router-link to="/register" class="font-medium text-blue-700 hover:text-blue-900">Registre-se</router-link>
+                <router-link to="/?tab=register" class="font-medium text-blue-700 hover:text-blue-900">Registre-se</router-link>
               </p>
               <p class="text-center text-xs text-gray-500 mt-2">
                 <a href="#" @click.prevent="openPrivacy" class="hover:text-gray-700 underline">Políticas de Privacidade</a>
@@ -3853,10 +4175,13 @@ const Login = {
         }
         
         localStorage.setItem('token', token);
+        if (window.a11yManager && typeof window.a11yManager.syncFromServer === 'function') {
+          window.a11yManager.syncFromServer();
+        }
         // Lembrar e-mail opcionalmente
         if (this.remember && this.email) localStorage.setItem('remember_email', this.email);
         else localStorage.removeItem('remember_email');
-        this.$router.push('/');
+        this.$router.push('/app');
       } catch (error) {
         this.error = error.response?.data?.message || 'Erro ao fazer login';
       } finally {
@@ -4925,13 +5250,13 @@ Veja o console (F12) para mais detalhes.`);
     },
     irPara(segment) {
       if (!segment) return;
-      this.$router.push(`/${segment}`);
+      this.$router.push(`/app/${segment}`);
     },
     abrirFormulario(tipo, alunoId = null) {
       const rotas = {
-        entrevista: '/entrevista-responsavel',
-        pdi: '/pdi',
-        pai: '/plano-atendimento'
+        entrevista: '/app/entrevista-responsavel',
+        pdi: '/app/pdi',
+        pai: '/app/plano-atendimento'
       };
       const base = rotas[tipo];
       if (!base) return;
@@ -8699,12 +9024,12 @@ const PlanoAtendimento = {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Telefone para Contato <span class="text-red-500">*</span></label>
-                    <input v-model="form.telefone" type="tel" required
+                    <input v-model="form.telefone_contato" type="tel" required
                       class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
                   </div>
                   <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Endereço Residencial <span class="text-red-500">*</span></label>
-                    <input v-model="form.endereco" type="text" required
+                    <input v-model="form.endereco_residencial" type="text" required
                       class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
                   </div>
                 </div>
@@ -8748,7 +9073,7 @@ const PlanoAtendimento = {
                   </div>
                   <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Data da Avaliação Diagnóstica</label>
-                    <input v-model="form.data_avaliacao_diagnostica" type="date"
+                    <input v-model="form.data_avaliacao" type="date"
                       class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500">
                   </div>
                   <div>
@@ -8833,25 +9158,25 @@ const PlanoAtendimento = {
                   <div class="space-y-4">
                     <div>
                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Oralidade</label>
-                      <textarea v-model="form.avaliacao_oralidade" rows="2"
+                      <textarea v-model="form.oralidade" rows="2"
                         class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                     </div>
 
                     <div>
                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Compreensão</label>
-                      <textarea v-model="form.avaliacao_compreensao" rows="2"
+                      <textarea v-model="form.compreensao" rows="2"
                         class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                     </div>
 
                     <div>
                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Expressão Verbal</label>
-                      <textarea v-model="form.avaliacao_expressao_verbal" rows="2"
+                      <textarea v-model="form.expressao_verbal" rows="2"
                         class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                     </div>
 
                     <div>
                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Clareza</label>
-                      <textarea v-model="form.avaliacao_clareza" rows="2"
+                      <textarea v-model="form.clareza" rows="2"
                         class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                     </div>
 
@@ -8908,7 +9233,7 @@ const PlanoAtendimento = {
                       </div>
                       <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Produz textos?</label>
-                        <select v-model="form.produz_textos"
+                        <select v-model="form.producao_textos"
                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg">
                           <option value="">Selecione</option>
                           <option value="sim">Sim</option>
@@ -8949,7 +9274,7 @@ const PlanoAtendimento = {
 
                     <div>
                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Leitura</label>
-                      <textarea v-model="form.avaliacao_leitura" rows="2"
+                      <textarea v-model="form.leitura" rows="2"
                         placeholder="Reconhecimento de letras/palavras, compreensão de textos, velocidade, fluência. Leitura funcional?"
                         class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                     </div>
@@ -8970,7 +9295,7 @@ const PlanoAtendimento = {
                   <div class="space-y-4">
                     <div>
                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Raciocínio Lógico-Matemático</label>
-                      <textarea v-model="form.raciocinio_logico" rows="3"
+                      <textarea v-model="form.raciocinio_logico_matematico" rows="3"
                         placeholder="Contagem, reconhecimento de números, operações básicas, resolução de problemas, noções de grandeza, espaço, tempo."
                         class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                     </div>
@@ -9109,13 +9434,13 @@ const PlanoAtendimento = {
                       <div class="space-y-3">
                         <div>
                           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Objetivo:</label>
-                          <textarea v-model="form.obj_comunicacao_objetivo" rows="2"
+                          <textarea v-model="form.objetivo_comunicacao" rows="2"
                             placeholder="O aluno será capaz de expressar suas necessidades básicas utilizando frases de 3 a 4 palavras."
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                         </div>
                         <div>
                           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meta:</label>
-                          <textarea v-model="form.obj_comunicacao_meta" rows="2"
+                          <textarea v-model="form.meta_comunicacao" rows="2"
                             placeholder="(Ex: Em 2 meses, o aluno utilizará frases de 3 a 4 palavras em 80% das interações com o professor.)"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                         </div>
@@ -9128,13 +9453,13 @@ const PlanoAtendimento = {
                       <div class="space-y-3">
                         <div>
                           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Objetivo:</label>
-                          <textarea v-model="form.obj_leitura_objetivo" rows="2"
+                          <textarea v-model="form.objetivo_leitura" rows="2"
                             placeholder="(Ex: O aluno será capaz de identificar e nomear as letras do alfabeto.)"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                         </div>
                         <div>
                           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meta:</label>
-                          <textarea v-model="form.obj_leitura_meta" rows="2"
+                          <textarea v-model="form.meta_leitura" rows="2"
                             placeholder="(Ex: Até o final do semestre, o aluno identificará 20 letras do alfabeto em atividades de pareamento.)"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                         </div>
@@ -9147,12 +9472,12 @@ const PlanoAtendimento = {
                       <div class="space-y-3">
                         <div>
                           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Objetivo:</label>
-                          <textarea v-model="form.obj_matematica_objetivo" rows="2"
+                          <textarea v-model="form.objetivo_matematica" rows="2"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                         </div>
                         <div>
                           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meta:</label>
-                          <textarea v-model="form.obj_matematica_meta" rows="2"
+                          <textarea v-model="form.meta_matematica" rows="2"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                         </div>
                       </div>
@@ -9163,12 +9488,12 @@ const PlanoAtendimento = {
                       <div class="space-y-3">
                         <div>
                           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Objetivo:</label>
-                          <textarea v-model="form.obj_socioemocional_objetivo" rows="2"
+                          <textarea v-model="form.objetivo_socioemocional" rows="2"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                         </div>
                         <div>
                           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meta:</label>
-                          <textarea v-model="form.obj_socioemocional_meta" rows="2"
+                          <textarea v-model="form.meta_socioemocional" rows="2"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                         </div>
                       </div>
@@ -9179,12 +9504,12 @@ const PlanoAtendimento = {
                       <div class="space-y-3">
                         <div>
                           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Objetivo:</label>
-                          <textarea v-model="form.obj_autonomia_objetivo" rows="2"
+                          <textarea v-model="form.objetivo_autonomia" rows="2"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                         </div>
                         <div>
                           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meta:</label>
-                          <textarea v-model="form.obj_autonomia_meta" rows="2"
+                          <textarea v-model="form.meta_autonomia" rows="2"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                         </div>
                       </div>
@@ -9214,7 +9539,7 @@ const PlanoAtendimento = {
 
                 <div>
                   <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Recursos Didáticos e Tecnologias Assistivas</label>
-                  <textarea v-model="form.recursos_tecnologias" rows="3"
+                  <textarea v-model="form.recursos_didaticos" rows="3"
                     placeholder="Materiais manipuláveis, pranchas de comunicação, softwares educativos, lupa, cadeira adaptada."
                     class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-violet-500"></textarea>
                 </div>
@@ -9424,14 +9749,14 @@ const PlanoAtendimento = {
         serie_ano: '',
         turno: '',
         responsavel: '',
-        telefone: '',
-        endereco: '',
+        telefone_contato: '',
+        endereco_residencial: '',
         diagnostico_cid: '',
         professor_regente: '',
         professor_aee: '',
         outros_profissionais: '',
         data_elaboracao: '',
-        data_avaliacao_diagnostica: '',
+        data_avaliacao: '',
         periodo_vigencia: '',
         data_reavaliacao: '',
         // Seção 2: Histórico
@@ -9441,22 +9766,22 @@ const PlanoAtendimento = {
         dificuldades: '',
         potencialidades: '',
         // Seção 3: Avaliação Diagnóstica
-        avaliacao_oralidade: '',
-        avaliacao_compreensao: '',
-        avaliacao_expressao_verbal: '',
-        avaliacao_clareza: '',
+        oralidade: '',
+        compreensao: '',
+        expressao_verbal: '',
+        clareza: '',
         usa_frases_completas: '',
         interage_verbalmente: '',
         escreve: '',
         grafia_legivel: '',
         escreve_certo: '',
-        produz_textos: '',
+        producao_textos: '',
         desenha: '',
         copia: '',
         faz_garatujas: '',
-        avaliacao_leitura: '',
+        leitura: '',
         comunicacao_nao_verbal: '',
-        raciocinio_logico: '',
+        raciocinio_logico_matematico: '',
         conceitos_academicos: '',
         atencao_concentracao: '',
         memoria: '',
@@ -9471,19 +9796,19 @@ const PlanoAtendimento = {
         percepcao_visual_auditiva: '',
         // Seção 4: Objetivos e Metas
         objetivo_geral: '',
-        obj_comunicacao_objetivo: '',
-        obj_comunicacao_meta: '',
-        obj_leitura_objetivo: '',
-        obj_leitura_meta: '',
-        obj_matematica_objetivo: '',
-        obj_matematica_meta: '',
-        obj_socioemocional_objetivo: '',
-        obj_socioemocional_meta: '',
-        obj_autonomia_objetivo: '',
-        obj_autonomia_meta: '',
+        objetivo_comunicacao: '',
+        meta_comunicacao: '',
+        objetivo_leitura: '',
+        meta_leitura: '',
+        objetivo_matematica: '',
+        meta_matematica: '',
+        objetivo_socioemocional: '',
+        meta_socioemocional: '',
+        objetivo_autonomia: '',
+        meta_autonomia: '',
         // Seção 5: Estratégias e Recursos
         adaptacoes_curriculares: '',
-        recursos_tecnologias: '',
+        recursos_didaticos: '',
         estrategias_ensino: '',
         adaptacoes_ambiente: '',
         atendimento_aee: '',
@@ -9521,6 +9846,41 @@ const PlanoAtendimento = {
     await Promise.all([this.carregarAlunos(), this.carregarEscolas()]);
   },
   methods: {
+    mapLegacyPAIData(data) {
+      const mapped = { ...(data || {}) };
+      const renames = {
+        telefone: 'telefone_contato',
+        endereco: 'endereco_residencial',
+        data_avaliacao_diagnostica: 'data_avaliacao',
+        avaliacao_oralidade: 'oralidade',
+        avaliacao_compreensao: 'compreensao',
+        avaliacao_expressao_verbal: 'expressao_verbal',
+        avaliacao_clareza: 'clareza',
+        avaliacao_leitura: 'leitura',
+        raciocinio_logico: 'raciocinio_logico_matematico',
+        produz_textos: 'producao_textos',
+        obj_comunicacao_objetivo: 'objetivo_comunicacao',
+        obj_comunicacao_meta: 'meta_comunicacao',
+        obj_leitura_objetivo: 'objetivo_leitura',
+        obj_leitura_meta: 'meta_leitura',
+        obj_matematica_objetivo: 'objetivo_matematica',
+        obj_matematica_meta: 'meta_matematica',
+        obj_socioemocional_objetivo: 'objetivo_socioemocional',
+        obj_socioemocional_meta: 'meta_socioemocional',
+        obj_autonomia_objetivo: 'objetivo_autonomia',
+        obj_autonomia_meta: 'meta_autonomia',
+        recursos_tecnologias: 'recursos_didaticos'
+      };
+
+      Object.entries(renames).forEach(([oldKey, newKey]) => {
+        if ((mapped[newKey] === undefined || mapped[newKey] === '') && mapped[oldKey] !== undefined) {
+          mapped[newKey] = mapped[oldKey];
+        }
+      });
+
+      return mapped;
+    },
+
     async carregarAlunos() {
       try {
         let params = {};
@@ -9562,47 +9922,14 @@ const PlanoAtendimento = {
           const rows = r.data?.data?.rows || r.data?.rows || [];
           const ultimo = Array.isArray(rows) && rows.length ? rows[0] : null;
           
-          if (ultimo && ultimo.nome_aluno === alunoSelecionado.name) {
+          if (ultimo && ((ultimo.student_name || ultimo.nome_aluno) === alunoSelecionado.name)) {
             this.form.id = ultimo.id;
             
             // Mapear TODOS os campos do novo formulário completo
-            const allFields = [
-              // Seção 1
-              'nome_escola', 'nome_estudante', 'data_nascimento', 'idade', 'serie_ano', 'turno',
-              'responsavel', 'telefone', 'endereco', 'diagnostico_cid', 'professor_regente',
-              'professor_aee', 'outros_profissionais', 'data_elaboracao', 'data_avaliacao_diagnostica',
-              'periodo_vigencia', 'data_reavaliacao',
-              // Seção 2
-              'historico_escolar', 'historico_familiar_social', 'interesses_preferencias',
-              'dificuldades', 'potencialidades',
-              // Seção 3
-              'avaliacao_oralidade', 'avaliacao_compreensao', 'avaliacao_expressao_verbal',
-              'avaliacao_clareza', 'usa_frases_completas', 'interage_verbalmente', 'escreve',
-              'grafia_legivel', 'escreve_certo', 'produz_textos', 'desenha', 'copia', 'faz_garatujas',
-              'avaliacao_leitura', 'comunicacao_nao_verbal', 'raciocinio_logico', 'conceitos_academicos',
-              'atencao_concentracao', 'memoria', 'organizacao_planejamento', 'interacao_social',
-              'autonomia_independencia', 'manejo_emocoes', 'comportamento_sala',
-              'coordenacao_motora_fina', 'coordenacao_motora_grossa', 'orientacao_espacial_temporal',
-              'percepcao_visual_auditiva',
-              // Seção 4
-              'objetivo_geral', 'obj_comunicacao_objetivo', 'obj_comunicacao_meta',
-              'obj_leitura_objetivo', 'obj_leitura_meta', 'obj_matematica_objetivo',
-              'obj_matematica_meta', 'obj_socioemocional_objetivo', 'obj_socioemocional_meta',
-              'obj_autonomia_objetivo', 'obj_autonomia_meta',
-              // Seção 5
-              'adaptacoes_curriculares', 'recursos_tecnologias', 'estrategias_ensino',
-              'adaptacoes_ambiente', 'atendimento_aee', 'envolvimento_familia',
-              'articulacao_profissionais',
-              // Seção 6
-              'criterios_avaliacao', 'periodicidade_reavaliacoes', 'registro_progresso',
-              // Seção 7
-              'assinatura_professor_regente', 'assinatura_professor_aee', 'assinatura_coordenacao',
-              'assinatura_direcao', 'assinatura_responsavel'
-            ];
-            
-            allFields.forEach(field => {
-              if (ultimo[field] != null) {
-                this.form[field] = ultimo[field];
+                        const mappedFormData = this.mapLegacyPAIData(ultimo.form_data || {});
+            Object.entries(mappedFormData).forEach(([key, value]) => {
+              if (key in this.form) {
+                this.form[key] = value;
               }
             });
             
@@ -9655,7 +9982,7 @@ const PlanoAtendimento = {
         }
         const requiredFields = [
           'nome_escola', 'nome_estudante', 'data_nascimento', 'idade',
-          'serie_ano', 'turno', 'responsavel', 'telefone', 'endereco',
+          'serie_ano', 'turno', 'responsavel', 'telefone_contato', 'endereco_residencial',
           'diagnostico_cid', 'professor_regente', 'professor_aee', 'data_elaboracao'
         ];
         requiredFields.forEach(field => {
@@ -10935,10 +11262,11 @@ const DocumentosGerados = {
 
 // Configuração das rotas
 const routes = [
-  { path: '/login', component: Login },
-  { path: '/register', component: RegisterTW },
+  { path: '/', component: HomeLanding },
+  { path: '/login', redirect: () => ({ path: '/', query: { tab: 'login' } }) },
+  { path: '/register', redirect: () => ({ path: '/', query: { tab: 'register' } }) },
   { 
-    path: '/', 
+    path: '/app', 
     component: Layout,
     beforeEnter: AuthGuard,
     children: [
@@ -10993,11 +11321,22 @@ const app = createApp({
   mounted() {
     // Carregar preferência de dark mode do localStorage
     const savedDarkMode = localStorage.getItem('darkMode') === 'true';
-    this.darkMode = savedDarkMode;
-    this.applyDarkMode();
+    if (window.a11yManager && window.a11yManager.settings) {
+      this.darkMode = window.a11yManager.settings.theme === 'dark';
+      this.applyDarkMode();
+    } else {
+      this.darkMode = savedDarkMode;
+      this.applyDarkMode();
+    }
   },
   methods: {
     toggleDarkMode() {
+      if (window.a11yManager && typeof window.a11yManager.toggleSetting === 'function') {
+        const next = this.darkMode ? 'light' : 'dark';
+        window.a11yManager.updateSetting('theme', next);
+        this.darkMode = next === 'dark';
+        return;
+      }
       this.darkMode = !this.darkMode;
       localStorage.setItem('darkMode', this.darkMode);
       this.applyDarkMode();
@@ -11292,12 +11631,12 @@ const app = createApp({
   async mounted() {
     // Verificar se há token válido
     const token = localStorage.getItem('token');
-    if (token && this.$route.path !== '/login') {
+    if (token && this.$route.path !== '/') {
       try {
         await api.get('/user');
       } catch (error) {
         localStorage.removeItem('token');
-        this.$router.push('/login');
+        this.$router.push('/');
       }
     }
     this.loading = false;
@@ -11354,10 +11693,10 @@ app.config.globalProperties.$logout = async function() {
       localStorage.removeItem('token');
       if (api?.defaults?.headers?.common?.Authorization) delete api.defaults.headers.common['Authorization'];
       if (this && this.$showToast) this.$showToast('Sessão encerrada', 'Você saiu da conta com segurança.', 'success', 3000);
-      if (this && this.$route && this.$router && this.$route.path !== '/login') {
-        await this.$router.push('/login').catch(() => {});
+      if (this && this.$route && this.$router && this.$route.path !== '/') {
+        await this.$router.push('/').catch(() => {});
       }
-      setTimeout(() => { if (location.hash !== '#/login') location.hash = '#/login'; }, 80);
+      setTimeout(() => { if (location.hash !== '#/') location.hash = '#/'; }, 80);
     } finally {
       if (this && typeof this === 'object' && 'loggingOut' in this) this.loggingOut = false;
       __logoutLock = false;
@@ -11650,3 +11989,11 @@ try { mountVoicePortal(app); } catch (_) {}
 
 // Inicialização completa
 // console.log('ConectEdu v5.0 - Sistema inicializado com Tailwind CSS');
+
+
+
+
+
+
+
+

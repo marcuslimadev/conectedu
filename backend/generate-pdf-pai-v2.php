@@ -46,6 +46,42 @@ if (!empty($pai['form_data'])) {
     if (is_array($tmp)) $D = $tmp;
 }
 
+// Aliases para compatibilidade entre formulários e modelo oficial
+$aliasMap = [
+    'telefone_contato' => ['telefone'],
+    'endereco_residencial' => ['endereco'],
+    'data_avaliacao' => ['data_avaliacao_diagnostica'],
+    'periodo_vigencia' => ['periodo_vigencia'],
+    'oralidade' => ['avaliacao_oralidade'],
+    'compreensao' => ['avaliacao_compreensao'],
+    'expressao_verbal' => ['avaliacao_expressao_verbal'],
+    'clareza' => ['avaliacao_clareza'],
+    'producao_textos' => ['produz_textos'],
+    'leitura' => ['avaliacao_leitura'],
+    'raciocinio_logico_matematico' => ['raciocinio_logico'],
+    'objetivo_comunicacao' => ['obj_comunicacao_objetivo'],
+    'meta_comunicacao' => ['obj_comunicacao_meta'],
+    'objetivo_leitura' => ['obj_leitura_objetivo'],
+    'meta_leitura' => ['obj_leitura_meta'],
+    'objetivo_matematica' => ['obj_matematica_objetivo'],
+    'meta_matematica' => ['obj_matematica_meta'],
+    'objetivo_socioemocional' => ['obj_socioemocional_objetivo'],
+    'meta_socioemocional' => ['obj_socioemocional_meta'],
+    'objetivo_autonomia' => ['obj_autonomia_objetivo'],
+    'meta_autonomia' => ['obj_autonomia_meta'],
+    'recursos_didaticos' => ['recursos_tecnologias'],
+];
+
+foreach ($aliasMap as $dest => $keys) {
+    if (!empty($D[$dest])) continue;
+    foreach ((array)$keys as $key) {
+        if (!empty($D[$key])) {
+            $D[$dest] = $D[$key];
+            break;
+        }
+    }
+}
+
 // Helpers
 function vp($arr, $key, $default = '') { 
     $v = $arr[$key] ?? $default; 
@@ -73,6 +109,10 @@ $schoolName  = vp($D, 'nome_escola', $pai['school_name'] ?? '');
 $dataElaboracao = data_br_pai($D['data_elaboracao'] ?? ($pai['data_inicio'] ?? null));
 $dataAvaliacao = data_br_pai($D['data_avaliacao'] ?? null);
 $dataReavaliacao = data_br_pai($D['data_reavaliacao'] ?? ($pai['data_fim'] ?? null));
+$periodoTexto = vp($D, 'periodo_vigencia');
+$periodoInicio = vp($D, 'periodo_inicio');
+$periodoFim = vp($D, 'periodo_fim');
+$periodoDisplay = $periodoTexto ? $periodoTexto : (data_br_pai($periodoInicio) . ' a ' . data_br_pai($periodoFim));
 
 $mpdf = new Mpdf([
     'mode' => 'utf-8',
@@ -164,7 +204,7 @@ $html .= '</tr>';
 $html .= '<tr>';
 $html .= '<td>' . $dataElaboracao . '</td>';
 $html .= '<td>' . $dataAvaliacao . '</td>';
-$html .= '<td>' . data_br_pai(vp($D, 'periodo_inicio')) . ' a ' . data_br_pai(vp($D, 'periodo_fim')) . '</td>';
+$html .= '<td>' . $periodoDisplay . '</td>';
 $html .= '<td>' . $dataReavaliacao . '</td>';
 $html .= '</tr>';
 $html .= '</table>';

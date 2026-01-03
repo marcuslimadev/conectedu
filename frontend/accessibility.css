@@ -196,6 +196,19 @@
   font-size: 24px !important;
 }
 
+/* Espaçamento de linha */
+[data-line-spacing="normal"] {
+  line-height: 1.5 !important;
+}
+
+[data-line-spacing="relaxed"] {
+  line-height: 1.75 !important;
+}
+
+[data-line-spacing="extra"] {
+  line-height: 2 !important;
+}
+
 /* Alto contraste */
 [data-contrast="high"] {
   filter: contrast(150%) brightness(110%) !important;
@@ -451,6 +464,15 @@
 /* Animações suaves */
 * {
   transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Reduzir animações */
+[data-reduced-motion="true"] * ,
+[data-reduced-motion="true"] *::before,
+[data-reduced-motion="true"] *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
 }
 
 /* Melhorias para leitores de tela */

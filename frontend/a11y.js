@@ -5,12 +5,17 @@ class AccessibilityManager {
       theme: 'light',
       fontSize: 'normal',
       fontFamily: 'normal',
+      lineSpacing: 'normal',
       contrast: 'normal',
       highlightLinks: false,
       largeCursor: false,
       focusVisible: false,
+      reduceMotion: false,
       vlibras: true
     };
+    this.api = { mode: null, detected: false };
+    this.saveTimer = null;
+    this.isHydrating = false;
     this.init();
   }
 
@@ -20,7 +25,9 @@ class AccessibilityManager {
     this.createAccessibilityPanel();
     this.loadVlibras();
     this.applySettings();
+    this.updatePanelUI();
     this.setupKeyboardShortcuts();
+    this.syncFromServer();
   }
 
   loadSettings() {
@@ -32,6 +39,7 @@ class AccessibilityManager {
 
   saveSettings() {
     localStorage.setItem('conectedu-a11y-settings', JSON.stringify(this.settings));
+    this.scheduleSaveToServer();
   }
 
   createFloatingButton() {
@@ -82,6 +90,14 @@ class AccessibilityManager {
             </select>
           </div>
           <div class="a11y-option">
+            <span class="a11y-option-label">Espaçamento</span>
+            <select class="a11y-select" data-setting="lineSpacing">
+              <option value="normal">Normal</option>
+              <option value="relaxed">Relaxado</option>
+              <option value="extra">Extra</option>
+            </select>
+          </div>
+          <div class="a11y-option">
             <span class="a11y-option-label">Fonte para Disléxicos</span>
             <div class="a11y-toggle" data-setting="fontFamily" data-value="dyslexic">
               <div class="a11y-toggle-slider"></div>
@@ -114,6 +130,12 @@ class AccessibilityManager {
           <div class="a11y-option">
             <span class="a11y-option-label">Foco Visível</span>
             <div class="a11y-toggle" data-setting="focusVisible" data-value="true">
+              <div class="a11y-toggle-slider"></div>
+            </div>
+          </div>
+          <div class="a11y-option">
+            <span class="a11y-option-label">Reduzir Animações</span>
+            <div class="a11y-toggle" data-setting="reduceMotion" data-value="true">
               <div class="a11y-toggle-slider"></div>
             </div>
           </div>
@@ -209,10 +231,12 @@ class AccessibilityManager {
     body.setAttribute('data-theme', this.settings.theme);
     body.setAttribute('data-font-size', this.settings.fontSize);
     body.setAttribute('data-font-family', this.settings.fontFamily);
+    body.setAttribute('data-line-spacing', this.settings.lineSpacing);
     body.setAttribute('data-contrast', this.settings.contrast);
     body.setAttribute('data-highlight', this.settings.highlightLinks ? 'links' : 'none');
     body.setAttribute('data-cursor', this.settings.largeCursor ? 'large' : 'default');
     body.setAttribute('data-focus', this.settings.focusVisible ? 'visible' : 'auto');
+    body.setAttribute('data-reduced-motion', this.settings.reduceMotion ? 'true' : 'false');
     
     // Aplicar fonte disléxica globalmente
     if (this.settings.fontFamily === 'dyslexic') {
@@ -225,9 +249,116 @@ class AccessibilityManager {
       body.style.lineHeight = "";
     }
     
+    // Sincronizar com Tailwind dark mode
+    document.documentElement.classList.toggle('dark', this.settings.theme === 'dark');
+    
     const vlibrasWidget = document.querySelector('.vlibras-widget');
     if (vlibrasWidget) {
       vlibrasWidget.style.display = this.settings.vlibras ? 'block' : 'none';
+    }
+  }
+  
+  getToken() {
+    return localStorage.getItem('token');
+  }
+  
+  async detectApiRouting() {
+    if (this.api.detected) return this.api.mode;
+    const base = (window.CONFIG && window.CONFIG.API_BASE) || '';
+    if (!base) {
+      this.api.detected = true;
+      this.api.mode = 'path';
+      return this.api.mode;
+    }
+    const tryFetch = async (url) => {
+      try {
+        const r = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
+        return r.ok;
+      } catch (_) {
+        return false;
+      }
+    };
+    const okPath = await tryFetch(base.replace(/\/$/, '') + '/health');
+    if (okPath) {
+      this.api.mode = 'path';
+      this.api.detected = true;
+      return this.api.mode;
+    }
+    const okQuery = await tryFetch(base + (base.includes('?') ? '&' : '?') + 'action=health');
+    if (okQuery) {
+      this.api.mode = 'query';
+      this.api.detected = true;
+      return this.api.mode;
+    }
+    this.api.detected = true;
+    this.api.mode = 'path';
+    return this.api.mode;
+  }
+  
+  async buildApiUrl(route) {
+    const base = (window.CONFIG && window.CONFIG.API_BASE) || '';
+    const r = route.startsWith('/') ? route : '/' + route;
+    const mode = await this.detectApiRouting();
+    if (mode === 'query') {
+      return base + (base.includes('?') ? '&' : '?') + 'action=' + r.slice(1);
+    }
+    return base.replace(/\/$/, '') + r;
+  }
+  
+  async fetchFromServer() {
+    const token = this.getToken();
+    if (!token) return null;
+    const url = await this.buildApiUrl('/user/preferences');
+    const r = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer ' + token
+      }
+    });
+    if (!r.ok) return null;
+    const json = await r.json();
+    return json?.data?.preferences || json?.preferences || null;
+  }
+  
+  async saveToServer() {
+    const token = this.getToken();
+    if (!token) return;
+    const url = await this.buildApiUrl('/user/preferences');
+    await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({ preferences: this.settings })
+    });
+  }
+  
+  scheduleSaveToServer() {
+    if (this.isHydrating) return;
+    if (this.saveTimer) clearTimeout(this.saveTimer);
+    this.saveTimer = setTimeout(() => {
+      this.saveToServer().catch(() => {});
+    }, 400);
+  }
+  
+  async syncFromServer() {
+    const token = this.getToken();
+    if (!token) return;
+    this.isHydrating = true;
+    try {
+      const serverPrefs = await this.fetchFromServer();
+      if (serverPrefs && typeof serverPrefs === 'object') {
+        this.settings = { ...this.settings, ...serverPrefs };
+        this.saveSettings();
+        this.applySettings();
+        this.updatePanelUI();
+      }
+    } catch (_) {
+      // ignore
+    } finally {
+      this.isHydrating = false;
     }
   }
 
@@ -236,10 +367,12 @@ class AccessibilityManager {
       theme: 'light',
       fontSize: 'normal',
       fontFamily: 'normal',
+      lineSpacing: 'normal',
       contrast: 'normal',
       highlightLinks: false,
       largeCursor: false,
       focusVisible: false,
+      reduceMotion: false,
       vlibras: true
     };
     this.saveSettings();

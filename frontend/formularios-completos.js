@@ -2,7 +2,7 @@
 // Baseados nos templates oficiais fornecidos
 
 // Componente para Entrevista com Responsável - Template Completo
-const EntrevistaResponsavelCompleta = {
+const EntrevistaResponsavelCompletaLegado = {
   template: `
     <div class="space-y-6">
       <div>
@@ -431,5 +431,5 @@ const EntrevistaResponsavelCompleta = {
 };
 
 // Exportar para window para uso no router
-window.EntrevistaResponsavelCompletaForm = EntrevistaResponsavelCompleta;
+window.EntrevistaResponsavelCompletaForm = EntrevistaResponsavelCompletaLegado;
 

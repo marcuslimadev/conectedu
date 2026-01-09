@@ -3685,7 +3685,7 @@ const HomeLanding = {
             <br>
             <span class="text-white">para sua Escola</span>
           </h1>
-          <p class="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+          <p class="text-xl text-gray-100 mb-8 max-w-2xl mx-auto">
             Plataforma especializada em Atendimento Educacional Especializado com IA integrada para otimizar seu trabalho pedagógico
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
@@ -3710,7 +3710,7 @@ const HomeLanding = {
               📋
             </div>
             <h3 class="text-2xl font-bold mb-3 text-white">Formulários AEE Completos</h3>
-            <p class="text-gray-300">Entrevista Inicial, PDI e PAI digitalizados e organizados em um só lugar</p>
+            <p class="text-gray-100">Entrevista Inicial, PDI e PAI digitalizados e organizados em um só lugar</p>
           </div>
           
           <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8 hover:bg-white/15 transition shadow-xl">
@@ -3718,7 +3718,7 @@ const HomeLanding = {
               🤖
             </div>
             <h3 class="text-2xl font-bold mb-3 text-white">IA Integrada</h3>
-            <p class="text-gray-300">Transcrição automática de áudio e sugestões pedagógicas inteligentes com GPT-4</p>
+            <p class="text-gray-100">Transcrição automática de áudio e sugestões pedagógicas inteligentes com GPT-4</p>
           </div>
           
           <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8 hover:bg-white/15 transition shadow-xl">
@@ -3726,7 +3726,7 @@ const HomeLanding = {
               📊
             </div>
             <h3 class="text-2xl font-bold mb-3 text-white">Relatórios em PDF</h3>
-            <p class="text-gray-300">Geração automática de relatórios profissionais prontos para impressão</p>
+            <p class="text-gray-100">Geração automática de relatórios profissionais prontos para impressão</p>
           </div>
         </div>
       </div>
@@ -3736,19 +3736,19 @@ const HomeLanding = {
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
           <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6 text-center">
             <div class="text-4xl mb-2">🔒</div>
-            <div class="text-sm text-gray-300 font-medium">Dados Protegidos</div>
+            <div class="text-sm text-white font-medium">Dados Protegidos</div>
           </div>
           <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6 text-center">
             <div class="text-4xl mb-2">☁️</div>
-            <div class="text-sm text-gray-300 font-medium">100% Cloud</div>
+            <div class="text-sm text-white font-medium">100% Cloud</div>
           </div>
           <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6 text-center">
             <div class="text-4xl mb-2">📱</div>
-            <div class="text-sm text-gray-300 font-medium">Mobile Ready</div>
+            <div class="text-sm text-white font-medium">Mobile Ready</div>
           </div>
           <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6 text-center">
             <div class="text-4xl mb-2">⚡</div>
-            <div class="text-sm text-gray-300 font-medium">Super Rápido</div>
+            <div class="text-sm text-white font-medium">Super Rápido</div>
           </div>
         </div>
       </div>
@@ -3757,7 +3757,7 @@ const HomeLanding = {
       <div class="relative z-30 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div class="bg-gradient-to-r from-cyan-500/20 to-purple-500/20 backdrop-blur-xl border border-white/20 rounded-3xl p-12 text-center shadow-2xl">
           <h2 class="text-4xl font-bold mb-4 text-white">Comece Gratuitamente</h2>
-          <p class="text-xl text-gray-300 mb-8">Sem cartão de crédito. Acesso completo às funcionalidades.</p>
+          <p class="text-xl text-gray-100 mb-8">Sem cartão de crédito. Acesso completo às funcionalidades.</p>
           <button @click="tab = 'register'" class="px-10 py-5 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 rounded-xl text-xl font-bold transition shadow-2xl hover:shadow-cyan-500/50 transform hover:scale-105">
             Criar Conta Grátis
           </button>
@@ -3772,7 +3772,7 @@ const HomeLanding = {
               <div class="w-10 h-10 bg-gradient-to-br from-cyan-400 to-purple-600 rounded-lg flex items-center justify-center font-bold text-lg">C</div>
               <span class="text-lg font-bold text-white">ConectAEE</span>
             </div>
-            <div class="text-gray-400 text-sm">
+            <div class="text-gray-300 text-sm">
               © 2025 ConectAEE - Sistema de Gestão AEE
             </div>
           </div>
@@ -3786,7 +3786,7 @@ const HomeLanding = {
             <h3 class="text-2xl font-bold text-white">Funcionalidades Detalhadas</h3>
             <button @click="showModal = false" class="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
           </div>
-          <div class="space-y-4 text-gray-300">
+          <div class="space-y-4 text-gray-100">
             <div class="flex gap-3">
               <div class="text-2xl">✅</div>
               <div>

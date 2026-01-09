@@ -3653,7 +3653,188 @@ const HomeLanding = {
       
       <!-- Navbar Moderna -->
       <nav class="backdrop-blur-md" style="background: rgba(10, 15, 30, 0.95); border-bottom: 1px solid rgba(255,255,255,0.1);">
-        <div class="max-w-7xl mx-auto px-8 py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                C
+              </div>
+              <span class="text-2xl font-black">ConectAEE</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <button @click="tab = 'login'" class="px-6 py-2.5 text-white hover:text-blue-400 transition font-medium">
+                Entrar
+              </button>
+              <button @click="tab = 'register'" class="px-6 py-2.5 rounded-xl font-bold transition transform hover:scale-105" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);">
+                Começar Grátis
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Hero Section -->
+      <section class="pt-16 sm:pt-20 lg:pt-24 pb-24 sm:pb-32 lg:pb-40 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <!-- Efeitos de fundo -->
+        <div class="absolute inset-0 opacity-20">
+          <div class="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl" style="background: radial-gradient(circle, #667eea 0%, transparent 70%);"></div>
+          <div class="absolute top-1/2 right-1/4 w-96 h-96 rounded-full blur-3xl" style="background: radial-gradient(circle, #764ba2 0%, transparent 70%);"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto relative z-10">
+          <div class="grid lg:grid-cols-2 gap-12 lg:gap-20 xl:gap-24 items-center">
+            <!-- Coluna da esquerda: Texto -->
+            <div class="text-center lg:text-left space-y-8 lg:space-y-12">
+              <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3);">
+                <span class="w-2 h-2 rounded-full" style="background: #667eea;"></span>
+                <span class="text-sm font-semibold text-blue-300">Educação Especial + Tecnologia</span>
+              </div>
+              
+              <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black leading-tight">
+                <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                  ConectAEE
+                </span>
+                <br>
+                <span class="text-white">Plataforma AEE Completa</span>
+              </h1>
+              
+              <p class="text-lg sm:text-xl text-gray-300 leading-relaxed max-w-xl mx-auto lg:mx-0" style="line-height: 1.8;">
+                Sistema especializado em Atendimento Educacional Especializado com IA, formulários digitais e geração automática de relatórios profissionais.
+              </p>
+              
+              <div class="flex flex-col sm:flex-row gap-4 sm:gap-5 justify-center lg:justify-start">
+                <button @click="tab = 'register'" class="px-10 py-4 rounded-xl font-bold text-lg transition transform hover:scale-105" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);">
+                  Começar Agora
+                </button>
+                <button @click="scrollToFeatures" class="px-10 py-4 rounded-xl font-bold text-lg transition border-2 border-white/20 hover:border-white/40 hover:bg-white/5">
+                  Ver Funcionalidades
+                </button>
+              </div>
+
+              <!-- Stats -->
+              <div class="grid grid-cols-3 gap-6 sm:gap-8 lg:gap-10 pt-8">
+                <div class="space-y-2">
+                  <div class="text-2xl sm:text-3xl font-black" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    3
+                  </div>
+                  <div class="text-xs sm:text-sm text-gray-400">Formulários Oficiais</div>
+                </div>
+                <div class="space-y-2">
+                  <div class="text-2xl sm:text-3xl font-black" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    100%
+                  </div>
+                  <div class="text-xs sm:text-sm text-gray-400">Cloud & Seguro</div>
+                </div>
+                <div class="space-y-2">
+                  <div class="text-2xl sm:text-3xl font-black" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    IA
+                  </div>
+                  <div class="text-xs sm:text-sm text-gray-400">Integrada GPT-4</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Coluna da direita: Visual -->
+            <div class="relative mt-12 lg:mt-0">
+              <div class="rounded-3xl overflow-hidden" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px);">
+                <div class="p-6 sm:p-10 lg:p-14">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 lg:gap-10">
+                    <div class="p-6 sm:p-8 rounded-2xl space-y-3" style="background: rgba(102, 126, 234, 0.15); border: 1px solid rgba(102, 126, 234, 0.3);">
+                      <div class="text-4xl">📋</div>
+                      <div class="font-bold text-lg">PDI Digital</div>
+                      <div class="text-sm text-gray-400">Plano completo</div>
+                    </div>
+                    <div class="p-6 sm:p-8 rounded-2xl space-y-3" style="background: rgba(118, 75, 162, 0.15); border: 1px solid rgba(118, 75, 162, 0.3);">
+                      <div class="text-4xl">🎯</div>
+                      <div class="font-bold text-lg">PAI Estruturado</div>
+                      <div class="text-sm text-gray-400">Atendimento Individual</div>
+                    </div>
+                    <div class="p-6 sm:p-8 rounded-2xl space-y-3" style="background: rgba(240, 147, 251, 0.15); border: 1px solid rgba(240, 147, 251, 0.3);">
+                      <div class="text-4xl">💬</div>
+                      <div class="font-bold text-lg">Entrevista</div>
+                      <div class="text-sm text-gray-400">Com Responsável</div>
+                    </div>
+                    <div class="p-6 sm:p-8 rounded-2xl space-y-3" style="background: rgba(102, 126, 234, 0.15); border: 1px solid rgba(102, 126, 234, 0.3);">
+                      <div class="text-4xl">🤖</div>
+                      <div class="font-bold text-lg">IA Avançada</div>
+                      <div class="text-sm text-gray-400">Transcrição de Áudio</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features Section -->
+      <section id="features" class="py-24 sm:py-32 lg:py-40 px-4 sm:px-6 lg:px-8" style="background: rgba(255,255,255,0.02);">
+        <div class="max-w-7xl mx-auto">
+          <div class="text-center mb-16 sm:mb-20 lg:mb-24 space-y-6 sm:space-y-8">
+            <div class="inline-block px-5 py-2.5 rounded-full" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3);">
+              <span class="text-sm font-semibold text-blue-300">FUNCIONALIDADES</span>
+            </div>
+            <h2 class="text-4xl sm:text-5xl font-black">Tudo que você precisa</h2>
+            <p class="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto" style="line-height: 1.8;">Ferramentas profissionais para gestão completa do AEE</p>
+          </div>
+
+          <div class="grid md:grid-cols-3 gap-8 sm:gap-10 lg:gap-12">
+            <div class="p-8 sm:p-10 lg:p-12 rounded-2xl transition transform hover:scale-105 space-y-6" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%); border: 1px solid rgba(255,255,255,0.1);">
+              <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                📝
+              </div>
+              <h3 class="text-xl sm:text-2xl font-bold">Formulários Completos</h3>
+              <p class="text-gray-400" style="line-height: 1.8;">PDI, PAI e Entrevista com Responsável totalmente digitalizados seguindo modelos oficiais</p>
+            </div>
+
+            <div class="p-8 sm:p-10 lg:p-12 rounded-2xl transition transform hover:scale-105 space-y-6" style="background: linear-gradient(135deg, rgba(118, 75, 162, 0.1) 0%, rgba(240, 147, 251, 0.05) 100%); border: 1px solid rgba(255,255,255,0.1);">
+              <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl" style="background: linear-gradient(135deg, #764ba2 0%, #f093fb 100%);">
+                🤖
+              </div>
+              <h3 class="text-xl sm:text-2xl font-bold">Inteligência Artificial</h3>
+              <p class="text-gray-400" style="line-height: 1.8;">Transcrição automática de áudio para texto e sugestões pedagógicas inteligentes com GPT-4</p>
+            </div>
+
+            <div class="p-8 sm:p-10 lg:p-12 rounded-2xl transition transform hover:scale-105 space-y-6" style="background: linear-gradient(135deg, rgba(240, 147, 251, 0.1) 0%, rgba(102, 126, 234, 0.05) 100%); border: 1px solid rgba(255,255,255,0.1);">
+              <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl" style="background: linear-gradient(135deg, #f093fb 0%, #667eea 100%);">
+                📄
+              </div>
+              <h3 class="text-xl sm:text-2xl font-bold">Relatórios Profissionais</h3>
+              <p class="text-gray-400" style="line-height: 1.8;">Geração automática de PDFs formatados, prontos para impressão e compartilhamento</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA Section -->
+      <section class="py-24 sm:py-32 lg:py-40 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto text-center">
+          <div class="p-12 sm:p-16 lg:p-24 rounded-3xl space-y-8 sm:space-y-10 lg:space-y-12" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(20px);">
+            <h2 class="text-4xl sm:text-5xl font-black">Pronto para começar?</h2>
+            <p class="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto" style="line-height: 1.8;">Cadastre-se gratuitamente e tenha acesso completo a todas as funcionalidades</p>
+            <button @click="tab = 'register'" class="px-10 sm:px-12 py-4 sm:py-5 rounded-xl font-bold text-lg sm:text-xl transition transform hover:scale-105" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 20px 50px rgba(102, 126, 234, 0.5);">
+              Criar Conta Grátis
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer Moderno -->
+      <footer class="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8" style="background: rgba(255,255,255,0.02); border-top: 1px solid rgba(255,255,255,0.1);">
+        <div class="max-w-7xl mx-auto">
+          <div class="flex flex-col sm:flex-row justify-between items-center gap-6 sm:gap-8 lg:gap-10">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                C
+              </div>
+              <span class="text-xl font-black">ConectAEE</span>
+            </div>
+            <div class="text-gray-400 text-sm text-center sm:text-left">
+              © 2025 ConectAEE - Sistema de Gestão AEE
+            </div>
+          </div>
+        </div>
+      </footer>
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">

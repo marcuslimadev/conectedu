@@ -2838,7 +2838,7 @@ const LegislacoesTW = {
 const FloatingMicrophone = {
   template: `
     <teleport to="body">
-    <div v-if="$route.path !== '/'" style="position: fixed; top: 50%; transform: translateY(-50%); right: 0; z-index: 9999; margin-right: 0;">
+    <div v-if="shouldShow" style="position: fixed; bottom: 24px; right: 24px; z-index: 9999;">
       <div v-if="isRecording" 
            style="position: absolute; bottom: 88px; right: 0; background: white; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); padding: 16px; width: 320px; border: 2px solid #ef4444;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
@@ -2891,6 +2891,12 @@ const FloatingMicrophone = {
   },
   
   computed: {
+    shouldShow() {
+        // Só mostra se NÃO estiver na home ('/') E tiver usuário logado
+        // user pode ser acessado via $root.user se estiver exposto, ou via localStorage
+        const hasUser = !!localStorage.getItem('user'); // checagem simples de sessão
+        return this.$route.path !== '/' && hasUser;
+    },
     getTooltip() {
       if (!this.isSupported) return 'Navegador não suportado';
       return this.isRecording ? 'Parar gravação' : 'Gravar áudio para preencher campo';

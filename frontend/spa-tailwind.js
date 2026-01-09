@@ -3652,8 +3652,8 @@ const HomeLanding = {
     <div class="min-h-screen text-white overflow-hidden" style="background: #0a0f1e;">
       
       <!-- Navbar Moderna -->
-      <nav class="fixed top-0 w-full z-50 backdrop-blur-md" style="background: rgba(10, 15, 30, 0.8); border-bottom: 1px solid rgba(255,255,255,0.1);">
-        <div class="max-w-7xl mx-auto px-6 py-4">
+      <nav class="backdrop-blur-md" style="background: rgba(10, 15, 30, 0.95); border-bottom: 1px solid rgba(255,255,255,0.1);">
+        <div class="max-w-7xl mx-auto px-8 py-6">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
@@ -3674,7 +3674,7 @@ const HomeLanding = {
       </nav>
 
       <!-- Hero Section -->
-      <section class="pt-32 pb-20 px-6 relative overflow-hidden">
+      <section class="pt-20 pb-32 px-8 relative overflow-hidden">
         <!-- Efeitos de fundo -->
         <div class="absolute inset-0 opacity-20">
           <div class="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl" style="background: radial-gradient(circle, #667eea 0%, transparent 70%);"></div>
@@ -3682,15 +3682,15 @@ const HomeLanding = {
         </div>
 
         <div class="max-w-7xl mx-auto relative z-10">
-          <div class="grid lg:grid-cols-2 gap-16 items-center">
+          <div class="grid lg:grid-cols-2 gap-20 items-center">
             <!-- Coluna da esquerda: Texto -->
             <div>
-              <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3);">
+              <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full mb-8" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3);">
                 <span class="w-2 h-2 rounded-full" style="background: #667eea;"></span>
                 <span class="text-sm font-semibold text-blue-300">Educação Especial + Tecnologia</span>
               </div>
               
-              <h1 class="text-6xl lg:text-7xl font-black leading-tight mb-6">
+              <h1 class="text-6xl lg:text-7xl font-black leading-tight mb-8">
                 <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
                   ConectAEE
                 </span>
@@ -3698,21 +3698,21 @@ const HomeLanding = {
                 <span class="text-white">Plataforma AEE Completa</span>
               </h1>
               
-              <p class="text-xl text-gray-300 mb-8 leading-relaxed">
+              <p class="text-xl text-gray-300 mb-10 leading-relaxed max-w-xl">
                 Sistema especializado em Atendimento Educacional Especializado com IA, formulários digitais e geração automática de relatórios profissionais.
               </p>
               
-              <div class="flex flex-wrap gap-4 mb-12">
-                <button @click="tab = 'register'" class="px-8 py-4 rounded-xl font-bold text-lg transition transform hover:scale-105" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);">
+              <div class="flex flex-wrap gap-5 mb-16">
+                <button @click="tab = 'register'" class="px-10 py-4 rounded-xl font-bold text-lg transition transform hover:scale-105" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);">
                   Começar Agora
                 </button>
-                <button @click="scrollToFeatures" class="px-8 py-4 rounded-xl font-bold text-lg transition border-2 border-white/20 hover:border-white/40 hover:bg-white/5">
+                <button @click="scrollToFeatures" class="px-10 py-4 rounded-xl font-bold text-lg transition border-2 border-white/20 hover:border-white/40 hover:bg-white/5">
                   Ver Funcionalidades
                 </button>
               </div>
 
               <!-- Stats -->
-              <div class="grid grid-cols-3 gap-6">
+              <div class="grid grid-cols-3 gap-8">
                 <div>
                   <div class="text-3xl font-black" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
                     3
@@ -3738,24 +3738,24 @@ const HomeLanding = {
             <div class="relative">
               <div class="rounded-3xl overflow-hidden" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px);">
                 <div class="p-12">
-                  <div class="grid grid-cols-2 gap-6">
-                    <div class="p-6 rounded-2xl" style="background: rgba(102, 126, 234, 0.15); border: 1px solid rgba(102, 126, 234, 0.3);">
-                      <div class="text-4xl mb-3">📋</div>
+                  <div class="grid grid-cols-2 gap-8">
+                    <div class="p-8 rounded-2xl" style="background: rgba(102, 126, 234, 0.15); border: 1px solid rgba(102, 126, 234, 0.3);">
+                      <div class="text-4xl mb-4">📋</div>
                       <div class="font-bold text-lg mb-2">PDI Digital</div>
                       <div class="text-sm text-gray-400">Plano completo</div>
                     </div>
-                    <div class="p-6 rounded-2xl" style="background: rgba(118, 75, 162, 0.15); border: 1px solid rgba(118, 75, 162, 0.3);">
-                      <div class="text-4xl mb-3">🎯</div>
+                    <div class="p-8 rounded-2xl" style="background: rgba(118, 75, 162, 0.15); border: 1px solid rgba(118, 75, 162, 0.3);">
+                      <div class="text-4xl mb-4">🎯</div>
                       <div class="font-bold text-lg mb-2">PAI Estruturado</div>
                       <div class="text-sm text-gray-400">Atendimento Individual</div>
                     </div>
-                    <div class="p-6 rounded-2xl" style="background: rgba(240, 147, 251, 0.15); border: 1px solid rgba(240, 147, 251, 0.3);">
-                      <div class="text-4xl mb-3">💬</div>
+                    <div class="p-8 rounded-2xl" style="background: rgba(240, 147, 251, 0.15); border: 1px solid rgba(240, 147, 251, 0.3);">
+                      <div class="text-4xl mb-4">💬</div>
                       <div class="font-bold text-lg mb-2">Entrevista</div>
                       <div class="text-sm text-gray-400">Com Responsável</div>
                     </div>
-                    <div class="p-6 rounded-2xl" style="background: rgba(102, 126, 234, 0.15); border: 1px solid rgba(102, 126, 234, 0.3);">
-                      <div class="text-4xl mb-3">🤖</div>
+                    <div class="p-8 rounded-2xl" style="background: rgba(102, 126, 234, 0.15); border: 1px solid rgba(102, 126, 234, 0.3);">
+                      <div class="text-4xl mb-4">🤖</div>
                       <div class="font-bold text-lg mb-2">IA Avançada</div>
                       <div class="text-sm text-gray-400">Transcrição de Áudio</div>
                     </div>
@@ -3768,38 +3768,38 @@ const HomeLanding = {
       </section>
 
       <!-- Features Section -->
-      <section id="features" class="py-24 px-6" style="background: rgba(255,255,255,0.02);">
+      <section id="features" class="py-32 px-8" style="background: rgba(255,255,255,0.02);">
         <div class="max-w-7xl mx-auto">
-          <div class="text-center mb-16">
-            <div class="inline-block px-4 py-2 rounded-full mb-4" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3);">
+          <div class="text-center mb-20">
+            <div class="inline-block px-5 py-2.5 rounded-full mb-6" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3);">
               <span class="text-sm font-semibold text-blue-300">FUNCIONALIDADES</span>
             </div>
-            <h2 class="text-5xl font-black mb-4">Tudo que você precisa</h2>
-            <p class="text-xl text-gray-400">Ferramentas profissionais para gestão completa do AEE</p>
+            <h2 class="text-5xl font-black mb-6">Tudo que você precisa</h2>
+            <p class="text-xl text-gray-400 max-w-2xl mx-auto">Ferramentas profissionais para gestão completa do AEE</p>
           </div>
 
-          <div class="grid md:grid-cols-3 gap-8">
-            <div class="p-8 rounded-2xl transition transform hover:scale-105" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%); border: 1px solid rgba(255,255,255,0.1);">
-              <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-6" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+          <div class="grid md:grid-cols-3 gap-10">
+            <div class="p-10 rounded-2xl transition transform hover:scale-105" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%); border: 1px solid rgba(255,255,255,0.1);">
+              <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-8" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                 📝
               </div>
-              <h3 class="text-2xl font-bold mb-3">Formulários Completos</h3>
+              <h3 class="text-2xl font-bold mb-4">Formulários Completos</h3>
               <p class="text-gray-400 leading-relaxed">PDI, PAI e Entrevista com Responsável totalmente digitalizados seguindo modelos oficiais</p>
             </div>
 
-            <div class="p-8 rounded-2xl transition transform hover:scale-105" style="background: linear-gradient(135deg, rgba(118, 75, 162, 0.1) 0%, rgba(240, 147, 251, 0.05) 100%); border: 1px solid rgba(255,255,255,0.1);">
-              <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-6" style="background: linear-gradient(135deg, #764ba2 0%, #f093fb 100%);">
+            <div class="p-10 rounded-2xl transition transform hover:scale-105" style="background: linear-gradient(135deg, rgba(118, 75, 162, 0.1) 0%, rgba(240, 147, 251, 0.05) 100%); border: 1px solid rgba(255,255,255,0.1);">
+              <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-8" style="background: linear-gradient(135deg, #764ba2 0%, #f093fb 100%);">
                 🤖
               </div>
-              <h3 class="text-2xl font-bold mb-3">Inteligência Artificial</h3>
+              <h3 class="text-2xl font-bold mb-4">Inteligência Artificial</h3>
               <p class="text-gray-400 leading-relaxed">Transcrição automática de áudio para texto e sugestões pedagógicas inteligentes com GPT-4</p>
             </div>
 
-            <div class="p-8 rounded-2xl transition transform hover:scale-105" style="background: linear-gradient(135deg, rgba(240, 147, 251, 0.1) 0%, rgba(102, 126, 234, 0.05) 100%); border: 1px solid rgba(255,255,255,0.1);">
-              <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-6" style="background: linear-gradient(135deg, #f093fb 0%, #667eea 100%);">
+            <div class="p-10 rounded-2xl transition transform hover:scale-105" style="background: linear-gradient(135deg, rgba(240, 147, 251, 0.1) 0%, rgba(102, 126, 234, 0.05) 100%); border: 1px solid rgba(255,255,255,0.1);">
+              <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-8" style="background: linear-gradient(135deg, #f093fb 0%, #667eea 100%);">
                 📄
               </div>
-              <h3 class="text-2xl font-bold mb-3">Relatórios Profissionais</h3>
+              <h3 class="text-2xl font-bold mb-4">Relatórios Profissionais</h3>
               <p class="text-gray-400 leading-relaxed">Geração automática de PDFs formatados, prontos para impressão e compartilhamento</p>
             </div>
           </div>
@@ -3807,11 +3807,11 @@ const HomeLanding = {
       </section>
 
       <!-- CTA Section -->
-      <section class="py-24 px-6">
+      <section class="py-32 px-8">
         <div class="max-w-4xl mx-auto text-center">
-          <div class="p-16 rounded-3xl" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(20px);">
-            <h2 class="text-5xl font-black mb-6">Pronto para começar?</h2>
-            <p class="text-xl text-gray-300 mb-8">Cadastre-se gratuitamente e tenha acesso completo a todas as funcionalidades</p>
+          <div class="p-20 rounded-3xl" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(20px);">
+            <h2 class="text-5xl font-black mb-8">Pronto para começar?</h2>
+            <p class="text-xl text-gray-300 mb-10 max-w-2xl mx-auto">Cadastre-se gratuitamente e tenha acesso completo a todas as funcionalidades</p>
             <button @click="tab = 'register'" class="px-12 py-5 rounded-xl font-bold text-xl transition transform hover:scale-105" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 20px 50px rgba(102, 126, 234, 0.5);">
               Criar Conta Grátis
             </button>
@@ -3820,9 +3820,9 @@ const HomeLanding = {
       </section>
 
       <!-- Footer Moderno -->
-      <footer class="py-12 px-6" style="background: rgba(255,255,255,0.02); border-top: 1px solid rgba(255,255,255,0.1);">
+      <footer class="py-16 px-8" style="background: rgba(255,255,255,0.02); border-top: 1px solid rgba(255,255,255,0.1);">
         <div class="max-w-7xl mx-auto">
-          <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+          <div class="flex flex-col md:flex-row justify-between items-center gap-8">
             <div class="flex items-center gap-3">
               <div class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                 C

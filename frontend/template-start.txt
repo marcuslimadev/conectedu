@@ -1,0 +1,27 @@
+const HomeLanding = {
+  template: `
+    <div class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white overflow-hidden">
+      <!-- Animated background elements -->
+      <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div class="absolute top-1/3 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style="animation-delay: 2s"></div>
+        <div class="absolute bottom-0 left-1/2 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style="animation-delay: 4s"></div>
+      </div>
+
+      <!-- Header/Navbar -->
+      <nav class="relative z-40 bg-slate-900/40 backdrop-blur-xl border-b border-white/10 sticky top-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex items-center justify-between h-16">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-gradient-to-br from-cyan-400 to-purple-600 rounded-lg flex items-center justify-center font-bold text-lg">C</div>
+              <span class="text-xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">ConectAEE</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <button @click="tab = ''login''" class="px-4 py-2 text-gray-300 hover:text-white transition font-medium">Entrar</button>
+              <button @click="tab = ''register''" class="px-6 py-2 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 rounded-lg font-bold transition shadow-lg hover:shadow-xl">
+                Cadastrar
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>

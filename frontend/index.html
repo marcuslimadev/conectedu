@@ -12,6 +12,9 @@
   <!-- <link rel="manifest" href="./manifest.json"> PWA desabilitado -->
   <!-- <meta name="theme-color" content="#4A90E2"> PWA desabilitado -->
   <meta name="description" content="Sistema para gestão de alunos e AEE">
+  <!-- Bootstrap 5.3 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"
@@ -56,35 +59,10 @@
       }
     }
   </script>
-  <link rel="stylesheet" href="./tailwind-local.css">
-  <script>
-    // Tailwind CSS carregado localmente
-    console.log('✅ Tailwind CSS carregado sem versioning');
-
-    // Limpar cache automaticamente se necessário
-    if ('caches' in window) {
-      caches.keys().then(names => {
-        names.forEach(name => {
-          if (name.includes('conectedu')) {
-            caches.delete(name);
-            console.log('🧹 Cache limpo automaticamente:', name);
-          }
-        });
-      });
-    }
-
-    // Forçar reload se detectar versão antiga no localStorage
-    const currentVersion = '5.0';
-    const storedVersion2 = localStorage.getItem('app_version');
-    if (storedVersion2 && storedVersion2 !== currentVersion) {
-      localStorage.setItem('app_version', currentVersion);
-      console.log('🔄 Versão atualizada, limpando dados antigos');
-      // Não fazer reload automático, apenas limpar dados
-      localStorage.removeItem('token'); // Força novo login
-    } else if (!storedVersion2) {
-      localStorage.setItem('app_version', currentVersion);
-    }
-  </script>
+  
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  
   <link rel="stylesheet" href="./accessibility.css">
   <script src="./accessibility.js" defer></script>
   <style>
@@ -430,49 +408,8 @@
   <script src="./formularios-aee-completos.js"></script>
   <script>document.write('<script src="./spa-tailwind.js?v=20251212-pai-completo-' + Date.now() + '"><\/script>');</script>
 
-  <!-- Modal functionality -->
-  <script>
-    window.bootstrap = {
-      Modal: class {
-        constructor(el) {
-          this.el = el;
-        }
-        show() {
-          this.el.classList.add('tw-open');
-          document.body.style.overflow = 'hidden';
-          this.el.style.display = 'block';
-        }
-        hide() {
-          this.el.classList.remove('tw-open');
-          document.body.style.overflow = '';
-          this.el.style.display = 'none';
-        }
-        static getInstance(el) {
-          return new this(el);
-        }
-      }
-    };
-
-    // Fechar modal ao clicar no backdrop
-    document.addEventListener('click', function (e) {
-      if (e.target.classList.contains('modal-backdrop')) {
-        const modal = e.target.closest('.modal');
-        if (modal) {
-          bootstrap.Modal.getInstance(modal).hide();
-        }
-      }
-    });
-
-    // Fechar modal com ESC
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') {
-        const openModal = document.querySelector('.modal.tw-open');
-        if (openModal) {
-          bootstrap.Modal.getInstance(openModal).hide();
-        }
-      }
-    });
-  </script>
+  <!-- Bootstrap 5.3 JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 
 
 </body>

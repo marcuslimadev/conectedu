@@ -509,3 +509,6 @@ const EntrevistaResponsavelWizardCompleto = {
     }
   }
 };
+
+// Exportar para window para uso no router
+window.EntrevistaResponsavelCompleta = EntrevistaResponsavelWizardCompleto;

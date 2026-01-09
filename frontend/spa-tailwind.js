@@ -3649,26 +3649,24 @@ const Layout = {
 // Página inicial com login embutido
 const HomeLanding = {
   template: `
-    <div class="min-h-screen text-white overflow-hidden" style="background: linear-gradient(135deg, #020617 0%, #0f172a 50%, #020617 100%);">
-      <!-- Animated background elements -->
-      <div class="fixed inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl animate-pulse" style="background: rgba(6, 182, 212, 0.15);"></div>
-        <div class="absolute top-1/3 right-1/4 w-96 h-96 rounded-full blur-3xl animate-pulse" style="background: rgba(168, 85, 247, 0.15); animation-delay: 2s;"></div>
-        <div class="absolute bottom-0 left-1/2 w-96 h-96 rounded-full blur-3xl animate-pulse" style="background: rgba(59, 130, 246, 0.15); animation-delay: 4s;"></div>
-      </div>
-
-      <!-- Header/Navbar -->
-      <nav class="relative z-40 bg-slate-900/40 backdrop-blur-xl border-b border-white/10 sticky top-0">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex items-center justify-between h-16">
+    <div class="min-h-screen text-white overflow-hidden" style="background: #0a0f1e;">
+      
+      <!-- Navbar Moderna -->
+      <nav class="fixed top-0 w-full z-50 backdrop-blur-md" style="background: rgba(10, 15, 30, 0.8); border-bottom: 1px solid rgba(255,255,255,0.1);">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+          <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-gradient-to-br from-cyan-400 to-purple-600 rounded-lg flex items-center justify-center font-bold text-lg">C</div>
-              <span class="text-xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">ConectAEE</span>
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                C
+              </div>
+              <span class="text-2xl font-black">ConectAEE</span>
             </div>
-            <div class="flex items-center gap-3">
-              <button @click="tab = 'login'" class="px-4 py-2 text-gray-300 hover:text-white transition font-medium">Entrar</button>
-              <button @click="tab = 'register'" class="px-6 py-2 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 rounded-lg font-bold transition shadow-lg hover:shadow-xl">
-                Cadastrar
+            <div class="flex items-center gap-4">
+              <button @click="tab = 'login'" class="px-6 py-2.5 text-white hover:text-blue-400 transition font-medium">
+                Entrar
+              </button>
+              <button @click="tab = 'register'" class="px-6 py-2.5 rounded-xl font-bold transition transform hover:scale-105" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);">
+                Começar Grátis
               </button>
             </div>
           </div>
@@ -3676,151 +3674,167 @@ const HomeLanding = {
       </nav>
 
       <!-- Hero Section -->
-      <div class="relative z-30 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
-        <div class="text-center">
-          <h1 class="text-5xl md:text-6xl font-extrabold mb-6">
-            <span class="bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-              Gestão AEE Completa
-            </span>
-            <br>
-            <span class="text-white">para sua Escola</span>
-          </h1>
-          <p class="text-xl text-gray-100 mb-8 max-w-2xl mx-auto">
-            Plataforma especializada em Atendimento Educacional Especializado com IA integrada para otimizar seu trabalho pedagógico
-          </p>
-          <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <button @click="tab = 'register'" class="px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 rounded-lg text-lg font-bold transition shadow-2xl hover:shadow-cyan-500/50 transform hover:scale-105">
-              Começar Agora - Grátis
-            </button>
-            <button @click="scrollToFeatures" class="px-8 py-4 bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/20 rounded-lg text-lg font-bold transition">
-              Ver Funcionalidades
-            </button>
+      <section class="pt-32 pb-20 px-6 relative overflow-hidden">
+        <!-- Efeitos de fundo -->
+        <div class="absolute inset-0 opacity-20">
+          <div class="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl" style="background: radial-gradient(circle, #667eea 0%, transparent 70%);"></div>
+          <div class="absolute top-1/2 right-1/4 w-96 h-96 rounded-full blur-3xl" style="background: radial-gradient(circle, #764ba2 0%, transparent 70%);"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto relative z-10">
+          <div class="grid lg:grid-cols-2 gap-16 items-center">
+            <!-- Coluna da esquerda: Texto -->
+            <div>
+              <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3);">
+                <span class="w-2 h-2 rounded-full" style="background: #667eea;"></span>
+                <span class="text-sm font-semibold text-blue-300">Educação Especial + Tecnologia</span>
+              </div>
+              
+              <h1 class="text-6xl lg:text-7xl font-black leading-tight mb-6">
+                <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                  ConectAEE
+                </span>
+                <br>
+                <span class="text-white">Plataforma AEE Completa</span>
+              </h1>
+              
+              <p class="text-xl text-gray-300 mb-8 leading-relaxed">
+                Sistema especializado em Atendimento Educacional Especializado com IA, formulários digitais e geração automática de relatórios profissionais.
+              </p>
+              
+              <div class="flex flex-wrap gap-4 mb-12">
+                <button @click="tab = 'register'" class="px-8 py-4 rounded-xl font-bold text-lg transition transform hover:scale-105" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);">
+                  Começar Agora
+                </button>
+                <button @click="scrollToFeatures" class="px-8 py-4 rounded-xl font-bold text-lg transition border-2 border-white/20 hover:border-white/40 hover:bg-white/5">
+                  Ver Funcionalidades
+                </button>
+              </div>
+
+              <!-- Stats -->
+              <div class="grid grid-cols-3 gap-6">
+                <div>
+                  <div class="text-3xl font-black" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    3
+                  </div>
+                  <div class="text-sm text-gray-400">Formulários Oficiais</div>
+                </div>
+                <div>
+                  <div class="text-3xl font-black" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    100%
+                  </div>
+                  <div class="text-sm text-gray-400">Cloud & Seguro</div>
+                </div>
+                <div>
+                  <div class="text-3xl font-black" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    IA
+                  </div>
+                  <div class="text-sm text-gray-400">Integrada GPT-4</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Coluna da direita: Visual -->
+            <div class="relative">
+              <div class="rounded-3xl overflow-hidden" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px);">
+                <div class="p-12">
+                  <div class="grid grid-cols-2 gap-6">
+                    <div class="p-6 rounded-2xl" style="background: rgba(102, 126, 234, 0.15); border: 1px solid rgba(102, 126, 234, 0.3);">
+                      <div class="text-4xl mb-3">📋</div>
+                      <div class="font-bold text-lg mb-2">PDI Digital</div>
+                      <div class="text-sm text-gray-400">Plano completo</div>
+                    </div>
+                    <div class="p-6 rounded-2xl" style="background: rgba(118, 75, 162, 0.15); border: 1px solid rgba(118, 75, 162, 0.3);">
+                      <div class="text-4xl mb-3">🎯</div>
+                      <div class="font-bold text-lg mb-2">PAI Estruturado</div>
+                      <div class="text-sm text-gray-400">Atendimento Individual</div>
+                    </div>
+                    <div class="p-6 rounded-2xl" style="background: rgba(240, 147, 251, 0.15); border: 1px solid rgba(240, 147, 251, 0.3);">
+                      <div class="text-4xl mb-3">💬</div>
+                      <div class="font-bold text-lg mb-2">Entrevista</div>
+                      <div class="text-sm text-gray-400">Com Responsável</div>
+                    </div>
+                    <div class="p-6 rounded-2xl" style="background: rgba(102, 126, 234, 0.15); border: 1px solid rgba(102, 126, 234, 0.3);">
+                      <div class="text-4xl mb-3">🤖</div>
+                      <div class="font-bold text-lg mb-2">IA Avançada</div>
+                      <div class="text-sm text-gray-400">Transcrição de Áudio</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
       <!-- Features Section -->
-      <div id="features" class="relative z-30 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h2 class="text-4xl font-bold text-center mb-12 bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-          Funcionalidades Principais
-        </h2>
-        <div class="grid md:grid-cols-3 gap-8">
-          <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8 hover:bg-white/15 transition shadow-xl">
-            <div class="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center text-3xl mb-4">
-              📋
+      <section id="features" class="py-24 px-6" style="background: rgba(255,255,255,0.02);">
+        <div class="max-w-7xl mx-auto">
+          <div class="text-center mb-16">
+            <div class="inline-block px-4 py-2 rounded-full mb-4" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3);">
+              <span class="text-sm font-semibold text-blue-300">FUNCIONALIDADES</span>
             </div>
-            <h3 class="text-2xl font-bold mb-3 text-white">Formulários AEE Completos</h3>
-            <p class="text-gray-100">Entrevista Inicial, PDI e PAI digitalizados e organizados em um só lugar</p>
+            <h2 class="text-5xl font-black mb-4">Tudo que você precisa</h2>
+            <p class="text-xl text-gray-400">Ferramentas profissionais para gestão completa do AEE</p>
           </div>
-          
-          <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8 hover:bg-white/15 transition shadow-xl">
-            <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center text-3xl mb-4">
-              🤖
+
+          <div class="grid md:grid-cols-3 gap-8">
+            <div class="p-8 rounded-2xl transition transform hover:scale-105" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%); border: 1px solid rgba(255,255,255,0.1);">
+              <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-6" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                📝
+              </div>
+              <h3 class="text-2xl font-bold mb-3">Formulários Completos</h3>
+              <p class="text-gray-400 leading-relaxed">PDI, PAI e Entrevista com Responsável totalmente digitalizados seguindo modelos oficiais</p>
             </div>
-            <h3 class="text-2xl font-bold mb-3 text-white">IA Integrada</h3>
-            <p class="text-gray-100">Transcrição automática de áudio e sugestões pedagógicas inteligentes com GPT-4</p>
-          </div>
-          
-          <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8 hover:bg-white/15 transition shadow-xl">
-            <div class="w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl flex items-center justify-center text-3xl mb-4">
-              📊
+
+            <div class="p-8 rounded-2xl transition transform hover:scale-105" style="background: linear-gradient(135deg, rgba(118, 75, 162, 0.1) 0%, rgba(240, 147, 251, 0.05) 100%); border: 1px solid rgba(255,255,255,0.1);">
+              <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-6" style="background: linear-gradient(135deg, #764ba2 0%, #f093fb 100%);">
+                🤖
+              </div>
+              <h3 class="text-2xl font-bold mb-3">Inteligência Artificial</h3>
+              <p class="text-gray-400 leading-relaxed">Transcrição automática de áudio para texto e sugestões pedagógicas inteligentes com GPT-4</p>
             </div>
-            <h3 class="text-2xl font-bold mb-3 text-white">Relatórios em PDF</h3>
-            <p class="text-gray-100">Geração automática de relatórios profissionais prontos para impressão</p>
+
+            <div class="p-8 rounded-2xl transition transform hover:scale-105" style="background: linear-gradient(135deg, rgba(240, 147, 251, 0.1) 0%, rgba(102, 126, 234, 0.05) 100%); border: 1px solid rgba(255,255,255,0.1);">
+              <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-6" style="background: linear-gradient(135deg, #f093fb 0%, #667eea 100%);">
+                📄
+              </div>
+              <h3 class="text-2xl font-bold mb-3">Relatórios Profissionais</h3>
+              <p class="text-gray-400 leading-relaxed">Geração automática de PDFs formatados, prontos para impressão e compartilhamento</p>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Trust Badges -->
-      <div class="relative z-30 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6 text-center">
-            <div class="text-4xl mb-2">🔒</div>
-            <div class="text-sm text-white font-medium">Dados Protegidos</div>
-          </div>
-          <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6 text-center">
-            <div class="text-4xl mb-2">☁️</div>
-            <div class="text-sm text-white font-medium">100% Cloud</div>
-          </div>
-          <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6 text-center">
-            <div class="text-4xl mb-2">📱</div>
-            <div class="text-sm text-white font-medium">Mobile Ready</div>
-          </div>
-          <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6 text-center">
-            <div class="text-4xl mb-2">⚡</div>
-            <div class="text-sm text-white font-medium">Super Rápido</div>
+      <!-- CTA Section -->
+      <section class="py-24 px-6">
+        <div class="max-w-4xl mx-auto text-center">
+          <div class="p-16 rounded-3xl" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(20px);">
+            <h2 class="text-5xl font-black mb-6">Pronto para começar?</h2>
+            <p class="text-xl text-gray-300 mb-8">Cadastre-se gratuitamente e tenha acesso completo a todas as funcionalidades</p>
+            <button @click="tab = 'register'" class="px-12 py-5 rounded-xl font-bold text-xl transition transform hover:scale-105" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 20px 50px rgba(102, 126, 234, 0.5);">
+              Criar Conta Grátis
+            </button>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Pricing CTA -->
-      <div class="relative z-30 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div class="bg-gradient-to-r from-cyan-500/20 to-purple-500/20 backdrop-blur-xl border border-white/20 rounded-3xl p-12 text-center shadow-2xl">
-          <h2 class="text-4xl font-bold mb-4 text-white">Comece Gratuitamente</h2>
-          <p class="text-xl text-gray-100 mb-8">Sem cartão de crédito. Acesso completo às funcionalidades.</p>
-          <button @click="tab = 'register'" class="px-10 py-5 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 rounded-xl text-xl font-bold transition shadow-2xl hover:shadow-cyan-500/50 transform hover:scale-105">
-            Criar Conta Grátis
-          </button>
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <footer class="relative z-30 bg-slate-900/60 backdrop-blur-xl border-t border-white/10 mt-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+      <!-- Footer Moderno -->
+      <footer class="py-12 px-6" style="background: rgba(255,255,255,0.02); border-top: 1px solid rgba(255,255,255,0.1);">
+        <div class="max-w-7xl mx-auto">
+          <div class="flex flex-col md:flex-row justify-between items-center gap-6">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-gradient-to-br from-cyan-400 to-purple-600 rounded-lg flex items-center justify-center font-bold text-lg">C</div>
-              <span class="text-lg font-bold text-white">ConectAEE</span>
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                C
+              </div>
+              <span class="text-xl font-black">ConectAEE</span>
             </div>
-            <div class="text-gray-300 text-sm">
+            <div class="text-gray-400">
               © 2025 ConectAEE - Sistema de Gestão AEE
             </div>
           </div>
         </div>
       </footer>
-
-      <!-- Modal de Demonstração -->
-      <div v-if="showModal" @click="showModal = false" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div @click.stop class="bg-slate-900/95 backdrop-blur-xl border border-white/20 rounded-2xl max-w-2xl w-full p-8 shadow-2xl">
-          <div class="flex justify-between items-center mb-6">
-            <h3 class="text-2xl font-bold text-white">Funcionalidades Detalhadas</h3>
-            <button @click="showModal = false" class="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
-          </div>
-          <div class="space-y-4 text-gray-100">
-            <div class="flex gap-3">
-              <div class="text-2xl">✅</div>
-              <div>
-                <h4 class="font-bold text-white mb-1">Gestão Completa de Alunos</h4>
-                <p class="text-sm">Cadastro, edição e acompanhamento de todos os alunos AEE</p>
-              </div>
-            </div>
-            <div class="flex gap-3">
-              <div class="text-2xl">✅</div>
-              <div>
-                <h4 class="font-bold text-white mb-1">Formulários Digitalizados</h4>
-                <p class="text-sm">Entrevista com responsáveis, PDI e PAI totalmente digitais</p>
-              </div>
-            </div>
-            <div class="flex gap-3">
-              <div class="text-2xl">✅</div>
-              <div>
-                <h4 class="font-bold text-white mb-1">Transcrição de Áudio com IA</h4>
-                <p class="text-sm">Grave áudios durante entrevistas e converta automaticamente em texto</p>
-              </div>
-            </div>
-            <div class="flex gap-3">
-              <div class="text-2xl">✅</div>
-              <div>
-                <h4 class="font-bold text-white mb-1">Relatórios Profissionais</h4>
-                <p class="text-sm">PDFs formatados e prontos para impressão ou compartilhamento</p>
-              </div>
-            </div>
-          </div>
-          <button @click="showModal = false" class="mt-8 w-full px-6 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 rounded-lg font-bold transition">
-            Fechar
-          </button>
-        </div>
-      </div>
 
       <!-- Login/Register Modal -->
       <div v-if="tab === 'login' || tab === 'register'" @click.self="tab = null" 

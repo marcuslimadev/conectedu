@@ -182,11 +182,18 @@ class AccessibilityManager {
 
   loadVlibras() {
     if (this.settings.vlibras) {
+      if (document.getElementById('vlibras-script')) return; // Evita carregar duas vezes
+      
       const script = document.createElement('script');
+      script.id = 'vlibras-script';
       script.src = 'https://vlibras.gov.br/app/vlibras-plugin.js';
       script.onload = () => {
         if (window.VLibras) {
-          new window.VLibras.Widget('https://vlibras.gov.br/app');
+          try {
+            new window.VLibras.Widget('https://vlibras.gov.br/app');
+          } catch (e) {
+            console.warn('ConectEDU: Erro ao iniciar VLibras:', e);
+          }
         }
       };
       document.head.appendChild(script);

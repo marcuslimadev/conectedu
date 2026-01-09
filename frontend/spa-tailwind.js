@@ -3647,7 +3647,6 @@ const Layout = {
 };
 
 // Página inicial com login embutido
-// PÃ¡gina inicial com login embutido
 const HomeLanding = {
   template: `
     <div class="min-h-screen bg-[#0a0f1e] text-white font-sans relative overflow-x-hidden selection:bg-cyan-500 selection:text-white">
@@ -3666,7 +3665,7 @@ const HomeLanding = {
               Entrar
             </button>
             <button @click="tab = 'register'" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-sm font-semibold shadow-lg shadow-cyan-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
-              ComeÃ§ar GrÃ¡tis
+              Começar Grátis
             </button>
           </div>
         </div>
@@ -3683,7 +3682,7 @@ const HomeLanding = {
                 <div class="flex-1 text-center lg:text-left">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-900/30 border border-blue-500/30 text-blue-300 text-xs font-semibold mb-6">
                         <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
-                        EducaÃ§Ã£o Especial + Tecnologia
+                        Educação Especial + Tecnologia
                     </div>
                     <h1 class="text-5xl lg:text-7xl font-bold tracking-tight leading-tight mb-6">
                         <span class="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent">ConectAEE</span>
@@ -3691,11 +3690,11 @@ const HomeLanding = {
                         <span class="text-white">Plataforma Completa</span>
                     </h1>
                     <p class="text-lg text-gray-400 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                        Sistema especializado em Atendimento Educacional Especializado com IA, formulÃ¡rios digitais e geraÃ§Ã£o automÃ¡tica de relatÃ³rios profissionais.
+                        Sistema especializado em Atendimento Educacional Especializado com IA, formulários digitais e geração automática de relatórios profissionais.
                     </p>
                     <div class="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
                         <button @click="tab = 'register'" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-lg shadow-xl shadow-cyan-500/20 transition-all hover:-translate-y-1">
-                            ComeÃ§ar Agora
+                            Começar Agora
                         </button>
                         <button @click="scrollToFeatures" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold transition-all backdrop-blur-sm">
                             Ver Funcionalidades
@@ -3710,33 +3709,33 @@ const HomeLanding = {
       <section id="features" class="py-24 bg-gradient-to-b from-[#0a0f1e] to-[#0f172a]">
         <div class="container mx-auto px-6">
             <div class="text-center max-w-3xl mx-auto mb-16">
-                <h2 class="text-3xl lg:text-5xl font-bold mb-6 text-white">Tudo que vocÃª precisa</h2>
+                <h2 class="text-3xl lg:text-5xl font-bold mb-6 text-white">Tudo que você precisa</h2>
                 <p class="text-lg text-gray-400">Ferramentas profissionais desenvolvidas especificamente para o dia a dia do professor de AEE.</p>
             </div>
 
             <div class="grid md:grid-cols-3 gap-8">
                 <div class="group p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-blue-500/30 transition-all duration-300">
                     <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-3xl mb-6 shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
-                        ðŸ“
+                        📝
                     </div>
-                    <h3 class="text-xl font-bold text-white mb-4">FormulÃ¡rios Completos</h3>
+                    <h3 class="text-xl font-bold text-white mb-4">Formulários Completos</h3>
                     <p class="text-gray-400 leading-relaxed">PDI, PAI e Entrevistas totalmente digitalizados seguindo os modelos oficiais do MEC e secretarias.</p>
                 </div>
 
                 <div class="group p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-purple-500/30 transition-all duration-300">
                     <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-3xl mb-6 shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform">
-                        ðŸ¤–
+                        🤖
                     </div>
-                    <h3 class="text-xl font-bold text-white mb-4">InteligÃªncia Artificial</h3>
-                    <p class="text-gray-400 leading-relaxed">Transcreva Ã¡udios de atendimentos automaticamente e receba sugestÃµes pedagÃ³gicas da IA.</p>
+                    <h3 class="text-xl font-bold text-white mb-4">Inteligência Artificial</h3>
+                    <p class="text-gray-400 leading-relaxed">Transcreva áudios de atendimentos automaticamente e receba sugestões pedagógicas da IA.</p>
                 </div>
 
                 <div class="group p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-pink-500/30 transition-all duration-300">
                     <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500 to-pink-700 flex items-center justify-center text-3xl mb-6 shadow-lg shadow-pink-500/20 group-hover:scale-110 transition-transform">
-                        ðŸ“„
+                        📄
                     </div>
-                    <h3 class="text-xl font-bold text-white mb-4">RelatÃ³rios em PDF</h3>
-                    <p class="text-gray-400 leading-relaxed">Gere documentos profissionais prontos para impressÃ£o com formataÃ§Ã£o impecÃ¡vel e seu cabeÃ§alho.</p>
+                    <h3 class="text-xl font-bold text-white mb-4">Relatórios em PDF</h3>
+                    <p class="text-gray-400 leading-relaxed">Gere documentos profissionais prontos para impressão com formatação impecável e seu cabeçalho.</p>
                 </div>
             </div>
         </div>
@@ -3801,7 +3800,7 @@ const HomeLanding = {
                 <input id="home-password" :type="showLoginPassword ? 'text' : 'password'"
                        v-model="loginForm.password" autocomplete="current-password" required
                        class="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 pr-10 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
-                       placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
+                       placeholder="••••••••">
                 <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
                         @click="showLoginPassword = !showLoginPassword">
                   <i :class="showLoginPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
@@ -3814,7 +3813,7 @@ const HomeLanding = {
                 Lembrar meu e-mail
               </label>
               <button type="button" class="text-cyan-400 hover:text-cyan-300"
-                      @click="$showToast && $showToast('RecuperaÃ§Ã£o em breve', 'Estamos finalizando essa etapa.', 'info')">
+                      @click="$showToast && $showToast('Recuperação em breve', 'Estamos finalizando essa etapa.', 'info')">
                 Esqueci minha senha
               </button>
             </div>
@@ -3858,9 +3857,9 @@ const HomeLanding = {
               </div>
               <div class="mt-2 text-xs text-gray-400 grid grid-cols-2 gap-1">
                 <span :class="passwordChecks.length ? 'text-cyan-400' : ''">8+ caracteres</span>
-                <span :class="passwordChecks.uppercase ? 'text-cyan-400' : ''">1 maiÃºscula</span>
-                <span :class="passwordChecks.lowercase ? 'text-cyan-400' : ''">1 minÃºscula</span>
-                <span :class="passwordChecks.number ? 'text-cyan-400' : ''">1 nÃºmero</span>
+                <span :class="passwordChecks.uppercase ? 'text-cyan-400' : ''">1 maiúscula</span>
+                <span :class="passwordChecks.lowercase ? 'text-cyan-400' : ''">1 minúscula</span>
+                <span :class="passwordChecks.number ? 'text-cyan-400' : ''">1 número</span>
                 <span :class="passwordChecks.special ? 'text-cyan-400' : ''">1 especial</span>
               </div>
             </div>
@@ -3870,7 +3869,7 @@ const HomeLanding = {
                      class="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
                      placeholder="Repita a senha">
               <div v-if="registerForm.password && registerForm.confirm_password && registerForm.password !== registerForm.confirm_password"
-                   class="mt-1 text-xs text-rose-400">As senhas nÃ£o coincidem</div>
+                   class="mt-1 text-xs text-rose-400">As senhas não coincidem</div>
             </div>
             <div v-if="registerError" class="rounded-xl bg-rose-500/20 border border-rose-500/30 p-3 text-sm text-rose-200">
               {{ registerError }}
@@ -3887,7 +3886,7 @@ const HomeLanding = {
               <span v-else>Finalizar cadastro</span>
             </button>
             <p class="text-xs text-gray-400 text-center">
-              Administradores sÃ£o cadastrados manualmente pelo gestor do sistema.
+              Administradores são cadastrados manualmente pelo gestor do sistema.
             </p>
           </form>
         </section>
@@ -3970,7 +3969,7 @@ const HomeLanding = {
           this.loginError = res.data.error || 'Erro ao fazer login';
         }
       } catch (err) {
-        this.loginError = err.response?.data?.error || 'Erro de conexÃ£o';
+        this.loginError = err.response?.data?.error || 'Erro de conexão';
       } finally {
         this.loginLoading = false;
       }
@@ -3998,7 +3997,7 @@ const HomeLanding = {
           this.registerError = res.data.error || 'Erro ao criar conta';
         }
       } catch (err) {
-        this.registerError = err.response?.data?.error || 'Erro de conexÃ£o';
+        this.registerError = err.response?.data?.error || 'Erro de conexão';
       } finally {
         this.registerLoading = false;
       }
@@ -4018,7 +4017,6 @@ const HomeLanding = {
 };
 
 
-// PÃ¡gina de Login
 const Login = {
   template: `
     <div class="min-h-screen grid grid-cols-1 lg:grid-cols-2">

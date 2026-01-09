@@ -430,3 +430,6 @@ const EntrevistaResponsavelCompleta = {
   }
 };
 
+// Exportar para window para uso no router
+window.EntrevistaResponsavelCompletaForm = EntrevistaResponsavelCompleta;
+

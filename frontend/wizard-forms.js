@@ -274,3 +274,6 @@ const EntrevistaResponsavelWizard = {
     }
   }
 };
+
+// Exportar para window para uso no router
+window.EntrevistaResponsavelWizard = EntrevistaResponsavelWizard;

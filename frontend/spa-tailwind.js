@@ -3649,10 +3649,10 @@ const Layout = {
 // Página inicial com login embutido
 const HomeLanding = {
   template: `
-    <div class="min-h-screen bg-[#0a0f1e] text-white font-sans relative overflow-x-hidden selection:bg-cyan-500 selection:text-white">
+    <div class="min-h-screen text-white font-sans relative overflow-x-hidden selection:bg-cyan-500 selection:text-white" style="background-color: #0a0f1e">
       
       <!-- Navbar -->
-      <nav class="fixed top-0 inset-x-0 z-50 transition-all duration-300" :class="scrolled ? 'bg-[#0a0f1e]/80 backdrop-blur-md border-b border-white/10 py-4' : 'bg-transparent py-6'">
+      <nav class="fixed top-0 inset-x-0 z-50 transition-all duration-300" :class="scrolled ? 'backdrop-blur-md border-b border-white/10 py-4' : 'bg-transparent py-6'" :style="scrolled ? 'background-color: rgba(10, 15, 30, 0.8)' : ''">
         <div class="container mx-auto px-6 flex items-center justify-between">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-xl font-bold text-white shadow-lg shadow-cyan-500/20">
@@ -3706,7 +3706,7 @@ const HomeLanding = {
       </section>
 
       <!-- Features Section -->
-      <section id="features" class="py-24 bg-gradient-to-b from-[#0a0f1e] to-[#0f172a]">
+      <section id="features" class="py-24" style="background: linear-gradient(to bottom, #0a0f1e, #0f172a)">
         <div class="container mx-auto px-6">
             <div class="text-center max-w-3xl mx-auto mb-16">
                 <h2 class="text-3xl lg:text-5xl font-bold mb-6 text-white">Tudo que você precisa</h2>
@@ -3742,7 +3742,7 @@ const HomeLanding = {
       </section>
 
       <!-- Footer -->
-      <footer class="py-12 border-t border-white/10 bg-[#050810]">
+      <footer class="py-12 border-t border-white/10" style="background-color: #050810">
         <div class="container mx-auto px-6 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-6">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-sm font-bold text-white">
@@ -3758,8 +3758,8 @@ const HomeLanding = {
 
       <!-- Login/Register Modal -->
       <div v-if="tab === 'login' || tab === 'register'" @click.self="tab = null" 
-           class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <section class="bg-slate-900/95 backdrop-blur-xl border border-white/20 text-white rounded-3xl shadow-2xl p-6 sm:p-8 max-w-md w-full relative">
+           class="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-4" style="background-color: rgba(0, 0, 0, 0.6)">
+        <section class="backdrop-blur-xl border border-white/20 text-white rounded-3xl shadow-2xl p-6 sm:p-8 max-w-md w-full relative" style="background-color: rgba(15, 23, 42, 0.95)">
           <button @click="tab = null" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition">
             <i class="fas fa-times text-gray-400"></i>
           </button>
@@ -3772,7 +3772,7 @@ const HomeLanding = {
             <span class="text-xs uppercase tracking-[0.3em] text-gray-500">Professor</span>
           </div>
 
-          <div class="grid grid-cols-2 rounded-2xl bg-slate-800/50 p-1 text-sm font-medium mb-6">
+          <div class="grid grid-cols-2 rounded-2xl p-1 text-sm font-medium mb-6" style="background-color: rgba(30, 41, 59, 0.5)">
             <button type="button"
                     class="py-2 rounded-2xl transition"
                     :class="tab === 'login' ? 'bg-gradient-to-r from-cyan-600 to-purple-600 shadow text-white' : 'text-gray-400 hover:text-white'"

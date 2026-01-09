@@ -3649,136 +3649,105 @@ const Layout = {
 // Página inicial com login embutido
 const HomeLanding = {
   template: `
-    <div class="min-vh-100 text-white overflow-hidden" style="background: #0a0f1e; font-family: 'Inter', sans-serif;">
+    <div class="min-h-screen text-white overflow-hidden" style="background: #0a0f1e;">
       
-      <!-- Navbar Bootstrap -->
-      <nav class="navbar navbar-expand-lg py-4" style="background: rgba(10, 15, 30, 0.95); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.1);">
-        <div class="container-fluid container-xxl px-4 px-lg-5">
-          <a class="navbar-brand d-flex align-items-center gap-3" href="#" @click.prevent>
-            <div class="d-flex align-items-center justify-content-center rounded-3 fw-bold fs-4" 
-                 style="width: 48px; height: 48px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-              C
+      <!-- Navbar Moderna -->
+      <nav class="backdrop-blur-md" style="background: rgba(10, 15, 30, 0.95); border-bottom: 1px solid rgba(255,255,255,0.1);">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                C
+              </div>
+              <span class="text-2xl font-black">ConectAEE</span>
             </div>
-            <span class="fs-4 fw-bold">ConectAEE</span>
-          </a>
-          <div class="d-flex gap-3 ms-auto">
-            <button @click="tab = 'login'" class="btn btn-link text-white text-decoration-none px-4 py-2">
-              Entrar
-            </button>
-            <button @click="tab = 'register'" class="btn btn-primary px-4 py-2 fw-bold rounded-3" 
-                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);">
-              Começar Grátis
-            </button>
+            <div class="flex items-center gap-4">
+              <button @click="tab = 'login'" class="px-6 py-2.5 text-white hover:text-blue-400 transition font-medium">
+                Entrar
+              </button>
+              <button @click="tab = 'register'" class="px-6 py-2.5 rounded-xl font-bold transition transform hover:scale-105" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);">
+                Começar Grátis
+              </button>
+            </div>
           </div>
         </div>
       </nav>
 
-      
-      <!-- Hero Section Bootstrap -->
-      <section class="py-5 py-lg-6 position-relative overflow-hidden">
+      <!-- Hero Section -->
+      <section class="pt-16 sm:pt-20 lg:pt-24 pb-24 sm:pb-32 lg:pb-40 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         <!-- Efeitos de fundo -->
-        <div class="position-absolute top-0 start-0 w-100 h-100" style="opacity: 0.2; pointer-events: none;">
-          <div class="position-absolute rounded-circle" 
-               style="top: 0; left: 25%; width: 400px; height: 400px; background: radial-gradient(circle, #667eea 0%, transparent 70%); filter: blur(100px);"></div>
-          <div class="position-absolute rounded-circle" 
-               style="top: 50%; right: 25%; width: 400px; height: 400px; background: radial-gradient(circle, #764ba2 0%, transparent 70%); filter: blur(100px);"></div>
+        <div class="absolute inset-0 opacity-20">
+          <div class="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl" style="background: radial-gradient(circle, #667eea 0%, transparent 70%);"></div>
+          <div class="absolute top-1/2 right-1/4 w-96 h-96 rounded-full blur-3xl" style="background: radial-gradient(circle, #764ba2 0%, transparent 70%);"></div>
         </div>
 
-        <div class="container-xxl px-4 px-lg-5 position-relative" style="z-index: 10;">
-          <div class="row align-items-center g-5 g-lg-6 py-5">
+        <div class="max-w-7xl mx-auto relative z-10">
+          <div class="grid lg:grid-cols-2 gap-12 lg:gap-20 xl:gap-24 items-center">
             <!-- Coluna da esquerda: Texto -->
-            <div class="col-lg-6 text-center text-lg-start">
-              <div class="d-inline-flex align-items-center gap-2 px-4 py-2 rounded-pill mb-4 mb-lg-5" 
-                   style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3);">
-                <span class="rounded-circle" style="width: 8px; height: 8px; background: #667eea;"></span>
-                <span class="small fw-semibold" style="color: #a0cfff;">Educação Especial + Tecnologia</span>
+            <div class="text-center lg:text-left space-y-8 lg:space-y-12">
+              <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3);">
+                <span class="w-2 h-2 rounded-full" style="background: #667eea;"></span>
+                <span class="text-sm font-semibold text-blue-300">Educação Especial + Tecnologia</span>
               </div>
               
-              <h1 class="display-1 fw-black lh-sm mb-4 mb-lg-5">
-                <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+              <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black leading-tight">
+                <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
                   ConectAEE
                 </span>
                 <br>
                 <span class="text-white">Plataforma AEE Completa</span>
               </h1>
               
-              <p class="fs-5 text-white-50 mb-4 mb-lg-5 mx-auto mx-lg-0" style="max-width: 540px; line-height: 1.8;">
+              <p class="text-lg sm:text-xl text-gray-300 leading-relaxed max-w-xl mx-auto lg:mx-0" style="line-height: 1.8;">
                 Sistema especializado em Atendimento Educacional Especializado com IA, formulários digitais e geração automática de relatórios profissionais.
               </p>
               
-              <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start mb-5">
-                <button @click="tab = 'register'" class="btn btn-lg px-5 py-3 rounded-3 fw-bold" 
-                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);">
+              <div class="flex flex-col sm:flex-row gap-4 sm:gap-5 justify-center lg:justify-start">
+                <button @click="tab = 'register'" class="px-10 py-4 rounded-xl font-bold text-lg transition transform hover:scale-105" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);">
                   Começar Agora
                 </button>
-                <button @click="scrollToFeatures" class="btn btn-outline-light btn-lg px-5 py-3 rounded-3 fw-bold">
+                <button @click="scrollToFeatures" class="px-10 py-4 rounded-xl font-bold text-lg transition border-2 border-white/20 hover:border-white/40 hover:bg-white/5">
                   Ver Funcionalidades
                 </button>
               </div>
 
               <!-- Stats -->
-              <div class="row g-4 pt-4">
-                <div class="col-4">
-                  <div class="display-5 fw-black mb-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+              <div class="grid grid-cols-3 gap-6 sm:gap-8 lg:gap-10 pt-8">
+                <div class="space-y-2">
+                  <div class="text-2xl sm:text-3xl font-black" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
                     3
                   </div>
-                  <div class="small text-white-50">Formulários Oficiais</div>
+                  <div class="text-xs sm:text-sm text-gray-400">Formulários Oficiais</div>
                 </div>
-                <div class="col-4">
-                  <div class="display-5 fw-black mb-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                <div class="space-y-2">
+                  <div class="text-2xl sm:text-3xl font-black" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
                     100%
                   </div>
-                  <div class="small text-white-50">Cloud & Seguro</div>
+                  <div class="text-xs sm:text-sm text-gray-400">Cloud & Seguro</div>
                 </div>
-                <div class="col-4">
-                  <div class="display-5 fw-black mb-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                <div class="space-y-2">
+                  <div class="text-2xl sm:text-3xl font-black" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
                     IA
                   </div>
-                  <div class="small text-white-50">Integrada GPT-4</div>
+                  <div class="text-xs sm:text-sm text-gray-400">Integrada GPT-4</div>
                 </div>
               </div>
             </div>
 
             <!-- Coluna da direita: Visual -->
-            <div class="col-lg-6 mt-5 mt-lg-0">
-              <div class="rounded-4 overflow-hidden" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px);">
-                <div class="p-4 p-lg-5">
-                  <div class="row g-4">
-                    <div class="col-6">
-                      <div class="p-4 p-lg-5 rounded-4" style="background: rgba(102, 126, 234, 0.15); border: 1px solid rgba(102, 126, 234, 0.3);">
-                        <div class="fs-1 mb-3">📋</div>
-                        <div class="fw-bold fs-5 mb-2">PDI Digital</div>
-                        <div class="small text-white-50">Plano completo</div>
-                      </div>
+            <div class="relative mt-12 lg:mt-0">
+              <div class="rounded-3xl overflow-hidden" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px);">
+                <div class="p-6 sm:p-10 lg:p-14">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 lg:gap-10">
+                    <div class="p-6 sm:p-8 rounded-2xl space-y-3" style="background: rgba(102, 126, 234, 0.15); border: 1px solid rgba(102, 126, 234, 0.3);">
+                      <div class="text-4xl">📋</div>
+                      <div class="font-bold text-lg">PDI Digital</div>
+                      <div class="text-sm text-gray-400">Plano completo</div>
                     </div>
-                    <div class="col-6">
-                      <div class="p-4 p-lg-5 rounded-4" style="background: rgba(118, 75, 162, 0.15); border: 1px solid rgba(118, 75, 162, 0.3);">
-                        <div class="fs-1 mb-3">🎯</div>
-                        <div class="fw-bold fs-5 mb-2">PAI Estruturado</div>
-                        <div class="small text-white-50">Atendimento Individual</div>
-                      </div>
-                    </div>
-                    <div class="col-6">
-                      <div class="p-4 p-lg-5 rounded-4" style="background: rgba(240, 147, 251, 0.15); border: 1px solid rgba(240, 147, 251, 0.3);">
-                        <div class="fs-1 mb-3">💬</div>
-                        <div class="fw-bold fs-5 mb-2">Entrevista</div>
-                        <div class="small text-white-50">Com Responsável</div>
-                      </div>
-                    </div>
-                    <div class="col-6">
-                      <div class="p-4 p-lg-5 rounded-4" style="background: rgba(102, 126, 234, 0.15); border: 1px solid rgba(102, 126, 234, 0.3);">
-                        <div class="fs-1 mb-3">🤖</div>
-                        <div class="fw-bold fs-5 mb-2">IA Avançada</div>
-                        <div class="small text-white-50">Transcrição de Áudio</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+                    <div class="p-6 sm:p-8 rounded-2xl space-y-3" style="background: rgba(118, 75, 162, 0.15); border: 1px solid rgba(118, 75, 162, 0.3);">
+                      <div class="text-4xl">🎯</div>
+                      <div class="font-bold text-lg">PAI Estruturado</div>
+                      <div class="text-sm text-gray-400">Atendimento Individual</div>
                     </div>
                     <div class="p-6 sm:p-8 rounded-2xl space-y-3" style="background: rgba(240, 147, 251, 0.15); border: 1px solid rgba(240, 147, 251, 0.3);">
                       <div class="text-4xl">💬</div>
@@ -3798,79 +3767,69 @@ const HomeLanding = {
         </div>
       </section>
 
-      <!-- Features Section Bootstrap -->
-      <section id="features" class="py-5 py-lg-6" style="background: rgba(255,255,255,0.02);">
-        <div class="container-xxl px-4 px-lg-5">
-          <div class="text-center mb-5">
-            <div class="d-inline-block px-4 py-2 rounded-pill mb-4" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3);">
-              <span class="small fw-semibold" style="color: #a0cfff;">FUNCIONALIDADES</span>
+      <!-- Features Section -->
+      <section id="features" class="py-24 sm:py-32 lg:py-40 px-4 sm:px-6 lg:px-8" style="background: rgba(255,255,255,0.02);">
+        <div class="max-w-7xl mx-auto">
+          <div class="text-center mb-16 sm:mb-20 lg:mb-24 space-y-6 sm:space-y-8">
+            <div class="inline-block px-5 py-2.5 rounded-full" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3);">
+              <span class="text-sm font-semibold text-blue-300">FUNCIONALIDADES</span>
             </div>
-            <h2 class="display-3 fw-black mb-4">Tudo que você precisa</h2>
-            <p class="fs-5 text-white-50 mx-auto" style="max-width: 700px; line-height: 1.8;">Ferramentas profissionais para gestão completa do AEE</p>
+            <h2 class="text-4xl sm:text-5xl font-black">Tudo que você precisa</h2>
+            <p class="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto" style="line-height: 1.8;">Ferramentas profissionais para gestão completa do AEE</p>
           </div>
 
-          <div class="row g-4 g-lg-5">
-            <div class="col-md-4">
-              <div class="p-4 p-lg-5 rounded-4 h-100" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%); border: 1px solid rgba(255,255,255,0.1); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                <div class="d-flex align-items-center justify-content-center rounded-3 mb-4" style="width: 64px; height: 64px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-size: 2rem;">
-                  📝
-                </div>
-                <h3 class="fs-4 fw-bold mb-3">Formulários Completos</h3>
-                <p class="text-white-50 mb-0" style="line-height: 1.8;">PDI, PAI e Entrevista com Responsável totalmente digitalizados seguindo modelos oficiais</p>
+          <div class="grid md:grid-cols-3 gap-8 sm:gap-10 lg:gap-12">
+            <div class="p-8 sm:p-10 lg:p-12 rounded-2xl transition transform hover:scale-105 space-y-6" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%); border: 1px solid rgba(255,255,255,0.1);">
+              <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                📝
               </div>
+              <h3 class="text-xl sm:text-2xl font-bold">Formulários Completos</h3>
+              <p class="text-gray-400" style="line-height: 1.8;">PDI, PAI e Entrevista com Responsável totalmente digitalizados seguindo modelos oficiais</p>
             </div>
 
-            <div class="col-md-4">
-              <div class="p-4 p-lg-5 rounded-4 h-100" style="background: linear-gradient(135deg, rgba(118, 75, 162, 0.1) 0%, rgba(240, 147, 251, 0.05) 100%); border: 1px solid rgba(255,255,255,0.1); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                <div class="d-flex align-items-center justify-content-center rounded-3 mb-4" style="width: 64px; height: 64px; background: linear-gradient(135deg, #764ba2 0%, #f093fb 100%); font-size: 2rem;">
-                  🤖
-                </div>
-                <h3 class="fs-4 fw-bold mb-3">Inteligência Artificial</h3>
-                <p class="text-white-50 mb-0" style="line-height: 1.8;">Transcrição automática de áudio para texto e sugestões pedagógicas inteligentes com GPT-4</p>
+            <div class="p-8 sm:p-10 lg:p-12 rounded-2xl transition transform hover:scale-105 space-y-6" style="background: linear-gradient(135deg, rgba(118, 75, 162, 0.1) 0%, rgba(240, 147, 251, 0.05) 100%); border: 1px solid rgba(255,255,255,0.1);">
+              <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl" style="background: linear-gradient(135deg, #764ba2 0%, #f093fb 100%);">
+                🤖
               </div>
+              <h3 class="text-xl sm:text-2xl font-bold">Inteligência Artificial</h3>
+              <p class="text-gray-400" style="line-height: 1.8;">Transcrição automática de áudio para texto e sugestões pedagógicas inteligentes com GPT-4</p>
             </div>
 
-            <div class="col-md-4">
-              <div class="p-4 p-lg-5 rounded-4 h-100" style="background: linear-gradient(135deg, rgba(240, 147, 251, 0.1) 0%, rgba(102, 126, 234, 0.05) 100%); border: 1px solid rgba(255,255,255,0.1); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                <div class="d-flex align-items-center justify-content-center rounded-3 mb-4" style="width: 64px; height: 64px; background: linear-gradient(135deg, #f093fb 0%, #667eea 100%); font-size: 2rem;">
-                  📄
-                </div>
-                <h3 class="fs-4 fw-bold mb-3">Relatórios Profissionais</h3>
-                <p class="text-white-50 mb-0" style="line-height: 1.8;">Geração automática de PDFs formatados, prontos para impressão e compartilhamento</p>
+            <div class="p-8 sm:p-10 lg:p-12 rounded-2xl transition transform hover:scale-105 space-y-6" style="background: linear-gradient(135deg, rgba(240, 147, 251, 0.1) 0%, rgba(102, 126, 234, 0.05) 100%); border: 1px solid rgba(255,255,255,0.1);">
+              <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl" style="background: linear-gradient(135deg, #f093fb 0%, #667eea 100%);">
+                📄
               </div>
+              <h3 class="text-xl sm:text-2xl font-bold">Relatórios Profissionais</h3>
+              <p class="text-gray-400" style="line-height: 1.8;">Geração automática de PDFs formatados, prontos para impressão e compartilhamento</p>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- CTA Section Bootstrap -->
-      <section class="py-5 py-lg-6">
-        <div class="container-xxl px-4 px-lg-5">
-          <div class="row justify-content-center">
-            <div class="col-lg-10 col-xl-8">
-              <div class="p-5 p-lg-6 rounded-4 text-center" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(20px);">
-                <h2 class="display-3 fw-black mb-4">Pronto para começar?</h2>
-                <p class="fs-5 text-white-50 mb-5 mx-auto" style="max-width: 600px; line-height: 1.8;">Cadastre-se gratuitamente e tenha acesso completo a todas as funcionalidades</p>
-                <button @click="tab = 'register'" class="btn btn-lg px-5 py-3 rounded-3 fw-bold" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; box-shadow: 0 20px 50px rgba(102, 126, 234, 0.5);">
-                  Criar Conta Grátis
-                </button>
-              </div>
-            </div>
+      <!-- CTA Section -->
+      <section class="py-24 sm:py-32 lg:py-40 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto text-center">
+          <div class="p-12 sm:p-16 lg:p-24 rounded-3xl space-y-8 sm:space-y-10 lg:space-y-12" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(20px);">
+            <h2 class="text-4xl sm:text-5xl font-black">Pronto para começar?</h2>
+            <p class="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto" style="line-height: 1.8;">Cadastre-se gratuitamente e tenha acesso completo a todas as funcionalidades</p>
+            <button @click="tab = 'register'" class="px-10 sm:px-12 py-4 sm:py-5 rounded-xl font-bold text-lg sm:text-xl transition transform hover:scale-105" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 20px 50px rgba(102, 126, 234, 0.5);">
+              Criar Conta Grátis
+            </button>
           </div>
         </div>
       </section>
 
-      <!-- Footer Bootstrap -->
-      <footer class="py-5" style="background: rgba(255,255,255,0.02); border-top: 1px solid rgba(255,255,255,0.1);">
-        <div class="container-xxl px-4 px-lg-5">
-          <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-4">
-            <div class="d-flex align-items-center gap-3">
-              <div class="d-flex align-items-center justify-content-center rounded-3 fw-bold fs-4" style="width: 48px; height: 48px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+      <!-- Footer Moderno -->
+      <footer class="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8" style="background: rgba(255,255,255,0.02); border-top: 1px solid rgba(255,255,255,0.1);">
+        <div class="max-w-7xl mx-auto">
+          <div class="flex flex-col sm:flex-row justify-between items-center gap-6 sm:gap-8 lg:gap-10">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                 C
               </div>
-              <span class="fs-5 fw-bold">ConectAEE</span>
+              <span class="text-xl font-black">ConectAEE</span>
             </div>
-            <div class="text-white-50 small text-center text-md-start">
+            <div class="text-gray-400 text-sm text-center sm:text-left">
               © 2025 ConectAEE - Sistema de Gestão AEE
             </div>
           </div>
@@ -3895,7 +3854,306 @@ const HomeLanding = {
         </div>
       </nav>
 
-      <!-- Login/Register Modal Bootstrap -->\n      <div v-if="tab === 'login' || tab === 'register'" @click.self="tab = null" \n           class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-4" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); z-index: 9999;">\n        <div class="bg-dark border rounded-4 shadow-lg p-4 p-sm-5 position-relative" style="max-width: 500px; width: 100%; background: rgba(15, 23, 42, 0.95) !important; backdrop-filter: blur(20px); border-color: rgba(255,255,255,0.2) !important;">\n          <button @click="tab = null" type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3"></button>\n          \n          <div class="d-flex align-items-center justify-content-between mb-4">\n            <div>\n              <h2 class="h4 fw-semibold text-white mb-1">Acesso ao sistema</h2>\n              <p class="small text-white-50 mb-0">Login e cadastro no mesmo lugar.</p>\n            </div>\n            <span class="badge bg-secondary text-uppercase small">Professor</span>\n          </div>\n\n          <div class="btn-group w-100 mb-4" role="group">\n            <button type="button" class="btn py-2 rounded-start-3" :class="tab === 'login' ? 'btn-primary' : 'btn-outline-light'" @click="tab = 'login'" style="background: linear-gradient(135deg, #0891b2 0%, #7c3aed 100%); border: none;">Entrar</button>\n            <button type="button" class="btn py-2 rounded-end-3" :class="tab === 'register' ? 'btn-primary' : 'btn-outline-light'" @click="tab = 'register'" style="background: linear-gradient(135deg, #0891b2 0%, #7c3aed 100%); border: none;">Registrar</button>\n          </div>\n\n          <form v-show="tab === 'login'" @submit.prevent="login">\n            <div class="mb-3">\n              <label class="form-label small text-white-50" for="home-email">Email</label>\n              <input id="home-email" v-model.trim="loginForm.email" type="email" autocomplete="username" required class="form-control form-control-lg rounded-3 bg-white bg-opacity-10 border-white border-opacity-20 text-white" placeholder="seu@email.com">\n            </div>\n            <div class="mb-3">\n              <label class="form-label small text-white-50" for="home-password">Senha</label>\n              <div class="input-group">\n                <input id="home-password" :type="showLoginPassword ? 'text' : 'password'" v-model="loginForm.password" autocomplete="current-password" required class="form-control form-control-lg rounded-3 rounded-end-0 bg-white bg-opacity-10 border-white border-opacity-20 text-white" placeholder="••••••••">\n                <button type="button" class="btn btn-outline-secondary rounded-3 rounded-start-0 border-white border-opacity-20" @click="showLoginPassword = !showLoginPassword">\n                  <i :class="showLoginPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>\n                </button>\n              </div>\n            </div>\n            <div class="d-flex align-items-center justify-content-between mb-3 small">\n              <div class="form-check">\n                <input type="checkbox" v-model="loginForm.remember" class="form-check-input" id="remember">\n                <label class="form-check-label text-white-50" for="remember">Lembrar meu e-mail</label>\n              </div>\n              <button type="button" class="btn btn-link btn-sm text-info text-decoration-none p-0" @click="$showToast && $showToast('Recuperação em breve', 'Estamos finalizando essa etapa.', 'info')">Esqueci minha senha</button>\n            </div>\n            <div v-if="loginError" class="alert alert-danger small mb-3">{{ loginError }}</div>\n            <button type="submit" :disabled="loginLoading" class="btn btn-lg w-100 text-white fw-bold rounded-3" style="background: linear-gradient(135deg, #0891b2 0%, #7c3aed 100%);">\n              <span v-if="loginLoading"><span class="spinner-border spinner-border-sm me-2"></span>Entrando...</span>\n              <span v-else>Entrar</span>\n            </button>\n          </form>\n\n          <form v-show="tab === 'register'" @submit.prevent="register">\n            <div class="mb-3">\n              <label class="form-label small text-white-50" for="home-name">Nome completo</label>\n              <input id="home-name" v-model.trim="registerForm.name" type="text" required class="form-control form-control-lg rounded-3 bg-white bg-opacity-10 border-white border-opacity-20 text-white" placeholder="Seu nome completo">\n            </div>\n            <div class="mb-3">\n              <label class="form-label small text-white-50" for="home-register-email">Email</label>\n              <input id="home-register-email" v-model.trim="registerForm.email" type="email" required class="form-control form-control-lg rounded-3 bg-white bg-opacity-10 border-white border-opacity-20 text-white" placeholder="professor@escola.com">\n            </div>\n            <div class="mb-3">\n              <label class="form-label small text-white-50" for="home-register-password">Senha</label>\n              <div class="input-group mb-2">\n                <input id="home-register-password" :type="showRegisterPassword ? 'text' : 'password'" v-model="registerForm.password" required class="form-control form-control-lg rounded-3 rounded-end-0 bg-white bg-opacity-10 border-white border-opacity-20 text-white" placeholder="Crie uma senha">\n                <button type="button" class="btn btn-outline-secondary rounded-3 rounded-start-0 border-white border-opacity-20" @click="showRegisterPassword = !showRegisterPassword">\n                  <i :class="showRegisterPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>\n                </button>\n              </div>\n              <div class="row g-2 small text-white-50">\n                <div class="col-6"><span :class="passwordChecks.length ? 'text-info' : ''">8+ caracteres</span></div>\n                <div class="col-6"><span :class="passwordChecks.uppercase ? 'text-info' : ''">1 maiúscula</span></div>\n                <div class="col-6"><span :class="passwordChecks.lowercase ? 'text-info' : ''">1 minúscula</span></div>\n                <div class="col-6"><span :class="passwordChecks.number ? 'text-info' : ''">1 número</span></div>\n                <div class="col-12"><span :class="passwordChecks.special ? 'text-info' : ''">1 especial</span></div>\n              </div>\n            </div>\n            <div class="mb-3">\n              <label class="form-label small text-white-50" for="home-register-confirm">Confirmar senha</label>\n              <input id="home-register-confirm" v-model="registerForm.confirm_password" type="password" required class="form-control form-control-lg rounded-3 bg-white bg-opacity-10 border-white border-opacity-20 text-white" placeholder="Repita a senha">\n              <div v-if="registerForm.password && registerForm.confirm_password && registerForm.password !== registerForm.confirm_password" class="small text-danger mt-1">As senhas não coincidem</div>\n            </div>\n            <div v-if="registerError" class="alert alert-danger small mb-3">{{ registerError }}</div>\n            <div v-if="registerSuccess" class="alert alert-info small mb-3">{{ registerSuccess }}</div>\n            <button type="submit" :disabled="registerLoading || !isRegisterValid" class="btn btn-lg w-100 text-white fw-bold rounded-3 mb-2" style="background: linear-gradient(135deg, #0891b2 0%, #7c3aed 100%);">\n              <span v-if="registerLoading"><span class="spinner-border spinner-border-sm me-2"></span>Criando conta...</span>\n              <span v-else>Finalizar cadastro</span>\n            </button>\n            <p class="small text-white-50 text-center mb-0">Administradores são cadastrados manualmente pelo gestor do sistema.</p>\n          </form>\n        </div>\n      </div>\n    </div>\n  `,
+      <!-- Hero Section -->
+      <section class="pt-24 pb-40 px-8 relative overflow-hidden">
+        <!-- Efeitos de fundo -->
+        <div class="absolute inset-0 opacity-20">
+          <div class="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl" style="background: radial-gradient(circle, #667eea 0%, transparent 70%);"></div>
+          <div class="absolute top-1/2 right-1/4 w-96 h-96 rounded-full blur-3xl" style="background: radial-gradient(circle, #764ba2 0%, transparent 70%);"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto relative z-10">
+          <div class="grid lg:grid-cols-2 gap-24 items-center">
+            <!-- Coluna da esquerda: Texto -->
+            <div>
+              <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full mb-12" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3);">
+                <span class="w-2 h-2 rounded-full" style="background: #667eea;"></span>
+                <span class="text-sm font-semibold text-blue-300">Educação Especial + Tecnologia</span>
+              </div>
+              
+              <h1 class="text-6xl lg:text-7xl font-black leading-tight mb-10">
+                <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                  ConectAEE
+                </span>
+                <br>
+                <span class="text-white">Plataforma AEE Completa</span>
+              </h1>
+              
+              <p class="text-xl text-gray-300 mb-12 leading-relaxed max-w-xl" style="line-height: 1.8;">
+                Sistema especializado em Atendimento Educacional Especializado com IA, formulários digitais e geração automática de relatórios profissionais.
+              </p>
+              
+              <div class="flex flex-wrap gap-5 mb-20">
+                <button @click="tab = 'register'" class="px-10 py-4 rounded-xl font-bold text-lg transition transform hover:scale-105" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);">
+                  Começar Agora
+                </button>
+                <button @click="scrollToFeatures" class="px-10 py-4 rounded-xl font-bold text-lg transition border-2 border-white/20 hover:border-white/40 hover:bg-white/5">
+                  Ver Funcionalidades
+                </button>
+              </div>
+
+              <!-- Stats -->
+              <div class="grid grid-cols-3 gap-10">
+                <div>
+                  <div class="text-3xl font-black mb-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    3
+                  </div>
+                  <div class="text-sm text-gray-400 mt-2">Formulários Oficiais</div>
+                </div>
+                <div>
+                  <div class="text-3xl font-black mb-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    100%
+                  </div>
+                  <div class="text-sm text-gray-400 mt-2">Cloud & Seguro</div>
+                </div>
+                <div>
+                  <div class="text-3xl font-black mb-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    IA
+                  </div>
+                  <div class="text-sm text-gray-400 mt-2">Integrada GPT-4</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Coluna da direita: Visual -->
+            <div class="relative">
+              <div class="rounded-3xl overflow-hidden" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px);">
+                <div class="p-14">
+                  <div class="grid grid-cols-2 gap-10">
+                    <div class="p-8 rounded-2xl" style="background: rgba(102, 126, 234, 0.15); border: 1px solid rgba(102, 126, 234, 0.3);">
+                      <div class="text-4xl mb-6">📋</div>
+                      <div class="font-bold text-lg mb-3">PDI Digital</div>
+                      <div class="text-sm text-gray-400">Plano completo</div>
+                    </div>
+                    <div class="p-8 rounded-2xl" style="background: rgba(118, 75, 162, 0.15); border: 1px solid rgba(118, 75, 162, 0.3);">
+                      <div class="text-4xl mb-6">🎯</div>
+                      <div class="font-bold text-lg mb-3">PAI Estruturado</div>
+                      <div class="text-sm text-gray-400">Atendimento Individual</div>
+                    </div>
+                    <div class="p-8 rounded-2xl" style="background: rgba(240, 147, 251, 0.15); border: 1px solid rgba(240, 147, 251, 0.3);">
+                      <div class="text-4xl mb-6">💬</div>
+                      <div class="font-bold text-lg mb-3">Entrevista</div>
+                      <div class="text-sm text-gray-400">Com Responsável</div>
+                    </div>
+                    <div class="p-8 rounded-2xl" style="background: rgba(102, 126, 234, 0.15); border: 1px solid rgba(102, 126, 234, 0.3);">
+                      <div class="text-4xl mb-6">🤖</div>
+                      <div class="font-bold text-lg mb-3">IA Avançada</div>
+                      <div class="text-sm text-gray-400">Transcrição de Áudio</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features Section -->
+      <section id="features" class="py-40 px-8" style="background: rgba(255,255,255,0.02);">
+        <div class="max-w-7xl mx-auto">
+          <div class="text-center mb-24">
+            <div class="inline-block px-5 py-2.5 rounded-full mb-8" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3);">
+              <span class="text-sm font-semibold text-blue-300">FUNCIONALIDADES</span>
+            </div>
+            <h2 class="text-5xl font-black mb-8">Tudo que você precisa</h2>
+            <p class="text-xl text-gray-400 max-w-2xl mx-auto" style="line-height: 1.8;">Ferramentas profissionais para gestão completa do AEE</p>
+          </div>
+
+          <div class="grid md:grid-cols-3 gap-12">
+            <div class="p-12 rounded-2xl transition transform hover:scale-105" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%); border: 1px solid rgba(255,255,255,0.1);">
+              <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-10" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                📝
+              </div>
+              <h3 class="text-2xl font-bold mb-6">Formulários Completos</h3>
+              <p class="text-gray-400" style="line-height: 1.8;">PDI, PAI e Entrevista com Responsável totalmente digitalizados seguindo modelos oficiais</p>
+            </div>
+
+            <div class="p-12 rounded-2xl transition transform hover:scale-105" style="background: linear-gradient(135deg, rgba(118, 75, 162, 0.1) 0%, rgba(240, 147, 251, 0.05) 100%); border: 1px solid rgba(255,255,255,0.1);">
+              <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-10" style="background: linear-gradient(135deg, #764ba2 0%, #f093fb 100%);">
+                🤖
+              </div>
+              <h3 class="text-2xl font-bold mb-6">Inteligência Artificial</h3>
+              <p class="text-gray-400" style="line-height: 1.8;">Transcrição automática de áudio para texto e sugestões pedagógicas inteligentes com GPT-4</p>
+            </div>
+
+            <div class="p-12 rounded-2xl transition transform hover:scale-105" style="background: linear-gradient(135deg, rgba(240, 147, 251, 0.1) 0%, rgba(102, 126, 234, 0.05) 100%); border: 1px solid rgba(255,255,255,0.1);">
+              <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-10" style="background: linear-gradient(135deg, #f093fb 0%, #667eea 100%);">
+                📄
+              </div>
+              <h3 class="text-2xl font-bold mb-6">Relatórios Profissionais</h3>
+              <p class="text-gray-400" style="line-height: 1.8;">Geração automática de PDFs formatados, prontos para impressão e compartilhamento</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA Section -->
+      <section class="py-40 px-8">
+        <div class="max-w-4xl mx-auto text-center">
+          <div class="p-24 rounded-3xl" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(20px);">
+            <h2 class="text-5xl font-black mb-10">Pronto para começar?</h2>
+            <p class="text-xl text-gray-300 mb-12 max-w-2xl mx-auto" style="line-height: 1.8;">Cadastre-se gratuitamente e tenha acesso completo a todas as funcionalidades</p>
+            <button @click="tab = 'register'" class="px-12 py-5 rounded-xl font-bold text-xl transition transform hover:scale-105" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 20px 50px rgba(102, 126, 234, 0.5);">
+              Criar Conta Grátis
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer Moderno -->
+      <footer class="py-20 px-8" style="background: rgba(255,255,255,0.02); border-top: 1px solid rgba(255,255,255,0.1);">
+        <div class="max-w-7xl mx-auto">
+          <div class="flex flex-col md:flex-row justify-between items-center gap-10">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                C
+              </div>
+              <span class="text-xl font-black">ConectAEE</span>
+            </div>
+            <div class="text-gray-400">
+              © 2025 ConectAEE - Sistema de Gestão AEE
+            </div>
+          </div>
+        </div>
+      </footer>
+
+      <!-- Login/Register Modal -->
+      <div v-if="tab === 'login' || tab === 'register'" @click.self="tab = null" 
+           class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <section class="bg-slate-900/95 backdrop-blur-xl border border-white/20 text-white rounded-3xl shadow-2xl p-6 sm:p-8 max-w-md w-full relative">
+          <button @click="tab = null" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition">
+            <i class="fas fa-times text-gray-400"></i>
+          </button>
+          
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h2 class="text-2xl font-semibold text-white">Acesso ao sistema</h2>
+              <p class="text-sm text-gray-400">Login e cadastro no mesmo lugar.</p>
+            </div>
+            <span class="text-xs uppercase tracking-[0.3em] text-gray-500">Professor</span>
+          </div>
+
+          <div class="grid grid-cols-2 rounded-2xl bg-slate-800/50 p-1 text-sm font-medium mb-6">
+            <button type="button"
+                    class="py-2 rounded-2xl transition"
+                    :class="tab === 'login' ? 'bg-gradient-to-r from-cyan-600 to-purple-600 shadow text-white' : 'text-gray-400 hover:text-white'"
+                    @click="tab = 'login'">
+              Entrar
+            </button>
+            <button type="button"
+                    class="py-2 rounded-2xl transition"
+                    :class="tab === 'register' ? 'bg-gradient-to-r from-cyan-600 to-purple-600 shadow text-white' : 'text-gray-400 hover:text-white'"
+                    @click="tab = 'register'">
+              Registrar
+            </button>
+          </div>
+
+          <form v-show="tab === 'login'" @submit.prevent="login" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-1" for="home-email">Email</label>
+              <input id="home-email" v-model.trim="loginForm.email" type="email" autocomplete="username" required
+                     class="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                     placeholder="seu@email.com">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-1" for="home-password">Senha</label>
+              <div class="relative">
+                <input id="home-password" :type="showLoginPassword ? 'text' : 'password'"
+                       v-model="loginForm.password" autocomplete="current-password" required
+                       class="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 pr-10 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                       placeholder="••••••••">
+                <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                        @click="showLoginPassword = !showLoginPassword">
+                  <i :class="showLoginPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                </button>
+              </div>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <label class="inline-flex items-center gap-2 text-gray-300">
+                <input type="checkbox" v-model="loginForm.remember" class="rounded border-gray-600 bg-slate-800 text-cyan-500 focus:ring-cyan-500">
+                Lembrar meu e-mail
+              </label>
+              <button type="button" class="text-cyan-400 hover:text-cyan-300"
+                      @click="$showToast && $showToast('Recuperação em breve', 'Estamos finalizando essa etapa.', 'info')">
+                Esqueci minha senha
+              </button>
+            </div>
+            <div v-if="loginError" class="rounded-xl bg-rose-500/20 border border-rose-500/30 p-3 text-sm text-rose-200">
+              {{ loginError }}
+            </div>
+            <button type="submit" :disabled="loginLoading"
+                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-white bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-60">
+              <span v-if="loginLoading" class="inline-flex items-center gap-2">
+                <span class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                Entrando...
+              </span>
+              <span v-else>Entrar</span>
+            </button>
+          </form>
+
+          <form v-show="tab === 'register'" @submit.prevent="register" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-1" for="home-name">Nome completo</label>
+              <input id="home-name" v-model.trim="registerForm.name" type="text" required
+                     class="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                     placeholder="Seu nome completo">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-1" for="home-register-email">Email</label>
+              <input id="home-register-email" v-model.trim="registerForm.email" type="email" required
+                     class="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                     placeholder="professor@escola.com">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-1" for="home-register-password">Senha</label>
+              <div class="relative">
+                <input id="home-register-password" :type="showRegisterPassword ? 'text' : 'password'"
+                       v-model="registerForm.password" required
+                       class="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 pr-10 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                       placeholder="Crie uma senha">
+                <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                        @click="showRegisterPassword = !showRegisterPassword">
+                  <i :class="showRegisterPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                </button>
+              </div>
+              <div class="mt-2 text-xs text-gray-400 grid grid-cols-2 gap-1">
+                <span :class="passwordChecks.length ? 'text-cyan-400' : ''">8+ caracteres</span>
+                <span :class="passwordChecks.uppercase ? 'text-cyan-400' : ''">1 maiúscula</span>
+                <span :class="passwordChecks.lowercase ? 'text-cyan-400' : ''">1 minúscula</span>
+                <span :class="passwordChecks.number ? 'text-cyan-400' : ''">1 número</span>
+                <span :class="passwordChecks.special ? 'text-cyan-400' : ''">1 especial</span>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-1" for="home-register-confirm">Confirmar senha</label>
+              <input id="home-register-confirm" v-model="registerForm.confirm_password" type="password" required
+                     class="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                     placeholder="Repita a senha">
+              <div v-if="registerForm.password && registerForm.confirm_password && registerForm.password !== registerForm.confirm_password"
+                   class="mt-1 text-xs text-rose-400">As senhas não coincidem</div>
+            </div>
+            <div v-if="registerError" class="rounded-xl bg-rose-500/20 border border-rose-500/30 p-3 text-sm text-rose-200">
+              {{ registerError }}
+            </div>
+            <div v-if="registerSuccess" class="rounded-xl bg-cyan-500/20 border border-cyan-500/30 p-3 text-sm text-cyan-200">
+              {{ registerSuccess }}
+            </div>
+            <button type="submit" :disabled="registerLoading || !isRegisterValid"
+                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-white bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-60">
+              <span v-if="registerLoading" class="inline-flex items-center gap-2">
+                <span class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                Criando conta...
+              </span>
+              <span v-else>Finalizar cadastro</span>
+            </button>
+            <p class="text-xs text-gray-400 text-center">
+              Administradores são cadastrados manualmente pelo gestor do sistema.
+            </p>
+          </form>
+        </section>
+      </div>
+    </div>
+  `,
   data() {
     return {
       tab: null,

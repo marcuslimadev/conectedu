@@ -3647,210 +3647,117 @@ const Layout = {
 };
 
 // Página inicial com login embutido
+// PÃ¡gina inicial com login embutido
 const HomeLanding = {
   template: `
-    <div class="min-vh-100 text-white overflow-hidden" style="background: #0a0f1e; font-family: 'Inter', sans-serif;">
+    <div class="min-h-screen bg-[#0a0f1e] text-white font-sans relative overflow-x-hidden selection:bg-cyan-500 selection:text-white">
       
-      <!-- Navbar Bootstrap -->
-      <nav class="navbar py-4" style="background: rgba(10, 15, 30, 0.95); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.1);">
-        <div class="container-xxl px-4 px-lg-5">
-          <div class="d-flex align-items-center justify-content-between w-100">
-            <div class="d-flex align-items-center gap-3">
-              <div class="d-flex align-items-center justify-content-center rounded-3 fw-black fs-4" style="width: 48px; height: 48px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                C
-              </div>
-              <span class="fs-4 fw-bold">ConectAEE</span>
+      <!-- Navbar -->
+      <nav class="fixed top-0 inset-x-0 z-50 transition-all duration-300" :class="scrolled ? 'bg-[#0a0f1e]/80 backdrop-blur-md border-b border-white/10 py-4' : 'bg-transparent py-6'">
+        <div class="container mx-auto px-6 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-xl font-bold text-white shadow-lg shadow-cyan-500/20">
+              C
             </div>
-            <div class="d-flex gap-3">
-              <button @click="tab = 'login'" class="btn btn-link text-white text-decoration-none px-4 py-2">
-                Entrar
-              </button>
-              <button @click="tab = 'register'" class="btn px-4 py-2 fw-bold rounded-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);">
-                ComeÃ§ar GrÃ¡tis
-              </button>
-            </div>
+            <span class="text-xl font-bold tracking-tight">ConectAEE</span>
+          </div>
+          <div class="flex items-center gap-4">
+            <button @click="tab = 'login'" class="text-sm font-medium text-gray-300 hover:text-white transition-colors">
+              Entrar
+            </button>
+            <button @click="tab = 'register'" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-sm font-semibold shadow-lg shadow-cyan-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+              ComeÃ§ar GrÃ¡tis
+            </button>
           </div>
         </div>
       </nav>
 
-      <!-- Hero Section Bootstrap -->
-      <section class="py-5 position-relative overflow-hidden" style="padding-top: 5rem !important; padding-bottom: 8rem !important;">
-        <div class="position-absolute top-0 start-0 w-100 h-100" style="opacity: 0.2; pointer-events: none;">
-          <div class="position-absolute rounded-circle" style="top: 0; left: 25%; width: 400px; height: 400px; background: radial-gradient(circle, #667eea 0%, transparent 70%); filter: blur(100px);"></div>
-          <div class="position-absolute rounded-circle" style="top: 50%; right: 25%; width: 400px; height: 400px; background: radial-gradient(circle, #764ba2 0%, transparent 70%); filter: blur(100px);"></div>
-        </div>
+      <!-- Hero Section -->
+      <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+        <!-- Background Elements -->
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-[128px] pointer-events-none"></div>
+        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-[128px] pointer-events-none"></div>
 
-        <div class="container-xxl px-4 px-lg-5 position-relative" style="z-index: 10;">
-          <div class="row align-items-center g-5 py-5">
-            <div class="col-lg-6 text-center text-lg-start">
-              <div class="d-inline-flex align-items-center gap-2 px-4 py-2 rounded-pill mb-4" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3);">
-                <span class="rounded-circle" style="width: 8px; height: 8px; background: #667eea;"></span>
-                <span class="small fw-semibold" style="color: #a0cfff;">EducaÃ§Ã£o Especial + Tecnologia</span>
-              </div>
-              
-              <h1 class="display-1 fw-black lh-sm mb-4">
-                <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                  ConectAEE
-                </span>
-                <br>
-                <span class="text-white">Plataforma AEE Completa</span>
-              </h1>
-              
-              <p class="fs-5 mb-4 mx-auto mx-lg-0" style="max-width: 540px; line-height: 1.8; color: rgba(255,255,255,0.7);">
-                Sistema especializado em Atendimento Educacional Especializado com IA, formulÃ¡rios digitais e geraÃ§Ã£o automÃ¡tica de relatÃ³rios profissionais.
-              </p>
-              
-              <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start mb-5">
-                <button @click="tab = 'register'" class="btn btn-lg px-5 py-3 rounded-3 fw-bold" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);">
-                  ComeÃ§ar Agora
-                </button>
-                <button @click="scrollToFeatures" class="btn btn-outline-light btn-lg px-5 py-3 rounded-3 fw-bold">
-                  Ver Funcionalidades
-                </button>
-              </div>
-
-              <div class="row g-4 pt-4">
-                <div class="col-4">
-                  <div class="display-5 fw-black mb-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                    3
-                  </div>
-                  <div class="small" style="color: rgba(255,255,255,0.5);">FormulÃ¡rios Oficiais</div>
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+                <div class="flex-1 text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-900/30 border border-blue-500/30 text-blue-300 text-xs font-semibold mb-6">
+                        <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+                        EducaÃ§Ã£o Especial + Tecnologia
+                    </div>
+                    <h1 class="text-5xl lg:text-7xl font-bold tracking-tight leading-tight mb-6">
+                        <span class="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent">ConectAEE</span>
+                        <br>
+                        <span class="text-white">Plataforma Completa</span>
+                    </h1>
+                    <p class="text-lg text-gray-400 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                        Sistema especializado em Atendimento Educacional Especializado com IA, formulÃ¡rios digitais e geraÃ§Ã£o automÃ¡tica de relatÃ³rios profissionais.
+                    </p>
+                    <div class="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
+                        <button @click="tab = 'register'" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-lg shadow-xl shadow-cyan-500/20 transition-all hover:-translate-y-1">
+                            ComeÃ§ar Agora
+                        </button>
+                        <button @click="scrollToFeatures" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold transition-all backdrop-blur-sm">
+                            Ver Funcionalidades
+                        </button>
+                    </div>
                 </div>
-                <div class="col-4">
-                  <div class="display-5 fw-black mb-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                    100%
-                  </div>
-                  <div class="small" style="color: rgba(255,255,255,0.5);">Cloud & Seguro</div>
-                </div>
-                <div class="col-4">
-                  <div class="display-5 fw-black mb-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                    IA
-                  </div>
-                  <div class="small" style="color: rgba(255,255,255,0.5);">Integrada GPT-4</div>
-                </div>
-              </div>
             </div>
-
-            <div class="col-lg-6 mt-5 mt-lg-0">
-              <div class="rounded-4 overflow-hidden" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px);">
-                <div class="p-4 p-lg-5">
-                  <div class="row g-4">
-                    <div class="col-6">
-                      <div class="p-4 rounded-4" style="background: rgba(102, 126, 234, 0.15); border: 1px solid rgba(102, 126, 234, 0.3);">
-                        <div class="fs-1 mb-3">ðŸ“‹</div>
-                        <div class="fw-bold fs-5 mb-2">PDI Digital</div>
-                        <div class="small" style="color: rgba(255,255,255,0.5);">Plano completo</div>
-                      </div>
-                    </div>
-                    <div class="col-6">
-                      <div class="p-4 rounded-4" style="background: rgba(118, 75, 162, 0.15); border: 1px solid rgba(118, 75, 162, 0.3);">
-                        <div class="fs-1 mb-3">ðŸŽ¯</div>
-                        <div class="fw-bold fs-5 mb-2">PAI Estruturado</div>
-                        <div class="small" style="color: rgba(255,255,255,0.5);">Atendimento Individual</div>
-                      </div>
-                    </div>
-                    <div class="col-6">
-                      <div class="p-4 rounded-4" style="background: rgba(240, 147, 251, 0.15); border: 1px solid rgba(240, 147, 251, 0.3);">
-                        <div class="fs-1 mb-3">ðŸ’¬</div>
-                        <div class="fw-bold fs-5 mb-2">Entrevista</div>
-                        <div class="small" style="color: rgba(255,255,255,0.5);">Com ResponsÃ¡vel</div>
-                      </div>
-                    </div>
-                    <div class="col-6">
-                      <div class="p-4 rounded-4" style="background: rgba(102, 126, 234, 0.15); border: 1px solid rgba(102, 126, 234, 0.3);">
-                        <div class="fs-1 mb-3">ðŸ¤–</div>
-                        <div class="fw-bold fs-5 mb-2">IA AvanÃ§ada</div>
-                        <div class="small" style="color: rgba(255,255,255,0.5);">TranscriÃ§Ã£o de Ãudio</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
-      <!-- Features Section Bootstrap -->
-      <section id="features" class="py-5" style="background: rgba(255,255,255,0.02); padding-top: 6rem !important; padding-bottom: 6rem !important;">
-        <div class="container-xxl px-4 px-lg-5">
-          <div class="text-center mb-5">
-            <div class="d-inline-block px-4 py-2 rounded-pill mb-4" style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3);">
-              <span class="small fw-semibold" style="color: #a0cfff;">FUNCIONALIDADES</span>
-            </div>
-            <h2 class="display-3 fw-black mb-4">Tudo que vocÃª precisa</h2>
-            <p class="fs-5 mx-auto" style="max-width: 700px; line-height: 1.8; color: rgba(255,255,255,0.6);">Ferramentas profissionais para gestÃ£o completa do AEE</p>
-          </div>
-
-          <div class="row g-4 g-lg-5">
-            <div class="col-md-4">
-              <div class="p-5 rounded-4 h-100" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%); border: 1px solid rgba(255,255,255,0.1); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                <div class="d-flex align-items-center justify-content-center rounded-3 mb-4" style="width: 64px; height: 64px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-size: 2rem;">
-                  ðŸ“
-                </div>
-                <h3 class="fs-4 fw-bold mb-3">FormulÃ¡rios Completos</h3>
-                <p class="mb-0" style="line-height: 1.8; color: rgba(255,255,255,0.6);">PDI, PAI e Entrevista com ResponsÃ¡vel totalmente digitalizados seguindo modelos oficiais</p>
-              </div>
+      <!-- Features Section -->
+      <section id="features" class="py-24 bg-gradient-to-b from-[#0a0f1e] to-[#0f172a]">
+        <div class="container mx-auto px-6">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-3xl lg:text-5xl font-bold mb-6 text-white">Tudo que vocÃª precisa</h2>
+                <p class="text-lg text-gray-400">Ferramentas profissionais desenvolvidas especificamente para o dia a dia do professor de AEE.</p>
             </div>
 
-            <div class="col-md-4">
-              <div class="p-5 rounded-4 h-100" style="background: linear-gradient(135deg, rgba(118, 75, 162, 0.1) 0%, rgba(240, 147, 251, 0.05) 100%); border: 1px solid rgba(255,255,255,0.1); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                <div class="d-flex align-items-center justify-content-center rounded-3 mb-4" style="width: 64px; height: 64px; background: linear-gradient(135deg, #764ba2 0%, #f093fb 100%); font-size: 2rem;">
-                  ðŸ¤–
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="group p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-blue-500/30 transition-all duration-300">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-3xl mb-6 shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
+                        ðŸ“
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-4">FormulÃ¡rios Completos</h3>
+                    <p class="text-gray-400 leading-relaxed">PDI, PAI e Entrevistas totalmente digitalizados seguindo os modelos oficiais do MEC e secretarias.</p>
                 </div>
-                <h3 class="fs-4 fw-bold mb-3">InteligÃªncia Artificial</h3>
-                <p class="mb-0" style="line-height: 1.8; color: rgba(255,255,255,0.6);">TranscriÃ§Ã£o automÃ¡tica de Ã¡udio para texto e sugestÃµes pedagÃ³gicas inteligentes com GPT-4</p>
-              </div>
-            </div>
 
-            <div class="col-md-4">
-              <div class="p-5 rounded-4 h-100" style="background: linear-gradient(135deg, rgba(240, 147, 251, 0.1) 0%, rgba(102, 126, 234, 0.05) 100%); border: 1px solid rgba(255,255,255,0.1); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                <div class="d-flex align-items-center justify-content-center rounded-3 mb-4" style="width: 64px; height: 64px; background: linear-gradient(135deg, #f093fb 0%, #667eea 100%); font-size: 2rem;">
-                  ðŸ“„
+                <div class="group p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-purple-500/30 transition-all duration-300">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-3xl mb-6 shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform">
+                        ðŸ¤–
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-4">InteligÃªncia Artificial</h3>
+                    <p class="text-gray-400 leading-relaxed">Transcreva Ã¡udios de atendimentos automaticamente e receba sugestÃµes pedagÃ³gicas da IA.</p>
                 </div>
-                <h3 class="fs-4 fw-bold mb-3">RelatÃ³rios Profissionais</h3>
-                <p class="mb-0" style="line-height: 1.8; color: rgba(255,255,255,0.6);">GeraÃ§Ã£o automÃ¡tica de PDFs formatados, prontos para impressÃ£o e compartilhamento</p>
-              </div>
+
+                <div class="group p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-pink-500/30 transition-all duration-300">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500 to-pink-700 flex items-center justify-center text-3xl mb-6 shadow-lg shadow-pink-500/20 group-hover:scale-110 transition-transform">
+                        ðŸ“„
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-4">RelatÃ³rios em PDF</h3>
+                    <p class="text-gray-400 leading-relaxed">Gere documentos profissionais prontos para impressÃ£o com formataÃ§Ã£o impecÃ¡vel e seu cabeÃ§alho.</p>
+                </div>
             </div>
-          </div>
         </div>
       </section>
 
-      <!-- CTA Section Bootstrap -->
-      <section class="py-5" style="padding-top: 6rem !important; padding-bottom: 6rem !important;">
-        <div class="container-xxl px-4 px-lg-5">
-          <div class="row justify-content-center">
-            <div class="col-lg-10 col-xl-8">
-              <div class="p-5 rounded-4 text-center" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(20px);">
-                <h2 class="display-3 fw-black mb-4">Pronto para comeÃ§ar?</h2>
-                <p class="fs-5 mb-5 mx-auto" style="max-width: 600px; line-height: 1.8; color: rgba(255,255,255,0.7);">Cadastre-se gratuitamente e tenha acesso completo a todas as funcionalidades</p>
-                <button @click="tab = 'register'" class="btn btn-lg px-5 py-3 rounded-3 fw-bold" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; box-shadow: 0 20px 50px rgba(102, 126, 234, 0.5);">
-                  Criar Conta GrÃ¡tis
-                </button>
-              </div>
+      <!-- Footer -->
+      <footer class="py-12 border-t border-white/10 bg-[#050810]">
+        <div class="container mx-auto px-6 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-sm font-bold text-white">
+                    C
+                </div>
+                <span class="text-lg font-bold text-gray-300">ConectAEE</span>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Footer Bootstrap -->
-      <footer class="py-5" style="background: rgba(255,255,255,0.02); border-top: 1px solid rgba(255,255,255,0.1);">
-        <div class="container-xxl px-4 px-lg-5">
-          <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-4">
-            <div class="d-flex align-items-center gap-3">
-              <div class="d-flex align-items-center justify-content-center rounded-3 fw-black fs-4" style="width: 48px; height: 48px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                C
-              </div>
-              <span class="fs-5 fw-bold">ConectAEE</span>
+            <div class="text-sm text-gray-500">
+                &copy; 2026 ConectAEE.
             </div>
-            <div class="small text-center text-md-start" style="color: rgba(255,255,255,0.5);">
-              Â© 2025 ConectAEE - Sistema de GestÃ£o AEE
-            </div>
-          </div>
         </div>
       </footer>
 
-      <!-- Login/Register Modal (mantÃ©m Tailwind pois Ã© usado em outros componentes tambÃ©m) -->
+      <!-- Login/Register Modal -->
       <div v-if="tab === 'login' || tab === 'register'" @click.self="tab = null" 
            class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <section class="bg-slate-900/95 backdrop-blur-xl border border-white/20 text-white rounded-3xl shadow-2xl p-6 sm:p-8 max-w-md w-full relative">
@@ -3990,6 +3897,7 @@ const HomeLanding = {
   data() {
     return {
       tab: null,
+      scrolled: false,
       showModal: false,
       loginForm: {
         email: '',
@@ -4032,6 +3940,9 @@ const HomeLanding = {
     }
   },
   methods: {
+    handleScroll() {
+      this.scrolled = window.scrollY > 20;
+    },
     scrollToFeatures() {
       document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
     },
@@ -4094,16 +4005,20 @@ const HomeLanding = {
     }
   },
   mounted() {
+    window.addEventListener('scroll', this.handleScroll);
     const rememberedEmail = localStorage.getItem('rememberedEmail');
     if (rememberedEmail) {
       this.loginForm.email = rememberedEmail;
       this.loginForm.remember = true;
     }
+  },
+  unmounted() {
+    window.removeEventListener('scroll', this.handleScroll);
   }
 };
 
 
-// Página de Login
+// PÃ¡gina de Login
 const Login = {
   template: `
     <div class="min-h-screen grid grid-cols-1 lg:grid-cols-2">

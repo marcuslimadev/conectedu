@@ -3649,19 +3649,19 @@ const Layout = {
 // Página inicial com login embutido
 const HomeLanding = {
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div class="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50">
       <!-- Header/Navbar -->
-      <nav class="bg-white/80 backdrop-blur-lg border-b border-gray-200 sticky top-0 z-50">
+      <nav class="bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex items-center justify-between h-16">
             <div class="flex items-center gap-3">
               <img src="./icons/logo-icon.png" alt="ConectAEE" class="h-10 w-10">
-              <span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">ConectAEE</span>
+              <span class="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">ConectAEE</span>
             </div>
             <div class="flex items-center gap-4">
-              <button @click="tab = 'login'" class="text-gray-700 hover:text-blue-600 font-medium transition">Entrar</button>
-              <button @click="tab = 'register'" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition">
-                Cadastrar Grátis
+              <button @click="tab = 'login'" class="text-gray-700 hover:text-emerald-600 font-medium transition">Entrar</button>
+              <button @click="tab = 'register'" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg hover:shadow-lg hover:scale-105 transition font-medium">
+                Cadastrar
               </button>
             </div>
           </div>
@@ -3674,14 +3674,13 @@ const HomeLanding = {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div class="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <div class="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-6">
-                <i class="fas fa-heart"></i>
+              <div class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 text-emerald-700 rounded-full text-sm font-semibold mb-6">
+                <span class="w-2 h-2 bg-emerald-600 rounded-full"></span>
                 <span>Educação Inclusiva com Tecnologia</span>
               </div>
               
-              <h1 class="text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight mb-6">
-                Transforme a <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Gestão AEE</span> 
-                na sua escola
+              <h1 class="text-6xl lg:text-7xl font-black text-gray-900 leading-tight mb-6">
+                Transforme a <span class="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">Gestão AEE</span>
               </h1>
               
               <p class="text-xl text-gray-600 mb-8 leading-relaxed">
@@ -3689,31 +3688,37 @@ const HomeLanding = {
                 Crie PDI, PAI e Entrevistas seguindo os modelos oficiais, com facilidade e acessibilidade.
               </p>
               
-              <div class="flex flex-col sm:flex-row gap-4 mb-8">
+              <div class="flex flex-col sm:flex-row gap-4 pt-4 mb-8">
                 <button @click="tab = 'register'" 
-                        class="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition">
+                        class="px-8 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition duration-300">
                   <i class="fas fa-rocket mr-2"></i>
-                  Começar Agora - Grátis
+                  Começar Agora
                 </button>
                 <button @click="tab = 'login'" 
-                        class="px-8 py-4 bg-white text-gray-700 rounded-xl font-semibold text-lg border-2 border-gray-300 hover:border-blue-600 hover:text-blue-600 transition">
+                        class="px-8 py-4 bg-gray-100 text-gray-900 rounded-xl font-bold text-lg border-2 border-gray-200 hover:border-emerald-600 hover:bg-emerald-50 transition duration-300">
                   <i class="fas fa-sign-in-alt mr-2"></i>
                   Fazer Login
                 </button>
               </div>
 
-              <div class="flex items-center gap-8 text-sm text-gray-600">
+              <div class="flex flex-wrap items-center gap-6 pt-8 border-t border-gray-200">
                 <div class="flex items-center gap-2">
-                  <i class="fas fa-check-circle text-green-500"></i>
-                  <span>100% Gratuito</span>
+                  <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-check text-emerald-600 text-sm"></i>
+                  </div>
+                  <span class="text-sm font-medium text-gray-700">Totalmente Acessível</span>
                 </div>
                 <div class="flex items-center gap-2">
-                  <i class="fas fa-universal-access text-blue-500"></i>
-                  <span>Totalmente Acessível</span>
+                  <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-shield-alt text-emerald-600 text-sm"></i>
+                  </div>
+                  <span class="text-sm font-medium text-gray-700">Dados Seguros</span>
                 </div>
                 <div class="flex items-center gap-2">
-                  <i class="fas fa-shield-alt text-purple-500"></i>
-                  <span>Dados Seguros</span>
+                  <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-bolt text-emerald-600 text-sm"></i>
+                  </div>
+                  <span class="text-sm font-medium text-gray-700">Rápido e Confiável</span>
                 </div>
               </div>
             </div>
@@ -3728,26 +3733,26 @@ const HomeLanding = {
               </div>
               
               <!-- Cards flutuantes com dados do sistema -->
-              <div class="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-xl border border-gray-100">
-                <div class="flex items-center gap-3">
-                  <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-file-pdf text-white text-xl"></i>
+              <div class="absolute -bottom-8 -left-8 bg-white p-6 rounded-2xl shadow-2xl border border-gray-100 backdrop-blur-sm">
+                <div class="flex items-center gap-4">
+                  <div class="w-14 h-14 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-file-pdf text-white text-2xl"></i>
                   </div>
                   <div>
-                    <div class="text-2xl font-bold text-gray-900">3</div>
-                    <div class="text-xs text-gray-600">Documentos Oficiais</div>
+                    <div class="text-3xl font-black text-gray-900">3</div>
+                    <div class="text-sm text-gray-600 font-medium">Formulários Oficiais</div>
                   </div>
                 </div>
               </div>
               
-              <div class="absolute -top-6 -right-6 bg-white p-4 rounded-xl shadow-xl border border-gray-100">
-                <div class="flex items-center gap-3">
-                  <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-600 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-heart text-white text-xl"></i>
+              <div class="absolute -top-8 -right-8 bg-white p-6 rounded-2xl shadow-2xl border border-gray-100 backdrop-blur-sm">
+                <div class="flex items-center gap-4">
+                  <div class="w-14 h-14 bg-gradient-to-br from-teal-400 to-teal-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-universal-access text-white text-2xl"></i>
                   </div>
                   <div>
-                    <div class="text-2xl font-bold text-gray-900">100%</div>
-                    <div class="text-xs text-gray-600">Acessível</div>
+                    <div class="text-3xl font-black text-gray-900">100%</div>
+                    <div class="text-sm text-gray-600 font-medium">Acessível</div>
                   </div>
                 </div>
               </div>

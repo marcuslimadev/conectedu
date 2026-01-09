@@ -75,13 +75,13 @@
 
     // Forçar reload se detectar versão antiga no localStorage
     const currentVersion = '5.0';
-    const storedVersion = localStorage.getItem('app_version');
-    if (storedVersion && storedVersion !== currentVersion) {
+    const storedVersion2 = localStorage.getItem('app_version');
+    if (storedVersion2 && storedVersion2 !== currentVersion) {
       localStorage.setItem('app_version', currentVersion);
       console.log('🔄 Versão atualizada, limpando dados antigos');
       // Não fazer reload automático, apenas limpar dados
       localStorage.removeItem('token'); // Força novo login
-    } else if (!storedVersion) {
+    } else if (!storedVersion2) {
       localStorage.setItem('app_version', currentVersion);
     }
   </script>

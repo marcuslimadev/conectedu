@@ -3649,7 +3649,7 @@ const Layout = {
 // Página inicial com login embutido
 const HomeLanding = {
   template: `
-    <div class="min-h-screen bg-slate-950 text-white relative overflow-hidden">
+    <div class="min-h-screen bg-slate-950 text-white relative overflow-hidden" style="background-color: #020617 !important;">
       <div class="absolute inset-0">
         <div class="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-emerald-400/20 blur-3xl"></div>
         <div class="absolute top-1/3 -right-32 w-[28rem] h-[28rem] rounded-full bg-sky-500/20 blur-3xl"></div>

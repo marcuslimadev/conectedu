@@ -3647,141 +3647,363 @@ const Layout = {
 };
 
 // Página inicial com login embutido
+// ConectAEE - Homepage Limpa, Simples e Bonita
+
 const HomeLanding = {
   template: `
-    <div class="min-h-screen text-white font-sans relative overflow-x-hidden selection:bg-cyan-500 selection:text-white" style="background-color: #0a0f1e">
-      
-      <!-- Navbar -->
-      <nav class="fixed top-0 inset-x-0 z-50 transition-all duration-300" :class="scrolled ? 'backdrop-blur-md border-b border-white/10 py-4' : 'bg-transparent py-6'" :style="scrolled ? 'background-color: rgba(10, 15, 30, 0.8)' : ''">
-        <div class="container mx-auto px-6 flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-xl font-bold text-white shadow-lg shadow-cyan-500/20">
-              C
+    <div class="min-h-screen bg-white">
+      <!-- Header/Navbar -->
+      <nav class="sticky top-0 z-40 bg-white border-b border-gray-200">
+        <div class="max-w-6xl mx-auto px-6 lg:px-8">
+          <div class="flex items-center justify-between h-16">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center font-bold text-white text-lg">C</div>
+              <span class="text-xl font-bold text-gray-900">ConectAEE</span>
             </div>
-            <span class="text-xl font-bold tracking-tight">ConectAEE</span>
-          </div>
-          <div class="flex items-center gap-4">
-            <button @click="tab = 'login'" class="text-sm font-medium text-gray-300 hover:text-white transition-colors">
-              Entrar
-            </button>
-            <button @click="tab = 'register'" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-sm font-semibold shadow-lg shadow-cyan-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
-              Começar Grátis
-            </button>
+            <div class="flex items-center gap-3">
+              <button @click="tab = 'login'" class="px-4 py-2 text-gray-600 hover:text-gray-900 transition font-medium">Entrar</button>
+              <button @click="tab = 'register'" class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition">
+                Cadastrar
+              </button>
+            </div>
           </div>
         </div>
       </nav>
 
       <!-- Hero Section -->
-      <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-        <!-- Background Elements -->
-        <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-[128px] pointer-events-none"></div>
-        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-[128px] pointer-events-none"></div>
+      <section class="py-20 lg:py-32">
+        <div class="max-w-6xl mx-auto px-6 lg:px-8">
+          <div class="grid lg:grid-cols-2 gap-12 items-center">
+            <!-- Left Content -->
+            <div class="space-y-8">
+              <div class="space-y-4">
+                <h1 class="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+                  Gestão de AEE Simplificada
+                </h1>
+                <p class="text-xl text-gray-600 leading-relaxed">
+                  Plataforma completa para criar PDI, PAI e Entrevistas com responsáveis. Tudo em um só lugar, seguro e acessível.
+                </p>
+              </div>
 
-        <div class="container mx-auto px-6 relative z-10">
-            <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
-                <div class="flex-1 text-center lg:text-left">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-900/30 border border-blue-500/30 text-blue-300 text-xs font-semibold mb-6">
-                        <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
-                        Educação Especial + Tecnologia
-                    </div>
-                    <h1 class="text-5xl lg:text-7xl font-bold tracking-tight leading-tight mb-6">
-                        <span class="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent">ConectAEE</span>
-                        <br>
-                        <span class="text-white">Plataforma Completa</span>
-                    </h1>
-                    <p class="text-lg text-gray-400 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                        Sistema especializado em Atendimento Educacional Especializado com IA, formulários digitais e geração automática de relatórios profissionais.
-                    </p>
-                    <div class="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
-                        <button @click="tab = 'register'" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-lg shadow-xl shadow-cyan-500/20 transition-all hover:-translate-y-1">
-                            Começar Agora
-                        </button>
-                        <button @click="scrollToFeatures" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold transition-all backdrop-blur-sm">
-                            Ver Funcionalidades
-                        </button>
-                    </div>
+              <div class="flex flex-col sm:flex-row gap-4">
+                <button @click="tab = 'register'" 
+                        class="px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition">
+                  Começar Agora
+                </button>
+                <button @click="tab = 'login'" 
+                        class="px-8 py-3 border-2 border-gray-300 hover:border-gray-400 text-gray-900 rounded-lg font-semibold transition">
+                  Fazer Login
+                </button>
+              </div>
+
+              <div class="flex flex-wrap gap-8 pt-8 border-t border-gray-200">
+                <div class="flex items-center gap-3">
+                  <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
+                    <i class="fas fa-check text-green-600 text-sm"></i>
+                  </div>
+                  <span class="text-sm font-medium text-gray-700">Totalmente Acessível</span>
                 </div>
+                <div class="flex items-center gap-3">
+                  <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
+                    <i class="fas fa-check text-green-600 text-sm"></i>
+                  </div>
+                  <span class="text-sm font-medium text-gray-700">Dados Seguros</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
+                    <i class="fas fa-check text-green-600 text-sm"></i>
+                  </div>
+                  <span class="text-sm font-medium text-gray-700">Rápido e Confiável</span>
+                </div>
+              </div>
             </div>
+
+            <!-- Right Visual -->
+            <div class="hidden lg:block">
+              <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 border border-gray-200">
+                <div class="space-y-4">
+                  <div class="flex items-start gap-4 p-4 bg-white rounded-lg border border-gray-100 hover:border-blue-200 transition">
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <i class="fas fa-file-alt text-blue-600 text-lg"></i>
+                    </div>
+                    <div>
+                      <h3 class="font-semibold text-gray-900">PDI Completo</h3>
+                      <p class="text-sm text-gray-600">Plano de Desenvolvimento Individual</p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-start gap-4 p-4 bg-white rounded-lg border border-gray-100 hover:border-indigo-200 transition">
+                    <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <i class="fas fa-clipboard-list text-indigo-600 text-lg"></i>
+                    </div>
+                    <div>
+                      <h3 class="font-semibold text-gray-900">PAI Estruturado</h3>
+                      <p class="text-sm text-gray-600">Plano de Atendimento Individual</p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-start gap-4 p-4 bg-white rounded-lg border border-gray-100 hover:border-purple-200 transition">
+                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <i class="fas fa-comments text-purple-600 text-lg"></i>
+                    </div>
+                    <div>
+                      <h3 class="font-semibold text-gray-900">Entrevista</h3>
+                      <p class="text-sm text-gray-600">Com responsável do aluno</p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-start gap-4 p-4 bg-white rounded-lg border border-gray-100 hover:border-orange-200 transition">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <i class="fas fa-file-pdf text-orange-600 text-lg"></i>
+                    </div>
+                    <div>
+                      <h3 class="font-semibold text-gray-900">PDFs Profissionais</h3>
+                      <p class="text-sm text-gray-600">Prontos para impressão</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
       <!-- Features Section -->
-      <section id="features" class="py-24" style="background: linear-gradient(to bottom, #0a0f1e, #0f172a)">
-        <div class="container mx-auto px-6">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <h2 class="text-3xl lg:text-5xl font-bold mb-6 text-white">Tudo que você precisa</h2>
-                <p class="text-lg text-gray-400">Ferramentas profissionais desenvolvidas especificamente para o dia a dia do professor de AEE.</p>
+      <section class="py-20 bg-gray-50 border-t border-gray-200">
+        <div class="max-w-6xl mx-auto px-6 lg:px-8">
+          <div class="text-center mb-16">
+            <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Funcionalidades</h2>
+            <p class="text-lg text-gray-600">Tudo que você precisa para gerenciar AEE de forma eficiente</p>
+          </div>
+
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Feature 1 -->
+            <div class="bg-white rounded-xl p-8 border border-gray-200 hover:border-blue-300 hover:shadow-lg transition">
+              <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                <i class="fas fa-file-alt text-blue-600 text-xl"></i>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 mb-2">PDI Completo</h3>
+              <p class="text-gray-600">Formulário oficial do Plano de Desenvolvimento Individual com todos os campos necessários.</p>
             </div>
 
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="group p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-blue-500/30 transition-all duration-300">
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-3xl mb-6 shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
-                        📝
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-4">Formulários Completos</h3>
-                    <p class="text-gray-400 leading-relaxed">PDI, PAI e Entrevistas totalmente digitalizados seguindo os modelos oficiais do MEC e secretarias.</p>
-                </div>
-
-                <div class="group p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-purple-500/30 transition-all duration-300">
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-3xl mb-6 shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform">
-                        🤖
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-4">Inteligência Artificial</h3>
-                    <p class="text-gray-400 leading-relaxed">Transcreva áudios de atendimentos automaticamente e receba sugestões pedagógicas da IA.</p>
-                </div>
-
-                <div class="group p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-pink-500/30 transition-all duration-300">
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500 to-pink-700 flex items-center justify-center text-3xl mb-6 shadow-lg shadow-pink-500/20 group-hover:scale-110 transition-transform">
-                        📄
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-4">Relatórios em PDF</h3>
-                    <p class="text-gray-400 leading-relaxed">Gere documentos profissionais prontos para impressão com formatação impecável e seu cabeçalho.</p>
-                </div>
+            <!-- Feature 2 -->
+            <div class="bg-white rounded-xl p-8 border border-gray-200 hover:border-indigo-300 hover:shadow-lg transition">
+              <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
+                <i class="fas fa-clipboard-list text-indigo-600 text-xl"></i>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 mb-2">PAI Estruturado</h3>
+              <p class="text-gray-600">Plano de Atendimento Individual com sequência preservada do documento original.</p>
             </div>
+
+            <!-- Feature 3 -->
+            <div class="bg-white rounded-xl p-8 border border-gray-200 hover:border-purple-300 hover:shadow-lg transition">
+              <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                <i class="fas fa-comments text-purple-600 text-xl"></i>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 mb-2">Entrevista</h3>
+              <p class="text-gray-600">Formulário completo para entrevista inicial com responsável do aluno.</p>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="bg-white rounded-xl p-8 border border-gray-200 hover:border-orange-300 hover:shadow-lg transition">
+              <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
+                <i class="fas fa-file-pdf text-orange-600 text-xl"></i>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 mb-2">PDFs Profissionais</h3>
+              <p class="text-gray-600">Gere documentos em PDF otimizados e prontos para arquivamento ou impressão.</p>
+            </div>
+
+            <!-- Feature 5 -->
+            <div class="bg-white rounded-xl p-8 border border-gray-200 hover:border-red-300 hover:shadow-lg transition">
+              <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
+                <i class="fas fa-users text-red-600 text-xl"></i>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 mb-2">Gestão de Alunos</h3>
+              <p class="text-gray-600">Cadastre e acompanhe todos os alunos em atendimento com histórico completo.</p>
+            </div>
+
+            <!-- Feature 6 -->
+            <div class="bg-white rounded-xl p-8 border border-gray-200 hover:border-green-300 hover:shadow-lg transition">
+              <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                <i class="fas fa-chart-bar text-green-600 text-xl"></i>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 mb-2">Relatórios</h3>
+              <p class="text-gray-600">Registre atendimentos com gravação de áudio e transcrição automática.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Benefits Section -->
+      <section class="py-20">
+        <div class="max-w-6xl mx-auto px-6 lg:px-8">
+          <div class="text-center mb-16">
+            <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Por que escolher ConectAEE?</h2>
+            <p class="text-lg text-gray-600">Benefícios que fazem diferença no seu dia a dia</p>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-8">
+            <div class="flex gap-4">
+              <div class="flex-shrink-0">
+                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-blue-100">
+                  <i class="fas fa-lock text-blue-600 text-lg"></i>
+                </div>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">Segurança de Dados</h3>
+                <p class="mt-2 text-gray-600">Seus dados e dos alunos são protegidos com criptografia de ponta.</p>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <div class="flex-shrink-0">
+                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-green-100">
+                  <i class="fas fa-universal-access text-green-600 text-lg"></i>
+                </div>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">100% Acessível</h3>
+                <p class="mt-2 text-gray-600">Interface adaptada para todos, seguindo normas WCAG de acessibilidade.</p>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <div class="flex-shrink-0">
+                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-purple-100">
+                  <i class="fas fa-bolt text-purple-600 text-lg"></i>
+                </div>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">Rápido e Responsivo</h3>
+                <p class="mt-2 text-gray-600">Interface rápida que funciona em qualquer dispositivo, desktop ou mobile.</p>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <div class="flex-shrink-0">
+                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-orange-100">
+                  <i class="fas fa-headset text-orange-600 text-lg"></i>
+                </div>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">Suporte Dedicado</h3>
+                <p class="mt-2 text-gray-600">Equipe pronta para ajudar com dúvidas e sugestões de melhorias.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stats Section -->
+      <section class="py-20 bg-blue-50 border-y border-gray-200">
+        <div class="max-w-6xl mx-auto px-6 lg:px-8">
+          <div class="grid md:grid-cols-4 gap-8 text-center">
+            <div>
+              <div class="text-4xl font-bold text-blue-600 mb-2">100%</div>
+              <p class="text-gray-700 font-medium">Acessível</p>
+            </div>
+            <div>
+              <div class="text-4xl font-bold text-indigo-600 mb-2">3</div>
+              <p class="text-gray-700 font-medium">Formulários Oficiais</p>
+            </div>
+            <div>
+              <div class="text-4xl font-bold text-purple-600 mb-2">∞</div>
+              <p class="text-gray-700 font-medium">Alunos Suportados</p>
+            </div>
+            <div>
+              <div class="text-4xl font-bold text-green-600 mb-2">24/7</div>
+              <p class="text-gray-700 font-medium">Disponível</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA Section -->
+      <section class="py-20">
+        <div class="max-w-4xl mx-auto px-6 lg:px-8">
+          <div class="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl p-12 text-center text-white">
+            <h2 class="text-4xl font-bold mb-4">Comece Agora</h2>
+            <p class="text-lg mb-8 opacity-90">Transforme a forma como você gerencia o Atendimento Educacional Especializado.</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+              <button @click="tab = 'register'" 
+                      class="px-8 py-3 bg-white text-blue-600 hover:bg-gray-100 rounded-lg font-semibold transition">
+                Cadastre-se Agora
+              </button>
+              <button @click="tab = 'login'" 
+                      class="px-8 py-3 border-2 border-white hover:bg-white/10 text-white rounded-lg font-semibold transition">
+                Já tenho conta
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
       <!-- Footer -->
-      <footer class="py-12 border-t border-white/10" style="background-color: #050810">
-        <div class="container mx-auto px-6 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-6">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-sm font-bold text-white">
-                    C
-                </div>
-                <span class="text-lg font-bold text-gray-300">ConectAEE</span>
+      <footer class="border-t border-gray-200 bg-gray-50 py-16">
+        <div class="max-w-6xl mx-auto px-6 lg:px-8">
+          <div class="grid md:grid-cols-4 gap-12 mb-12">
+            <div>
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center font-bold text-white">C</div>
+                <span class="text-lg font-bold text-gray-900">ConectAEE</span>
+              </div>
+              <p class="text-gray-600 text-sm">Plataforma completa para gestão do Atendimento Educacional Especializado.</p>
             </div>
-            <div class="text-sm text-gray-500">
-                &copy; 2026 ConectAEE.
+            <div>
+              <h4 class="font-semibold text-gray-900 mb-4">Funcionalidades</h4>
+              <ul class="space-y-2 text-sm text-gray-600">
+                <li class="hover:text-blue-600 transition cursor-pointer">PDI - Plano de Desenvolvimento</li>
+                <li class="hover:text-blue-600 transition cursor-pointer">PAI - Plano de Atendimento</li>
+                <li class="hover:text-blue-600 transition cursor-pointer">Entrevista com Responsável</li>
+                <li class="hover:text-blue-600 transition cursor-pointer">Geração de PDFs</li>
+              </ul>
             </div>
+            <div>
+              <h4 class="font-semibold text-gray-900 mb-4">Recursos</h4>
+              <ul class="space-y-2 text-sm text-gray-600">
+                <li class="hover:text-blue-600 transition cursor-pointer">Documentação</li>
+                <li class="hover:text-blue-600 transition cursor-pointer">Tutoriais</li>
+                <li class="hover:text-blue-600 transition cursor-pointer">Suporte</li>
+                <li class="hover:text-blue-600 transition cursor-pointer">FAQ</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-900 mb-4">Acessibilidade</h4>
+              <button @click="openA11y" class="text-sm text-gray-600 hover:text-blue-600 transition inline-flex items-center gap-2">
+                <i class="fas fa-universal-access"></i>
+                Painel de Acessibilidade
+              </button>
+            </div>
+          </div>
+          <div class="border-t border-gray-200 pt-8 text-center text-sm text-gray-600">
+            <p>&copy; 2026 ConectAEE. Desenvolvido para educação inclusiva.</p>
+          </div>
         </div>
       </footer>
 
       <!-- Login/Register Modal -->
       <div v-if="tab === 'login' || tab === 'register'" @click.self="tab = null" 
-           class="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-4" style="background-color: rgba(0, 0, 0, 0.6)">
-        <section class="backdrop-blur-xl border border-white/20 text-white rounded-3xl shadow-2xl p-6 sm:p-8 max-w-md w-full relative" style="background-color: rgba(15, 23, 42, 0.95)">
-          <button @click="tab = null" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition">
+           class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <section class="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full relative">
+          <button @click="tab = null" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition">
             <i class="fas fa-times text-gray-400"></i>
           </button>
           
-          <div class="flex items-center justify-between mb-6">
-            <div>
-              <h2 class="text-2xl font-semibold text-white">Acesso ao sistema</h2>
-              <p class="text-sm text-gray-400">Login e cadastro no mesmo lugar.</p>
-            </div>
-            <span class="text-xs uppercase tracking-[0.3em] text-gray-500">Professor</span>
+          <div class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-900">Acesso ao Sistema</h2>
+            <p class="text-sm text-gray-600">Login e cadastro no mesmo lugar</p>
           </div>
 
-          <div class="grid grid-cols-2 rounded-2xl p-1 text-sm font-medium mb-6" style="background-color: rgba(30, 41, 59, 0.5)">
+          <div class="grid grid-cols-2 gap-2 rounded-lg bg-gray-100 p-1 mb-8">
             <button type="button"
-                    class="py-2 rounded-2xl transition"
-                    :class="tab === 'login' ? 'bg-gradient-to-r from-cyan-600 to-purple-600 shadow text-white' : 'text-gray-400 hover:text-white'"
+                    class="py-2 rounded-md transition font-medium"
+                    :class="tab === 'login' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-gray-900'"
                     @click="tab = 'login'">
               Entrar
             </button>
             <button type="button"
-                    class="py-2 rounded-2xl transition"
-                    :class="tab === 'register' ? 'bg-gradient-to-r from-cyan-600 to-purple-600 shadow text-white' : 'text-gray-400 hover:text-white'"
+                    class="py-2 rounded-md transition font-medium"
+                    :class="tab === 'register' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-gray-900'"
                     @click="tab = 'register'">
               Registrar
             </button>
@@ -3789,39 +4011,39 @@ const HomeLanding = {
 
           <form v-show="tab === 'login'" @submit.prevent="login" class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-gray-300 mb-1" for="home-email">Email</label>
-              <input id="home-email" v-model.trim="loginForm.email" type="email" autocomplete="username" required
-                     class="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+              <label class="block text-sm font-medium text-gray-900 mb-2">Email</label>
+              <input v-model.trim="loginForm.email" type="email" required
+                     class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition"
                      placeholder="seu@email.com">
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-300 mb-1" for="home-password">Senha</label>
+              <label class="block text-sm font-medium text-gray-900 mb-2">Senha</label>
               <div class="relative">
-                <input id="home-password" :type="showLoginPassword ? 'text' : 'password'"
-                       v-model="loginForm.password" autocomplete="current-password" required
-                       class="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 pr-10 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                <input :type="showLoginPassword ? 'text' : 'password'"
+                       v-model="loginForm.password" required
+                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-10 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition"
                        placeholder="••••••••">
-                <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                         @click="showLoginPassword = !showLoginPassword">
                   <i :class="showLoginPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
                 </button>
               </div>
             </div>
             <div class="flex items-center justify-between text-sm">
-              <label class="inline-flex items-center gap-2 text-gray-300">
-                <input type="checkbox" v-model="loginForm.remember" class="rounded border-gray-600 bg-slate-800 text-cyan-500 focus:ring-cyan-500">
+              <label class="inline-flex items-center gap-2 text-gray-600">
+                <input type="checkbox" v-model="loginForm.remember" class="rounded border-gray-300 text-blue-500">
                 Lembrar meu e-mail
               </label>
-              <button type="button" class="text-cyan-400 hover:text-cyan-300"
+              <button type="button" class="text-blue-600 hover:text-blue-700"
                       @click="$showToast && $showToast('Recuperação em breve', 'Estamos finalizando essa etapa.', 'info')">
                 Esqueci minha senha
               </button>
             </div>
-            <div v-if="loginError" class="rounded-xl bg-rose-500/20 border border-rose-500/30 p-3 text-sm text-rose-200">
+            <div v-if="loginError" class="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
               {{ loginError }}
             </div>
             <button type="submit" :disabled="loginLoading"
-                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-white bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-60">
+                    class="w-full py-2.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-semibold transition disabled:opacity-50">
               <span v-if="loginLoading" class="inline-flex items-center gap-2">
                 <span class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
                 Entrando...
@@ -3832,61 +4054,61 @@ const HomeLanding = {
 
           <form v-show="tab === 'register'" @submit.prevent="register" class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-gray-300 mb-1" for="home-name">Nome completo</label>
-              <input id="home-name" v-model.trim="registerForm.name" type="text" required
-                     class="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
-                     placeholder="Seu nome completo">
+              <label class="block text-sm font-medium text-gray-900 mb-2">Nome completo</label>
+              <input v-model.trim="registerForm.name" type="text" required
+                     class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition"
+                     placeholder="Seu nome">
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-300 mb-1" for="home-register-email">Email</label>
-              <input id="home-register-email" v-model.trim="registerForm.email" type="email" required
-                     class="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+              <label class="block text-sm font-medium text-gray-900 mb-2">Email</label>
+              <input v-model.trim="registerForm.email" type="email" required
+                     class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition"
                      placeholder="professor@escola.com">
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-300 mb-1" for="home-register-password">Senha</label>
+              <label class="block text-sm font-medium text-gray-900 mb-2">Senha</label>
               <div class="relative">
-                <input id="home-register-password" :type="showRegisterPassword ? 'text' : 'password'"
+                <input :type="showRegisterPassword ? 'text' : 'password'"
                        v-model="registerForm.password" required
-                       class="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 pr-10 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-10 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition"
                        placeholder="Crie uma senha">
-                <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                         @click="showRegisterPassword = !showRegisterPassword">
                   <i :class="showRegisterPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
                 </button>
               </div>
-              <div class="mt-2 text-xs text-gray-400 grid grid-cols-2 gap-1">
-                <span :class="passwordChecks.length ? 'text-cyan-400' : ''">8+ caracteres</span>
-                <span :class="passwordChecks.uppercase ? 'text-cyan-400' : ''">1 maiúscula</span>
-                <span :class="passwordChecks.lowercase ? 'text-cyan-400' : ''">1 minúscula</span>
-                <span :class="passwordChecks.number ? 'text-cyan-400' : ''">1 número</span>
-                <span :class="passwordChecks.special ? 'text-cyan-400' : ''">1 especial</span>
+              <div class="mt-2 text-xs text-gray-600 grid grid-cols-2 gap-1">
+                <span :class="passwordChecks.length ? 'text-green-600' : ''">✓ 8+ caracteres</span>
+                <span :class="passwordChecks.uppercase ? 'text-green-600' : ''">✓ 1 maiúscula</span>
+                <span :class="passwordChecks.lowercase ? 'text-green-600' : ''">✓ 1 minúscula</span>
+                <span :class="passwordChecks.number ? 'text-green-600' : ''">✓ 1 número</span>
+                <span :class="passwordChecks.special ? 'text-green-600' : ''">✓ 1 especial</span>
               </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-300 mb-1" for="home-register-confirm">Confirmar senha</label>
-              <input id="home-register-confirm" v-model="registerForm.confirm_password" type="password" required
-                     class="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+              <label class="block text-sm font-medium text-gray-900 mb-2">Confirmar senha</label>
+              <input v-model="registerForm.confirm_password" type="password" required
+                     class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition"
                      placeholder="Repita a senha">
               <div v-if="registerForm.password && registerForm.confirm_password && registerForm.password !== registerForm.confirm_password"
-                   class="mt-1 text-xs text-rose-400">As senhas não coincidem</div>
+                   class="mt-1 text-xs text-red-600">As senhas não coincidem</div>
             </div>
-            <div v-if="registerError" class="rounded-xl bg-rose-500/20 border border-rose-500/30 p-3 text-sm text-rose-200">
+            <div v-if="registerError" class="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
               {{ registerError }}
             </div>
-            <div v-if="registerSuccess" class="rounded-xl bg-cyan-500/20 border border-cyan-500/30 p-3 text-sm text-cyan-200">
+            <div v-if="registerSuccess" class="rounded-lg bg-green-50 border border-green-200 p-3 text-sm text-green-700">
               {{ registerSuccess }}
             </div>
             <button type="submit" :disabled="registerLoading || !isRegisterValid"
-                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-white bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-60">
+                    class="w-full py-2.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-semibold transition disabled:opacity-50">
               <span v-if="registerLoading" class="inline-flex items-center gap-2">
                 <span class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
                 Criando conta...
               </span>
               <span v-else>Finalizar cadastro</span>
             </button>
-            <p class="text-xs text-gray-400 text-center">
-              Administradores são cadastrados manualmente pelo gestor do sistema.
+            <p class="text-xs text-gray-600 text-center">
+              Administradores são cadastrados manualmente pelo gestor.
             </p>
           </form>
         </section>
@@ -3896,8 +4118,6 @@ const HomeLanding = {
   data() {
     return {
       tab: null,
-      scrolled: false,
-      showModal: false,
       loginForm: {
         email: '',
         password: '',
@@ -3939,37 +4159,43 @@ const HomeLanding = {
     }
   },
   methods: {
-    handleScroll() {
-      this.scrolled = window.scrollY > 20;
+    openA11y() {
+      if (window.a11yManager && typeof window.a11yManager.togglePanel === 'function') {
+        window.a11yManager.togglePanel();
+      }
     },
-    scrollToFeatures() {
-      document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+    syncA11y() {
+      if (window.a11yManager && typeof window.a11yManager.syncFromServer === 'function') {
+        window.a11yManager.syncFromServer();
+      }
     },
     async login() {
       this.loginLoading = true;
       this.loginError = '';
-
-      if (this.loginForm.remember) {
-        localStorage.setItem('rememberedEmail', this.loginForm.email);
-      } else {
-        localStorage.removeItem('rememberedEmail');
-      }
-
       try {
-        const res = await api.post('/login', {
+        await ensureApiRouting();
+        const response = await api.post('/login', {
           email: this.loginForm.email,
           password: this.loginForm.password
         });
-
-        if (res.data.ok) {
-          localStorage.setItem('token', res.data.data.token);
-          this.$root.user = res.data.data;
-          this.$router.push('/dashboard');
-        } else {
-          this.loginError = res.data.error || 'Erro ao fazer login';
+        const token = response.data?.data?.token || response.data?.token;
+        const user = response.data?.data?.user || response.data?.user;
+        if (!token) throw new Error('TOKEN_MISSING');
+        if (user && user.role === 'student') {
+          this.loginError = 'Acesso negado. Apenas professores e administradores podem fazer login.';
+          return;
         }
-      } catch (err) {
-        this.loginError = err.response?.data?.error || 'Erro de conexão';
+        localStorage.setItem('token', token);
+        if (this.loginForm.remember && this.loginForm.email) {
+          localStorage.setItem('remember_email', this.loginForm.email);
+        } else {
+          localStorage.removeItem('remember_email');
+        }
+        this.syncA11y();
+        this.$root.user = user;
+        this.$router.push('/dashboard');
+      } catch (error) {
+        this.loginError = error.response?.data?.message || 'Erro ao fazer login';
       } finally {
         this.loginLoading = false;
       }
@@ -3978,41 +4204,26 @@ const HomeLanding = {
       this.registerLoading = true;
       this.registerError = '';
       this.registerSuccess = '';
-
       try {
-        const res = await api.post('/register', {
+        await ensureApiRouting();
+        const response = await api.post('/register', {
           name: this.registerForm.name,
           email: this.registerForm.email,
           password: this.registerForm.password
         });
-
-        if (res.data.ok) {
-          this.registerSuccess = 'Conta criada com sucesso! Redirecionando...';
-          setTimeout(() => {
-            localStorage.setItem('token', res.data.data.token);
-            this.$root.user = res.data.data;
-            this.$router.push('/dashboard');
-          }, 1500);
-        } else {
-          this.registerError = res.data.error || 'Erro ao criar conta';
-        }
-      } catch (err) {
-        this.registerError = err.response?.data?.error || 'Erro de conexão';
+        const token = response.data?.data?.token || response.data?.token;
+        if (!token) throw new Error('TOKEN_MISSING');
+        localStorage.setItem('token', token);
+        this.syncA11y();
+        // Assume user is returned or fetch it
+        // this.$root.user = ...
+        this.$router.push('/dashboard');
+      } catch (error) {
+        this.registerError = error.response?.data?.message || 'Erro ao criar conta';
       } finally {
         this.registerLoading = false;
       }
     }
-  },
-  mounted() {
-    window.addEventListener('scroll', this.handleScroll);
-    const rememberedEmail = localStorage.getItem('rememberedEmail');
-    if (rememberedEmail) {
-      this.loginForm.email = rememberedEmail;
-      this.loginForm.remember = true;
-    }
-  },
-  unmounted() {
-    window.removeEventListener('scroll', this.handleScroll);
   }
 };
 

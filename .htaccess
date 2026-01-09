@@ -1,14 +1,20 @@
-# ConectAEE - Redireciona raiz para /frontend/
-# VERS√ÉO SIMPLES - sem rewrite complexo
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
 
-# Apenas redireciona / para /frontend/
-RedirectMatch 302 ^/$ /frontend/
+    # 1. Manter acesso direto ao backend e arquivos da raiz que n„o sejam do frontend
+    RewriteRule ^backend - [L]
+    RewriteRule ^\.well-known - [L]
+    
+    # 2. Se o arquivo existe na pasta frontend, serve de l· transparentemente
+    RewriteCond %{DOCUMENT_ROOT}/frontend/$1 -f
+    RewriteRule ^(.+)$ frontend/$1 [L]
 
-# Desabilitar cache para desenvolvimento
-<IfModule mod_headers.c>
-    <FilesMatch "\.(js|css|html|json)$">
-        Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
-        Header set Pragma "no-cache"
-        Header set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
-    </FilesMatch>
+    # 3. A raiz abre o index.html do frontend
+    RewriteRule ^$ frontend/index.html [L]
+    
+    # 4. Qualquer outra rota n„o encontrada cai no index.html (SPA Fallback)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule . frontend/index.html [L]
 </IfModule>

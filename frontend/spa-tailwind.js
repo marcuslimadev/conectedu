@@ -3948,11 +3948,12 @@ const HomeLanding = {
     }
   },
   mounted() {
-    const token = localStorage.getItem('token');
-    if (token) {
-      this.$router.push('/app');
-      return;
-    }
+    // Não redirecionar automaticamente - deixar usuário na home
+    // const token = localStorage.getItem('token');
+    // if (token) {
+    //   this.$router.push('/app');
+    //   return;
+    // }
     const remembered = localStorage.getItem('remember_email');
     if (remembered) {
       this.loginForm.email = remembered;

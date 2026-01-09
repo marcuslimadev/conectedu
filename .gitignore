@@ -10,3 +10,7 @@ logs/*.json
 node_modules/
 vendor/**/.DS_Store
 .DS_Store
+
+# Arquivos temporários de debug
+tmp_*.txt
+tmp_*

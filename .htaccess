@@ -1,0 +1,26 @@
+# ConectAEE - Configuração de URL limpa
+# Esconde pasta frontend/ da URL
+
+RewriteEngine On
+
+# Redireciona /frontend/ para raiz (se alguém acessar diretamente)
+RewriteCond %{REQUEST_URI} ^/frontend/(.*)$ [NC]
+RewriteRule ^frontend/(.*)$ /$1 [R=301,L]
+
+# Se não for arquivo/pasta existente na raiz, procura em /frontend/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/backend/ [NC]
+RewriteRule ^(.*)$ frontend/$1 [L]
+
+# Index padrão
+DirectoryIndex frontend/index.html
+
+# Desabilitar cache para desenvolvimento
+<IfModule mod_headers.c>
+    <FilesMatch "\.(js|css|html|json)$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
+        Header set Pragma "no-cache"
+        Header set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
+    </FilesMatch>
+</IfModule>

@@ -3649,12 +3649,12 @@ const Layout = {
 // Página inicial com login embutido
 const HomeLanding = {
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white overflow-hidden">
+    <div class="min-h-screen text-white overflow-hidden" style="background: linear-gradient(135deg, #020617 0%, #0f172a 50%, #020617 100%);">
       <!-- Animated background elements -->
       <div class="fixed inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute top-0 left-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div class="absolute top-1/3 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style="animation-delay: 2s"></div>
-        <div class="absolute bottom-0 left-1/2 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style="animation-delay: 4s"></div>
+        <div class="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl animate-pulse" style="background: rgba(6, 182, 212, 0.15);"></div>
+        <div class="absolute top-1/3 right-1/4 w-96 h-96 rounded-full blur-3xl animate-pulse" style="background: rgba(168, 85, 247, 0.15); animation-delay: 2s;"></div>
+        <div class="absolute bottom-0 left-1/2 w-96 h-96 rounded-full blur-3xl animate-pulse" style="background: rgba(59, 130, 246, 0.15); animation-delay: 4s;"></div>
       </div>
 
       <!-- Header/Navbar -->

@@ -3649,64 +3649,187 @@ const Layout = {
 // Página inicial com login embutido
 const HomeLanding = {
   template: `
-    <div class="min-h-screen bg-slate-950 text-white relative overflow-hidden" style="background-color: #020617 !important;">
-      <div class="absolute inset-0">
-        <div class="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-emerald-400/20 blur-3xl"></div>
-        <div class="absolute top-1/3 -right-32 w-[28rem] h-[28rem] rounded-full bg-sky-500/20 blur-3xl"></div>
-        <div class="absolute bottom-0 left-1/4 w-[30rem] h-[30rem] rounded-full bg-orange-400/20 blur-3xl"></div>
-        <div class="absolute inset-0 opacity-30" aria-hidden="true" style="background-image: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08) 0, transparent 45%), radial-gradient(circle at 80% 40%, rgba(255,255,255,0.06) 0, transparent 40%);"></div>
-      </div>
-
-      <div class="relative z-10 max-w-6xl mx-auto px-6 py-10 lg:py-16 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-        <section>
-          <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur flex items-center justify-center border border-white/20">
-              <img src="./icons/logo-icon.png" alt="ConectAEE" class="w-7 h-7">
+    <div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      <!-- Header/Navbar -->
+      <nav class="bg-white/80 backdrop-blur-lg border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex items-center justify-between h-16">
+            <div class="flex items-center gap-3">
+              <img src="./icons/logo-icon.png" alt="ConectAEE" class="h-10 w-10">
+              <span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">ConectAEE</span>
             </div>
-            <div class="text-sm uppercase tracking-[0.3em] text-white/70">ConectAEE</div>
-          </div>
-
-          <h1 class="mt-6 text-4xl lg:text-5xl font-bold leading-tight">
-            Gestão AEE centrada no professor, com documentos fiéis ao modelo oficial.
-          </h1>
-          <p class="mt-4 text-white/75 text-lg">
-            Cadastre, acompanhe e gere PDI/PAI/Entrevista com a mesma sequência dos documentos originais. 
-            Interface rápida, acessível e pronta para o dia a dia.
-          </p>
-
-          <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="rounded-2xl border border-white/15 bg-white/5 p-4">
-              <div class="text-sm text-white/60">Documentos</div>
-              <div class="text-xl font-semibold">Sequência oficial</div>
-              <div class="text-xs text-white/50 mt-2">PDI, PAI e Entrevista com ordem I, II, III preservada</div>
-            </div>
-            <div class="rounded-2xl border border-white/15 bg-white/5 p-4">
-              <div class="text-sm text-white/60">Relatórios</div>
-              <div class="text-xl font-semibold">PDFs otimizados</div>
-              <div class="text-xs text-white/50 mt-2">Layout melhorado sem perder nenhum dado</div>
-            </div>
-            <div class="rounded-2xl border border-white/15 bg-white/5 p-4">
-              <div class="text-sm text-white/60">Acesso</div>
-              <div class="text-xl font-semibold">Professor</div>
-              <div class="text-xs text-white/50 mt-2">Cadastro aberto para professores</div>
-            </div>
-            <div class="rounded-2xl border border-white/15 bg-white/5 p-4">
-              <div class="text-sm text-white/60">Administração</div>
-              <div class="text-xl font-semibold">Gestão de perfis</div>
-              <div class="text-xs text-white/50 mt-2">Administrador cria níveis e libera acessos</div>
+            <div class="flex items-center gap-4">
+              <button @click="tab = 'login'" class="text-gray-700 hover:text-blue-600 font-medium transition">Entrar</button>
+              <button @click="tab = 'register'" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition">
+                Cadastrar Grátis
+              </button>
             </div>
           </div>
+        </div>
+      </nav>
 
-          <div class="mt-8 flex flex-wrap items-center gap-3 text-sm text-white/70">
-            <span class="px-3 py-1 rounded-full bg-white/10 border border-white/20">Acessibilidade integrada</span>
-            <button type="button" class="px-3 py-1 rounded-full bg-white/10 border border-white/20 hover:bg-white/20"
-                    @click="openA11y">
-              Ajustar acessibilidade
-            </button>
+      <!-- Hero Section -->
+      <section class="relative py-20 lg:py-32 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-100/50 via-purple-100/30 to-pink-100/50"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div class="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <div class="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-6">
+                <i class="fas fa-heart"></i>
+                <span>Educação Inclusiva com Tecnologia</span>
+              </div>
+              
+              <h1 class="text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight mb-6">
+                Transforme a <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Gestão AEE</span> 
+                na sua escola
+              </h1>
+              
+              <p class="text-xl text-gray-600 mb-8 leading-relaxed">
+                Plataforma completa para Atendimento Educacional Especializado. 
+                Crie PDI, PAI e Entrevistas seguindo os modelos oficiais, com facilidade e acessibilidade.
+              </p>
+              
+              <div class="flex flex-col sm:flex-row gap-4 mb-8">
+                <button @click="tab = 'register'" 
+                        class="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition">
+                  <i class="fas fa-rocket mr-2"></i>
+                  Começar Agora - Grátis
+                </button>
+                <button @click="tab = 'login'" 
+                        class="px-8 py-4 bg-white text-gray-700 rounded-xl font-semibold text-lg border-2 border-gray-300 hover:border-blue-600 hover:text-blue-600 transition">
+                  <i class="fas fa-sign-in-alt mr-2"></i>
+                  Fazer Login
+                </button>
+              </div>
+
+              <div class="flex items-center gap-8 text-sm text-gray-600">
+                <div class="flex items-center gap-2">
+                  <i class="fas fa-check-circle text-green-500"></i>
+                  <span>100% Gratuito</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <i class="fas fa-universal-access text-blue-500"></i>
+                  <span>Totalmente Acessível</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <i class="fas fa-shield-alt text-purple-500"></i>
+                  <span>Dados Seguros</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="relative">
+              <!-- Substitua por imagem Shutterstock: professora com aluno em sala AEE -->
+              <div class="relative rounded-2xl overflow-hidden shadow-2xl">
+                <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&h=600&fit=crop" 
+                     alt="Professora trabalhando com aluno em AEE" 
+                     class="w-full h-[500px] object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-blue-900/30 to-transparent"></div>
+              </div>
+              <!-- Cards flutuantes -->
+              <div class="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-lg">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-file-pdf text-green-600 text-xl"></i>
+                  </div>
+                  <div>
+                    <div class="text-2xl font-bold text-gray-900">3</div>
+                    <div class="text-xs text-gray-600">Documentos Oficiais</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section class="bg-white text-slate-900 rounded-3xl shadow-2xl p-6 sm:p-8">
+      <!-- Features Section -->
+      <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">Tudo que você precisa em um só lugar</h2>
+            <p class="text-xl text-gray-600">Ferramentas completas para gestão do AEE</p>
+          </div>
+
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Feature 1 -->
+            <div class="group p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 hover:shadow-xl transition">
+              <div class="w-14 h-14 bg-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                <i class="fas fa-file-alt text-white text-2xl"></i>
+              </div>
+              <h3 class="text-xl font-bold text-gray-900 mb-2">PDI Completo</h3>
+              <p class="text-gray-600">Plano de Desenvolvimento Individual seguindo modelo oficial com todos os campos obrigatórios.</p>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="group p-8 rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 hover:shadow-xl transition">
+              <div class="w-14 h-14 bg-purple-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                <i class="fas fa-clipboard-list text-white text-2xl"></i>
+              </div>
+              <h3 class="text-xl font-bold text-gray-900 mb-2">PAI Estruturado</h3>
+              <p class="text-gray-600">Plano de Atendimento Individual com sequência preservada do documento original.</p>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="group p-8 rounded-2xl bg-gradient-to-br from-green-50 to-green-100 hover:shadow-xl transition">
+              <div class="w-14 h-14 bg-green-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                <i class="fas fa-comments text-white text-2xl"></i>
+              </div>
+              <h3 class="text-xl font-bold text-gray-900 mb-2">Entrevista com Responsável</h3>
+              <p class="text-gray-600">Formulário completo para entrevista inicial com todas as informações necessárias.</p>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="group p-8 rounded-2xl bg-gradient-to-br from-orange-50 to-orange-100 hover:shadow-xl transition">
+              <div class="w-14 h-14 bg-orange-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                <i class="fas fa-file-pdf text-white text-2xl"></i>
+              </div>
+              <h3 class="text-xl font-bold text-gray-900 mb-2">PDFs Profissionais</h3>
+              <p class="text-gray-600">Gere documentos em PDF otimizados e prontos para impressão ou arquivamento.</p>
+            </div>
+
+            <!-- Feature 5 -->
+            <div class="group p-8 rounded-2xl bg-gradient-to-br from-pink-50 to-pink-100 hover:shadow-xl transition">
+              <div class="w-14 h-14 bg-pink-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                <i class="fas fa-users text-white text-2xl"></i>
+              </div>
+              <h3 class="text-xl font-bold text-gray-900 mb-2">Gestão de Alunos</h3>
+              <p class="text-gray-600">Cadastre e acompanhe todos os alunos em atendimento com histórico completo.</p>
+            </div>
+
+            <!-- Feature 6 -->
+            <div class="group p-8 rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100 hover:shadow-xl transition">
+              <div class="w-14 h-14 bg-indigo-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                <i class="fas fa-universal-access text-white text-2xl"></i>
+              </div>
+              <h3 class="text-xl font-bold text-gray-900 mb-2">Acessibilidade Total</h3>
+              <p class="text-gray-600">Interface acessível com suporte a leitores de tela e ajustes de contraste.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA Section -->
+      <section class="py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 class="text-4xl font-bold mb-6">Pronto para transformar sua gestão AEE?</h2>
+          <p class="text-xl mb-8 opacity-90">Cadastre-se gratuitamente e comece a usar agora mesmo.</p>
+          <button @click="tab = 'register'" 
+                  class="px-10 py-5 bg-white text-blue-600 rounded-xl font-bold text-lg hover:shadow-2xl hover:scale-105 transition">
+            <i class="fas fa-rocket mr-2"></i>
+            Criar Conta Gratuita
+          </button>
+        </div>
+      </section>
+
+      <!-- Login/Register Modal -->
+      <div v-if="tab === 'login' || tab === 'register'" @click.self="tab = null" 
+           class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <section class="bg-white text-slate-900 rounded-3xl shadow-2xl p-6 sm:p-8 max-w-md w-full relative">
+          <button @click="tab = null" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition">
+            <i class="fas fa-times text-gray-600"></i>
+          </button>
+          
           <div class="flex items-center justify-between mb-6">
             <div>
               <h2 class="text-2xl font-semibold">Acesso ao sistema</h2>

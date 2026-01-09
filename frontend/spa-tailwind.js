@@ -3719,22 +3719,35 @@ const HomeLanding = {
             </div>
 
             <div class="relative">
-              <!-- Substitua por imagem Shutterstock: professora com aluno em sala AEE -->
+              <!-- Imagem principal: Educação Inclusiva -->
               <div class="relative rounded-2xl overflow-hidden shadow-2xl">
-                <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&h=600&fit=crop" 
-                     alt="Professora trabalhando com aluno em AEE" 
+                <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&h=600&fit=crop&q=80" 
+                     alt="Professora trabalhando com aluno em educação especial" 
                      class="w-full h-[500px] object-cover">
-                <div class="absolute inset-0 bg-gradient-to-t from-blue-900/30 to-transparent"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-blue-900/40 to-transparent"></div>
               </div>
-              <!-- Cards flutuantes -->
-              <div class="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-lg">
+              
+              <!-- Cards flutuantes com dados do sistema -->
+              <div class="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-xl border border-gray-100">
                 <div class="flex items-center gap-3">
-                  <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-file-pdf text-green-600 text-xl"></i>
+                  <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-file-pdf text-white text-xl"></i>
                   </div>
                   <div>
                     <div class="text-2xl font-bold text-gray-900">3</div>
                     <div class="text-xs text-gray-600">Documentos Oficiais</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="absolute -top-6 -right-6 bg-white p-4 rounded-xl shadow-xl border border-gray-100">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-heart text-white text-xl"></i>
+                  </div>
+                  <div>
+                    <div class="text-2xl font-bold text-gray-900">100%</div>
+                    <div class="text-xs text-gray-600">Acessível</div>
                   </div>
                 </div>
               </div>
@@ -3957,11 +3970,47 @@ const HomeLanding = {
           </form>
         </section>
       </div>
+
+      <!-- Footer -->
+      <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="grid md:grid-cols-3 gap-8 mb-8">
+            <div>
+              <div class="flex items-center gap-3 mb-4">
+                <img src="./icons/logo-icon.png" alt="ConectAEE" class="h-10 w-10">
+                <span class="text-xl font-bold">ConectAEE</span>
+              </div>
+              <p class="text-gray-400 text-sm">
+                Plataforma completa para gestão do Atendimento Educacional Especializado.
+              </p>
+            </div>
+            <div>
+              <h4 class="font-semibold mb-4">Recursos</h4>
+              <ul class="space-y-2 text-sm text-gray-400">
+                <li>PDI - Plano de Desenvolvimento</li>
+                <li>PAI - Plano de Atendimento</li>
+                <li>Entrevista com Responsável</li>
+                <li>Geração de PDFs</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="font-semibold mb-4">Acessibilidade</h4>
+              <button @click="openA11y" class="text-sm text-gray-400 hover:text-white transition">
+                <i class="fas fa-universal-access mr-2"></i>
+                Abrir painel de acessibilidade
+              </button>
+            </div>
+          </div>
+          <div class="border-t border-gray-800 pt-8 text-center text-sm text-gray-400">
+            <p>&copy; 2026 ConectAEE. Desenvolvido para educação inclusiva.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   `,
   data() {
     return {
-      tab: 'login',
+      tab: null,
       loginForm: {
         email: '',
         password: '',

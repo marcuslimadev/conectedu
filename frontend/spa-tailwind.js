@@ -9255,6 +9255,10 @@ const PDIPlanoDesenvolvimento = {
       currentStep: 1,
       totalSteps: 11,
       saving: false,
+      autoSaveTimer: null,
+      autoSaving: false,
+      isHydrating: false,
+      lastAutoSave: null,
       alunos: [],
       escolas: [],
       form: baseForm,
@@ -9279,6 +9283,12 @@ const PDIPlanoDesenvolvimento = {
       disciplinasAvaliacao,
     };
   },
+  watch: {
+    form: {
+      handler() { this.scheduleAutoSave(); },
+      deep: true
+    }
+  },
   async mounted() {
     await Promise.all([this.carregarAlunos(), this.carregarEscolas()]);
     // Se vier por querystring (modo leitura), carrega aluno
@@ -9289,6 +9299,55 @@ const PDIPlanoDesenvolvimento = {
     }
   },
   methods: {
+    scheduleAutoSave() {
+      if (this.isHydrating) return;
+      if (!this.form || !this.form.student_id) return;
+      if (this.saving) return;
+      if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
+      this.autoSaveTimer = setTimeout(() => {
+        this.autoSaveTimer = null;
+        this.autoSave();
+      }, 2000);
+    },
+    async autoSave() {
+      if (this.isHydrating) return;
+      if (!this.form || !this.form.student_id) return;
+      if (this.saving) return;
+      if (this.autoSaving) {
+        this.autoSaveTimer = setTimeout(() => {
+          this.autoSaveTimer = null;
+          this.autoSave();
+        }, 1500);
+        return;
+      }
+      this.autoSaving = true;
+      try {
+        const formData = { ...this.form };
+        delete formData.id;
+        delete formData.student_id;
+        const payload = {
+          student_id: this.form.student_id,
+          form_data: formData,
+          data_inicio: this.form.data_elaboracao || null,
+          data_fim: null,
+          status: 'rascunho'
+        };
+        let response;
+        if (this.form.id) {
+          response = await api.post(`?action=pdi.update&id=${this.form.id}`, payload);
+        } else {
+          response = await api.post('?action=pdi.create', payload);
+        }
+        if (response.data?.ok && response.data?.data?.id && !this.form.id) {
+          this.form.id = response.data.data.id;
+        }
+        this.lastAutoSave = new Date().toISOString();
+      } catch (error) {
+        console.warn('Falha no autosave do PDI:', error);
+      } finally {
+        this.autoSaving = false;
+      }
+    },
     planKey(discKey, bimestre, field) {
       return `planejamento_${discKey}_bim${bimestre}_${field}`;
     },
@@ -9359,6 +9418,8 @@ const PDIPlanoDesenvolvimento = {
       }
     },
     async onSelectAluno() {
+      this.isHydrating = true;
+      try {
       const aluno = this.alunos.find(a => a.id == this.form.student_id);
       if (aluno) {
         if (!this.form.nome_estudante) this.form.nome_estudante = aluno.name || '';
@@ -9388,6 +9449,9 @@ const PDIPlanoDesenvolvimento = {
         }
       } catch (e) {
         console.warn('Falha ao carregar PDI existente:', e);
+      }
+      } finally {
+        this.isHydrating = false;
       }
     },
     async salvar() {
@@ -10272,6 +10336,10 @@ const PlanoAtendimento = {
       totalSteps: 7,
       maxCompletedStep: 1,
       loading: false,
+      autoSaveTimer: null,
+      autoSaving: false,
+      isHydrating: false,
+      lastAutoSave: null,
       generatingPDF: false,
       validationErrors: {},
       alunos: [],
@@ -10379,6 +10447,12 @@ const PlanoAtendimento = {
       return (this.currentStep / (this.totalSteps || 1)) * 100;
     }
   },
+  watch: {
+    form: {
+      handler() { this.scheduleAutoSave(); },
+      deep: true
+    }
+  },
   async mounted() {
     await Promise.all([this.carregarAlunos(), this.carregarEscolas()]);
     const qStudentId = this.$route?.query?.student_id;
@@ -10388,6 +10462,57 @@ const PlanoAtendimento = {
     }
   },
   methods: {
+    scheduleAutoSave() {
+      if (this.isHydrating) return;
+      if (!this.form || !this.form.student_id) return;
+      if (this.loading) return;
+      if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
+      this.autoSaveTimer = setTimeout(() => {
+        this.autoSaveTimer = null;
+        this.autoSave();
+      }, 2000);
+    },
+    async autoSave() {
+      if (this.isHydrating) return;
+      if (!this.form || !this.form.student_id) return;
+      if (this.loading) return;
+      if (this.autoSaving) {
+        this.autoSaveTimer = setTimeout(() => {
+          this.autoSaveTimer = null;
+          this.autoSave();
+        }, 1500);
+        return;
+      }
+      this.autoSaving = true;
+      try {
+        const formData = { ...this.form };
+        delete formData.id;
+        delete formData.student_id;
+        delete formData.pdi_id;
+        const payload = {
+          student_id: this.form.student_id,
+          pdi_id: this.form.pdi_id || null,
+          form_data: formData,
+          data_inicio: this.form.data_inicio || null,
+          data_fim: this.form.data_fim || null,
+          status: 'rascunho'
+        };
+        let response;
+        if (this.form.id) {
+          response = await api.post(`?action=plano-atendimento.update&id=${this.form.id}`, payload);
+        } else {
+          response = await api.post('?action=plano-atendimento.create', payload);
+        }
+        if (response.data?.ok && response.data?.data?.id && !this.form.id) {
+          this.form.id = response.data.data.id;
+        }
+        this.lastAutoSave = new Date().toISOString();
+      } catch (error) {
+        console.warn('Falha no autosave do PAI:', error);
+      } finally {
+        this.autoSaving = false;
+      }
+    },
     mapLegacyPAIData(data) {
       const mapped = { ...(data || {}) };
       const renames = {
@@ -10452,37 +10577,42 @@ const PlanoAtendimento = {
       }
     },
     async preencherDadosAlunoPlano() {
-      const alunoSelecionado = this.alunos.find(aluno => aluno.id == this.form.student_id);
-      if (alunoSelecionado) {
-        // Preenche dados automaticamente do perfil do aluno na Seção 1
-        this.form.nome_estudante = alunoSelecionado.name || '';
-        this.form.nome_escola = alunoSelecionado.school_name || '';
-        this.form.serie_ano = alunoSelecionado.grade || '';
-        
-        // Tentar carregar último Plano de Atendimento deste aluno
-        try {
-          const r = await api.get('/planos-atendimento/list', { params: { q: alunoSelecionado.name, per_page: 1 } });
-          const rows = r.data?.data?.rows || r.data?.rows || [];
-          const ultimo = Array.isArray(rows) && rows.length ? rows[0] : null;
-          
-          if (ultimo && ((ultimo.student_name || ultimo.nome_aluno) === alunoSelecionado.name)) {
-            this.form.id = ultimo.id;
-            
-            // Mapear TODOS os campos do novo formulário completo
-                        const mappedFormData = this.mapLegacyPAIData(ultimo.form_data || {});
-            Object.entries(mappedFormData).forEach(([key, value]) => {
-              if (key in this.form) {
-                this.form[key] = value;
-              }
-            });
-            
-            this.$showToast && this.$showToast('Info', 'PAI existente carregado para edição.', 'info');
-          } else {
-            delete this.form.id;
+      this.isHydrating = true;
+      try {
+        const alunoSelecionado = this.alunos.find(aluno => aluno.id == this.form.student_id);
+        if (alunoSelecionado) {
+          // Preenche dados automaticamente do perfil do aluno na Secao 1
+          this.form.nome_estudante = alunoSelecionado.name || '';
+          this.form.nome_escola = alunoSelecionado.school_name || '';
+          this.form.serie_ano = alunoSelecionado.grade || '';
+
+          // Tentar carregar ultimo Plano de Atendimento deste aluno
+          try {
+            const r = await api.get('/planos-atendimento/list', { params: { q: alunoSelecionado.name, per_page: 1 } });
+            const rows = r.data?.data?.rows || r.data?.rows || [];
+            const ultimo = Array.isArray(rows) && rows.length ? rows[0] : null;
+
+            if (ultimo && ((ultimo.student_name || ultimo.nome_aluno) === alunoSelecionado.name)) {
+              this.form.id = ultimo.id;
+
+              // Mapear todos os campos do formulario completo
+              const mappedFormData = this.mapLegacyPAIData(ultimo.form_data || {});
+              Object.entries(mappedFormData).forEach(([key, value]) => {
+                if (key in this.form) {
+                  this.form[key] = value;
+                }
+              });
+
+              this.$showToast && this.$showToast('Info', 'PAI existente carregado para edicao.', 'info');
+            } else {
+              delete this.form.id;
+            }
+          } catch (e) {
+            console.warn('Falha ao carregar PAI existente:', e);
           }
-        } catch (e) {
-          console.warn('Falha ao carregar PAI existente:', e);
         }
+      } finally {
+        this.isHydrating = false;
       }
     },
     preencherEscolaPlano() {
@@ -12549,6 +12679,9 @@ try { mountVoicePortal(app); } catch (_) {}
 
 // Inicialização completa
 // console.log('ConectEdu v5.0 - Sistema inicializado com Tailwind CSS');
+
+
+
 
 
 

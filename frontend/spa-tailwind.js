@@ -2866,7 +2866,7 @@ const LegislacoesTW = {
 const FloatingMicrophone = {
   template: `
     <teleport to="body">
-    <div v-if="shouldShow" style="position: fixed; bottom: 24px; right: 24px; z-index: 9999;">
+    <div v-if="shouldShow" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
       <div v-if="isRecording" 
            style="position: absolute; bottom: 88px; right: 0; background: white; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); padding: 16px; width: 320px; border: 2px solid #ef4444;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">

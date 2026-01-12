@@ -1,4 +1,4 @@
-// Sistema de Acessibilidade - ConectEdu
+﻿// Sistema de Acessibilidade - ConectEdu
 class AccessibilityManager {
   constructor() {
     this.settings = {
@@ -45,8 +45,8 @@ class AccessibilityManager {
   createFloatingButton() {
     const button = document.createElement('button');
     button.className = 'a11y-floating-btn';
-    button.innerHTML = '♿';
-    button.setAttribute('aria-label', 'Abrir opções de acessibilidade');
+    button.innerHTML = '<i class="fas fa-universal-access" aria-hidden="true"></i>';
+    button.setAttribute('aria-label', 'Abrir opcoes de acessibilidade');
     button.title = 'Acessibilidade';
     button.addEventListener('click', () => this.togglePanel());
     document.body.appendChild(button);
@@ -470,3 +470,4 @@ document.addEventListener('DOMContentLoaded', () => {
   `;
   document.head.appendChild(style);
 })();
+

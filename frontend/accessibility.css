@@ -241,14 +241,14 @@
 /* Botão flutuante de acessibilidade */
 .a11y-floating-btn {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  top: 20%;
+  right: -24px;
   z-index: 9999;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: none;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
+  border-radius: 34px 0 0 34px;
+  width: 68px;
+  height: 68px;
   color: white;
   font-size: 24px;
   cursor: pointer;
@@ -256,11 +256,13 @@
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  padding-left: 16px;
+  transform: translateY(-50%);
 }
 
 .a11y-floating-btn:hover {
-  transform: scale(1.1);
+  transform: translateY(-50%) translateX(-6px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
 
@@ -272,15 +274,15 @@
 /* Painel de acessibilidade */
 .a11y-panel {
   position: fixed;
-  bottom: 90px;
-  right: 20px;
+  top: 50%;
+  right: 84px;
   width: 320px;
   max-width: calc(100vw - 40px);
   background: white;
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   z-index: 9998;
-  transform: translateY(20px);
+  transform: translateY(-50%) translateX(20px);
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease;
@@ -288,7 +290,7 @@
 }
 
 .a11y-panel.open {
-  transform: translateY(0);
+  transform: translateY(-50%) translateX(0);
   opacity: 1;
   visibility: visible;
 }
@@ -442,18 +444,29 @@
 /* Responsividade mobile */
 @media (max-width: 768px) {
   .a11y-floating-btn {
-    width: 50px;
-    height: 50px;
+    width: 52px;
+    height: 52px;
     font-size: 20px;
-    bottom: 15px;
-    right: 15px;
+    top: auto;
+    bottom: 16px;
+    right: 16px;
+    border-radius: 50%;
+    justify-content: center;
+    padding-left: 0;
+    transform: none;
   }
   
   .a11y-panel {
-    bottom: 75px;
-    right: 15px;
-    left: 15px;
+    bottom: 80px;
+    right: 16px;
+    left: 16px;
     width: auto;
+    top: auto;
+    transform: translateY(20px);
+  }
+
+  .a11y-panel.open {
+    transform: translateY(0);
   }
   
   .a11y-panel-content {

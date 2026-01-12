@@ -96,6 +96,34 @@ api.interceptors.response.use(
   }
 );
 
+function normalizeStudentsResponse(response) {
+  const data = response?.data;
+  if (data?.data?.data?.rows) return data.data.data.rows;
+  if (Array.isArray(data?.data?.data)) return data.data.data;
+  if (data?.data?.rows) return data.data.rows;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.rows)) return data.rows;
+  if (Array.isArray(data)) return data;
+  return [];
+}
+
+async function fetchStudents(params = {}) {
+  const endpoints = ['/students', '/students/options', '?action=students.list'];
+  let lastError = null;
+
+  for (const endpoint of endpoints) {
+    try {
+      const res = await api.get(endpoint, { params });
+      const rows = normalizeStudentsResponse(res);
+      if (rows.length) return rows;
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  if (lastError) throw lastError;
+  return [];
+}
 // Guard de autenticação
 const AuthGuard = (to, from, next) => {
   const token = localStorage.getItem('token');
@@ -8115,14 +8143,15 @@ const PDI = {
   methods: {
     async carregarAlunos() {
       try {
-        let params = {};
-        if (this.$parent.user && this.$parent.user.role !== 'admin') {
-          params.teacher_id = this.$parent.user.id;
+        const user = this.$parent?.user || this.$root?.user;
+        const params = {};
+        if (user && user.role !== 'admin') {
+          params.teacher_id = user.id;
         }
-        const response = await api.get('/students/options', { params });
-        this.alunos = response.data?.data?.rows || [];
+        this.alunos = await fetchStudents(params);
       } catch (error) {
         console.error('Erro ao carregar alunos:', error);
+        this.alunos = [];
       }
     },
     async carregarEscolas() {
@@ -9306,12 +9335,12 @@ const PDIPlanoDesenvolvimento = {
     },
     async carregarAlunos() {
       try {
-        let params = {};
-        if (this.$parent?.user && this.$parent.user.role !== 'admin') {
-          params.teacher_id = this.$parent.user.id;
+        const user = this.$parent?.user || this.$root?.user;
+        const params = {};
+        if (user && user.role !== 'admin') {
+          params.teacher_id = user.id;
         }
-        const response = await api.get('/students/options', { params });
-        this.alunos = response.data?.data?.rows || [];
+        this.alunos = await fetchStudents(params);
       } catch (error) {
         console.error('Erro ao carregar alunos:', error);
         this.alunos = [];
@@ -10351,6 +10380,11 @@ const PlanoAtendimento = {
   },
   async mounted() {
     await Promise.all([this.carregarAlunos(), this.carregarEscolas()]);
+    const qStudentId = this.$route?.query?.student_id;
+    if (qStudentId) {
+      this.form.student_id = String(qStudentId);
+      await this.preencherDadosAlunoPlano();
+    }
   },
   methods: {
     mapLegacyPAIData(data) {
@@ -10390,14 +10424,15 @@ const PlanoAtendimento = {
 
     async carregarAlunos() {
       try {
-        let params = {};
-        if (this.$parent.user && this.$parent.user.role !== 'admin') {
-          params.teacher_id = this.$parent.user.id;
+        const user = this.$parent?.user || this.$root?.user;
+        const params = {};
+        if (user && user.role !== 'admin') {
+          params.teacher_id = user.id;
         }
-        const response = await api.get('/students/options', { params });
-        this.alunos = response.data?.data?.rows || [];
+        this.alunos = await fetchStudents(params);
       } catch (error) {
         console.error('Erro ao carregar alunos:', error);
+        this.alunos = [];
       }
     },
     async carregarEscolas() {
@@ -11648,14 +11683,15 @@ const DocumentosGerados = {
     
     async loadStudents() {
       try {
-        let params = {};
-        if (this.$parent.user && this.$parent.user.role !== 'admin') {
-          params.teacher_id = this.$parent.user.id;
+        const user = this.$parent?.user || this.$root?.user;
+        const params = {};
+        if (user && user.role !== 'admin') {
+          params.teacher_id = user.id;
         }
-        const res = await api.get('/students/options', { params });
-        this.students = res.data?.data || [];
+        this.students = await fetchStudents(params);
       } catch (err) {
         console.error('Erro ao carregar alunos:', err);
+        this.students = [];
       }
     },
     
@@ -12512,6 +12548,8 @@ try { mountVoicePortal(app); } catch (_) {}
 
 // Inicialização completa
 // console.log('ConectEdu v5.0 - Sistema inicializado com Tailwind CSS');
+
+
 
 
 

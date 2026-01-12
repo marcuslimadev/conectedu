@@ -72,16 +72,17 @@ $mpdf->SetTitle('PAI - ' . ($studentName ?: 'Aluno'));
 $mpdf->SetAuthor('ConectEDU - Sistema AEE');
 
 $css = '<style>
-body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 10pt; color: #000; }
-h1 { font-size: 14pt; text-align: center; margin: 0 0 8px 0; font-weight: bold; }
+body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 10pt; color: #1f2937; }
+h1 { font-size: 14pt; text-align: center; margin: 0 0 8px 0; font-weight: bold; color: #1f4c7a; }
 .sec { margin: 12px 0; }
-.sec-h { background: #eaeaea; padding: 5px 8px; font-weight: bold; }
+.sec-h { background: #f1f5f9; padding: 5px 8px; font-weight: bold; color: #1f2937; border-left: 3px solid #8fb3d9; }
 .field { margin: 5px 0; }
-.label { font-weight: bold; }
-.value { display: inline; border-bottom: 1px dotted #666; padding: 0 3px; }
+.label { font-weight: bold; color: #334155; }
+.value { display: inline; border-bottom: 1px solid #cbd5e1; padding: 0 3px; }
 .table { width: 100%; border-collapse: collapse; margin-top: 6px; }
-.table th,.table td { border: 1px solid #000; padding: 5px; font-size: 9pt; vertical-align: top; }
-.small { font-size: 9pt; color: #333; }
+.table th,.table td { border: 1px solid #d7e0ea; padding: 5px; font-size: 9pt; vertical-align: top; }
+.table th { background: #eef2f7; font-weight: 600; }
+.small { font-size: 9pt; color: #475569; }
 .page-break { page-break-after: always; }
 </style>';
 
@@ -99,7 +100,7 @@ $candidates = [
 foreach ($candidates as $cand) {
         if (file_exists($cand)) { $logoData = 'data:image/png;base64,' . base64_encode(@file_get_contents($cand)); break; }
 }
-$headerHtml = '<table width=\"100%\" style=\"border-bottom:1px solid #ccc; font-size:10pt; color:#333;\">'
+$headerHtml = '<table width=\"100%\" style=\"border-bottom:1px solid #d7e0ea; font-size:10pt; color:#475569;\">'
     . '<tr>'
     . '<td style=\"width:60px;\">' . ($logoData ? ('<img src=\"' . $logoData . '\" style=\"height:36px;\" />') : '<strong>ConectEDU</strong>') . '</td>'
     . '<td style=\"text-align:center; font-weight:bold;\">Plano de Atendimento Individual (PAI)</td>'
@@ -109,7 +110,7 @@ $headerHtml = '<table width=\"100%\" style=\"border-bottom:1px solid #ccc; font-
 $mpdf->SetHTMLHeader($headerHtml);
 
 // Footer com paginação e data
-$mpdf->SetHTMLFooter('<div style=\"border-top:1px solid #ccc; font-size:9pt; padding-top:4px; display:flex; justify-content:space-between;\">'
+$mpdf->SetHTMLFooter('<div style=\"border-top:1px solid #d7e0ea; font-size:9pt; padding-top:4px; display:flex; justify-content:space-between; color:#475569;\">'
     . '<span>Gerado em ' . date('d/m/Y H:i') . '</span>'
     . '<span>Página {PAGENO}</span>'
     . '</div>');

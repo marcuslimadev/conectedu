@@ -64,7 +64,7 @@ try {
     }
     
     function linha($texto) {
-        return '<span style="border-bottom:1px solid #000; display:inline-block; min-width:100px;">' . ($texto ?: '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;') . '</span>';
+        return '<span style="border-bottom:1px solid #cbd5e1; display:inline-block; min-width:100px;">' . ($texto ?: '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;') . '</span>';
     }
     
     function data_br($data) {
@@ -106,12 +106,12 @@ try {
         body {
             font-family: 'DejaVu Sans', Arial, sans-serif;
             font-size: 10pt;
-            line-height: 1.4;
-            color: #000;
+            line-height: 1.45;
+            color: #1f2937;
         }
         .header {
             text-align: center;
-            border-bottom: 2px solid #000;
+            border-bottom: 1px solid #d7e0ea;
             padding-bottom: 8px;
             margin-bottom: 15px;
         }
@@ -119,21 +119,25 @@ try {
             font-size: 14pt;
             font-weight: bold;
             margin: 0 0 10px 0;
+            color: #1f4c7a;
         }
         .data-entrevista {
             text-align: right;
             font-size: 9pt;
+            color: #475569;
         }
         .secao {
             margin-top: 12px;
             margin-bottom: 12px;
         }
         .secao-titulo {
-            background-color: #e0e0e0;
-            padding: 4px 8px;
+            background-color: #f1f5f9;
+            padding: 5px 8px;
             font-weight: bold;
             font-size: 10pt;
             margin-bottom: 8px;
+            border-left: 3px solid #8fb3d9;
+            color: #1f2937;
         }
         .campo {
             margin-bottom: 6px;

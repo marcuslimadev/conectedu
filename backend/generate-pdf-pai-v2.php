@@ -96,12 +96,12 @@ function data_br_pai($s) {
 
 function campo_pai($label, $valor = '') {
     $v = $valor ? htmlspecialchars($valor, ENT_QUOTES, 'UTF-8') : '';
-    return '<div style="margin:3px 0;"><strong>' . $label . '</strong> <span style="border-bottom:1px solid #000;display:inline-block;min-width:150px;padding:0 5px;">' . $v . '</span></div>';
+    return '<div style="margin:3px 0;"><strong>' . $label . '</strong> <span style="border-bottom:1px solid #cbd5e1;display:inline-block;min-width:150px;padding:0 5px;">' . $v . '</span></div>';
 }
 
 function texto_pai($label, $valor = '') {
     $v = $valor ? nl2br(htmlspecialchars($valor, ENT_QUOTES, 'UTF-8')) : '';
-    return '<div style="margin:5px 0;"><strong>' . $label . '</strong><div style="margin-top:2px;padding:4px;border:1px solid #ccc;background:#f9f9f9;min-height:30px;">' . $v . '</div></div>';
+    return '<div style="margin:5px 0;"><strong>' . $label . '</strong><div style="margin-top:2px;padding:4px;border:1px solid #d7e0ea;background:#f8fafc;min-height:30px;">' . $v . '</div></div>';
 }
 
 $studentName = vp($D, 'nome_estudante', $pai['student_name'] ?? '');
@@ -128,16 +128,16 @@ $mpdf->SetAuthor('ConectEDU - Sistema AEE');
 
 // CSS Global - EXATAMENTE como o modelo oficial
 $css = '<style>
-body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 9pt; line-height: 1.2; color: #000; }
-h1 { text-align: center; font-size: 13pt; font-weight: bold; margin: 5px 0 10px 0; color: #1a5490; }
-.secao-titulo { background: #b0b0b0; padding: 6px 10px; font-weight: bold; font-size: 10pt; margin: 8px 0 4px 0; border: 1px solid #000; }
-table { width: 100%; border-collapse: collapse; margin: 3px 0; }
-table.bordered { border: 2px solid #000; }
-table.bordered td, table.bordered th { border: 1px solid #000; padding: 4px; font-size: 8.5pt; vertical-align: top; }
-table.bordered th { background: #d0d0d0; font-weight: bold; text-align: left; }
-.label { font-weight: bold; font-size: 8pt; }
-.field-box { border: 1px solid #000; padding: 3px; min-height: 18px; background: #fff; }
-.photo-box { width: 100px; height: 120px; border: 2px solid #000; background: #f5f5f5; text-align: center; vertical-align: middle; font-size: 7pt; color: #666; }
+body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 9pt; line-height: 1.35; color: #1f2937; }
+h1 { text-align: center; font-size: 13pt; font-weight: bold; margin: 5px 0 10px 0; color: #1f4c7a; }
+.secao-titulo { background: #f1f5f9; padding: 6px 10px; font-weight: bold; font-size: 10pt; margin: 8px 0 6px 0; border: 1px solid #d7e0ea; border-left: 3px solid #8fb3d9; color: #1f2937; }
+table { width: 100%; border-collapse: collapse; margin: 4px 0; }
+table.bordered { border: 1px solid #d7e0ea; }
+table.bordered td, table.bordered th { border: 1px solid #d7e0ea; padding: 5px; font-size: 8.5pt; vertical-align: top; }
+table.bordered th { background: #eef2f7; font-weight: 600; text-align: left; color: #1f2937; }
+.label { font-weight: bold; font-size: 8pt; color: #334155; }
+.field-box { border: 1px solid #d7e0ea; padding: 4px; min-height: 18px; background: #f8fafc; }
+.photo-box { width: 100px; height: 120px; border: 1px solid #cbd5e1; background: #f8fafc; text-align: center; vertical-align: middle; font-size: 7pt; color: #64748b; }
 </style>';
 
 // HTML do documento

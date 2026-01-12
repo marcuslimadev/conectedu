@@ -139,23 +139,23 @@ function getPDITemplate($data) {
     // CSS inline para mPDF
     $css = "
     <style>
-        body { font-family: Arial, sans-serif; font-size: 10pt; }
-        h1 { font-size: 14pt; text-align: center; font-weight: bold; margin-bottom: 5px; }
-        h2 { font-size: 11pt; font-weight: bold; margin-top: 15px; margin-bottom: 8px; background: #f0f0f0; padding: 5px; }
-        h3 { font-size: 10pt; font-weight: bold; margin-top: 10px; margin-bottom: 5px; }
+        body { font-family: Arial, sans-serif; font-size: 10pt; color: #1f2937; }
+        h1 { font-size: 14pt; text-align: center; font-weight: bold; margin-bottom: 5px; color: #1f4c7a; }
+        h2 { font-size: 11pt; font-weight: bold; margin-top: 15px; margin-bottom: 8px; background: #f1f5f9; padding: 6px; border-left: 3px solid #8fb3d9; }
+        h3 { font-size: 10pt; font-weight: bold; margin-top: 10px; margin-bottom: 5px; color: #334155; }
         .section { margin-bottom: 15px; }
         .field { margin-bottom: 5px; }
-        .label { font-weight: bold; display: inline; }
+        .label { font-weight: bold; display: inline; color: #334155; }
         .value { display: inline; }
         table { width: 100%; border-collapse: collapse; margin-top: 8px; margin-bottom: 8px; font-size: 9pt; }
-        table th { background: #e0e0e0; padding: 4px; border: 1px solid #000; font-weight: bold; text-align: center; }
-        table td { padding: 4px; border: 1px solid #000; vertical-align: top; }
-        .checkbox { display: inline-block; width: 12px; height: 12px; border: 1px solid #000; margin-right: 3px; text-align: center; line-height: 12px; font-size: 8pt; }
+        table th { background: #eef2f7; padding: 4px; border: 1px solid #d7e0ea; font-weight: 600; text-align: center; color: #1f2937; }
+        table td { padding: 4px; border: 1px solid #d7e0ea; vertical-align: top; }
+        .checkbox { display: inline-block; width: 12px; height: 12px; border: 1px solid #cbd5e1; margin-right: 3px; text-align: center; line-height: 12px; font-size: 8pt; }
         .checkbox.checked::after { content: 'X'; }
-        .photo { width: 80px; height: 100px; border: 1px solid #000; float: right; margin-left: 10px; }
-        .signature-line { border-top: 1px solid #000; width: 200px; margin-top: 30px; text-align: center; font-size: 8pt; }
+        .photo { width: 80px; height: 100px; border: 1px solid #cbd5e1; float: right; margin-left: 10px; }
+        .signature-line { border-top: 1px solid #cbd5e1; width: 200px; margin-top: 30px; text-align: center; font-size: 8pt; }
         .page-break { page-break-after: always; }
-        .small-text { font-size: 8pt; }
+        .small-text { font-size: 8pt; color: #475569; }
     </style>
     ";
     

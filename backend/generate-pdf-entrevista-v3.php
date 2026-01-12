@@ -97,14 +97,14 @@ try {
     
     // CSS Global
     $css = '<style>
-        body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 9pt; line-height: 1.4; color: #000; }
-        h1 { text-align: center; color: #1a5490; font-size: 13pt; font-weight: bold; margin: 10px 0; }
-        .data-entrevista { text-align: right; font-size: 9pt; margin: 0 0 10px 0; }
-        .secao { font-size: 11pt; font-weight: bold; margin: 12px 0 5px 0; padding: 3px 5px; background: #e8f0f8; border-left: 4px solid #1a5490; }
-        .bordered { width: 100%; border-collapse: collapse; margin: 5px 0; }
-        .bordered td { border: 2px solid #000; padding: 5px; vertical-align: top; }
-        .label { font-weight: bold; font-size: 8pt; display: block; margin-bottom: 2px; }
-        .field-box { border: 1px solid #666; padding: 4px; background: #fff; min-height: 25px; }
+        body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 9pt; line-height: 1.45; color: #1f2937; }
+        h1 { text-align: center; color: #1f4c7a; font-size: 13pt; font-weight: bold; margin: 10px 0; }
+        .data-entrevista { text-align: right; font-size: 9pt; margin: 0 0 10px 0; color: #475569; }
+        .secao { font-size: 11pt; font-weight: bold; margin: 12px 0 6px 0; padding: 4px 6px; background: #f1f5f9; border-left: 3px solid #8fb3d9; color: #1f2937; }
+        .bordered { width: 100%; border-collapse: collapse; margin: 6px 0; }
+        .bordered td { border: 1px solid #d7e0ea; padding: 6px; vertical-align: top; }
+        .label { font-weight: bold; font-size: 8pt; display: block; margin-bottom: 3px; color: #334155; }
+        .field-box { border: 1px solid #d7e0ea; padding: 5px; background: #f8fafc; min-height: 24px; }
     </style>';
     
     // Extrair valores

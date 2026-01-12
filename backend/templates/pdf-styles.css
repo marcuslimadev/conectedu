@@ -6,12 +6,12 @@ body {
     font-family: Arial, sans-serif;
     font-size: 11pt;
     line-height: 1.4;
-    color: #333;
+    color: #1f2937;
 }
 .header {
     text-align: center;
     margin-bottom: 20px;
-    border-bottom: 2px solid #000;
+    border-bottom: 1px solid #d7e0ea;
     padding-bottom: 10px;
 }
 .header h1 {
@@ -29,8 +29,8 @@ body {
     page-break-inside: avoid;
 }
 .section-title {
-    background-color: #4a5568;
-    color: white;
+    background-color: #f1f5f9;
+    color: #1f2937;
     padding: 5px 10px;
     font-weight: bold;
     margin-bottom: 10px;
@@ -48,7 +48,7 @@ body {
 }
 .field-value {
     display: inline;
-    border-bottom: 1px dotted #999;
+    border-bottom: 1px solid #cbd5e1;
     padding-left: 5px;
 }
 .grid-2 {
@@ -70,11 +70,11 @@ body {
     margin-right: 3px;
 }
 .textarea-field {
-    border: 1px solid #ccc;
+    border: 1px solid #d7e0ea;
     padding: 8px;
     min-height: 40px;
     margin-top: 5px;
-    background-color: #f9f9f9;
+    background-color: #f8fafc;
     width: 100%;
     box-sizing: border-box;
 }
@@ -84,7 +84,7 @@ body {
     page-break-inside: avoid;
 }
 .signature-line {
-    border-top: 1px solid #000;
+    border-top: 1px solid #cbd5e1;
     width: 300px;
     margin: 0 auto 5px auto;
 }
@@ -95,7 +95,7 @@ body {
     width: 80px;
     height: 100px;
     object-fit: cover;
-    border: 1px solid #333;
+    border: 1px solid #cbd5e1;
 }
 .footer {
     position: fixed;

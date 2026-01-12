@@ -11772,6 +11772,21 @@ const routes = [
   { path: '/', component: HomeLanding },
   { path: '/login', redirect: () => ({ path: '/', query: { tab: 'login' } }) },
   { path: '/register', redirect: () => ({ path: '/', query: { tab: 'register' } }) },
+  // Compat: manter rotas antigas sem /app funcionando.
+  { path: '/alunos', redirect: '/app/alunos' },
+  { path: '/usuarios', redirect: '/app/usuarios' },
+  { path: '/escolas', redirect: '/app/escolas' },
+  { path: '/supervisao', redirect: '/app/supervisao' },
+  { path: '/relatorio-atendimento', redirect: '/app/relatorio-atendimento' },
+  { path: '/entrevista-responsavel', redirect: '/app/entrevista-responsavel' },
+  { path: '/entrevista-completa', redirect: '/app/entrevista-completa' },
+  { path: '/pdi', redirect: '/app/pdi' },
+  { path: '/pdi-completo', redirect: '/app/pdi-completo' },
+  { path: '/plano-atendimento', redirect: '/app/plano-atendimento' },
+  { path: '/pai-completo', redirect: '/app/pai-completo' },
+  { path: '/relatorios', redirect: '/app/relatorios' },
+  { path: '/legislacoes', redirect: '/app/legislacoes' },
+  { path: '/documentos', redirect: '/app/documentos' },
   { 
     path: '/app', 
     component: Layout,
@@ -11796,7 +11811,8 @@ const routes = [
       { path: 'legislacoes', component: LegislacoesTW },
       { path: 'documentos', component: DocumentosGerados }
     ]
-  }
+  },
+  { path: '/:pathMatch(.*)*', redirect: '/' }
 ];
 
 // Configuração do router

@@ -2920,10 +2920,11 @@ const FloatingMicrophone = {
   
   computed: {
     shouldShow() {
-        // Só mostra se NÃO estiver na home ('/') E tiver usuário logado
-        // user pode ser acessado via $root.user se estiver exposto, ou via localStorage
-        const hasUser = !!localStorage.getItem('user'); // checagem simples de sessão
-        return this.$route.path !== '/' && hasUser;
+        // Mostra fora da home quando houver sessao ativa.
+        const hasToken = !!localStorage.getItem('token');
+        const hasUser = !!localStorage.getItem('user');
+        const hasRootUser = !!this.$root?.user;
+        return this.$route.path !== '/' && (hasToken || hasUser || hasRootUser);
     },
     getTooltip() {
       if (!this.isSupported) return 'Navegador não suportado';
@@ -12548,6 +12549,7 @@ try { mountVoicePortal(app); } catch (_) {}
 
 // Inicialização completa
 // console.log('ConectEdu v5.0 - Sistema inicializado com Tailwind CSS');
+
 
 
 

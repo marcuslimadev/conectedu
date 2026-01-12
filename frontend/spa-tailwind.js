@@ -1,4 +1,4 @@
-﻿// ConectAEE v5.0 - Sistema de Gestão Educacional com Tailwind CSS
+// ConectAEE v5.0 - Sistema de Gestão Educacional com Tailwind CSS
 
 // Configuração da API
 const api = axios.create({
@@ -3657,401 +3657,431 @@ const Layout = {
 
 const HomeLanding = {
   template: `
-    <div class="min-h-screen bg-white">
-      <!-- Header/Navbar -->
-      <nav class="sticky top-0 z-40 bg-white border-b border-gray-200">
-        <div class="max-w-6xl mx-auto px-6 lg:px-8">
-          <div class="flex items-center justify-between h-16">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center font-bold text-white text-lg">C</div>
-              <span class="text-xl font-bold text-gray-900">ConectAEE</span>
-            </div>
-            <div class="flex items-center gap-3">
-              <button @click="tab = 'login'" class="px-4 py-2 text-gray-600 hover:text-gray-900 transition font-medium">Entrar</button>
-              <button @click="tab = 'register'" class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition">
-                Cadastrar
-              </button>
+    <div class="home-landing">
+      <header class="landing-hero">
+        <div class="landing-grid" aria-hidden="true"></div>
+        <div class="landing-orb orb-1" aria-hidden="true"></div>
+        <div class="landing-orb orb-2" aria-hidden="true"></div>
+        <div class="landing-orb orb-3" aria-hidden="true"></div>
+
+        <nav class="landing-nav">
+          <div class="max-w-6xl mx-auto px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+              <div class="flex items-center gap-3">
+                <div class="landing-logo">
+                  <img src="./icons/logo-icon.png" alt="ConectAEE" class="w-8 h-8">
+                </div>
+                <div>
+                  <p class="landing-brand">ConectAEE</p>
+                  <p class="landing-brand-sub">Atendimento Educacional Especializado</p>
+                </div>
+              </div>
+              <div class="hidden lg:flex items-center gap-6">
+                <button v-for="link in navLinks" :key="link.id" type="button" class="landing-nav-link" @click="scrollToSection(link.id)">
+                  {{ link.label }}
+                </button>
+              </div>
+              <div class="flex items-center gap-3">
+                <button type="button" @click="tab = 'login'" class="landing-btn ghost">Entrar</button>
+                <button type="button" @click="tab = 'register'" class="landing-btn primary">Criar conta</button>
+              </div>
             </div>
           </div>
-        </div>
-      </nav>
+        </nav>
 
-      <!-- Hero Section -->
-      <section class="py-20 lg:py-32">
-        <div class="max-w-6xl mx-auto px-6 lg:px-8">
-          <div class="grid lg:grid-cols-2 gap-12 items-center">
-            <!-- Left Content -->
+        <section class="landing-hero-body max-w-6xl mx-auto px-6 lg:px-8 py-16 lg:py-24">
+          <div class="grid lg:grid-cols-[1.1fr_0.9fr] gap-12 items-center">
             <div class="space-y-8">
-              <div class="space-y-4">
-                <h1 class="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                  Gestão de AEE Simplificada
+              <div class="landing-pill landing-rise" style="animation-delay: 0.05s;">
+                <span class="landing-dot"></span>
+                Plataforma completa para AEE, do zero ao PDF final
+              </div>
+              <div class="space-y-5">
+                <h1 class="landing-title landing-rise" style="animation-delay: 0.12s;">
+                  Orquestre toda a jornada do aluno com uma experi�ncia <span class="landing-gradient-text">moderna, guiada e segura</span>
                 </h1>
-                <p class="text-xl text-gray-600 leading-relaxed">
-                  Plataforma completa para criar PDI, PAI e Entrevistas com responsáveis. Tudo em um só lugar, seguro e acessível.
+                <p class="landing-lead landing-rise" style="animation-delay: 0.18s;">
+                  Centralize cadastro de alunos, entrevistas, PDI, PAI, relat�rios, supervis�o e documentos oficiais em um �nico fluxo. Tudo pensado para equipes multidisciplinares e gest�o educacional inclusiva.
                 </p>
               </div>
-
-              <div class="flex flex-col sm:flex-row gap-4">
-                <button @click="tab = 'register'" 
-                        class="px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition">
-                  Começar Agora
-                </button>
-                <button @click="tab = 'login'" 
-                        class="px-8 py-3 border-2 border-gray-300 hover:border-gray-400 text-gray-900 rounded-lg font-semibold transition">
-                  Fazer Login
-                </button>
+              <div class="flex flex-col sm:flex-row gap-4 landing-rise" style="animation-delay: 0.26s;">
+                <button type="button" @click="tab = 'register'" class="landing-btn primary">Quero come�ar</button>
+                <button type="button" @click="tab = 'login'" class="landing-btn secondary">Entrar no sistema</button>
+                <button type="button" class="landing-btn ghost" @click="scrollToSection('modulos')">Explorar m�dulos</button>
               </div>
-
-              <div class="flex flex-wrap gap-8 pt-8 border-t border-gray-200">
-                <div class="flex items-center gap-3">
-                  <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
-                    <i class="fas fa-check text-green-600 text-sm"></i>
-                  </div>
-                  <span class="text-sm font-medium text-gray-700">Totalmente Acessível</span>
-                </div>
-                <div class="flex items-center gap-3">
-                  <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
-                    <i class="fas fa-check text-green-600 text-sm"></i>
-                  </div>
-                  <span class="text-sm font-medium text-gray-700">Dados Seguros</span>
-                </div>
-                <div class="flex items-center gap-3">
-                  <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
-                    <i class="fas fa-check text-green-600 text-sm"></i>
-                  </div>
-                  <span class="text-sm font-medium text-gray-700">Rápido e Confiável</span>
+              <div class="flex flex-wrap gap-3 landing-rise" style="animation-delay: 0.32s;">
+                <span v-for="badge in heroBadges" :key="badge" class="landing-chip">{{ badge }}</span>
+              </div>
+              <div class="grid sm:grid-cols-3 gap-4 landing-rise" style="animation-delay: 0.38s;">
+                <div v-for="stat in heroStats" :key="stat.label" class="landing-mini-card">
+                  <p class="landing-mini-value">{{ stat.value }}</p>
+                  <p class="landing-mini-label">{{ stat.label }}</p>
                 </div>
               </div>
             </div>
 
-            <!-- Right Visual -->
-            <div class="hidden lg:block">
-              <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 border border-gray-200">
-                <div class="space-y-4">
-                  <div class="flex items-start gap-4 p-4 bg-white rounded-lg border border-gray-100 hover:border-blue-200 transition">
-                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <i class="fas fa-file-alt text-blue-600 text-lg"></i>
+            <div class="landing-showcase">
+              <div class="landing-screen landing-float">
+                <div class="landing-screen-header">
+                  <div>
+                    <p class="landing-screen-title">Painel AEE</p>
+                    <p class="landing-screen-sub">Resumo do dia e pend�ncias</p>
+                  </div>
+                  <span class="landing-chip">Hoje</span>
+                </div>
+                <div class="landing-screen-body">
+                  <div class="landing-kpis">
+                    <div>
+                      <p class="landing-kpi-label">Formul�rios em andamento</p>
+                      <p class="landing-kpi-value">28</p>
                     </div>
                     <div>
-                      <h3 class="font-semibold text-gray-900">PDI Completo</h3>
-                      <p class="text-sm text-gray-600">Plano de Desenvolvimento Individual</p>
+                      <p class="landing-kpi-label">Pend�ncias cr�ticas</p>
+                      <p class="landing-kpi-value">4</p>
                     </div>
                   </div>
-
-                  <div class="flex items-start gap-4 p-4 bg-white rounded-lg border border-gray-100 hover:border-indigo-200 transition">
-                    <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <i class="fas fa-clipboard-list text-indigo-600 text-lg"></i>
+                  <div class="landing-progress">
+                    <div class="landing-progress-head">
+                      <span>Entrevistas conclu�das</span>
+                      <span>78%</span>
                     </div>
-                    <div>
-                      <h3 class="font-semibold text-gray-900">PAI Estruturado</h3>
-                      <p class="text-sm text-gray-600">Plano de Atendimento Individual</p>
-                    </div>
+                    <div class="landing-progress-bar"><span style="width: 78%;"></span></div>
                   </div>
-
-                  <div class="flex items-start gap-4 p-4 bg-white rounded-lg border border-gray-100 hover:border-purple-200 transition">
-                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <i class="fas fa-comments text-purple-600 text-lg"></i>
+                  <div class="landing-progress">
+                    <div class="landing-progress-head">
+                      <span>PDI e PAI finalizados</span>
+                      <span>64%</span>
                     </div>
-                    <div>
-                      <h3 class="font-semibold text-gray-900">Entrevista</h3>
-                      <p class="text-sm text-gray-600">Com responsável do aluno</p>
-                    </div>
+                    <div class="landing-progress-bar"><span style="width: 64%;"></span></div>
                   </div>
-
-                  <div class="flex items-start gap-4 p-4 bg-white rounded-lg border border-gray-100 hover:border-orange-200 transition">
-                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <i class="fas fa-file-pdf text-orange-600 text-lg"></i>
+                  <div class="landing-list">
+                    <div class="landing-list-item">
+                      <i class="fas fa-user-check"></i>
+                      <span>Alunos com atendimento agendado</span>
+                      <strong>12</strong>
                     </div>
-                    <div>
-                      <h3 class="font-semibold text-gray-900">PDFs Profissionais</h3>
-                      <p class="text-sm text-gray-600">Prontos para impressão</p>
+                    <div class="landing-list-item">
+                      <i class="fas fa-file-pdf"></i>
+                      <span>PDFs prontos para assinatura</span>
+                      <strong>8</strong>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      <!-- Features Section -->
-      <section class="py-20 bg-gray-50 border-t border-gray-200">
-        <div class="max-w-6xl mx-auto px-6 lg:px-8">
-          <div class="text-center mb-16">
-            <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Funcionalidades</h2>
-            <p class="text-lg text-gray-600">Tudo que você precisa para gerenciar AEE de forma eficiente</p>
-          </div>
-
-          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <!-- Feature 1 -->
-            <div class="bg-white rounded-xl p-8 border border-gray-200 hover:border-blue-300 hover:shadow-lg transition">
-              <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                <i class="fas fa-file-alt text-blue-600 text-xl"></i>
-              </div>
-              <h3 class="text-xl font-semibold text-gray-900 mb-2">PDI Completo</h3>
-              <p class="text-gray-600">Formulário oficial do Plano de Desenvolvimento Individual com todos os campos necessários.</p>
-            </div>
-
-            <!-- Feature 2 -->
-            <div class="bg-white rounded-xl p-8 border border-gray-200 hover:border-indigo-300 hover:shadow-lg transition">
-              <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
-                <i class="fas fa-clipboard-list text-indigo-600 text-xl"></i>
-              </div>
-              <h3 class="text-xl font-semibold text-gray-900 mb-2">PAI Estruturado</h3>
-              <p class="text-gray-600">Plano de Atendimento Individual com sequência preservada do documento original.</p>
-            </div>
-
-            <!-- Feature 3 -->
-            <div class="bg-white rounded-xl p-8 border border-gray-200 hover:border-purple-300 hover:shadow-lg transition">
-              <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                <i class="fas fa-comments text-purple-600 text-xl"></i>
-              </div>
-              <h3 class="text-xl font-semibold text-gray-900 mb-2">Entrevista</h3>
-              <p class="text-gray-600">Formulário completo para entrevista inicial com responsável do aluno.</p>
-            </div>
-
-            <!-- Feature 4 -->
-            <div class="bg-white rounded-xl p-8 border border-gray-200 hover:border-orange-300 hover:shadow-lg transition">
-              <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
-                <i class="fas fa-file-pdf text-orange-600 text-xl"></i>
-              </div>
-              <h3 class="text-xl font-semibold text-gray-900 mb-2">PDFs Profissionais</h3>
-              <p class="text-gray-600">Gere documentos em PDF otimizados e prontos para arquivamento ou impressão.</p>
-            </div>
-
-            <!-- Feature 5 -->
-            <div class="bg-white rounded-xl p-8 border border-gray-200 hover:border-red-300 hover:shadow-lg transition">
-              <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
-                <i class="fas fa-users text-red-600 text-xl"></i>
-              </div>
-              <h3 class="text-xl font-semibold text-gray-900 mb-2">Gestão de Alunos</h3>
-              <p class="text-gray-600">Cadastre e acompanhe todos os alunos em atendimento com histórico completo.</p>
-            </div>
-
-            <!-- Feature 6 -->
-            <div class="bg-white rounded-xl p-8 border border-gray-200 hover:border-green-300 hover:shadow-lg transition">
-              <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                <i class="fas fa-chart-bar text-green-600 text-xl"></i>
-              </div>
-              <h3 class="text-xl font-semibold text-gray-900 mb-2">Relatórios</h3>
-              <p class="text-gray-600">Registre atendimentos com gravação de áudio e transcrição automática.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Benefits Section -->
-      <section class="py-20">
-        <div class="max-w-6xl mx-auto px-6 lg:px-8">
-          <div class="text-center mb-16">
-            <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Por que escolher ConectAEE?</h2>
-            <p class="text-lg text-gray-600">Benefícios que fazem diferença no seu dia a dia</p>
-          </div>
-
-          <div class="grid md:grid-cols-2 gap-8">
-            <div class="flex gap-4">
-              <div class="flex-shrink-0">
-                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-blue-100">
-                  <i class="fas fa-lock text-blue-600 text-lg"></i>
+              <div class="landing-float-card float-one landing-float">
+                <div class="landing-float-icon"><i class="fas fa-microphone-lines"></i></div>
+                <div>
+                  <p class="landing-float-title">Relat�rios com voz</p>
+                  <p class="landing-float-text">Grave atendimentos e gere transcri��o autom�tica.</p>
                 </div>
               </div>
-              <div>
-                <h3 class="text-lg font-semibold text-gray-900">Segurança de Dados</h3>
-                <p class="mt-2 text-gray-600">Seus dados e dos alunos são protegidos com criptografia de ponta.</p>
-              </div>
-            </div>
 
-            <div class="flex gap-4">
-              <div class="flex-shrink-0">
-                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-green-100">
-                  <i class="fas fa-universal-access text-green-600 text-lg"></i>
+              <div class="landing-float-card float-two landing-float">
+                <div class="landing-float-icon"><i class="fas fa-clipboard-check"></i></div>
+                <div>
+                  <p class="landing-float-title">Supervis�o inteligente</p>
+                  <p class="landing-float-text">Acompanhe professores, escolas e metas em tempo real.</p>
                 </div>
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-gray-900">100% Acessível</h3>
-                <p class="mt-2 text-gray-600">Interface adaptada para todos, seguindo normas WCAG de acessibilidade.</p>
-              </div>
-            </div>
-
-            <div class="flex gap-4">
-              <div class="flex-shrink-0">
-                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-purple-100">
-                  <i class="fas fa-bolt text-purple-600 text-lg"></i>
-                </div>
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-gray-900">Rápido e Responsivo</h3>
-                <p class="mt-2 text-gray-600">Interface rápida que funciona em qualquer dispositivo, desktop ou mobile.</p>
-              </div>
-            </div>
-
-            <div class="flex gap-4">
-              <div class="flex-shrink-0">
-                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-orange-100">
-                  <i class="fas fa-headset text-orange-600 text-lg"></i>
-                </div>
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-gray-900">Suporte Dedicado</h3>
-                <p class="mt-2 text-gray-600">Equipe pronta para ajudar com dúvidas e sugestões de melhorias.</p>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- Stats Section -->
-      <section class="py-20 bg-blue-50 border-y border-gray-200">
-        <div class="max-w-6xl mx-auto px-6 lg:px-8">
-          <div class="grid md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div class="text-4xl font-bold text-blue-600 mb-2">100%</div>
-              <p class="text-gray-700 font-medium">Acessível</p>
+        <section class="landing-marquee" aria-label="M�dulos do ConectAEE">
+          <div class="landing-marquee-track">
+            <span v-for="item in marqueeItems" :key="'m1-' + item" class="landing-marquee-item">{{ item }}</span>
+            <span v-for="item in marqueeItems" :key="'m2-' + item" class="landing-marquee-item">{{ item }}</span>
+          </div>
+        </section>
+      </header>
+
+      <main>
+        <section id="solucao" class="landing-section">
+          <div class="max-w-6xl mx-auto px-6 lg:px-8">
+            <div class="landing-section-head">
+              <p class="landing-eyebrow">Plataforma</p>
+              <h2 class="landing-section-title">Tudo o que a gest�o AEE precisa, em um �nico sistema</h2>
+              <p class="landing-section-subtitle">Da capta��o de dados � gera��o de evid�ncias, o ConectAEE conecta equipes, escolas e fam�lias com fluxos oficiais e rastre�veis.</p>
             </div>
-            <div>
-              <div class="text-4xl font-bold text-indigo-600 mb-2">3</div>
-              <p class="text-gray-700 font-medium">Formulários Oficiais</p>
-            </div>
-            <div>
-              <div class="text-4xl font-bold text-purple-600 mb-2">∞</div>
-              <p class="text-gray-700 font-medium">Alunos Suportados</p>
-            </div>
-            <div>
-              <div class="text-4xl font-bold text-green-600 mb-2">24/7</div>
-              <p class="text-gray-700 font-medium">Disponível</p>
+            <div class="grid md:grid-cols-3 gap-6">
+              <article v-for="(pillar, index) in pillars" :key="pillar.title" class="landing-card landing-rise" :style="{ animationDelay: (0.08 * index) + 's', '--accent-color': pillar.accent, '--accent-soft': pillar.accentSoft }">
+                <div class="landing-card-icon">
+                  <i :class="pillar.icon"></i>
+                </div>
+                <h3 class="landing-card-title">{{ pillar.title }}</h3>
+                <p class="landing-card-text">{{ pillar.text }}</p>
+              </article>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- CTA Section -->
-      <section class="py-20">
-        <div class="max-w-4xl mx-auto px-6 lg:px-8">
-          <div class="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl p-12 text-center text-white">
-            <h2 class="text-4xl font-bold mb-4">Comece Agora</h2>
-            <p class="text-lg mb-8 opacity-90">Transforme a forma como você gerencia o Atendimento Educacional Especializado.</p>
+        <section id="fluxo" class="landing-section landing-section-alt">
+          <div class="max-w-6xl mx-auto px-6 lg:px-8">
+            <div class="grid lg:grid-cols-[0.9fr_1.1fr] gap-10 items-start">
+              <div class="space-y-6">
+                <p class="landing-eyebrow">Fluxo AEE</p>
+                <h2 class="landing-section-title">Uma trilha guiada do primeiro contato at� o documento final</h2>
+                <p class="landing-section-subtitle">Cada etapa mant�m a sequ�ncia oficial e garante rastreabilidade. Professores e gestores enxergam pend�ncias, prazos e evolu��o por aluno.</p>
+                <button type="button" class="landing-btn secondary" @click="scrollToSection('modulos')">Ver todos os m�dulos</button>
+              </div>
+              <ol class="space-y-4">
+                <li v-for="(step, index) in flowSteps" :key="step.title" class="landing-step" :style="{ '--accent-color': step.accent }">
+                  <div class="landing-step-number">{{ index + 1 }}</div>
+                  <div>
+                    <h3 class="landing-step-title">{{ step.title }}</h3>
+                    <p class="landing-step-text">{{ step.text }}</p>
+                  </div>
+                </li>
+              </ol>
+            </div>
+          </div>
+        </section>
+        <section id="modulos" class="landing-section">
+          <div class="max-w-6xl mx-auto px-6 lg:px-8">
+            <div class="landing-section-head">
+              <p class="landing-eyebrow">M�dulos</p>
+              <h2 class="landing-section-title">Mapa completo do sistema ConectAEE</h2>
+              <p class="landing-section-subtitle">Cada m�dulo conversa com os demais para garantir dados consistentes, monitoramento cont�nuo e documentos oficiais padronizados.</p>
+            </div>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <article v-for="module in modules" :key="module.title" class="landing-module" :style="{ '--accent-color': module.accent, '--accent-soft': module.accentSoft }">
+                <div class="landing-module-icon">
+                  <i :class="module.icon"></i>
+                </div>
+                <h3 class="landing-module-title">{{ module.title }}</h3>
+                <p class="landing-module-text">{{ module.text }}</p>
+                <span class="landing-tag">{{ module.tag }}</span>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section id="relatorios" class="landing-section landing-section-alt">
+          <div class="max-w-6xl mx-auto px-6 lg:px-8">
+            <div class="grid lg:grid-cols-[1.05fr_0.95fr] gap-12 items-center">
+              <div class="space-y-6">
+                <p class="landing-eyebrow">Relat�rios & Evid�ncias</p>
+                <h2 class="landing-section-title">Indicadores, registros e PDFs prontos para gest�o</h2>
+                <p class="landing-section-subtitle">Relat�rios de atendimento com �udio e transcri��o, filtros avan�ados e exporta��es oficiais geradas em poucos cliques.</p>
+                <div class="space-y-3">
+                  <div v-for="item in reportHighlights" :key="item" class="landing-check">
+                    <i class="fas fa-check-circle"></i>
+                    <span>{{ item }}</span>
+                  </div>
+                </div>
+                <button type="button" class="landing-btn ghost" @click="tab = 'register'">Quero gerar meus relat�rios</button>
+              </div>
+              <div class="landing-report">
+                <div class="landing-report-header">
+                  <div>
+                    <p class="landing-report-title">Relat�rio Geral</p>
+                    <p class="landing-report-sub">Per�odo mensal</p>
+                  </div>
+                  <span class="landing-chip">PDF</span>
+                </div>
+                <div class="landing-report-body">
+                  <div class="landing-report-line">
+                    <span>Entrevistas</span>
+                    <strong>42</strong>
+                  </div>
+                  <div class="landing-report-line">
+                    <span>PDI finalizados</span>
+                    <strong>18</strong>
+                  </div>
+                  <div class="landing-report-line">
+                    <span>PAI em andamento</span>
+                    <strong>12</strong>
+                  </div>
+                  <div class="landing-report-chart">
+                    <span style="height: 60%;"></span>
+                    <span style="height: 80%;"></span>
+                    <span style="height: 50%;"></span>
+                    <span style="height: 90%;"></span>
+                    <span style="height: 70%;"></span>
+                  </div>
+                  <div class="landing-report-foot">
+                    <span>Gerado automaticamente</span>
+                    <span class="landing-report-tag">Audit�vel</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section id="acessibilidade" class="landing-section">
+          <div class="max-w-6xl mx-auto px-6 lg:px-8">
+            <div class="grid lg:grid-cols-[0.9fr_1.1fr] gap-12 items-center">
+              <div class="space-y-6">
+                <p class="landing-eyebrow">Acessibilidade</p>
+                <h2 class="landing-section-title">Inclus�o real para toda a equipe e comunidade escolar</h2>
+                <p class="landing-section-subtitle">Painel dedicado com ajustes de contraste, fonte, espa�amento e leitura. O sistema respeita normas de acessibilidade e facilita o uso di�rio.</p>
+                <div class="space-y-3">
+                  <div v-for="item in accessibilityItems" :key="item" class="landing-check">
+                    <i class="fas fa-universal-access"></i>
+                    <span>{{ item }}</span>
+                  </div>
+                </div>
+                <button type="button" class="landing-btn secondary" @click="openA11y">Abrir painel de acessibilidade</button>
+              </div>
+              <div class="landing-access">
+                <div class="landing-access-card">
+                  <p class="landing-access-title">Painel de Acessibilidade</p>
+                  <p class="landing-access-text">Controle r�pido com pr�-visualiza��o em tempo real.</p>
+                  <div class="landing-access-options">
+                    <span>Contraste</span>
+                    <span>Fonte</span>
+                    <span>Leitura</span>
+                    <span>Espa�amento</span>
+                  </div>
+                </div>
+                <div class="landing-access-card secondary">
+                  <p class="landing-access-title">Navega��o inteligente</p>
+                  <p class="landing-access-text">Atalhos de teclado e foco vis�vel em todos os formul�rios.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="landing-section landing-section-alt" id="seguranca">
+          <div class="max-w-6xl mx-auto px-6 lg:px-8">
+            <div class="grid lg:grid-cols-2 gap-10 items-center">
+              <div class="space-y-6">
+                <p class="landing-eyebrow">Seguran�a & Governan�a</p>
+                <h2 class="landing-section-title">Dados protegidos, equipes alinhadas e gest�o transparente</h2>
+                <p class="landing-section-subtitle">Controle de usu�rios, perfis e acompanhamento com visibilidade total das a��es realizadas no sistema.</p>
+                <div class="space-y-3">
+                  <div v-for="item in securityItems" :key="item" class="landing-check">
+                    <i class="fas fa-shield-halved"></i>
+                    <span>{{ item }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="landing-governance">
+                <div class="landing-governance-item">
+                  <span class="landing-governance-label">Usu�rios ativos</span>
+                  <strong>126</strong>
+                </div>
+                <div class="landing-governance-item">
+                  <span class="landing-governance-label">Escolas monitoradas</span>
+                  <strong>24</strong>
+                </div>
+                <div class="landing-governance-item">
+                  <span class="landing-governance-label">Pend�ncias cr�ticas</span>
+                  <strong>7</strong>
+                </div>
+                <div class="landing-governance-item">
+                  <span class="landing-governance-label">�ltima auditoria</span>
+                  <strong>Hoje</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section class="landing-cta">
+          <div class="max-w-5xl mx-auto px-6 lg:px-8 text-center">
+            <p class="landing-eyebrow">Comece agora</p>
+            <h2 class="landing-cta-title">Traga seu time para o ConectAEE e transforme a gest�o do AEE</h2>
+            <p class="landing-cta-text">Mais efici�ncia, menos retrabalho e documentos oficiais sempre prontos para compartilhamento.</p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-              <button @click="tab = 'register'" 
-                      class="px-8 py-3 bg-white text-blue-600 hover:bg-gray-100 rounded-lg font-semibold transition">
-                Cadastre-se Agora
-              </button>
-              <button @click="tab = 'login'" 
-                      class="px-8 py-3 border-2 border-white hover:bg-white/10 text-white rounded-lg font-semibold transition">
-                Já tenho conta
-              </button>
+              <button type="button" class="landing-btn primary" @click="tab = 'register'">Solicitar acesso</button>
+              <button type="button" class="landing-btn secondary" @click="tab = 'login'">J� tenho conta</button>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
 
-      <!-- Footer -->
-      <footer class="border-t border-gray-200 bg-gray-50 py-16">
+      <footer class="landing-footer">
         <div class="max-w-6xl mx-auto px-6 lg:px-8">
-          <div class="grid md:grid-cols-4 gap-12 mb-12">
-            <div>
-              <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center font-bold text-white">C</div>
-                <span class="text-lg font-bold text-gray-900">ConectAEE</span>
+          <div class="grid md:grid-cols-4 gap-10 mb-12">
+            <div class="space-y-4">
+              <div class="flex items-center gap-3">
+                <div class="landing-logo small">
+                  <img src="./icons/logo-icon.png" alt="ConectAEE" class="w-7 h-7">
+                </div>
+                <div>
+                  <p class="landing-brand">ConectAEE</p>
+                  <p class="landing-brand-sub">Gest�o AEE inteligente</p>
+                </div>
               </div>
-              <p class="text-gray-600 text-sm">Plataforma completa para gestão do Atendimento Educacional Especializado.</p>
+              <p class="landing-footer-text">Plataforma completa para Atendimento Educacional Especializado com foco em inclus�o, resultados e governan�a.</p>
             </div>
             <div>
-              <h4 class="font-semibold text-gray-900 mb-4">Funcionalidades</h4>
-              <ul class="space-y-2 text-sm text-gray-600">
-                <li class="hover:text-blue-600 transition cursor-pointer">PDI - Plano de Desenvolvimento</li>
-                <li class="hover:text-blue-600 transition cursor-pointer">PAI - Plano de Atendimento</li>
-                <li class="hover:text-blue-600 transition cursor-pointer">Entrevista com Responsável</li>
-                <li class="hover:text-blue-600 transition cursor-pointer">Geração de PDFs</li>
+              <h4 class="landing-footer-title">M�dulos-chave</h4>
+              <ul class="landing-footer-list">
+                <li>PDI e PAI oficiais</li>
+                <li>Entrevista com respons�vel</li>
+                <li>Relat�rios e PDFs</li>
+                <li>Gest�o de alunos e escolas</li>
               </ul>
             </div>
             <div>
-              <h4 class="font-semibold text-gray-900 mb-4">Recursos</h4>
-              <ul class="space-y-2 text-sm text-gray-600">
-                <li class="hover:text-blue-600 transition cursor-pointer">Documentação</li>
-                <li class="hover:text-blue-600 transition cursor-pointer">Tutoriais</li>
-                <li class="hover:text-blue-600 transition cursor-pointer">Suporte</li>
-                <li class="hover:text-blue-600 transition cursor-pointer">FAQ</li>
+              <h4 class="landing-footer-title">Gest�o</h4>
+              <ul class="landing-footer-list">
+                <li>Supervis�o de professores</li>
+                <li>Usu�rios e permiss�es</li>
+                <li>Legisla��es atualizadas</li>
+                <li>Indicadores e pend�ncias</li>
               </ul>
             </div>
-            <div>
-              <h4 class="font-semibold text-gray-900 mb-4">Acessibilidade</h4>
-              <button @click="openA11y" class="text-sm text-gray-600 hover:text-blue-600 transition inline-flex items-center gap-2">
+            <div class="space-y-4">
+              <h4 class="landing-footer-title">Acessibilidade</h4>
+              <p class="landing-footer-text">Ajustes e recursos para atender diferentes necessidades de uso.</p>
+              <button type="button" class="landing-btn ghost small" @click="openA11y">
                 <i class="fas fa-universal-access"></i>
-                Painel de Acessibilidade
+                Painel de acessibilidade
               </button>
             </div>
           </div>
-          <div class="border-t border-gray-200 pt-8 text-center text-sm text-gray-600">
-            <p>&copy; 2026 ConectAEE. Desenvolvido para educação inclusiva.</p>
+          <div class="landing-footer-bottom">
+            <span>&copy; 2026 ConectAEE. Educa��o inclusiva com dados confi�veis.</span>
+            <button type="button" class="landing-btn ghost small" @click="scrollToSection('solucao')">Voltar ao topo</button>
           </div>
         </div>
       </footer>
 
-      <!-- Login/Register Modal -->
-      <div v-if="tab === 'login' || tab === 'register'" @click.self="tab = null" 
-           class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <section class="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full relative">
-          <button @click="tab = null" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition">
-            <i class="fas fa-times text-gray-400"></i>
+      <div v-if="tab === 'login' || tab === 'register'" class="landing-modal-backdrop" @click.self="tab = null">
+        <section class="landing-modal">
+          <button type="button" class="landing-modal-close" @click="tab = null" aria-label="Fechar">
+            <i class="fas fa-times"></i>
           </button>
-          
-          <div class="mb-8">
-            <h2 class="text-2xl font-bold text-gray-900">Acesso ao Sistema</h2>
-            <p class="text-sm text-gray-600">Login e cadastro no mesmo lugar</p>
+          <div class="landing-modal-head">
+            <p class="landing-modal-title">Acesso ao ConectAEE</p>
+            <p class="landing-modal-sub">Entre ou crie uma conta para continuar</p>
           </div>
-
-          <div class="grid grid-cols-2 gap-2 rounded-lg bg-gray-100 p-1 mb-8">
-            <button type="button"
-                    class="py-2 rounded-md transition font-medium"
-                    :class="tab === 'login' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-gray-900'"
-                    @click="tab = 'login'">
-              Entrar
-            </button>
-            <button type="button"
-                    class="py-2 rounded-md transition font-medium"
-                    :class="tab === 'register' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-gray-900'"
-                    @click="tab = 'register'">
-              Registrar
-            </button>
+          <div class="landing-modal-tabs">
+            <button type="button" :class="['landing-modal-tab', tab === 'login' ? 'active' : '']" @click="tab = 'login'">Entrar</button>
+            <button type="button" :class="['landing-modal-tab', tab === 'register' ? 'active' : '']" @click="tab = 'register'">Cadastrar</button>
           </div>
 
           <form v-show="tab === 'login'" @submit.prevent="login" class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-gray-900 mb-2">Email</label>
-              <input v-model.trim="loginForm.email" type="email" required
-                     class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition"
-                     placeholder="seu@email.com">
+              <label class="landing-label">Email</label>
+              <input v-model.trim="loginForm.email" type="email" required class="landing-input" placeholder="seu@email.com">
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-900 mb-2">Senha</label>
-              <div class="relative">
-                <input :type="showLoginPassword ? 'text' : 'password'"
-                       v-model="loginForm.password" required
-                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-10 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition"
-                       placeholder="••••••••">
-                <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                        @click="showLoginPassword = !showLoginPassword">
+              <label class="landing-label">Senha</label>
+              <div class="landing-input-wrap">
+                <input :type="showLoginPassword ? 'text' : 'password'" v-model="loginForm.password" required class="landing-input" placeholder="********">
+                <button type="button" class="landing-input-toggle" @click="showLoginPassword = !showLoginPassword" :aria-label="showLoginPassword ? 'Ocultar senha' : 'Mostrar senha'">
                   <i :class="showLoginPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
                 </button>
               </div>
             </div>
-            <div class="flex items-center justify-between text-sm">
-              <label class="inline-flex items-center gap-2 text-gray-600">
-                <input type="checkbox" v-model="loginForm.remember" class="rounded border-gray-300 text-blue-500">
+            <div class="landing-row">
+              <label class="landing-checkbox">
+                <input type="checkbox" v-model="loginForm.remember">
                 Lembrar meu e-mail
               </label>
-              <button type="button" class="text-blue-600 hover:text-blue-700"
-                      @click="$showToast && $showToast('Recuperação em breve', 'Estamos finalizando essa etapa.', 'info')">
+              <button type="button" class="landing-link" @click="$showToast && $showToast('Recupera��o em breve', 'Estamos finalizando essa etapa.', 'info')">
                 Esqueci minha senha
               </button>
             </div>
-            <div v-if="loginError" class="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
-              {{ loginError }}
-            </div>
-            <button type="submit" :disabled="loginLoading"
-                    class="w-full py-2.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-semibold transition disabled:opacity-50">
+            <div v-if="loginError" class="landing-alert error">{{ loginError }}</div>
+            <button type="submit" :disabled="loginLoading" class="landing-btn primary full">
               <span v-if="loginLoading" class="inline-flex items-center gap-2">
-                <span class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                <span class="landing-spinner"></span>
                 Entrando...
               </span>
               <span v-else>Entrar</span>
@@ -4060,62 +4090,46 @@ const HomeLanding = {
 
           <form v-show="tab === 'register'" @submit.prevent="register" class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-gray-900 mb-2">Nome completo</label>
-              <input v-model.trim="registerForm.name" type="text" required
-                     class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition"
-                     placeholder="Seu nome">
+              <label class="landing-label">Nome completo</label>
+              <input v-model.trim="registerForm.name" type="text" required class="landing-input" placeholder="Seu nome">
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-900 mb-2">Email</label>
-              <input v-model.trim="registerForm.email" type="email" required
-                     class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition"
-                     placeholder="professor@escola.com">
+              <label class="landing-label">Email</label>
+              <input v-model.trim="registerForm.email" type="email" required class="landing-input" placeholder="professor@escola.com">
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-900 mb-2">Senha</label>
-              <div class="relative">
-                <input :type="showRegisterPassword ? 'text' : 'password'"
-                       v-model="registerForm.password" required
-                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-10 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition"
-                       placeholder="Crie uma senha">
-                <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                        @click="showRegisterPassword = !showRegisterPassword">
+              <label class="landing-label">Senha</label>
+              <div class="landing-input-wrap">
+                <input :type="showRegisterPassword ? 'text' : 'password'" v-model="registerForm.password" required class="landing-input" placeholder="Crie uma senha">
+                <button type="button" class="landing-input-toggle" @click="showRegisterPassword = !showRegisterPassword" :aria-label="showRegisterPassword ? 'Ocultar senha' : 'Mostrar senha'">
                   <i :class="showRegisterPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
                 </button>
               </div>
-              <div class="mt-2 text-xs text-gray-600 grid grid-cols-2 gap-1">
-                <span :class="passwordChecks.length ? 'text-green-600' : ''">✓ 8+ caracteres</span>
-                <span :class="passwordChecks.uppercase ? 'text-green-600' : ''">✓ 1 maiúscula</span>
-                <span :class="passwordChecks.lowercase ? 'text-green-600' : ''">✓ 1 minúscula</span>
-                <span :class="passwordChecks.number ? 'text-green-600' : ''">✓ 1 número</span>
-                <span :class="passwordChecks.special ? 'text-green-600' : ''">✓ 1 especial</span>
+              <div class="landing-password-grid">
+                <span :class="passwordChecks.length ? 'ok' : ''">8+ caracteres</span>
+                <span :class="passwordChecks.uppercase ? 'ok' : ''">1 mai�scula</span>
+                <span :class="passwordChecks.lowercase ? 'ok' : ''">1 min�scula</span>
+                <span :class="passwordChecks.number ? 'ok' : ''">1 n�mero</span>
+                <span :class="passwordChecks.special ? 'ok' : ''">1 especial</span>
               </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-900 mb-2">Confirmar senha</label>
-              <input v-model="registerForm.confirm_password" type="password" required
-                     class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition"
-                     placeholder="Repita a senha">
-              <div v-if="registerForm.password && registerForm.confirm_password && registerForm.password !== registerForm.confirm_password"
-                   class="mt-1 text-xs text-red-600">As senhas não coincidem</div>
+              <label class="landing-label">Confirmar senha</label>
+              <input v-model="registerForm.confirm_password" type="password" required class="landing-input" placeholder="Repita a senha">
+              <div v-if="registerForm.password && registerForm.confirm_password && registerForm.password !== registerForm.confirm_password" class="landing-alert warning">
+                As senhas n�o coincidem
+              </div>
             </div>
-            <div v-if="registerError" class="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
-              {{ registerError }}
-            </div>
-            <div v-if="registerSuccess" class="rounded-lg bg-green-50 border border-green-200 p-3 text-sm text-green-700">
-              {{ registerSuccess }}
-            </div>
-            <button type="submit" :disabled="registerLoading || !isRegisterValid"
-                    class="w-full py-2.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-semibold transition disabled:opacity-50">
+            <div v-if="registerError" class="landing-alert error">{{ registerError }}</div>
+            <div v-if="registerSuccess" class="landing-alert success">{{ registerSuccess }}</div>
+            <button type="submit" :disabled="registerLoading || !isRegisterValid" class="landing-btn primary full">
               <span v-if="registerLoading" class="inline-flex items-center gap-2">
-                <span class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                <span class="landing-spinner"></span>
                 Criando conta...
               </span>
               <span v-else>Finalizar cadastro</span>
             </button>
-            <p class="text-xs text-gray-600 text-center">
-              Administradores são cadastrados manualmente pelo gestor.
-            </p>
+            <p class="landing-modal-foot">Administradores s�o cadastrados manualmente pelo gestor.</p>
           </form>
         </section>
       </div>
@@ -4124,6 +4138,210 @@ const HomeLanding = {
   data() {
     return {
       tab: null,
+      navLinks: [
+        { id: 'solucao', label: 'Plataforma' },
+        { id: 'fluxo', label: 'Fluxo AEE' },
+        { id: 'modulos', label: 'M�dulos' },
+        { id: 'relatorios', label: 'Relat�rios' },
+        { id: 'acessibilidade', label: 'Acessibilidade' }
+      ],
+      heroStats: [
+        { value: '3', label: 'Formul�rios oficiais (PDI, PAI, Entrevista)' },
+        { value: '12', label: 'M�dulos conectados' },
+        { value: '24/7', label: 'Dispon�vel e responsivo' }
+      ],
+      heroBadges: [
+        'Entrevista guiada',
+        'PDI e PAI completos',
+        'Relat�rios com �udio',
+        'Gest�o de usu�rios e escolas',
+        'Supervis�o em tempo real',
+        'Documentos PDF audit�veis'
+      ],
+      marqueeItems: [
+        'Dashboard',
+        'Gest�o de Alunos',
+        'Gest�o de Usu�rios',
+        'Gest�o de Escolas',
+        'Supervis�o',
+        'Entrevista Respons�vel',
+        'PDI Completo',
+        'PAI Completo',
+        'Relat�rios de Atendimento',
+        'Legisla��es',
+        'Documentos PDF',
+        'Acessibilidade'
+      ],
+      pillars: [
+        {
+          title: 'Gest�o centralizada',
+          text: 'Dados de alunos, escolas, usu�rios e atendimentos organizados em um �nico painel.',
+          icon: 'fas fa-layer-group',
+          accent: '#22d3ee',
+          accentSoft: 'rgba(34, 211, 238, 0.16)'
+        },
+        {
+          title: 'Fluxos oficiais garantidos',
+          text: 'PDI, PAI e entrevistas seguindo sequ�ncia oficial com valida��es e rastreio.',
+          icon: 'fas fa-file-signature',
+          accent: '#f59e0b',
+          accentSoft: 'rgba(245, 158, 11, 0.16)'
+        },
+        {
+          title: 'Vis�o gerencial completa',
+          text: 'Supervis�o, indicadores e relat�rios para apoiar decis�es estrat�gicas.',
+          icon: 'fas fa-chart-line',
+          accent: '#22c55e',
+          accentSoft: 'rgba(34, 197, 94, 0.16)'
+        }
+      ],
+      flowSteps: [
+        {
+          title: 'Configurar escolas e usu�rios',
+          text: 'Crie perfis, n�veis de acesso e vincule equipes com seguran�a.',
+          accent: '#38bdf8'
+        },
+        {
+          title: 'Cadastrar alunos e v�nculos',
+          text: 'Hist�rico, escola, turma e professores organizados em um s� lugar.',
+          accent: '#22c55e'
+        },
+        {
+          title: 'Entrevista com respons�vel',
+          text: 'Formul�rio guiado para captar dados iniciais e diagn�sticos.',
+          accent: '#fb7185'
+        },
+        {
+          title: 'PDI completo',
+          text: 'Plano de Desenvolvimento Individual alinhado ao modelo oficial.',
+          accent: '#f97316'
+        },
+        {
+          title: 'PAI estruturado',
+          text: 'Plano de Atendimento Individual com etapas validadas.',
+          accent: '#eab308'
+        },
+        {
+          title: 'Relat�rios e documentos',
+          text: 'Relat�rios com �udio, transcri��o e PDF pronto para assinatura.',
+          accent: '#22d3ee'
+        }
+      ],
+      modules: [
+        {
+          title: 'Dashboard Inteligente',
+          text: 'Indicadores de progresso, pend�ncias e metas por turma e escola.',
+          icon: 'fas fa-chart-pie',
+          tag: 'Vis�o geral',
+          accent: '#38bdf8',
+          accentSoft: 'rgba(56, 189, 248, 0.16)'
+        },
+        {
+          title: 'Gest�o de Alunos',
+          text: 'Cadastro completo, hist�rico e acompanhamento individualizado.',
+          icon: 'fas fa-user-graduate',
+          tag: 'Cadastro e hist�rico',
+          accent: '#22c55e',
+          accentSoft: 'rgba(34, 197, 94, 0.16)'
+        },
+        {
+          title: 'Gest�o de Usu�rios',
+          text: 'Perfis, permiss�es e acessos para professores e gestores.',
+          icon: 'fas fa-user-shield',
+          tag: 'Perfis e permiss�es',
+          accent: '#f59e0b',
+          accentSoft: 'rgba(245, 158, 11, 0.16)'
+        },
+        {
+          title: 'Gest�o de Escolas',
+          text: 'Cadastro de unidades, turmas e vincula��es pedag�gicas.',
+          icon: 'fas fa-school',
+          tag: 'Unidades e turmas',
+          accent: '#0ea5e9',
+          accentSoft: 'rgba(14, 165, 233, 0.16)'
+        },
+        {
+          title: 'Supervis�o de Professores',
+          text: 'Acompanhe atendimentos, desempenho e pend�ncias por equipe.',
+          icon: 'fas fa-clipboard-check',
+          tag: 'Acompanhamento',
+          accent: '#14b8a6',
+          accentSoft: 'rgba(20, 184, 166, 0.16)'
+        },
+        {
+          title: 'Entrevista Respons�vel',
+          text: 'Formul�rio inicial completo com perguntas oficiais e hist�rico.',
+          icon: 'fas fa-comments',
+          tag: 'Diagn�stico',
+          accent: '#fb7185',
+          accentSoft: 'rgba(251, 113, 133, 0.16)'
+        },
+        {
+          title: 'PDI Completo',
+          text: 'Plano de Desenvolvimento Individual com todos os campos exigidos.',
+          icon: 'fas fa-file-lines',
+          tag: 'Modelo oficial',
+          accent: '#f97316',
+          accentSoft: 'rgba(249, 115, 22, 0.16)'
+        },
+        {
+          title: 'PAI Estruturado',
+          text: 'Plano de Atendimento Individual seguindo a sequ�ncia oficial.',
+          icon: 'fas fa-list-check',
+          tag: 'Sequ�ncia validada',
+          accent: '#eab308',
+          accentSoft: 'rgba(234, 179, 8, 0.16)'
+        },
+        {
+          title: 'Relat�rios de Atendimento',
+          text: 'Registro com �udio, transcri��o e anexos por aluno.',
+          icon: 'fas fa-microphone',
+          tag: '�udio e texto',
+          accent: '#22d3ee',
+          accentSoft: 'rgba(34, 211, 238, 0.16)'
+        },
+        {
+          title: 'Legisla��es',
+          text: 'Diret�rio atualizado com normas e documentos de refer�ncia.',
+          icon: 'fas fa-scale-balanced',
+          tag: 'Normas oficiais',
+          accent: '#94a3b8',
+          accentSoft: 'rgba(148, 163, 184, 0.16)'
+        },
+        {
+          title: 'Documentos PDF',
+          text: 'Gera��o autom�tica com layout profissional e rastreio.',
+          icon: 'fas fa-file-pdf',
+          tag: 'PDFs oficiais',
+          accent: '#ef4444',
+          accentSoft: 'rgba(239, 68, 68, 0.16)'
+        },
+        {
+          title: 'Acessibilidade',
+          text: 'Painel de ajustes para contraste, fontes e leitura assistida.',
+          icon: 'fas fa-universal-access',
+          tag: 'Inclus�o',
+          accent: '#10b981',
+          accentSoft: 'rgba(16, 185, 129, 0.16)'
+        }
+      ],
+      reportHighlights: [
+        'Relat�rios de atendimento com �udio e transcri��o.',
+        'Filtros por per�odo, tipo, escola e professor.',
+        'Exporta��o direta de documentos oficiais em PDF.',
+        'Indicadores de pend�ncias e progresso em tempo real.'
+      ],
+      accessibilityItems: [
+        'Painel com contraste, fontes ampliadas e leitura assistida.',
+        'Compatibilidade com leitores de tela e navega��o por teclado.',
+        'Ajustes persistentes para cada perfil de usu�rio.'
+      ],
+      securityItems: [
+        'Autentica��o segura com token e sess�o controlada.',
+        'Permiss�es por perfil e supervis�o hier�rquica.',
+        'Hist�rico de atualiza��es e documentos audit�veis.',
+        'Estrutura alinhada a requisitos da LGPD.'
+      ],
       loginForm: {
         email: '',
         password: '',
@@ -4164,7 +4382,34 @@ const HomeLanding = {
         Object.values(this.passwordChecks).every(check => check);
     }
   },
+  watch: {
+    '$route.query.tab'(value) {
+      this.applyTabFromRoute(value);
+    }
+  },
+  mounted() {
+    this.applyTabFromRoute(this.$route?.query?.tab);
+    const remembered = localStorage.getItem('remember_email');
+    if (remembered) {
+      this.loginForm.email = remembered;
+      this.loginForm.remember = true;
+    }
+  },
   methods: {
+    scrollToSection(id) {
+      const target = document.getElementById(id);
+      if (target) {
+        const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        target.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth', block: 'start' });
+      }
+    },
+    applyTabFromRoute(value) {
+      if (value === 'login' || value === 'register') {
+        this.tab = value;
+      } else {
+        this.tab = null;
+      }
+    },
     openA11y() {
       if (window.a11yManager && typeof window.a11yManager.togglePanel === 'function') {
         window.a11yManager.togglePanel();
@@ -4199,7 +4444,7 @@ const HomeLanding = {
         }
         this.syncA11y();
         this.$root.user = user;
-        this.$router.push('/dashboard');
+        this.$router.push('/app');
       } catch (error) {
         this.loginError = error.response?.data?.message || 'Erro ao fazer login';
       } finally {
@@ -4221,9 +4466,7 @@ const HomeLanding = {
         if (!token) throw new Error('TOKEN_MISSING');
         localStorage.setItem('token', token);
         this.syncA11y();
-        // Assume user is returned or fetch it
-        // this.$root.user = ...
-        this.$router.push('/dashboard');
+        this.$router.push('/app');
       } catch (error) {
         this.registerError = error.response?.data?.message || 'Erro ao criar conta';
       } finally {

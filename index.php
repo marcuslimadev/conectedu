@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // ConectAEE - Entrada principal (index.php não mais necessário com .htaccess)
 // Este arquivo serve apenas como fallback caso .htaccess não esteja funcionando
 
@@ -18,6 +18,6 @@ if (!headers_sent()) {
   <title>ConectAEE</title>
 </head>
 <body>
-  <p>Redirecionando… <a href="frontend/">Clique aqui</a> se não for redirecionado.</p>
+  <p>Redirecionando... <a href="frontend/">Clique aqui</a> se não for redirecionado.</p>
 </body>
 </html>

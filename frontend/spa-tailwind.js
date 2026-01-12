@@ -1,4 +1,4 @@
-// ConectAEE v5.0 - Sistema de Gestão Educacional com Tailwind CSS
+﻿// ConectAEE v5.0 - Sistema de Gestão Educacional com Tailwind CSS
 
 // Configuração da API
 const api = axios.create({
@@ -3698,16 +3698,16 @@ const HomeLanding = {
               </div>
               <div class="space-y-5">
                 <h1 class="landing-title landing-rise" style="animation-delay: 0.12s;">
-                  Orquestre toda a jornada do aluno com uma experi�ncia <span class="landing-gradient-text">moderna, guiada e segura</span>
+                  Orquestre toda a jornada do aluno com uma experiência <span class="landing-gradient-text">moderna, guiada e segura</span>
                 </h1>
                 <p class="landing-lead landing-rise" style="animation-delay: 0.18s;">
-                  Centralize cadastro de alunos, entrevistas, PDI, PAI, relat�rios, supervis�o e documentos oficiais em um �nico fluxo. Tudo pensado para equipes multidisciplinares e gest�o educacional inclusiva.
+                  Centralize cadastro de alunos, entrevistas, PDI, PAI, relatórios, supervisão e documentos oficiais em um único fluxo. Tudo pensado para equipes multidisciplinares e gestão educacional inclusiva.
                 </p>
               </div>
               <div class="flex flex-col sm:flex-row gap-4 landing-rise" style="animation-delay: 0.26s;">
-                <button type="button" @click="tab = 'register'" class="landing-btn primary">Quero come�ar</button>
+                <button type="button" @click="tab = 'register'" class="landing-btn primary">Quero começar</button>
                 <button type="button" @click="tab = 'login'" class="landing-btn secondary">Entrar no sistema</button>
-                <button type="button" class="landing-btn ghost" @click="scrollToSection('modulos')">Explorar m�dulos</button>
+                <button type="button" class="landing-btn ghost" @click="scrollToSection('modulos')">Explorar módulos</button>
               </div>
               <div class="flex flex-wrap gap-3 landing-rise" style="animation-delay: 0.32s;">
                 <span v-for="badge in heroBadges" :key="badge" class="landing-chip">{{ badge }}</span>
@@ -3725,24 +3725,24 @@ const HomeLanding = {
                 <div class="landing-screen-header">
                   <div>
                     <p class="landing-screen-title">Painel AEE</p>
-                    <p class="landing-screen-sub">Resumo do dia e pend�ncias</p>
+                    <p class="landing-screen-sub">Resumo do dia e pendências</p>
                   </div>
                   <span class="landing-chip">Hoje</span>
                 </div>
                 <div class="landing-screen-body">
                   <div class="landing-kpis">
                     <div>
-                      <p class="landing-kpi-label">Formul�rios em andamento</p>
+                      <p class="landing-kpi-label">Formulários em andamento</p>
                       <p class="landing-kpi-value">28</p>
                     </div>
                     <div>
-                      <p class="landing-kpi-label">Pend�ncias cr�ticas</p>
+                      <p class="landing-kpi-label">pendências críticas</p>
                       <p class="landing-kpi-value">4</p>
                     </div>
                   </div>
                   <div class="landing-progress">
                     <div class="landing-progress-head">
-                      <span>Entrevistas conclu�das</span>
+                      <span>Entrevistas concluídas</span>
                       <span>78%</span>
                     </div>
                     <div class="landing-progress-bar"><span style="width: 78%;"></span></div>
@@ -3772,15 +3772,15 @@ const HomeLanding = {
               <div class="landing-float-card float-one landing-float">
                 <div class="landing-float-icon"><i class="fas fa-microphone-lines"></i></div>
                 <div>
-                  <p class="landing-float-title">Relat�rios com voz</p>
-                  <p class="landing-float-text">Grave atendimentos e gere transcri��o autom�tica.</p>
+                  <p class="landing-float-title">Relatórios com voz</p>
+                  <p class="landing-float-text">Grave atendimentos e gere transcrição automática.</p>
                 </div>
               </div>
 
               <div class="landing-float-card float-two landing-float">
                 <div class="landing-float-icon"><i class="fas fa-clipboard-check"></i></div>
                 <div>
-                  <p class="landing-float-title">Supervis�o inteligente</p>
+                  <p class="landing-float-title">supervisão inteligente</p>
                   <p class="landing-float-text">Acompanhe professores, escolas e metas em tempo real.</p>
                 </div>
               </div>
@@ -3788,7 +3788,7 @@ const HomeLanding = {
           </div>
         </section>
 
-        <section class="landing-marquee" aria-label="M�dulos do ConectAEE">
+        <section class="landing-marquee" aria-label="Módulos do ConectAEE">
           <div class="landing-marquee-track">
             <span v-for="item in marqueeItems" :key="'m1-' + item" class="landing-marquee-item">{{ item }}</span>
             <span v-for="item in marqueeItems" :key="'m2-' + item" class="landing-marquee-item">{{ item }}</span>
@@ -3801,8 +3801,8 @@ const HomeLanding = {
           <div class="max-w-6xl mx-auto px-6 lg:px-8">
             <div class="landing-section-head">
               <p class="landing-eyebrow">Plataforma</p>
-              <h2 class="landing-section-title">Tudo o que a gest�o AEE precisa, em um �nico sistema</h2>
-              <p class="landing-section-subtitle">Da capta��o de dados � gera��o de evid�ncias, o ConectAEE conecta equipes, escolas e fam�lias com fluxos oficiais e rastre�veis.</p>
+              <h2 class="landing-section-title">Tudo o que a gestão AEE precisa, em um único sistema</h2>
+              <p class="landing-section-subtitle">Da captação de dados à geração de evidências, o ConectAEE conecta equipes, escolas e famílias com fluxos oficiais e rastreáveis.</p>
             </div>
             <div class="grid md:grid-cols-3 gap-6">
               <article v-for="(pillar, index) in pillars" :key="pillar.title" class="landing-card landing-rise" :style="{ animationDelay: (0.08 * index) + 's', '--accent-color': pillar.accent, '--accent-soft': pillar.accentSoft }">
@@ -3821,9 +3821,9 @@ const HomeLanding = {
             <div class="grid lg:grid-cols-[0.9fr_1.1fr] gap-10 items-start">
               <div class="space-y-6">
                 <p class="landing-eyebrow">Fluxo AEE</p>
-                <h2 class="landing-section-title">Uma trilha guiada do primeiro contato at� o documento final</h2>
-                <p class="landing-section-subtitle">Cada etapa mant�m a sequ�ncia oficial e garante rastreabilidade. Professores e gestores enxergam pend�ncias, prazos e evolu��o por aluno.</p>
-                <button type="button" class="landing-btn secondary" @click="scrollToSection('modulos')">Ver todos os m�dulos</button>
+                <h2 class="landing-section-title">Uma trilha guiada do primeiro contato até o documento final</h2>
+                <p class="landing-section-subtitle">Cada etapa mantêm a sequência oficial e garante rastreabilidade. Professores e gestores enxergam pendências, prazos e evolução por aluno.</p>
+                <button type="button" class="landing-btn secondary" @click="scrollToSection('modulos')">Ver todos os módulos</button>
               </div>
               <ol class="space-y-4">
                 <li v-for="(step, index) in flowSteps" :key="step.title" class="landing-step" :style="{ '--accent-color': step.accent }">
@@ -3840,9 +3840,9 @@ const HomeLanding = {
         <section id="modulos" class="landing-section">
           <div class="max-w-6xl mx-auto px-6 lg:px-8">
             <div class="landing-section-head">
-              <p class="landing-eyebrow">M�dulos</p>
+              <p class="landing-eyebrow">Módulos</p>
               <h2 class="landing-section-title">Mapa completo do sistema ConectAEE</h2>
-              <p class="landing-section-subtitle">Cada m�dulo conversa com os demais para garantir dados consistentes, monitoramento cont�nuo e documentos oficiais padronizados.</p>
+              <p class="landing-section-subtitle">Cada módulo conversa com os demais para garantir dados consistentes, monitoramento contínuo e documentos oficiais padronizados.</p>
             </div>
             <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               <article v-for="module in modules" :key="module.title" class="landing-module" :style="{ '--accent-color': module.accent, '--accent-soft': module.accentSoft }">
@@ -3861,22 +3861,22 @@ const HomeLanding = {
           <div class="max-w-6xl mx-auto px-6 lg:px-8">
             <div class="grid lg:grid-cols-[1.05fr_0.95fr] gap-12 items-center">
               <div class="space-y-6">
-                <p class="landing-eyebrow">Relat�rios & Evid�ncias</p>
-                <h2 class="landing-section-title">Indicadores, registros e PDFs prontos para gest�o</h2>
-                <p class="landing-section-subtitle">Relat�rios de atendimento com �udio e transcri��o, filtros avan�ados e exporta��es oficiais geradas em poucos cliques.</p>
+                <p class="landing-eyebrow">Relatórios & Evidências</p>
+                <h2 class="landing-section-title">Indicadores, registros e PDFs prontos para gestão</h2>
+                <p class="landing-section-subtitle">Relatórios de atendimento com áudio e transcrição, filtros avançados e exportações oficiais geradas em poucos cliques.</p>
                 <div class="space-y-3">
                   <div v-for="item in reportHighlights" :key="item" class="landing-check">
                     <i class="fas fa-check-circle"></i>
                     <span>{{ item }}</span>
                   </div>
                 </div>
-                <button type="button" class="landing-btn ghost" @click="tab = 'register'">Quero gerar meus relat�rios</button>
+                <button type="button" class="landing-btn ghost" @click="tab = 'register'">Quero gerar meus relatórios</button>
               </div>
               <div class="landing-report">
                 <div class="landing-report-header">
                   <div>
-                    <p class="landing-report-title">Relat�rio Geral</p>
-                    <p class="landing-report-sub">Per�odo mensal</p>
+                    <p class="landing-report-title">Relatório Geral</p>
+                    <p class="landing-report-sub">Período mensal</p>
                   </div>
                   <span class="landing-chip">PDF</span>
                 </div>
@@ -3902,7 +3902,7 @@ const HomeLanding = {
                   </div>
                   <div class="landing-report-foot">
                     <span>Gerado automaticamente</span>
-                    <span class="landing-report-tag">Audit�vel</span>
+                    <span class="landing-report-tag">Auditável</span>
                   </div>
                 </div>
               </div>
@@ -3914,8 +3914,8 @@ const HomeLanding = {
             <div class="grid lg:grid-cols-[0.9fr_1.1fr] gap-12 items-center">
               <div class="space-y-6">
                 <p class="landing-eyebrow">Acessibilidade</p>
-                <h2 class="landing-section-title">Inclus�o real para toda a equipe e comunidade escolar</h2>
-                <p class="landing-section-subtitle">Painel dedicado com ajustes de contraste, fonte, espa�amento e leitura. O sistema respeita normas de acessibilidade e facilita o uso di�rio.</p>
+                <h2 class="landing-section-title">Inclusão real para toda a equipe e comunidade escolar</h2>
+                <p class="landing-section-subtitle">Painel dedicado com ajustes de contraste, fonte, espaçamento e leitura. O sistema respeita normas de acessibilidade e facilita o uso diário.</p>
                 <div class="space-y-3">
                   <div v-for="item in accessibilityItems" :key="item" class="landing-check">
                     <i class="fas fa-universal-access"></i>
@@ -3927,17 +3927,17 @@ const HomeLanding = {
               <div class="landing-access">
                 <div class="landing-access-card">
                   <p class="landing-access-title">Painel de Acessibilidade</p>
-                  <p class="landing-access-text">Controle r�pido com pr�-visualiza��o em tempo real.</p>
+                  <p class="landing-access-text">Controle rápido com pré-visualização em tempo real.</p>
                   <div class="landing-access-options">
                     <span>Contraste</span>
                     <span>Fonte</span>
                     <span>Leitura</span>
-                    <span>Espa�amento</span>
+                    <span>espaçamento</span>
                   </div>
                 </div>
                 <div class="landing-access-card secondary">
-                  <p class="landing-access-title">Navega��o inteligente</p>
-                  <p class="landing-access-text">Atalhos de teclado e foco vis�vel em todos os formul�rios.</p>
+                  <p class="landing-access-title">Navegação inteligente</p>
+                  <p class="landing-access-text">Atalhos de teclado e foco visível em todos os Formulários.</p>
                 </div>
               </div>
             </div>
@@ -3948,9 +3948,9 @@ const HomeLanding = {
           <div class="max-w-6xl mx-auto px-6 lg:px-8">
             <div class="grid lg:grid-cols-2 gap-10 items-center">
               <div class="space-y-6">
-                <p class="landing-eyebrow">Seguran�a & Governan�a</p>
-                <h2 class="landing-section-title">Dados protegidos, equipes alinhadas e gest�o transparente</h2>
-                <p class="landing-section-subtitle">Controle de usu�rios, perfis e acompanhamento com visibilidade total das a��es realizadas no sistema.</p>
+                <p class="landing-eyebrow">Segurança & Governança</p>
+                <h2 class="landing-section-title">Dados protegidos, equipes alinhadas e gestão transparente</h2>
+                <p class="landing-section-subtitle">Controle de usuários, perfis e acompanhamento com visibilidade total das ações realizadas no sistema.</p>
                 <div class="space-y-3">
                   <div v-for="item in securityItems" :key="item" class="landing-check">
                     <i class="fas fa-shield-halved"></i>
@@ -3960,7 +3960,7 @@ const HomeLanding = {
               </div>
               <div class="landing-governance">
                 <div class="landing-governance-item">
-                  <span class="landing-governance-label">Usu�rios ativos</span>
+                  <span class="landing-governance-label">usuários ativos</span>
                   <strong>126</strong>
                 </div>
                 <div class="landing-governance-item">
@@ -3968,11 +3968,11 @@ const HomeLanding = {
                   <strong>24</strong>
                 </div>
                 <div class="landing-governance-item">
-                  <span class="landing-governance-label">Pend�ncias cr�ticas</span>
+                  <span class="landing-governance-label">pendências críticas</span>
                   <strong>7</strong>
                 </div>
                 <div class="landing-governance-item">
-                  <span class="landing-governance-label">�ltima auditoria</span>
+                  <span class="landing-governance-label">Última auditoria</span>
                   <strong>Hoje</strong>
                 </div>
               </div>
@@ -3982,11 +3982,11 @@ const HomeLanding = {
         <section class="landing-cta">
           <div class="max-w-5xl mx-auto px-6 lg:px-8 text-center">
             <p class="landing-eyebrow">Comece agora</p>
-            <h2 class="landing-cta-title">Traga seu time para o ConectAEE e transforme a gest�o do AEE</h2>
-            <p class="landing-cta-text">Mais efici�ncia, menos retrabalho e documentos oficiais sempre prontos para compartilhamento.</p>
+            <h2 class="landing-cta-title">Traga seu time para o ConectAEE e transforme a gestão do AEE</h2>
+            <p class="landing-cta-text">Mais eficiência, menos retrabalho e documentos oficiais sempre prontos para compartilhamento.</p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
               <button type="button" class="landing-btn primary" @click="tab = 'register'">Solicitar acesso</button>
-              <button type="button" class="landing-btn secondary" @click="tab = 'login'">J� tenho conta</button>
+              <button type="button" class="landing-btn secondary" @click="tab = 'login'">Já tenho conta</button>
             </div>
           </div>
         </section>
@@ -4002,27 +4002,27 @@ const HomeLanding = {
                 </div>
                 <div>
                   <p class="landing-brand">ConectAEE</p>
-                  <p class="landing-brand-sub">Gest�o AEE inteligente</p>
+                  <p class="landing-brand-sub">Gestão AEE inteligente</p>
                 </div>
               </div>
-              <p class="landing-footer-text">Plataforma completa para Atendimento Educacional Especializado com foco em inclus�o, resultados e governan�a.</p>
+              <p class="landing-footer-text">Plataforma completa para Atendimento Educacional Especializado com foco em Inclusão, resultados e Governança.</p>
             </div>
             <div>
-              <h4 class="landing-footer-title">M�dulos-chave</h4>
+              <h4 class="landing-footer-title">Módulos-chave</h4>
               <ul class="landing-footer-list">
                 <li>PDI e PAI oficiais</li>
-                <li>Entrevista com respons�vel</li>
-                <li>Relat�rios e PDFs</li>
-                <li>Gest�o de alunos e escolas</li>
+                <li>Entrevista com responsável</li>
+                <li>Relatórios e PDFs</li>
+                <li>Gestão de alunos e escolas</li>
               </ul>
             </div>
             <div>
-              <h4 class="landing-footer-title">Gest�o</h4>
+              <h4 class="landing-footer-title">Gestão</h4>
               <ul class="landing-footer-list">
-                <li>Supervis�o de professores</li>
-                <li>Usu�rios e permiss�es</li>
-                <li>Legisla��es atualizadas</li>
-                <li>Indicadores e pend�ncias</li>
+                <li>supervisão de professores</li>
+                <li>usuários e permissões</li>
+                <li>Legislações atualizadas</li>
+                <li>Indicadores e pendências</li>
               </ul>
             </div>
             <div class="space-y-4">
@@ -4035,7 +4035,7 @@ const HomeLanding = {
             </div>
           </div>
           <div class="landing-footer-bottom">
-            <span>&copy; 2026 ConectAEE. Educa��o inclusiva com dados confi�veis.</span>
+            <span>&copy; 2026 ConectAEE. Educação inclusiva com dados confiáveis.</span>
             <button type="button" class="landing-btn ghost small" @click="scrollToSection('solucao')">Voltar ao topo</button>
           </div>
         </div>
@@ -4074,7 +4074,7 @@ const HomeLanding = {
                 <input type="checkbox" v-model="loginForm.remember">
                 Lembrar meu e-mail
               </label>
-              <button type="button" class="landing-link" @click="$showToast && $showToast('Recupera��o em breve', 'Estamos finalizando essa etapa.', 'info')">
+              <button type="button" class="landing-link" @click="$showToast && $showToast('Recuperação em breve', 'Estamos finalizando essa etapa.', 'info')">
                 Esqueci minha senha
               </button>
             </div>
@@ -4107,9 +4107,9 @@ const HomeLanding = {
               </div>
               <div class="landing-password-grid">
                 <span :class="passwordChecks.length ? 'ok' : ''">8+ caracteres</span>
-                <span :class="passwordChecks.uppercase ? 'ok' : ''">1 mai�scula</span>
-                <span :class="passwordChecks.lowercase ? 'ok' : ''">1 min�scula</span>
-                <span :class="passwordChecks.number ? 'ok' : ''">1 n�mero</span>
+                <span :class="passwordChecks.uppercase ? 'ok' : ''">1 maiúscula</span>
+                <span :class="passwordChecks.lowercase ? 'ok' : ''">1 minúscula</span>
+                <span :class="passwordChecks.number ? 'ok' : ''">1 número</span>
                 <span :class="passwordChecks.special ? 'ok' : ''">1 especial</span>
               </div>
             </div>
@@ -4117,7 +4117,7 @@ const HomeLanding = {
               <label class="landing-label">Confirmar senha</label>
               <input v-model="registerForm.confirm_password" type="password" required class="landing-input" placeholder="Repita a senha">
               <div v-if="registerForm.password && registerForm.confirm_password && registerForm.password !== registerForm.confirm_password" class="landing-alert warning">
-                As senhas n�o coincidem
+                As senhas não coincidem
               </div>
             </div>
             <div v-if="registerError" class="landing-alert error">{{ registerError }}</div>
@@ -4129,7 +4129,7 @@ const HomeLanding = {
               </span>
               <span v-else>Finalizar cadastro</span>
             </button>
-            <p class="landing-modal-foot">Administradores s�o cadastrados manualmente pelo gestor.</p>
+            <p class="landing-modal-foot">Administradores são cadastrados manualmente pelo gestor.</p>
           </form>
         </section>
       </div>
@@ -4141,55 +4141,55 @@ const HomeLanding = {
       navLinks: [
         { id: 'solucao', label: 'Plataforma' },
         { id: 'fluxo', label: 'Fluxo AEE' },
-        { id: 'modulos', label: 'M�dulos' },
-        { id: 'relatorios', label: 'Relat�rios' },
+        { id: 'modulos', label: 'Módulos' },
+        { id: 'relatorios', label: 'Relatórios' },
         { id: 'acessibilidade', label: 'Acessibilidade' }
       ],
       heroStats: [
-        { value: '3', label: 'Formul�rios oficiais (PDI, PAI, Entrevista)' },
-        { value: '12', label: 'M�dulos conectados' },
-        { value: '24/7', label: 'Dispon�vel e responsivo' }
+        { value: '3', label: 'Formulários oficiais (PDI, PAI, Entrevista)' },
+        { value: '12', label: 'Módulos conectados' },
+        { value: '24/7', label: 'Disponível e responsivo' }
       ],
       heroBadges: [
         'Entrevista guiada',
         'PDI e PAI completos',
-        'Relat�rios com �udio',
-        'Gest�o de usu�rios e escolas',
-        'Supervis�o em tempo real',
-        'Documentos PDF audit�veis'
+        'Relatórios com áudio',
+        'Gestão de usuários e escolas',
+        'supervisão em tempo real',
+        'Documentos PDF auditáveis'
       ],
       marqueeItems: [
         'Dashboard',
-        'Gest�o de Alunos',
-        'Gest�o de Usu�rios',
-        'Gest�o de Escolas',
-        'Supervis�o',
-        'Entrevista Respons�vel',
+        'Gestão de Alunos',
+        'Gestão de Usuários',
+        'Gestão de Escolas',
+        'supervisão',
+        'Entrevista responsável',
         'PDI Completo',
         'PAI Completo',
-        'Relat�rios de Atendimento',
-        'Legisla��es',
+        'Relatórios de Atendimento',
+        'Legislações',
         'Documentos PDF',
         'Acessibilidade'
       ],
       pillars: [
         {
-          title: 'Gest�o centralizada',
-          text: 'Dados de alunos, escolas, usu�rios e atendimentos organizados em um �nico painel.',
+          title: 'Gestão centralizada',
+          text: 'Dados de alunos, escolas, usuários e atendimentos organizados em um único painel.',
           icon: 'fas fa-layer-group',
           accent: '#22d3ee',
           accentSoft: 'rgba(34, 211, 238, 0.16)'
         },
         {
           title: 'Fluxos oficiais garantidos',
-          text: 'PDI, PAI e entrevistas seguindo sequ�ncia oficial com valida��es e rastreio.',
+          text: 'PDI, PAI e entrevistas seguindo sequência oficial com validações e rastreio.',
           icon: 'fas fa-file-signature',
           accent: '#f59e0b',
           accentSoft: 'rgba(245, 158, 11, 0.16)'
         },
         {
-          title: 'Vis�o gerencial completa',
-          text: 'Supervis�o, indicadores e relat�rios para apoiar decis�es estrat�gicas.',
+          title: 'Visão gerencial completa',
+          text: 'supervisão, indicadores e relatórios para apoiar decisões estratégicas.',
           icon: 'fas fa-chart-line',
           accent: '#22c55e',
           accentSoft: 'rgba(34, 197, 94, 0.16)'
@@ -4197,18 +4197,18 @@ const HomeLanding = {
       ],
       flowSteps: [
         {
-          title: 'Configurar escolas e usu�rios',
-          text: 'Crie perfis, n�veis de acesso e vincule equipes com seguran�a.',
+          title: 'Configurar escolas e usuários',
+          text: 'Crie perfis, níveis de acesso e vincule equipes com Segurança.',
           accent: '#38bdf8'
         },
         {
-          title: 'Cadastrar alunos e v�nculos',
-          text: 'Hist�rico, escola, turma e professores organizados em um s� lugar.',
+          title: 'Cadastrar alunos e vínculos',
+          text: 'Histórico, escola, turma e professores organizados em um só lugar.',
           accent: '#22c55e'
         },
         {
-          title: 'Entrevista com respons�vel',
-          text: 'Formul�rio guiado para captar dados iniciais e diagn�sticos.',
+          title: 'Entrevista com responsável',
+          text: 'Formulário guiado para captar dados iniciais e Diagnósticos.',
           accent: '#fb7185'
         },
         {
@@ -4222,57 +4222,57 @@ const HomeLanding = {
           accent: '#eab308'
         },
         {
-          title: 'Relat�rios e documentos',
-          text: 'Relat�rios com �udio, transcri��o e PDF pronto para assinatura.',
+          title: 'Relatórios e documentos',
+          text: 'Relatórios com áudio, transcrição e PDF pronto para assinatura.',
           accent: '#22d3ee'
         }
       ],
       modules: [
         {
           title: 'Dashboard Inteligente',
-          text: 'Indicadores de progresso, pend�ncias e metas por turma e escola.',
+          text: 'Indicadores de progresso, pendências e metas por turma e escola.',
           icon: 'fas fa-chart-pie',
-          tag: 'Vis�o geral',
+          tag: 'Visão geral',
           accent: '#38bdf8',
           accentSoft: 'rgba(56, 189, 248, 0.16)'
         },
         {
-          title: 'Gest�o de Alunos',
-          text: 'Cadastro completo, hist�rico e acompanhamento individualizado.',
+          title: 'Gestão de Alunos',
+          text: 'Cadastro completo, Histórico e acompanhamento individualizado.',
           icon: 'fas fa-user-graduate',
-          tag: 'Cadastro e hist�rico',
+          tag: 'Cadastro e Histórico',
           accent: '#22c55e',
           accentSoft: 'rgba(34, 197, 94, 0.16)'
         },
         {
-          title: 'Gest�o de Usu�rios',
-          text: 'Perfis, permiss�es e acessos para professores e gestores.',
+          title: 'Gestão de Usuários',
+          text: 'Perfis, permissões e acessos para professores e gestores.',
           icon: 'fas fa-user-shield',
-          tag: 'Perfis e permiss�es',
+          tag: 'Perfis e permissões',
           accent: '#f59e0b',
           accentSoft: 'rgba(245, 158, 11, 0.16)'
         },
         {
-          title: 'Gest�o de Escolas',
-          text: 'Cadastro de unidades, turmas e vincula��es pedag�gicas.',
+          title: 'Gestão de Escolas',
+          text: 'Cadastro de unidades, turmas e vinculações pedagógicas.',
           icon: 'fas fa-school',
           tag: 'Unidades e turmas',
           accent: '#0ea5e9',
           accentSoft: 'rgba(14, 165, 233, 0.16)'
         },
         {
-          title: 'Supervis�o de Professores',
-          text: 'Acompanhe atendimentos, desempenho e pend�ncias por equipe.',
+          title: 'supervisão de Professores',
+          text: 'Acompanhe atendimentos, desempenho e pendências por equipe.',
           icon: 'fas fa-clipboard-check',
           tag: 'Acompanhamento',
           accent: '#14b8a6',
           accentSoft: 'rgba(20, 184, 166, 0.16)'
         },
         {
-          title: 'Entrevista Respons�vel',
-          text: 'Formul�rio inicial completo com perguntas oficiais e hist�rico.',
+          title: 'Entrevista responsável',
+          text: 'Formulário inicial completo com perguntas oficiais e Histórico.',
           icon: 'fas fa-comments',
-          tag: 'Diagn�stico',
+          tag: 'Diagnóstico',
           accent: '#fb7185',
           accentSoft: 'rgba(251, 113, 133, 0.16)'
         },
@@ -4286,23 +4286,23 @@ const HomeLanding = {
         },
         {
           title: 'PAI Estruturado',
-          text: 'Plano de Atendimento Individual seguindo a sequ�ncia oficial.',
+          text: 'Plano de Atendimento Individual seguindo a sequência oficial.',
           icon: 'fas fa-list-check',
-          tag: 'Sequ�ncia validada',
+          tag: 'sequência validada',
           accent: '#eab308',
           accentSoft: 'rgba(234, 179, 8, 0.16)'
         },
         {
-          title: 'Relat�rios de Atendimento',
-          text: 'Registro com �udio, transcri��o e anexos por aluno.',
+          title: 'Relatórios de Atendimento',
+          text: 'Registro com áudio, transcrição e anexos por aluno.',
           icon: 'fas fa-microphone',
-          tag: '�udio e texto',
+          tag: 'Áudio e texto',
           accent: '#22d3ee',
           accentSoft: 'rgba(34, 211, 238, 0.16)'
         },
         {
-          title: 'Legisla��es',
-          text: 'Diret�rio atualizado com normas e documentos de refer�ncia.',
+          title: 'Legislações',
+          text: 'Diretório atualizado com normas e documentos de referência.',
           icon: 'fas fa-scale-balanced',
           tag: 'Normas oficiais',
           accent: '#94a3b8',
@@ -4310,7 +4310,7 @@ const HomeLanding = {
         },
         {
           title: 'Documentos PDF',
-          text: 'Gera��o autom�tica com layout profissional e rastreio.',
+          text: 'geração automática com layout profissional e rastreio.',
           icon: 'fas fa-file-pdf',
           tag: 'PDFs oficiais',
           accent: '#ef4444',
@@ -4320,26 +4320,26 @@ const HomeLanding = {
           title: 'Acessibilidade',
           text: 'Painel de ajustes para contraste, fontes e leitura assistida.',
           icon: 'fas fa-universal-access',
-          tag: 'Inclus�o',
+          tag: 'Inclusão',
           accent: '#10b981',
           accentSoft: 'rgba(16, 185, 129, 0.16)'
         }
       ],
       reportHighlights: [
-        'Relat�rios de atendimento com �udio e transcri��o.',
-        'Filtros por per�odo, tipo, escola e professor.',
-        'Exporta��o direta de documentos oficiais em PDF.',
-        'Indicadores de pend�ncias e progresso em tempo real.'
+        'Relatórios de atendimento com áudio e transcrição.',
+        'Filtros por Período, tipo, escola e professor.',
+        'Exportação direta de documentos oficiais em PDF.',
+        'Indicadores de pendências e progresso em tempo real.'
       ],
       accessibilityItems: [
         'Painel com contraste, fontes ampliadas e leitura assistida.',
-        'Compatibilidade com leitores de tela e navega��o por teclado.',
-        'Ajustes persistentes para cada perfil de usu�rio.'
+        'Compatibilidade com leitores de tela e Navegação por teclado.',
+        'Ajustes persistentes para cada perfil de usuário.'
       ],
       securityItems: [
-        'Autentica��o segura com token e sess�o controlada.',
-        'Permiss�es por perfil e supervis�o hier�rquica.',
-        'Hist�rico de atualiza��es e documentos audit�veis.',
+        'Autenticação segura com token e sessão controlada.',
+        'permissões por perfil e supervisão hierárquica.',
+        'Histórico de atualizações e documentos auditáveis.',
         'Estrutura alinhada a requisitos da LGPD.'
       ],
       loginForm: {
@@ -8291,7 +8291,7 @@ const PDI = {
           status: 'ativo'
         };
         
-        console.log('� [PDI] Salvando:', payload);
+        console.log('[PDI] Salvando:', payload);
         
         // Sempre usar .create que faz UPSERT automático
         const response = await api.post('?action=pdi.create', payload);
@@ -10572,7 +10572,7 @@ const PlanoAtendimento = {
           status: 'ativo'
         };
         
-        console.log('� [PAI] Salvando:', payload);
+        console.log('[PAI] Salvando:', payload);
         
         // Sempre usar .create que faz UPSERT automático
         const response = await api.post('?action=plano-atendimento.create', payload);
@@ -12496,6 +12496,8 @@ try { mountVoicePortal(app); } catch (_) {}
 
 // Inicialização completa
 // console.log('ConectEdu v5.0 - Sistema inicializado com Tailwind CSS');
+
+
 
 
 

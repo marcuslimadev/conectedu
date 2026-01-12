@@ -1,4 +1,7 @@
-# DESABILITAR CACHE COMPLETAMENTE - MODO DESENVOLVIMENTO
+﻿# DESABILITAR CACHE COMPLETAMENTE - MODO DESENVOLVIMENTO
+
+AddDefaultCharset UTF-8
+AddCharset UTF-8 .html .htm .js .css .json .svg .txt
 
 # Definir index.html como página padrão
 DirectoryIndex index.html

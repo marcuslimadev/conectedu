@@ -1,23 +1,12 @@
-﻿AddDefaultCharset UTF-8
-AddCharset UTF-8 .html .htm .js .css .json .svg .txt
-
 <IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteBase /
-
-    # 1. Manter acesso direto ao backend e arquivos da raiz que não sejam do frontend
-    RewriteRule ^backend - [L]
-    RewriteRule ^\.well-known - [L]
-
-    # 2. Se o arquivo existe na pasta frontend, serve daí transparentemente
-    RewriteCond %{DOCUMENT_ROOT}/frontend/$1 -f
-    RewriteRule ^(.+)$ frontend/$1 [L]
-
-    # 3. A raiz abre o index.html do frontend
-    RewriteRule ^$ frontend/index.html [L]
-
-    # 4. Qualquer outra rota não encontrada cai no index.html (SPA Fallback)
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule . frontend/index.html [L]
+RewriteEngine On
+RewriteBase /
+RewriteRule ^backend - [L]
+RewriteRule ^\.well-known - [L]
+RewriteCond %{DOCUMENT_ROOT}/frontend/$1 -f
+RewriteRule ^(.+)$ frontend/$1 [L]
+RewriteRule ^$ frontend/index.html [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . frontend/index.html [L]
 </IfModule>

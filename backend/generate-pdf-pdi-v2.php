@@ -147,6 +147,7 @@ $html .= '<tr><td>' . campo_pdi('Guia Intérprete (quando houver):', vv($D, 'gui
 $html .= '<tr><td>' . campo_pdi('TILS (quando houver):', vv($D, 'tils')) . '</td></tr>';
 $html .= '<tr><td>' . campo_pdi('Professor de Sala de Recursos (quando houver):', vv($D, 'professor_sala_recursos')) . '</td></tr>';
 $html .= '<tr><td>' . campo_pdi('Regente(s) de turma/aula:', vv($D, 'regentes')) . '</td></tr>';
+$html .= '<tr><td>' . campo_pdi('Elaborado por:', vv($D, 'elaborado_por')) . '</td></tr>';
 $html .= '</table>';
 
 // ==================== II. DADOS DO ESTUDANTE ====================
@@ -368,7 +369,7 @@ $html .= check_pdi($D, 'leitura_textos') . ' Lê textos<br>';
 $html .= check_pdi($D, 'leitura_global') . ' Leitura global (compreensão, inferência, comparação)<br>';
 $html .= check_pdi($D, 'leitura_fonetica') . ' Leitura fonética (silabada) com dificuldade no entendimento da palavra<br>';
 $html .= check_pdi($D, 'leitura_imita') . ' É capaz de imitar a leitura a partir de um texto conhecido oralmente<br>';
-$html .= check_pdi($D, 'leitura_nao') . ' Não</div></td></tr>';
+$html .= check_pdi($D, 'leitura_nao') . ' Não lê</div></td></tr>';
 $html .= '</table>';
 
 // ==================== IX. PLANEJAMENTO BIMESTRAL ====================
@@ -377,11 +378,18 @@ $html .= '<table class="bordered">';
 $html .= '<tr><td><strong>ESTUDANTE:</strong> ' . $studentName . ' &nbsp;&nbsp;&nbsp; <strong>TURMA:</strong> ' . vv($D, 'turma') . '</td></tr>';
 $html .= '</table>';
 
-// Exemplo de tabela de planejamento (repetir para cada disciplina/bimestre conforme necessário)
-$disciplinas = ['ARTE', 'LÍNGUA PORTUGUESA', 'MATEMÁTICA', 'CIÊNCIAS', 'GEOGRAFIA', 'HISTÓRIA', 'EDUCAÇÃO FÍSICA'];
+// Mapeamento exato das chaves do frontend para rótulos de disciplinas
+$disciplinas_map = [
+    'arte' => 'ARTE',
+    'lingua_portuguesa' => 'LÍNGUA PORTUGUESA',
+    'matematica' => 'MATEMÁTICA',
+    'ciencias' => 'CIÊNCIAS',
+    'geografia' => 'GEOGRAFIA',
+    'historia' => 'HISTÓRIA',
+    'educacao_fisica' => 'EDUCAÇÃO FÍSICA',
+];
 
-foreach ($disciplinas as $disc) {
-    $disc_key = strtolower(str_replace([' ', 'Ç', 'Ã', 'Ú'], ['_', 'c', 'a', 'u'], $disc));
+foreach ($disciplinas_map as $disc_key => $disc) {
     
     for ($bim = 1; $bim <= 4; $bim++) {
         $key_prefix = 'planejamento_' . $disc_key . '_bim' . $bim;

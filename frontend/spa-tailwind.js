@@ -8601,6 +8601,10 @@ const PDIPlanoDesenvolvimento = {
                     <input v-model="form.regentes" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg" />
                   </div>
                 </div>
+                <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Elaborado por (usuário logado):</label>
+                  <input v-model="form.elaborado_por" type="text" readonly class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-600 border border-gray-300 dark:border-gray-600 dark:text-white rounded-lg cursor-not-allowed" />
+                </div>
               </div>
             </div>
 
@@ -8885,7 +8889,7 @@ const PDIPlanoDesenvolvimento = {
                   <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.leitura_global" /> ( ) Leitura global (compreensão, inferência, comparação)</label>
                   <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.leitura_fonetica" /> ( ) Leitura fonética (silabada) com dificuldade no entendimento da palavra</label>
                   <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.leitura_imita" /> ( ) É capaz de imitar a leitura a partir de um texto conhecido oralmente (música/parlenda/poesia)</label>
-                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.leitura_nao" /> ( ) Não</label>
+                  <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" v-model="form.leitura_nao" /> ( ) Não lê</label>
                 </div>
               </div>
             </div>
@@ -9164,6 +9168,7 @@ const PDIPlanoDesenvolvimento = {
       tils: '',
       professor_sala_recursos: '',
       regentes: '',
+      elaborado_por: '',
 
       // II
       nome_estudante: '',
@@ -9325,6 +9330,10 @@ const PDIPlanoDesenvolvimento = {
     }
   },
   async mounted() {
+    // Auto-preencher "Elaborado por" com o nome do usuário logado
+    if (this.$root?.user?.name && !this.form.elaborado_por) {
+      this.form.elaborado_por = this.$root.user.name;
+    }
     await Promise.all([this.carregarAlunos(), this.carregarEscolas()]);
     // Se vier por querystring (modo leitura), carrega aluno
     const qStudentId = this.$route?.query?.student_id;

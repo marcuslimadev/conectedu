@@ -209,8 +209,9 @@ function getPDITemplate($data) {
     $html .= "<div class='field'><span class='label'>TILS (quando houver):</span> <span class='value'>" . htmlspecialchars($pdi['tils'] ?? '') . "</span></div>";
     $html .= "<div class='field'><span class='label'>Professor de Sala de Recursos (quando houver):</span> <span class='value'>" . htmlspecialchars($pdi['professor_sala_recursos'] ?? '') . "</span></div>";
     $html .= "<div class='field'><span class='label'>Regente(s) de turma/aula:</span> <span class='value'>" . nl2br(htmlspecialchars($pdi['regentes_turma'] ?? '')) . "</span></div>";
+    $html .= "<div class='field'><span class='label'>Elaborado por:</span> <span class='value'>" . htmlspecialchars($pdi['elaborado_por'] ?? '') . "</span></div>";
     $html .= "</div>";
-    
+
     // SEÇÃO II - DADOS DO ESTUDANTE
     $html .= "<div class='section'>";
     $html .= "<h2>II. DADOS DO(A) ESTUDANTE</h2>";
@@ -543,7 +544,7 @@ function getComunicacaoLinguagemSection($pdi) {
         'leitura_global' => 'Leitura global (compreensão, inferência, comparação)',
         'leitura_fonetica' => 'Leitura fonética (silabada) com dificuldade no entendimento',
         'imita_leitura' => 'É capaz de imitar a leitura a partir de um texto conhecido oralmente',
-        'nao' => 'Não',
+        'nao' => 'Não lê',
     ];
     foreach ($opcoes_leitura as $key => $label) {
         $html .= "<span class='checkbox " . (in_array($key, $leitura) ? 'checked' : '') . "'></span> $label<br>";

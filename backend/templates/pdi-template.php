@@ -83,6 +83,7 @@ if ($photo_path && file_exists($photo_path)) {
     <div class="field-row"><span class="field-label">TILS:</span> <span class="field-value"><?php echo v($pdi, 'tils'); ?></span></div>
     <div class="field-row"><span class="field-label">Professor de Sala de Recursos:</span> <span class="field-value"><?php echo v($pdi, 'professor_sala_recursos'); ?></span></div>
     <div class="field-row"><span class="field-label">Regente(s) de turma/aula:</span> <div class="textarea-field" style="min-height: 20px;"><?php echo nl2br(v($pdi, 'regentes_turma')); ?></div></div>
+    <div class="field-row"><span class="field-label">Elaborado por:</span> <span class="field-value"><?php echo v($pdi, 'elaborado_por'); ?></span></div>
 </div>
 
 <!-- SEÇÃO II - DADOS DO ESTUDANTE -->

@@ -63,7 +63,7 @@ $pdi = $data['pdi'];
     <div class="field-row" style="margin-top: 8px;"><span class="field-label">6. Leitura:</span><br>
          <?php
         $leitura = explode(',', v($pdi, 'leitura_nivel'));
-        $opcoes_leitura = ['le_palavras' => 'Lê palavras', 'le_frases' => 'Lê frases', 'le_textos' => 'Lê textos', 'leitura_global' => 'Leitura global (compreensão, inferência, comparação)', 'leitura_fonetica' => 'Leitura fonética (silabada) com dificuldade no entendimento', 'imita_leitura' => 'É capaz de imitar a leitura a partir de um texto conhecido oralmente', 'nao' => 'Não'];
+        $opcoes_leitura = ['le_palavras' => 'Lê palavras', 'le_frases' => 'Lê frases', 'le_textos' => 'Lê textos', 'leitura_global' => 'Leitura global (compreensão, inferência, comparação)', 'leitura_fonetica' => 'Leitura fonética (silabada) com dificuldade no entendimento', 'imita_leitura' => 'É capaz de imitar a leitura a partir de um texto conhecido oralmente', 'nao' => 'Não lê'];
         foreach ($opcoes_leitura as $key => $label) {
             echo "<div style='margin-left: 10px;'>" . checkbox(in_array($key, $leitura) ? $key : '', $key) . " {$label}</div>";
         }

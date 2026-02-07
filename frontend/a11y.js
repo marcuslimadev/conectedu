@@ -27,7 +27,7 @@ class AccessibilityManager {
     this.applySettings();
     this.updatePanelUI();
     this.setupKeyboardShortcuts();
-    this.syncFromServer();
+    // syncFromServer será chamado apenas após login bem-sucedido
   }
 
   loadSettings() {
@@ -180,21 +180,44 @@ class AccessibilityManager {
     });
   }
 
+  ensureVlibrasContainer() {
+    if (document.querySelector('[vw]')) {
+      return;
+    }
+    const container = document.createElement('div');
+    container.setAttribute('vw', '');
+    container.className = 'enabled';
+    container.innerHTML = `
+      <div vw-access-button class="active"></div>
+      <div vw-plugin-wrapper>
+        <div class="vw-plugin-top-wrapper"></div>
+      </div>
+    `;
+    document.body.appendChild(container);
+  }
+
   loadVlibras() {
     if (this.settings.vlibras) {
+      // Garantir que o container existe antes de carregar o script
+      this.ensureVlibrasContainer();
+      
       if (document.getElementById('vlibras-script')) return; // Evita carregar duas vezes
       
       const script = document.createElement('script');
       script.id = 'vlibras-script';
       script.src = 'https://vlibras.gov.br/app/vlibras-plugin.js';
+      script.setAttribute('data-vlibras', 'true');
       script.onload = () => {
         if (window.VLibras) {
           try {
             new window.VLibras.Widget('https://vlibras.gov.br/app');
           } catch (e) {
-            console.warn('ConectEDU: Erro ao iniciar VLibras:', e);
+            console.warn('⚠️ VLibras falhou ao iniciar:', e);
           }
         }
+      };
+      script.onerror = () => {
+        console.warn('⚠️ Falha ao carregar VLibras');
       };
       document.head.appendChild(script);
     }
@@ -352,7 +375,10 @@ class AccessibilityManager {
   
   async syncFromServer() {
     const token = this.getToken();
-    if (!token) return;
+    if (!token) {
+      console.log('📋 Sem token - pulando sync de preferências');
+      return;
+    }
     this.isHydrating = true;
     try {
       const serverPrefs = await this.fetchFromServer();
@@ -361,9 +387,10 @@ class AccessibilityManager {
         this.saveSettings();
         this.applySettings();
         this.updatePanelUI();
+        console.log('✅ Preferências sincronizadas do servidor');
       }
-    } catch (_) {
-      // ignore
+    } catch (err) {
+      console.warn('⚠️ Erro ao sincronizar preferências:', err.message);
     } finally {
       this.isHydrating = false;
     }
@@ -430,6 +457,14 @@ class AccessibilityManager {
 // Inicializar
 document.addEventListener('DOMContentLoaded', () => {
   window.a11yManager = new AccessibilityManager();
+  
+  // Listener para evento de login bem-sucedido
+  window.addEventListener('user-logged-in', () => {
+    if (window.a11yManager) {
+      console.log('🔄 Sincronizando preferências após login...');
+      window.a11yManager.syncFromServer();
+    }
+  });
 });
 
 // Ancillary accessibility features

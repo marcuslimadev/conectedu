@@ -4471,7 +4471,10 @@ const HomeLanding = {
         } else {
           localStorage.removeItem('remember_email');
         }
-        this.syncA11y();
+        
+        // Disparar evento customizado para sincronização de preferências
+        window.dispatchEvent(new Event('user-logged-in'));
+        
         this.$root.user = user;
         this.$router.push('/app');
       } catch (error) {
@@ -4489,15 +4492,46 @@ const HomeLanding = {
         const response = await api.post('/register', {
           name: this.registerForm.name,
           email: this.registerForm.email,
+          password: this.registerForm.password,
+          confirm_password: this.registerForm.confirm_password
+        });
+        
+        // Registro bem-sucedido - fazer login autom\u00e1tico
+        this.registerSuccess = response.data?.message || 'Conta criada com sucesso! Redirecionando...';
+        
+        // Aguardar um pouco para mostrar a mensagem
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Fazer login autom\u00e1tico
+        const loginResponse = await api.post('/login', {
+          email: this.registerForm.email,
           password: this.registerForm.password
         });
-        const token = response.data?.data?.token || response.data?.token;
+        
+        const token = loginResponse.data?.data?.token || loginResponse.data?.token;
         if (!token) throw new Error('TOKEN_MISSING');
         localStorage.setItem('token', token);
-        this.syncA11y();
+        
+        // Sincronizar prefer\u00eancias de acessibilidade
+        if (window.a11yManager) {
+          await window.a11yManager.syncFromServer();
+        }
+        
         this.$router.push('/app');
       } catch (error) {
-        this.registerError = error.response?.data?.message || 'Erro ao criar conta';
+        console.error('Erro no registro:', error);
+        const errorCode = error.response?.data?.error;
+        const errorMap = {
+          'EMAIL_IN_USE': 'Este e-mail j\u00e1 est\u00e1 cadastrado',
+          'PASSWORD_MISMATCH': 'As senhas n\u00e3o coincidem',
+          'PASSWORD_TOO_SHORT': 'Senha deve ter no m\u00ednimo 8 caracteres',
+          'PASSWORD_NO_UPPERCASE': 'Senha deve conter letra mai\u00fascula',
+          'PASSWORD_NO_LOWERCASE': 'Senha deve conter letra min\u00fascula',
+          'PASSWORD_NO_NUMBER': 'Senha deve conter n\u00famero',
+          'PASSWORD_NO_SPECIAL': 'Senha deve conter caractere especial',
+          'INVALID_INPUT': 'Preencha todos os campos obrigat\u00f3rios'
+        };
+        this.registerError = errorMap[errorCode] || error.response?.data?.message || 'Erro ao criar conta';
       } finally {
         this.registerLoading = false;
       }
@@ -4711,9 +4745,10 @@ const Login = {
         }
         
         localStorage.setItem('token', token);
-        if (window.a11yManager && typeof window.a11yManager.syncFromServer === 'function') {
-          window.a11yManager.syncFromServer();
-        }
+        
+        // Disparar evento customizado para sincronização de preferências
+        window.dispatchEvent(new Event('user-logged-in'));
+        
         // Lembrar e-mail opcionalmente
         if (this.remember && this.email) localStorage.setItem('remember_email', this.email);
         else localStorage.removeItem('remember_email');
